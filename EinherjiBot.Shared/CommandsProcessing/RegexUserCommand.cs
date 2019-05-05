@@ -27,6 +27,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             : this(DefaultVerificator, regex, method) { }
         public RegexUserCommand(ICommandVerificator verificator, string pattern, RegexOptions options, Func<SocketCommandContext, Match, Task> method)
             : this(verificator, new Regex(pattern, options), method) { }
+        public RegexUserCommand(ICommandVerificator verificator, string pattern, Func<SocketCommandContext, Match, Task> method)
+            : this(verificator, pattern, DefaultRegexOptions, method) { }
         public RegexUserCommand(string pattern, RegexOptions options, Func<SocketCommandContext, Match, Task> method)
             : this(DefaultVerificator, new Regex(pattern, options), method) { }
         public RegexUserCommand(string pattern, Func<SocketCommandContext, Match, Task> method)

@@ -16,6 +16,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             AcceptPrivateMessages = true,
             StringPrefix = "."
         };
+        public static ICommandVerificator DefaultPrefixedGuildOnly { get; } = new CommandVerificator()
+        {
+            IgnoreBots = true,
+            AcceptMentionPrefix = true,
+            AcceptGuildMessages = true,
+            AcceptPrivateMessages = false,
+            StringPrefix = "."
+        };
 
         public bool IgnoreBots { get; set; }
         public bool AcceptMentionPrefix { get; set; }
