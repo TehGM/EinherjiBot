@@ -2,7 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>TehGM.EinherjiBot</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="auth.json" />
+    <None Remove="config.json" />
+    <None Remove="data.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Config\auth.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.0.1" />
