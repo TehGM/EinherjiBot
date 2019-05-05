@@ -29,6 +29,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             : this(verificator, new Regex(pattern, options), method) { }
         public RegexUserCommand(string pattern, RegexOptions options, Func<SocketCommandContext, Match, Task> method)
             : this(DefaultVerificator, new Regex(pattern, options), method) { }
+        public RegexUserCommand(string pattern, Func<SocketCommandContext, Match, Task> method)
+            : this(pattern, DefaultRegexOptions, method) { }
 
         public async Task<bool> ProcessAsync(DiscordSocketClient client, SocketMessage message)
         {
