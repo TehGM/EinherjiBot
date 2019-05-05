@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EinherjiBot.Pi120
+namespace TehGM.EinherjiBot
 {
     class Program
     {
