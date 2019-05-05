@@ -49,7 +49,7 @@ namespace TehGM.EinherjiBot
 
         public static IList<HandlerBase> InitializeHandlers(DiscordSocketClient client, BotConfig config)
         {
-            Type[] types = Assembly.GetExecutingAssembly().FindDerivedTypes(typeof(HandlerBase));
+            Type[] types = Assembly.GetEntryAssembly().FindDerivedTypes(typeof(HandlerBase));
             List<HandlerBase> handlers = new List<HandlerBase>(types.Length);
 
             for (int i = 0; i < types.Length; i++)
