@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.EinherjiBot
+namespace TehGM.EinherjiBot.Extensions
 {
     public static class JsonFileExtensions
     {

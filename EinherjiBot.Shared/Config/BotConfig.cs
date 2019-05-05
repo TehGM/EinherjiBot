@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using TehGM.EinherjiBot.Extensions;
 using System.Threading.Tasks;
 
 namespace TehGM.EinherjiBot.Config

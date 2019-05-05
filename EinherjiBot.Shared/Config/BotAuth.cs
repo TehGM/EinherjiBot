@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
+using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot.Config
 {
