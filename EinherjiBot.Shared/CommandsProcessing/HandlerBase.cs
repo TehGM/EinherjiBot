@@ -81,5 +81,13 @@ namespace TehGM.EinherjiBot.CommandsProcessing
                 Client = null;
             }
         }
+
+        public string GetDefaultPrefix()
+        {
+            string prefix = (CommandVerificator.DefaultPrefixed as CommandVerificator).StringPrefix;
+            if (prefix == null)
+                prefix = Client.CurrentUser.Mention;
+            return prefix;
+        }
     }
 }
