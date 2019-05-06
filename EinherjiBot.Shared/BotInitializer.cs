@@ -55,7 +55,7 @@ namespace TehGM.EinherjiBot
             for (int i = 0; i < types.Length; i++)
             {
                 Type t = types[i];
-                if (!Debugger.IsAttached && Attribute.IsDefined(t, typeof(ProductionOnlyAttribute)))
+                if (Debugger.IsAttached && Attribute.IsDefined(t, typeof(ProductionOnlyAttribute)))
                     continue;
                 HandlerBase handler = (HandlerBase)Activator.CreateInstance(t, client, config);
                 handlers.Add(handler);
