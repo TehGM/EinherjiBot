@@ -113,8 +113,9 @@ namespace TehGM.EinherjiBot
                 return message.Channel.SendMessageAsync("You did not have any mod on the list.");
 
             string[] listStrings = new string[Config.Data.StellarisMods.Count];
-            for (int i = 0; i < Config.Data.StellarisMods.Count; i++)
-                listStrings[i] = ModToListString(Config.Data.StellarisMods[i], i + 1);
+            StellarisModInfo[] orderedMods = Config.Data.StellarisMods.OrderBy(mod => mod.Name).ToArray();
+            for (int i = 0; i < orderedMods.Length; i++)
+                listStrings[i] = ModToListString(orderedMods[i], i + 1);
             EmbedBuilder embed = new EmbedBuilder()
                 .WithDescription(string.Join('\n', listStrings))
                 .WithFooter($"Currently you guys are using {listStrings.Length} mods.", Client.CurrentUser.GetAvatarUrl())
