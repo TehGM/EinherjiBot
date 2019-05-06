@@ -8,6 +8,8 @@ namespace TehGM.EinherjiBot.Config
 {
     public class BotAuth : IDisposable
     {
+        public const string DefaultPath = "Config/auth.json";
+
         [JsonProperty("token", Required = Required.Always)]
         public string Token { get; private set; }
 
@@ -18,7 +20,7 @@ namespace TehGM.EinherjiBot.Config
         }
 
         public static Task<BotAuth> LoadAsync()
-            => LoadAsync("Config/auth.json");
+            => LoadAsync(DefaultPath);
 
         public void Dispose()
         {

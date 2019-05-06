@@ -8,6 +8,8 @@ namespace TehGM.EinherjiBot.Config
 {
     public class BotConfig
     {
+        public const string DefaultPath = "Config/config.json";
+
         [JsonIgnore]
         public BotAuth Auth { get; private set; }
         [JsonIgnore]
@@ -39,6 +41,9 @@ namespace TehGM.EinherjiBot.Config
         }
 
         public static Task<BotConfig> LoadAsync()
-            => LoadAsync("Config/config.json");
+            => LoadAsync(DefaultPath);
+
+        public Task SaveAllAsync()
+            => Data?.SaveAsync();
     }
 }
