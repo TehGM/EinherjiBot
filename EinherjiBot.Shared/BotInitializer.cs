@@ -54,7 +54,10 @@ namespace TehGM.EinherjiBot
 
             for (int i = 0; i < types.Length; i++)
             {
-                HandlerBase handler = (HandlerBase)Activator.CreateInstance(types[i], client, config);
+                Type t = types[i];
+                if (!Debugger.IsAttached && Attribute.IsDefined(t, typeof(ProductionOnlyAttribute)))
+                    continue;
+                HandlerBase handler = (HandlerBase)Activator.CreateInstance(t, client, config);
                 handlers.Add(handler);
             }
 

@@ -11,6 +11,7 @@ using TehGM.EinherjiBot.Config;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
+    [ProductionOnly]
     class AdministrationHandler : HandlerBase
     {
         public AdministrationHandler(DiscordSocketClient client, BotConfig config) 

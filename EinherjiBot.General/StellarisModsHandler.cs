@@ -13,6 +13,7 @@ using TehGM.EinherjiBot.DataModels;
 
 namespace TehGM.EinherjiBot
 {
+    [ProductionOnly]
     class StellarisModsHandler : HandlerBase
     { 
         public StellarisModsHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
