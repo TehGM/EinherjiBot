@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Discord;
 
 namespace TehGM.EinherjiBot
 {
@@ -17,7 +18,7 @@ namespace TehGM.EinherjiBot
 
         private static Task Client_Connected()
         {
-            return Task.CompletedTask;
+            return _initializer.Client.SetGameAsync("TehGM's orders", null, ActivityType.Listening);
         }
     }
 }
