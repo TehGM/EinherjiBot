@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using TehGM.EinherjiBot.Config;
+using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
@@ -24,7 +25,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         {
             if (!(message.Channel is SocketTextChannel channel))
             {
-                await message.Channel.SendMessageAsync("Sir, this command is only applicable in guild channels.");
+                await message.ReplyAsync("Sir, this command is only applicable in guild channels.");
                 return;
             }
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);

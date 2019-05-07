@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Config;
 using TehGM.EinherjiBot.DataModels;
+using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
@@ -28,10 +29,10 @@ namespace TehGM.EinherjiBot
         private async Task CmdAddMod(SocketCommandContext message, Match match)
         {
             Task CreateInvalidUseResponse()
-                => message.Channel.SendMessageAsync($"Please specify both name and URL of the mod.\nProper usage of this command:\n`{GetDefaultPrefix()}stellaris mods add <name> | <url>`");
+                => message.ReplyAsync($"Please specify both name and URL of the mod.\nProper usage of this command:\n`{GetDefaultPrefix()}stellaris mods add <name> | <url>`");
             if (message.User.Id != AuthorUser.Id)
             {
-                await message.Channel.SendMessageAsync("You can't order me to do that.");
+                await message.ReplyAsync("You can't order me to do that.");
                 return;
             }
             if (match.Groups.Count < 3)
@@ -49,26 +50,26 @@ namespace TehGM.EinherjiBot
             }
             if (url.Contains(' ', StringComparison.Ordinal))
             {
-                await message.Channel.SendMessageAsync("Url can't contain any spaces.");
+                await message.ReplyAsync("Url can't contain any spaces.");
                 return;
             }
 
             StellarisModInfo mod = new StellarisModInfo(name, url);
             Config.Data.StellarisMods.Add(mod);
             await Config.Data.SaveAsync();
-            await message.Channel.SendMessageAsync($"Added mod:\n\n{ModToMessageString(mod)}");
+            await message.ReplyAsync($"Added mod:\n\n{ModToMessageString(mod)}");
         }
 
         private async Task CmdRemoveMod(SocketCommandContext message, Match match)
         {
             if (message.User.Id != AuthorUser.Id)
             {
-                await message.Channel.SendMessageAsync("You can't order me to do that.");
+                await message.ReplyAsync("You can't order me to do that.");
                 return;
             }
             if (match.Groups.Count < 2)
             {
-                await message.Channel.SendMessageAsync($"Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{GetDefaultPrefix()}stellaris mods`");
+                await message.ReplyAsync($"Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{GetDefaultPrefix()}stellaris mods`");
                 return;
             }
 
@@ -101,10 +102,10 @@ namespace TehGM.EinherjiBot
             if (removedCount != 0)
             {
                 await Config.Data.SaveAsync();
-                await message.Channel.SendMessageAsync($"Removed {removedCount} mods.{incompatibleString}");
+                await message.ReplyAsync($"Removed {removedCount} mods.{incompatibleString}");
             }
             else
-                await message.Channel.SendMessageAsync($"No mods removed.{incompatibleString}");
+                await message.ReplyAsync($"No mods removed.{incompatibleString}");
         }
 
         private Task CmdListMods(SocketCommandContext message, Match match)
@@ -122,7 +123,7 @@ namespace TehGM.EinherjiBot
                 .WithTimestamp(DateTimeOffset.Now)
                 .WithAuthor("Your Stellaris mods", Client.CurrentUser.GetAvatarUrl());
 
-            return message.Channel.SendMessageAsync(null, false, embed.Build());
+            return message.ReplyAsync(null, false, embed.Build());
         }
 
         public static string ModToMessageString(StellarisModInfo mod)
