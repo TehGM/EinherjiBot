@@ -25,7 +25,7 @@ namespace TehGM.EinherjiBot
             CommandsStack.Add(new RegexUserCommand("^stellaris mods", CmdListMods));
         }
 
-        public async Task CmdAddMod(SocketCommandContext message, Match match)
+        private async Task CmdAddMod(SocketCommandContext message, Match match)
         {
             Task CreateInvalidUseResponse()
                 => message.Channel.SendMessageAsync($"Please specify both name and URL of the mod.\nProper usage of this command:\n`{GetDefaultPrefix()}stellaris mods add <name> | <url>`");
@@ -59,7 +59,7 @@ namespace TehGM.EinherjiBot
             await message.Channel.SendMessageAsync($"Added mod:\n\n{ModToMessageString(mod)}");
         }
 
-        public async Task CmdRemoveMod(SocketCommandContext message, Match match)
+        private async Task CmdRemoveMod(SocketCommandContext message, Match match)
         {
             if (message.User.Id != AuthorUser.Id)
             {
@@ -107,7 +107,7 @@ namespace TehGM.EinherjiBot
                 await message.Channel.SendMessageAsync($"No mods removed.{incompatibleString}");
         }
 
-        public Task CmdListMods(SocketCommandContext message, Match match)
+        private Task CmdListMods(SocketCommandContext message, Match match)
         {
             if (Config.Data.StellarisMods.Count == 0)
                 return message.Channel.SendMessageAsync("You did not have any mod on the list.");
