@@ -13,6 +13,8 @@ namespace TehGM.EinherjiBot.Config
 
         [JsonProperty("stellarisMods")]
         public List<StellarisModInfo> StellarisMods { get; set; }
+        [JsonProperty("netflixAccount")]
+        public NetflixAccountInfo NetflixAccount { get; set; }
 
         public static async Task<BotData> LoadAsync(string filePath)
         {
