@@ -54,7 +54,7 @@ namespace TehGM.EinherjiBot.Config
         {
             Saving?.Invoke(this);
             JObject obj = JObject.FromObject(this);
-            obj.Add("intel", JToken.FromObject(UserIntel.Values));
+            obj.Add("intelCollection", JToken.FromObject(UserIntel.Values));
             return JsonFileExtensions.SaveToFileAsync((JToken)obj, filePath);
         }
 
