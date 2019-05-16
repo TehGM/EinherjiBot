@@ -15,7 +15,7 @@ using Discord.Rest;
 
 namespace TehGM.EinherjiBot
 {
-    [ProductionOnly]
+    //[ProductionOnly]
     public class NetflixAccountHandler : HandlerBase
     {
         private readonly NetflixAccountInfo NetflixAccount;

@@ -3,21 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Config;
+using TehGM.EinherjiBot.DataModels;
 using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
-    [ProductionOnly]
+    //[ProductionOnly]
     class IntelHandler : HandlerBase
     {
+        private CancellationTokenSource _delayedSaveCancellationTokenSource;
+
         public IntelHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
         {
+            if (config.Data?.Intel != null)
+                config.Data.Intel.Saving += Intel_Saving;
             CommandsStack.Add(new RegexUserCommand("^intel on me", CmdIntelMe));
             CommandsStack.Add(new RegexUserCommand("^intel on \\\\?<@!?(\\d+)>", CmdIntelUser));
             CommandsStack.Add(new RegexUserCommand("^intel on guild", CmdIntelGuild));
@@ -72,6 +78,33 @@ namespace TehGM.EinherjiBot
             return message.ReplyAsync(null, false, embed.Build());
         }
 
+        protected override Task OnGuildMemberUpdated(SocketGuildUser userBefore, SocketGuildUser userAfter)
+        {
+            if (userBefore.Status == userAfter.Status)
+                return Task.CompletedTask;
+            if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
+                return Task.CompletedTask;
+            UserIntel intel = Config.Data.Intel.GetOrCreateUserIntel(userAfter.Id);
+            if (intel.ChangeState(userAfter.Status))
+                return SaveDelayed(TimeSpan.FromMinutes(2.5));
+            return Task.CompletedTask;
+        }
+
+        private async Task SaveDelayed(TimeSpan delay)
+        {
+            if (_delayedSaveCancellationTokenSource != null)
+                return;
+            _delayedSaveCancellationTokenSource = new CancellationTokenSource();
+            CancellationToken ct = _delayedSaveCancellationTokenSource.Token;
+            await Task.Delay(delay, ct);
+            if (ct.IsCancellationRequested)
+                return;
+            await Config.Data.Intel.SaveAsync();
+        }
+
+        private void Intel_Saving(BotDataIntel obj)
+            => _delayedSaveCancellationTokenSource?.Cancel();
+
         protected static string GetMaxUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto)
             => GetUserAvatarUrl(user, format, 2048);
         protected static string GetUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
@@ -84,9 +117,15 @@ namespace TehGM.EinherjiBot
                 .WithThumbnailUrl(GetMaxUserAvatarUrl(user))
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
-                .AddField("Status", user.Status.ToString(), true)
-                .AddField("Activity", activityString, true)
-                .AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
+                .AddField("Status", user.Status.ToString(), true);
+            if (user.Activity != null)
+                embed.AddField("Activity", activityString, true);
+            if (Config.Data.Intel.UserIntel.TryGetValue(user.Id, out UserIntel intel))
+            {
+                embed.AddField(intel.IsOnline ? "Online for" : "No visual for",
+                    (DateTimeOffset.UtcNow - intel.ChangeTimeUTC.Value).ToFriendlyString(), true);
+            }
+            embed.AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
                 .WithTimestamp(user.CreatedAt)
                 .WithFooter($"User ID: {user.Id}", GetUserAvatarUrl(user));
             return embed;
@@ -173,6 +212,13 @@ namespace TehGM.EinherjiBot
                 default:
                     return null;
             }
+        }
+
+        public override void Dispose()
+        {
+            if (Config.Data.Intel != null)
+                Config.Data.Intel.Saving -= Intel_Saving;
+            base.Dispose();
         }
     }
 }

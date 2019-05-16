@@ -37,15 +37,17 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
             Client.MessageReceived += Client_MessageReceived;
             Client.ReactionAdded += Client_ReactionAdded;
+            Client.GuildMemberUpdated += Client_GuildMemberUpdated;
             // TODO: more event handlers as they become needed
 
             Console.WriteLine($"{this.GetType().Name} initialized.");
         }
 
+        protected virtual Task OnGuildMemberUpdated(SocketGuildUser userBefore, SocketGuildUser userAfter)
+            => Task.CompletedTask;
+
         protected virtual Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            return Task.CompletedTask;
-        }
+            => Task.CompletedTask;
 
         protected virtual async Task OnMessageReceived(SocketMessage message)
         {
@@ -58,7 +60,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
         private Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
             => InvokeTask(() => OnReactionAdded(message, channel, reaction));
-
+        private Task Client_GuildMemberUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
+            => InvokeTask(() => OnGuildMemberUpdated(arg1, arg2));
         private Task Client_MessageReceived(SocketMessage message)
             => InvokeTask(() => OnMessageReceived(message));
 
@@ -78,6 +81,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             {
                 Client.MessageReceived -= Client_MessageReceived;
                 Client.ReactionAdded -= Client_ReactionAdded;
+                Client.GuildMemberUpdated -= Client_GuildMemberUpdated;
                 Client = null;
             }
         }

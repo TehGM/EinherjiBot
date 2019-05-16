@@ -344,3 +344,4 @@ healthchecksdb
 auth.json
 # Bot data
 data.json
+data_intel.json
