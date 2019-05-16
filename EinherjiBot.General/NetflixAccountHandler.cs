@@ -115,7 +115,7 @@ namespace TehGM.EinherjiBot
         }
 
         private string GetWarningIfAutoremoving(bool removingSendersMsg = true)
-            => NetflixAccount.IsAutoRemoving ? $"I will remove this{(removingSendersMsg ? " and your" : null)} message in {NetflixAccount.AutoRemoveDelay.ToFriendlyString()}." : null;
+            => NetflixAccount.IsAutoRemoving ? $"I will remove this{(removingSendersMsg ? " and your" : null)} message in {NetflixAccount.AutoRemoveDelay.ToShortFriendlyString()}." : null;
 
         private Task SendError(string text, IMessageChannel channel, string mention = null)
         {
