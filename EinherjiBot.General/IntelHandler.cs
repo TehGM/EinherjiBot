@@ -72,18 +72,23 @@ namespace TehGM.EinherjiBot
             return message.ReplyAsync(null, false, embed.Build());
         }
 
+        protected static string GetMaxUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto)
+            => GetUserAvatarUrl(user, format, 2048);
+        protected static string GetUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
+            => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
+
         private static EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user)
         {
             string activityString = user.Activity == null ? "-" : $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
-            embed.WithAuthor($"Intel on {user.Username}", user.GetAvatarUrl())
-                .WithThumbnailUrl(user.GetAvatarUrl())
+            embed.WithAuthor($"Intel on {user.Username}", GetUserAvatarUrl(user))
+                .WithThumbnailUrl(GetMaxUserAvatarUrl(user))
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
                 .AddField("Status", user.Status.ToString(), true)
                 .AddField("Activity", activityString, true)
                 .AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
                 .WithTimestamp(user.CreatedAt)
-                .WithFooter($"User ID: {user.Id}", user.GetAvatarUrl());
+                .WithFooter($"User ID: {user.Id}", GetUserAvatarUrl(user));
             return embed;
         }
 
@@ -92,7 +97,7 @@ namespace TehGM.EinherjiBot
             IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
             if (user.Nickname != null)
                 embed.AddField("Guild nickname", user.Nickname, true)
-                    .WithAuthor($"Intel on {user.Nickname}", user.GetAvatarUrl());
+                    .WithAuthor($"Intel on {user.Nickname}", GetUserAvatarUrl(user));
             embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
             if (user.JoinedAt != null)
                 embed.AddField("Time in this guild", (DateTimeOffset.UtcNow - user.JoinedAt.Value).ToLongFriendlyString(), true);
