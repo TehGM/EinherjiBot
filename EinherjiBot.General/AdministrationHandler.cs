@@ -45,17 +45,19 @@ namespace TehGM.EinherjiBot.CommandsProcessing
                 await channel.SendMessageAsync($"Sir, `{countString} is not a valid number.");
                 return;
             }
-            if (count < 1)
+            if (count < 0)
             {
                 await channel.SendMessageAsync($"Sir, how am I supposed to execute removal of {count} messages?.");
                 return;
             }
 
             // get last X messages
-            var msgs = await channel.GetMessagesAsync(count).FlattenAsync();
+            var msgs = await channel.GetMessagesAsync(count + 1).FlattenAsync();
             await channel.DeleteMessagesAsync(msgs);
-            RestUserMessage confirmationMsg = await channel.SendMessageAsync($"Sir, {count} message{(count > 1 ? "s were" : " was")} taken down.");
-            await Task.Delay(5 * 1000);
+            RestUserMessage confirmationMsg = count > 0 ?
+                await channel.SendMessageAsync($"Sir, your message and {count} previous message{(count > 1 ? "s were" : " was")} taken down.") :
+                await channel.SendMessageAsync($"Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
+            await Task.Delay(6 * 1000);
             await channel.DeleteMessageAsync(confirmationMsg);
         }
     }
