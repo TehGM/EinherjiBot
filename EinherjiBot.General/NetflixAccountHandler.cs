@@ -23,8 +23,8 @@ namespace TehGM.EinherjiBot
         public NetflixAccountHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
         {
             this.NetflixAccount = config.Data.NetflixAccount;
-            CommandsStack.Add(new RegexUserCommand("netflix set (login|email|username|password|pass|pwd) (.+)", CmdSet));
-            CommandsStack.Add(new RegexUserCommand("netflix (?:password|account|login)", CmdRetrieve));
+            CommandsStack.Add(new RegexUserCommand("^netflix set (login|email|username|password|pass|pwd) (.+)", CmdSet));
+            CommandsStack.Add(new RegexUserCommand("^netflix (?:password|account|login)", CmdRetrieve));
         }
 
         private async Task CmdRetrieve(SocketCommandContext message, Match match)

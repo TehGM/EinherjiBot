@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         public AdministrationHandler(DiscordSocketClient client, BotConfig config) 
             : base(client, config)
         {
-            CommandsStack.Add(new RegexUserCommand("^\\s*purge(?:\\s+(\\d+))?", CmdPurge));
+            CommandsStack.Add(new RegexUserCommand("^purge(?:\\s+(\\d+))?", CmdPurge));
         }
 
         private async Task CmdPurge(SocketCommandContext message, Match match)

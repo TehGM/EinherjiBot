@@ -14,7 +14,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             AcceptMentionPrefix = true,
             AcceptGuildMessages = true,
             AcceptPrivateMessages = true,
-            StringPrefix = "."
+            StringPrefix = ".",
+            TrimSpaceAfterStringPrefix = false
         };
         public static ICommandVerificator DefaultPrefixedGuildOnly { get; } = new CommandVerificator()
         {
@@ -22,7 +23,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             AcceptMentionPrefix = true,
             AcceptGuildMessages = true,
             AcceptPrivateMessages = false,
-            StringPrefix = "."
+            StringPrefix = ".",
+            TrimSpaceAfterStringPrefix = false
         };
 
         public bool IgnoreBots { get; set; }
@@ -31,6 +33,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
         public bool AcceptGuildMessages { get; set; }
         public bool AcceptPrivateMessages { get; set; }
+
+        public bool TrimSpaceAfterStringPrefix { get; set; }
 
         public bool RequirePrefix => AcceptMentionPrefix || !string.IsNullOrWhiteSpace(StringPrefix);
 
@@ -50,13 +54,25 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             }
             // extract actual command so it can be confirmed with regex
             int cmdIndex = 0;
-            if ((AcceptMentionPrefix && command.Message.HasMentionPrefix(command.Client.CurrentUser, ref cmdIndex)) ||
-                (!string.IsNullOrWhiteSpace(StringPrefix) && command.Message.HasStringPrefix(StringPrefix, ref cmdIndex)))
+            if (AcceptMentionPrefix && command.Message.HasMentionPrefix(command.Client.CurrentUser, ref cmdIndex))
             {
-                actualCommand = command.Message.Content.Substring(cmdIndex);
+                actualCommand = GetActualCommand(command, cmdIndex, true);
+                return true;
+            }
+            if (!string.IsNullOrWhiteSpace(StringPrefix) && command.Message.HasStringPrefix(StringPrefix, ref cmdIndex))
+            {
+                actualCommand = GetActualCommand(command, cmdIndex, TrimSpaceAfterStringPrefix);
                 return true;
             }
             return false;
+        }
+
+        private static string GetActualCommand(SocketCommandContext command, int cmdIndex, bool trimPrefixSpace)
+        {
+            string actualCommand = command.Message.Content.Substring(cmdIndex);
+            if (trimPrefixSpace)
+                actualCommand = actualCommand.TrimStart(' ');
+            return actualCommand;
         }
     }
 }
