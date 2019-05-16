@@ -77,10 +77,10 @@ namespace TehGM.EinherjiBot
         protected static string GetUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
-        private static EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user)
+        private EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user)
         {
             string activityString = user.Activity == null ? "-" : $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
-            embed.WithAuthor($"Intel on {user.Username}", GetUserAvatarUrl(user))
+            embed.WithAuthor($"Intel on {user.Username}", GetUserAvatarUrl(Client.CurrentUser))
                 .WithThumbnailUrl(GetMaxUserAvatarUrl(user))
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
@@ -92,12 +92,12 @@ namespace TehGM.EinherjiBot
             return embed;
         }
 
-        private static EmbedBuilder AddGuildUserInfo(EmbedBuilder embed, SocketGuildUser user)
+        private EmbedBuilder AddGuildUserInfo(EmbedBuilder embed, SocketGuildUser user)
         {
             IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
             if (user.Nickname != null)
                 embed.AddField("Guild nickname", user.Nickname, true)
-                    .WithAuthor($"Intel on {user.Nickname}", GetUserAvatarUrl(user));
+                    .WithAuthor($"Intel on {user.Nickname}", GetUserAvatarUrl(Client.CurrentUser));
             embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
             if (user.JoinedAt != null)
                 embed.AddField("Time in this guild", (DateTimeOffset.UtcNow - user.JoinedAt.Value).ToLongFriendlyString(), true);
