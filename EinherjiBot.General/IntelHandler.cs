@@ -15,7 +15,7 @@ using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
-    //[ProductionOnly]
+    [ProductionOnly]
     class IntelHandler : HandlerBase
     {
         private CancellationTokenSource _delayedSaveCancellationTokenSource;
@@ -144,9 +144,9 @@ namespace TehGM.EinherjiBot
             return embed;
         }
 
-        private static EmbedBuilder AddGuildInfo(EmbedBuilder embed, SocketGuild guild)
+        private EmbedBuilder AddGuildInfo(EmbedBuilder embed, SocketGuild guild)
         {
-            embed.WithAuthor(guild.Name, guild.IconUrl)
+            embed.WithAuthor($"Intel on {guild.Name}", GetUserAvatarUrl(Client.CurrentUser))
                 .WithThumbnailUrl(guild.IconUrl)
                 .AddField("Owner", MentionUtils.MentionUser(guild.OwnerId))
                 .AddField("Guild age", (DateTimeOffset.UtcNow - guild.CreatedAt).ToLongFriendlyString(), true)
