@@ -33,15 +33,21 @@ namespace TehGM.EinherjiBot
         private Task CmdIntelMe(SocketCommandContext message, Match match)
             => ProcessIntelUser(message, message.User);
 
-        private Task CmdIntelUser(SocketCommandContext message, Match match)
+        private async Task CmdIntelUser(SocketCommandContext message, Match match)
         {
             string idString = match.Groups[1].Value;
             if (!ulong.TryParse(idString, out ulong id))
-                return message.ReplyAsync($"Could not parse user ID `{idString}`.");
-            SocketUser user = Client.GetUser(id);
+            {
+                await message.ReplyAsync($"Could not parse user ID `{idString}`.");
+                return;
+            }
+            IUser user = await Client.GetUserAsync(id);
             if (user == null)
-                return message.ReplyAsync($"Could not find user with ID `{id}`.");
-            return ProcessIntelUser(message, user);
+            {
+                await message.ReplyAsync($"Could not find user with ID `{id}`.");
+                return;
+            }
+            await ProcessIntelUser(message, user);
         }
 
         private Task CmdIntelGuild(SocketCommandContext message, Match match)
@@ -106,7 +112,7 @@ namespace TehGM.EinherjiBot
             => _delayedSaveCancellationTokenSource?.Cancel();
 
         protected static string GetMaxUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto)
-            => GetUserAvatarUrl(user, format, 2048);
+            => GetUserAvatarUrl(user, format, (ushort)(user is SocketUser ? 2048 : 1024));
         protected static string GetUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
@@ -117,7 +123,7 @@ namespace TehGM.EinherjiBot
                 .WithThumbnailUrl(GetMaxUserAvatarUrl(user))
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
-                .AddField("Status", user.Status.ToString(), true);
+                .AddField("Status", (user is SocketUser) ? user.Status.ToString() : "???", true);
             if (user.Activity != null)
                 embed.AddField("Activity", activityString, true);
             if (Config.Data.Intel.UserIntel.TryGetValue(user.Id, out UserIntel intel))
