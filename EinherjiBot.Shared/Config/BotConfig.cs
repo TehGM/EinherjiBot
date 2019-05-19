@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using TehGM.EinherjiBot.Extensions;
 using System.Threading.Tasks;
+using TehGM.EinherjiBot.DataModels;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -17,6 +18,8 @@ namespace TehGM.EinherjiBot.Config
 
         [JsonProperty("authorId")]
         public ulong AuthorID { get; private set; }
+        [JsonProperty("botChannels")]
+        public BotChannelsInfo BotChannels { get; private set; }
 
         public static async Task<BotConfig> LoadAllAsync()
         {
