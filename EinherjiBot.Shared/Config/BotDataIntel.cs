@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using TehGM.EinherjiBot.Extensions;
 using TehGM.EinherjiBot.DataModels;
 using System.Linq;
+using System.Threading;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -17,6 +19,8 @@ namespace TehGM.EinherjiBot.Config
 
         [JsonIgnore]
         public IDictionary<ulong, UserIntel> UserIntel { get; private set; }
+
+        private CancellationTokenSource _delayedSaveCts;
 
         [JsonConstructor]
         public BotDataIntel(UserIntel[] intelCollection)
@@ -41,24 +45,34 @@ namespace TehGM.EinherjiBot.Config
             return result;
         }
 
-        public static async Task<BotDataIntel> LoadAsync(string filePath)
+        public static async Task<BotDataIntel> LoadAsync(string filePath = DefaultPath)
         {
             JToken fileContents = await JsonFileExtensions.LoadFromFileAsync(filePath);
             return fileContents.ToObject<BotDataIntel>();
         }
 
-        public static Task<BotDataIntel> LoadAsync()
-            => LoadAsync(DefaultPath);
-
-        public Task SaveAsync(string filePath)
+        public async Task SaveDelayedAsync(TimeSpan delay, string filePath = DefaultPath)
         {
+            if (_delayedSaveCts != null)
+                return;
+            _delayedSaveCts = new CancellationTokenSource();
+            CancellationToken ct = _delayedSaveCts.Token;
+            await Task.Delay(delay, ct);
+            if (ct.IsCancellationRequested)
+                return;
+            await SaveAsync(filePath);
+        }
+
+        public Task SaveAsync(string filePath = DefaultPath)
+        {
+            // cancel any delayed saving if any
+            _delayedSaveCts?.Cancel();
+            _delayedSaveCts = null;
+
             Saving?.Invoke(this);
             JObject obj = JObject.FromObject(this);
             obj.Add("intelCollection", JToken.FromObject(UserIntel.Values));
             return JsonFileExtensions.SaveToFileAsync((JToken)obj, filePath);
         }
-
-        public Task SaveAsync()
-            => SaveAsync(DefaultPath);
     }
 }

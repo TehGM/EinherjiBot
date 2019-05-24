@@ -18,12 +18,8 @@ namespace TehGM.EinherjiBot
     [ProductionOnly]
     class IntelHandler : HandlerBase
     {
-        private CancellationTokenSource _delayedSaveCancellationTokenSource;
-
         public IntelHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
         {
-            if (config.Data?.Intel != null)
-                config.Data.Intel.Saving += Intel_Saving;
             CommandsStack.Add(new RegexUserCommand("^intel on me", CmdIntelMe));
             CommandsStack.Add(new RegexUserCommand("^intel on \\\\?<@!?(\\d+)>", CmdIntelUser));
             CommandsStack.Add(new RegexUserCommand("^intel on guild", CmdIntelGuild));
@@ -92,24 +88,9 @@ namespace TehGM.EinherjiBot
                 return Task.CompletedTask;
             UserIntel intel = Config.Data.Intel.GetOrCreateUserIntel(userAfter.Id);
             if (intel.ChangeState(userAfter.Status))
-                return SaveDelayed(TimeSpan.FromMinutes(2.5));
+                return Config.Data.Intel.SaveDelayedAsync(TimeSpan.FromMinutes(2.5));
             return Task.CompletedTask;
         }
-
-        private async Task SaveDelayed(TimeSpan delay)
-        {
-            if (_delayedSaveCancellationTokenSource != null)
-                return;
-            _delayedSaveCancellationTokenSource = new CancellationTokenSource();
-            CancellationToken ct = _delayedSaveCancellationTokenSource.Token;
-            await Task.Delay(delay, ct);
-            if (ct.IsCancellationRequested)
-                return;
-            await Config.Data.Intel.SaveAsync();
-        }
-
-        private void Intel_Saving(BotDataIntel obj)
-            => _delayedSaveCancellationTokenSource?.Cancel();
 
         protected static string GetMaxUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto)
             => GetUserAvatarUrl(user, format, (ushort)(user is SocketUser ? 2048 : 1024));
@@ -218,13 +199,6 @@ namespace TehGM.EinherjiBot
                 default:
                     return null;
             }
-        }
-
-        public override void Dispose()
-        {
-            if (Config.Data.Intel != null)
-                Config.Data.Intel.Saving -= Intel_Saving;
-            base.Dispose();
         }
     }
 }
