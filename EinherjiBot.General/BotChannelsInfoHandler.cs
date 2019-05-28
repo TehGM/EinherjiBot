@@ -66,6 +66,10 @@ namespace TehGM.EinherjiBot
         {
             if (allowedChannelsIds.Contains(message.Channel.Id))
                 return;
+            if (Config.BotChannels.IgnoreChannelsIDs.Contains(message.Channel.Id))
+                return;
+            if (Config.BotChannels.IgnoreUsersIDs.Contains(message.User.Id))
+                return;
 
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
             string channelsText = GetChannelsMentionsText(allowedChannelsIds, user);
