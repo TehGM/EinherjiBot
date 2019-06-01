@@ -109,7 +109,7 @@ namespace TehGM.EinherjiBot
                 embed.AddField("Activity", activityString, true);
             if (Config.Data.Intel.UserIntel.TryGetValue(user.Id, out UserIntel intel))
             {
-                embed.AddField(intel.IsOnline ? "Online for" : "No visual for",
+                embed.AddField(user.Status == UserStatus.Offline ? "No visual for" : "Online for",
                     (DateTimeOffset.UtcNow - intel.ChangeTimeUTC.Value).ToFriendlyString(), true);
             }
             embed.AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
