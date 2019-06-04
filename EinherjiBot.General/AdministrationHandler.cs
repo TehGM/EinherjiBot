@@ -57,9 +57,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
             // get last X messages
             var msgs = await channel.GetMessagesAsync(count + 1).FlattenAsync();
+            int actualCount = msgs.Count() - 1;
             await channel.DeleteMessagesAsync(msgs);
-            RestUserMessage confirmationMsg = count > 0 ?
-                await channel.SendMessageAsync($"Sir, your message and {count} previous message{(count > 1 ? "s were" : " was")} taken down.") :
+            RestUserMessage confirmationMsg = actualCount > 0 ?
+                await channel.SendMessageAsync($"Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down.") :
                 await channel.SendMessageAsync($"Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
             await Task.Delay(6 * 1000);
             await channel.DeleteMessageAsync(confirmationMsg);
