@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.DataModels;
 using TehGM.EinherjiBot.Extensions;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -20,7 +21,8 @@ namespace TehGM.EinherjiBot.Config
         [JsonIgnore]
         public BotDataIntel Intel { get; set; }
 
-        private CancellationTokenSource _delayedSaveCts;
+        [JsonIgnore]
+        private readonly AsyncDelayedInvoker SaveDataInvoker = new AsyncDelayedInvoker();
 
         public static async Task<BotData> LoadAsync(string filePath = DefaultPath)
         {
@@ -30,24 +32,14 @@ namespace TehGM.EinherjiBot.Config
             return data;
         }
 
-        public async Task SaveDelayedAsync(TimeSpan delay, string filePath = DefaultPath)
-        {
-            if (_delayedSaveCts != null)
-                return;
-            _delayedSaveCts = new CancellationTokenSource();
-            CancellationToken ct = _delayedSaveCts.Token;
-            await Task.Delay(delay, ct);
-            if (ct.IsCancellationRequested)
-                return;
-            await SaveAsync(filePath);
-        }
+        public Task SaveDelayedAsync(TimeSpan delay, string filePath = DefaultPath)
+            => SaveDataInvoker.InvokeDelayedAsync(delay, () => SaveInternalAsync(filePath));
 
         public Task SaveAsync(string filePath = DefaultPath)
-        {
-            // cancel any delayed saving if any
-            _delayedSaveCts?.Cancel();
-            _delayedSaveCts = null;
+            => SaveDataInvoker.InvokeNowAsync(() => SaveInternalAsync(filePath));
 
+        private Task SaveInternalAsync(string filePath = DefaultPath)
+        {
             Task t1 = JsonFileExtensions.SaveToFileAsync(this, filePath);
             Task t2 = Intel.SaveAsync();
             return Task.WhenAll(t1, t2);
