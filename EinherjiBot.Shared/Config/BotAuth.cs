@@ -12,6 +12,8 @@ namespace TehGM.EinherjiBot.Config
 
         [JsonProperty("token", Required = Required.Always)]
         public string Token { get; private set; }
+        [JsonProperty("inaraApi")]
+        public InaraApiAuth InaraAPI { get; private set; }
 
         public static async Task<BotAuth> LoadAsync(string filePath)
         {
