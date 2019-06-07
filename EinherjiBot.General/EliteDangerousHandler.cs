@@ -29,6 +29,8 @@ namespace TehGM.EinherjiBot
             _webClient.Headers[HttpRequestHeader.UserAgent] = config.Auth.InaraAPI.AppName;
             _webClient.Headers[HttpRequestHeader.ContentType] = "application/json";
 
+            CommandsStack.Add(new RegexUserCommand("^elite (?:cgs?|community goals?) unsub(?:scribe)?", CmdCommunityGoalsUnsubscribe));
+            CommandsStack.Add(new RegexUserCommand("^elite (?:cgs?|community goals?) sub(?:scribe)?", CmdCommunityGoalsSubscribe));
             CommandsStack.Add(new RegexUserCommand("^elite (?:cgs?|community goals?)", CmdCommunityGoals));
 
             StartAutomaticNewsPosting();
@@ -111,6 +113,28 @@ namespace TehGM.EinherjiBot
         {
             _autoModeCTS?.Cancel();
             _autoModeCTS = null;
+        }
+
+        private async Task CmdCommunityGoalsSubscribe(SocketCommandContext message, Match match)
+        {
+            if (Config.Data.EliteAPI.AddCommunityGoalsSubscriber(message.User))
+            {
+                await Config.Data.SaveAsync();
+                await message.ReplyAsync("You will now get pinged or PMed when Elite Dangerous' Community Goals are updated. \u2705");
+            }
+            else
+                await message.ReplyAsync("You already are subscribed to Elite Dangerous' Community Goals updates. \u274C");
+        }
+
+        private async Task CmdCommunityGoalsUnsubscribe(SocketCommandContext message, Match match)
+        {
+            if (Config.Data.EliteAPI.RemoveCommunityGoalsSubscriber(message.User))
+            {
+                await Config.Data.SaveAsync();
+                await message.ReplyAsync("You'll no longer get pinged or PMed when Elite Dangerous' Community Goals are updated. \u2705");
+            }
+            else
+                await message.ReplyAsync("You are not subscribed to Elite Dangerous' Community Goals updates. \u274C");
         }
 
         private async Task CmdCommunityGoals(SocketCommandContext message, Match match)
