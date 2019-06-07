@@ -20,6 +20,7 @@ namespace TehGM.EinherjiBot
     class EliteDangerousHandler : HandlerBase
     {
         private IList<EliteCG> _cgCache = new List<EliteCG>();
+        private DateTime _cacheUpdateTimeUtc;
         private WebClient _webClient = new WebClient();
         private CancellationTokenSource _autoModeCTS;
 
@@ -73,6 +74,7 @@ namespace TehGM.EinherjiBot
                             newOrJustFinishedCGs.Add(cg);
                     }
                     _cgCache = allCGs.ToList();
+                    _cacheUpdateTimeUtc = DateTime.UtcNow;
 
 
                     // post all CGs
@@ -114,12 +116,17 @@ namespace TehGM.EinherjiBot
         private async Task CmdCommunityGoals(SocketCommandContext message, Match match)
         {
             _cgCache = (await QueryForCGs()).ToList();
+            _cacheUpdateTimeUtc = DateTime.UtcNow;
             for (int i = 0; i < _cgCache.Count; i++)
                 await message.ReplyAsync(null, false, _cgCache[i].ToEmbed().Build());
         }
 
         private async Task<IEnumerable<EliteCG>> QueryForCGs()
         {
+            // use cache if it's too early for retrieving again
+            if ((DateTime.UtcNow - _cacheUpdateTimeUtc) < Config.EliteAPI.CachedCGLifetime)
+                return _cgCache;
+
             // build query content
             JObject query = new JObject();
             query.Add("header", JToken.FromObject(Config.Auth.InaraAPI));

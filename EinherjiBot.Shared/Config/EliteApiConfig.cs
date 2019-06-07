@@ -11,6 +11,8 @@ namespace TehGM.EinherjiBot.Config
         public ulong EliteAutoNewsChannelID { get; private set; }
         [JsonProperty("eliteAutoNewsIntervalSeconds")]
         private uint _eliteAutoNewsIntervalSeconds;
+        [JsonProperty("chachedCgLifetimeSeconds")]
+        private uint _chachedCgLifetimeSeconds;
         [JsonProperty("preferPingOverPm")]
         public bool PreferPingOverPM { get; private set; }
         [JsonIgnore]
@@ -18,6 +20,12 @@ namespace TehGM.EinherjiBot.Config
         {
             get { return TimeSpan.FromSeconds(_eliteAutoNewsIntervalSeconds); }
             set { _eliteAutoNewsIntervalSeconds = (uint)value.TotalSeconds; }
+        }
+        [JsonIgnore]
+        public TimeSpan CachedCGLifetime
+        {
+            get { return TimeSpan.FromSeconds(_chachedCgLifetimeSeconds); }
+            set { _chachedCgLifetimeSeconds = (uint)value.TotalSeconds; }
         }
     }
 }
