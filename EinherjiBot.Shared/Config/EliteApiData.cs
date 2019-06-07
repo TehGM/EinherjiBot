@@ -18,6 +18,7 @@ namespace TehGM.EinherjiBot.Config
         {
             if (cgSubscribersIds == null)
                 CommunityGoalsSubscribersIDs = new List<ulong>();
+            else CommunityGoalsSubscribersIDs = cgSubscribersIds;
         }
 
         public bool AddCommunityGoalsSubscriber(ulong userID)
