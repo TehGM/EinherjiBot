@@ -8,11 +8,12 @@ namespace TehGM.EinherjiBot.Extensions
 {
     public static class EmbedGenerator
     {
-        public static EmbedBuilder ToEmbed(this EliteCG cg)
+        public static EmbedBuilder ToEmbed(this EliteCG cg, string thubnailUrl = null, string authorIconUrl = null)
         {
             string descriptionTrimmed = cg.Description.Length <= EmbedBuilder.MaxDescriptionLength ? cg.Description :
                 $"{cg.Description.Remove(EmbedBuilder.MaxDescriptionLength - 3)}...";
             EmbedBuilder builder = new EmbedBuilder()
+                .WithAuthor("Elite Dangerous Community Goals", authorIconUrl)
                 .WithTitle(cg.Name)
                 .WithDescription($"__**{cg.Objective}**__\n{descriptionTrimmed}")
                 .AddField("System", cg.SystemName, true)
@@ -26,6 +27,9 @@ namespace TehGM.EinherjiBot.Extensions
                 .WithColor(cg.IsCompleted ? Color.Green : (Color)System.Drawing.Color.Cyan)
                 .WithFooter("Powered by Inara | CG expiration time: ")
                 .WithTimestamp(cg.ExpirationTime);
+            if (thubnailUrl != null)
+                builder.WithThumbnailUrl(thubnailUrl);
+
             if (!string.IsNullOrWhiteSpace(cg.Reward))
             {
                 string rewardTrimmed = cg.Reward.Length <= EmbedFieldBuilder.MaxFieldValueLength ? cg.Reward :

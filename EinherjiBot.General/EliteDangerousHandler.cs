@@ -99,9 +99,7 @@ namespace TehGM.EinherjiBot
                     bool firstPost = true;
                     foreach (var cg in newOrJustFinishedCGs)
                     {
-                        Embed cgEmbed = cg.ToEmbed()
-                            .WithAuthor("Elite Dangerous Community Goals", Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
-                            .WithThumbnailUrl(Config.EliteAPI.ThumbnailURL)
+                        Embed cgEmbed = cg.ToEmbed(Config.EliteAPI.ThumbnailURL, Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
                             .Build();
 
                         // post in channel first, pinging all those who can be pinged
@@ -161,7 +159,8 @@ namespace TehGM.EinherjiBot
             _cgCache = (await QueryForCGs()).ToList();
             _cacheUpdateTimeUtc = DateTime.UtcNow;
             for (int i = 0; i < _cgCache.Count; i++)
-                await message.ReplyAsync(null, false, _cgCache[i].ToEmbed().Build());
+                await message.ReplyAsync(null, false, _cgCache[i].ToEmbed(Config.EliteAPI.ThumbnailURL, Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
+                    .Build());
         }
 
         private async Task<IEnumerable<EliteCG>> QueryForCGs()
