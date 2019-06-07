@@ -4,6 +4,7 @@ using System.IO;
 using TehGM.EinherjiBot.Extensions;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.DataModels;
+using System;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -20,6 +21,8 @@ namespace TehGM.EinherjiBot.Config
         public ulong AuthorID { get; private set; }
         [JsonProperty("botChannels")]
         public BotChannelsInfo BotChannels { get; private set; }
+        [JsonProperty("eliteApi")]
+        public EliteApiConfig EliteAPI { get; private set; }
 
         public static async Task<BotConfig> LoadAllAsync()
         {
