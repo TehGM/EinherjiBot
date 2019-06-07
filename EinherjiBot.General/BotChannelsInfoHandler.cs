@@ -13,6 +13,7 @@ using Discord;
 
 namespace TehGM.EinherjiBot
 {
+    [ProductionOnly]
     class BotChannelsInfoHandler : HandlerBase
     {
         public BotChannelsInfoHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
@@ -35,31 +36,9 @@ namespace TehGM.EinherjiBot
 
         private Task RedirectMusicBotsAsync(SocketCommandContext message, Match match)
             => RedirectToChannelsAsync(message, Config.BotChannels.MusicChannelsIDs, Config.BotChannels.RythmID, Config.BotChannels.RadioinatorID);
-        //{
-        //    if (Config.BotChannels.MusicChannelsIDs.Contains(message.Channel.Id))
-        //        return;
-
-        //    SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
-        //    string channelsText = GetChannelsMentionsText(Config.BotChannels.MusicChannelsIDs, user);
-        //    if (channelsText == null)
-        //        return;
-
-        //    await message.ReplyAsync($"{user.Mention}, please go to {channelsText} to use {MentionUtils.MentionUser(Config.BotChannels.RythmID)} and {MentionUtils.MentionUser(Config.BotChannels.RadioinatorID)}.");
-        //}
 
         private Task RedirectAkinatorAsync(SocketCommandContext message, Match match)
             => RedirectToChannelsAsync(message, Config.BotChannels.AkinatorChannelsIDs, Config.BotChannels.AkinatorID);
-        //{
-        //    if (Config.BotChannels.AkinatorChannelsIDs.Contains(message.Channel.Id))
-        //        return;
-
-        //    SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
-        //    string channelsText = GetChannelsMentionsText(Config.BotChannels.AkinatorChannelsIDs, user);
-        //    if (channelsText == null)
-        //        return;
-
-        //    await message.ReplyAsync($"{user.Mention}, please go to {channelsText} to use {MentionUtils.MentionUser(Config.BotChannels.AkinatorID)}.");
-        //}
 
         #region BASE METHODS
         private async Task RedirectToChannelsAsync(SocketCommandContext message, IEnumerable<ulong> allowedChannelsIds, IEnumerable<ulong> botsIds)
