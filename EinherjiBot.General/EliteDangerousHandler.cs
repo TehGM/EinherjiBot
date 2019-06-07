@@ -21,6 +21,8 @@ namespace TehGM.EinherjiBot
     class EliteDangerousHandler : HandlerBase
     {
         private IList<EliteCG> _cgCache = new List<EliteCG>();
+        // we need separate cache for auto mode, otherwise users pulling CGs on demand would mess with auto updates
+        private IEnumerable<EliteCG> _lastAutoCgs = new List<EliteCG>();
         private DateTime _cacheUpdateTimeUtc;
         private WebClient _webClient = new WebClient();
         private CancellationTokenSource _autoModeCTS;
@@ -88,11 +90,12 @@ namespace TehGM.EinherjiBot
                     IList<EliteCG> newOrJustFinishedCGs = new List<EliteCG>(allCGs.Count());
                     foreach (var cg in allCGs)
                     {
-                        EliteCG existingCG = _cgCache.FirstOrDefault(ecg => ecg.Equals(cg));
-                        if (existingCG == null || existingCG.IsCompleted != cg.IsCompleted)
+                        EliteCG lastCG = _lastAutoCgs.FirstOrDefault(ecg => ecg.Equals(cg));
+                        if (lastCG == null || lastCG.IsCompleted != cg.IsCompleted)
                             newOrJustFinishedCGs.Add(cg);
                     }
                     _cgCache = allCGs.ToList();
+                    _lastAutoCgs = allCGs;
                     _cacheUpdateTimeUtc = DateTime.UtcNow;
 
 
