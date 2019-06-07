@@ -64,7 +64,7 @@ namespace TehGM.EinherjiBot
                 {
                     TimeSpan nextUpdateIn = (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval) - DateTime.UtcNow;
                     // if still waiting, await time, and repeat iteration
-                    if (nextUpdateIn >= TimeSpan.Zero)
+                    if (nextUpdateIn > TimeSpan.Zero)
                     {
                         await Task.Delay(nextUpdateIn, token);
                         continue;
@@ -168,15 +168,17 @@ namespace TehGM.EinherjiBot
                 return _cgCache;
 
             // build query content
+            const string eventName = "getCommunityGoalsRecent";
             JObject query = new JObject();
             query.Add("header", JToken.FromObject(Config.Auth.InaraAPI));
             JObject eventParams = new JObject();
-            eventParams.Add("eventName", "getCommunityGoalsRecent");
+            eventParams.Add("eventName", eventName);
             eventParams.Add("eventTimestamp", DateTimeOffset.Now);
             eventParams.Add("eventData", new JArray());
             query.Add("events", new JArray(eventParams));
 
             // send query and get results
+            Console.WriteLine($"Sending {eventName} to Inara.");
             string response = await _webClient.UploadStringTaskAsync("https://inara.cz/inapi/v1/", query.ToString());
 
             // return results

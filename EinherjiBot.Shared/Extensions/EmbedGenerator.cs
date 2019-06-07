@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.Extensions
                 .AddField("Contributions Count", cg.ContributionsCount.ToString(), true)
                 .AddField("Last Updated", $"{(DateTime.UtcNow - cg.LastUpdateTime.ToUniversalTime()).ToLongFriendlyString()} ago")
                 .WithUrl(cg.InaraURL)
-                .WithColor(cg.IsCompleted ? Color.Green : Color.Magenta)
+                .WithColor(cg.IsCompleted ? Color.Green : (Color)System.Drawing.Color.Cyan)
                 .WithFooter("Powered by Inara | CG expires in ")
                 .WithTimestamp(cg.ExpirationTime);
             if (!string.IsNullOrWhiteSpace(cg.Reward))
