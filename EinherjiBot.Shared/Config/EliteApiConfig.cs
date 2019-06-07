@@ -15,6 +15,8 @@ namespace TehGM.EinherjiBot.Config
         private uint _chachedCgLifetimeSeconds;
         [JsonProperty("preferPingOverPm")]
         public bool PreferPingOverPM { get; private set; }
+        [JsonProperty("thumbnailUrl")]
+        public string ThumbnailURL { get; private set; }
         [JsonIgnore]
         public TimeSpan EliteAutoNewsInterval
         {

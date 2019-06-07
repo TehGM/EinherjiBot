@@ -99,7 +99,10 @@ namespace TehGM.EinherjiBot
                     bool firstPost = true;
                     foreach (var cg in newOrJustFinishedCGs)
                     {
-                        Embed cgEmbed = cg.ToEmbed().Build();
+                        Embed cgEmbed = cg.ToEmbed()
+                            .WithAuthor("Elite Dangerous Community Goals", Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
+                            .WithThumbnailUrl(Config.EliteAPI.ThumbnailURL)
+                            .Build();
 
                         // post in channel first, pinging all those who can be pinged
                         await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
