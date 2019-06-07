@@ -46,11 +46,11 @@ namespace TehGM.EinherjiBot
                 CancellationToken token = _autoModeCTS.Token;
                 while (!token.IsCancellationRequested)
                 {
-                    TimeSpan timeLeft = DateTime.UtcNow - (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval);
+                    TimeSpan nextUpdateIn = (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval) - DateTime.UtcNow;
                     // if still waiting, await time, and repeat iteration
-                    if (timeLeft > TimeSpan.Zero)
+                    if (nextUpdateIn >= TimeSpan.Zero)
                     {
-                        await Task.Delay(timeLeft, token);
+                        await Task.Delay(nextUpdateIn, token);
                         continue;
                     }
 
