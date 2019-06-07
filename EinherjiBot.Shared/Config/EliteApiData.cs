@@ -13,6 +13,13 @@ namespace TehGM.EinherjiBot.Config
         [JsonProperty("autoNewsRetrievalTimeUtc")]
         public DateTime AutoNewsRetrievalTimeUtc { get; set; }
 
+        [JsonConstructor]
+        public EliteApiData(List<ulong> cgSubscribersIds)
+        {
+            if (cgSubscribersIds == null)
+                CommunityGoalsSubscribersIDs = new List<ulong>();
+        }
+
         public bool AddCommunityGoalsSubscriber(ulong userID)
         {
             if (CommunityGoalsSubscribersIDs.Contains(userID))
@@ -24,7 +31,7 @@ namespace TehGM.EinherjiBot.Config
             => AddCommunityGoalsSubscriber(user.Id);
 
         public bool RemoveCommunityGoalsSubscriber(ulong userID)
-            => CommunityGoalsSubscribersIDs.Remove(userID);
+            => CommunityGoalsSubscribersIDs?.Remove(userID) ?? false;
         public bool RemoveCommunityGoalsSubscriber(IUser user)
             => RemoveCommunityGoalsSubscriber(user.Id);
     }

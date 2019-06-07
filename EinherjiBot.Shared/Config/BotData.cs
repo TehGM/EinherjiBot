@@ -31,6 +31,7 @@ namespace TehGM.EinherjiBot.Config
             JToken fileContents = await JsonFileExtensions.LoadFromFileAsync(filePath);
             BotData data = fileContents.ToObject<BotData>();
             data.Intel = await BotDataIntel.LoadAsync();
+            data.CreateObjectsIfMissing();
             return data;
         }
 
@@ -45,6 +46,18 @@ namespace TehGM.EinherjiBot.Config
             Task t1 = JsonFileExtensions.SaveToFileAsync(this, filePath);
             Task t2 = Intel.SaveAsync();
             return Task.WhenAll(t1, t2);
+        }
+
+        private void CreateObjectsIfMissing()
+        {
+            if (EliteAPI == null)
+                EliteAPI = new EliteApiData(null);
+            if (NetflixAccount == null)
+                NetflixAccount = new NetflixAccountInfo();
+            if (StellarisMods == null)
+                StellarisMods = new List<StellarisModInfo>();
+            if (Intel == null)
+                Intel = new BotDataIntel(null);
         }
     }
 }
