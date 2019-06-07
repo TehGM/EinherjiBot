@@ -23,7 +23,6 @@
   "eliteApi": {
     "eliteAutoNewsChannelId": 579610851095609345,
     "preferPingOverPm": true,
-    "eliteAutoNewsIntervalSeconds": 5400,
-    "cgSubscribersIds": []
+    "eliteAutoNewsIntervalSeconds": 5400
   }
 }
