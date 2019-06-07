@@ -33,7 +33,23 @@ namespace TehGM.EinherjiBot
             CommandsStack.Add(new RegexUserCommand("^elite (?:cgs?|community goals?) sub(?:scribe)?", CmdCommunityGoalsSubscribe));
             CommandsStack.Add(new RegexUserCommand("^elite (?:cgs?|community goals?)", CmdCommunityGoals));
 
+            if (Client.ConnectionState == ConnectionState.Connected)
+                StartAutomaticNewsPosting();
+
+            Client.Ready += Client_Ready;
+            Client.Disconnected += Client_Disconnected;
+        }
+
+        private Task Client_Ready()
+        {
             StartAutomaticNewsPosting();
+            return Task.CompletedTask;
+        }
+
+        private Task Client_Disconnected(Exception arg)
+        {
+            StopAutomaticNewsPosting();
+            return Task.CompletedTask;
         }
 
         private void StartAutomaticNewsPosting()
