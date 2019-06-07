@@ -20,6 +20,8 @@ namespace TehGM.EinherjiBot.Config
         public NetflixAccountInfo NetflixAccount { get; set; }
         [JsonIgnore]
         public BotDataIntel Intel { get; set; }
+        [JsonProperty("eliteAutoNewsRetrievalTimeUtc")]
+        public DateTime EliteAutoNewsRetrievalTimeUtc { get; set; }
 
         [JsonIgnore]
         private readonly AsyncDelayedInvoker SaveDataInvoker = new AsyncDelayedInvoker();
