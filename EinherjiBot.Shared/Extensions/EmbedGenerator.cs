@@ -22,13 +22,15 @@ namespace TehGM.EinherjiBot.Extensions
                 .AddField("Contributing Pilots", cg.ContributingPilotsCount.ToString(), true)
                 .AddField("Contributions Count", cg.ContributionsCount.ToString(), true)
                 .AddField("Last Updated", $"{(DateTime.UtcNow - cg.LastUpdateTime.ToUniversalTime()).ToLongFriendlyString()} ago")
-                .AddField("Is Completed?", cg.IsCompleted ? "\u2705" : "\u274C")
+                .AddField("Is Completed?", cg.IsCompleted ? "\u2705" : "\u274C", true)
                 .WithUrl(cg.InaraURL)
                 .WithColor(cg.IsCompleted ? Color.Green : (Color)System.Drawing.Color.Cyan)
                 .WithFooter("Powered by Inara | CG expiration time: ")
                 .WithTimestamp(cg.ExpirationTime);
             if (thubnailUrl != null)
                 builder.WithThumbnailUrl(thubnailUrl);
+            if (!cg.IsCompleted)
+                builder.AddField("Time Left", (cg.ExpirationTime - DateTimeOffset.Now).ToLongFriendlyString());
 
             if (!string.IsNullOrWhiteSpace(cg.Reward))
             {
