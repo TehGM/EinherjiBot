@@ -7,6 +7,8 @@ namespace TehGM.EinherjiBot.DataModels
 {
     public sealed class EliteCG : IEquatable<EliteCG>
     {
+        [JsonProperty("communitygoalGameID")]
+        public int ID { get; private set; }
         [JsonProperty("communitygoalName")]
         public string Name { get; private set; }
         [JsonProperty("starsystemName")]
@@ -45,16 +47,21 @@ namespace TehGM.EinherjiBot.DataModels
 
         public bool Equals(EliteCG other)
         {
-            return Name == other.Name &&
-                   ExpirationTime == other.ExpirationTime;
+            if (ID == 0 || other.ID == 0)
+                return Name == other.Name && ExpirationTime == other.ExpirationTime;
+            return this.ID == other.ID;
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 420877175;
-            hashCode = hashCode * -1521134295 + Name.GetHashCode();
-            hashCode = hashCode * -1521134295 + ExpirationTime.GetHashCode();
-            return hashCode;
+            if (ID == 0)
+            {
+                var hashCode = 420877175;
+                hashCode = hashCode * -1521134295 + Name.GetHashCode();
+                hashCode = hashCode * -1521134295 + ExpirationTime.GetHashCode();
+                return hashCode;
+            }
+            return ID.GetHashCode();
         }
     }
 }
