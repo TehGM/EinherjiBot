@@ -127,25 +127,10 @@ namespace TehGM.EinherjiBot
         }
 
         private string GetAllowedRolesMentionsText()
-            => GetMentionsText(NetflixAccount.RetrieveRolesID, MentionUtils.MentionRole);
+            => NetflixAccount.RetrieveRolesID.Select(id => MentionUtils.MentionRole(id)).JoinAsSentence(lastSeparator: " or ");
 
         private string GetAllowedChannelsMentionsText()
-            => GetMentionsText(NetflixAccount.AllowedChannelsIDs, MentionUtils.MentionChannel);
-
-        private static string GetMentionsText(IEnumerable<ulong> ids, Func<ulong, string> processingMethod)
-        {
-            int count = ids.Count();
-            string lastRoleMention = processingMethod(ids.Last());
-            if (count == 1)
-                return lastRoleMention;
-            StringBuilder builder = new StringBuilder();
-            // separate all except last with commas
-            builder.AppendJoin(", ", ids.Take(count - 1).Select(i => processingMethod(i)));
-            // add last with "or"
-            builder.Append(" or ");
-            builder.Append(lastRoleMention);
-            return builder.ToString();
-        }
+            => NetflixAccount.AllowedChannelsIDs.Select(id => MentionUtils.MentionChannel(id)).JoinAsSentence(lastSeparator: " or ");
 
         private async Task RemoveMessagesDelayed(TimeSpan delay, params IMessage[] messages)
         {

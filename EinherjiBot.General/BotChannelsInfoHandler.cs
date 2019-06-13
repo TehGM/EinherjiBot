@@ -61,29 +61,12 @@ namespace TehGM.EinherjiBot
             => RedirectToChannelsAsync(message, allowedChannelsIds, botsIds as IEnumerable<ulong>);
 
         private static string GetChannelsMentionsText(IEnumerable<ulong> ids, SocketGuildUser user)
-            => GetMentionsText(ids.Where(id => user.Guild.GetChannel(id) != null
-                && user.GetPermissions(user.Guild.GetChannel(id)).Has(ChannelPermission.ViewChannel | ChannelPermission.SendMessages)),
-                id => MentionUtils.MentionChannel(id));
+            => ids.Where(id => user.Guild.GetChannel(id) != null
+                && user.GetPermissions(user.Guild.GetChannel(id)).Has(ChannelPermission.ViewChannel | ChannelPermission.SendMessages))
+                .Select(id => MentionUtils.MentionChannel(id)).JoinAsSentence(", ", " or ");
 
         private static string GetUsersMentionsText(IEnumerable<ulong> ids)
-            => GetMentionsText(ids, id => MentionUtils.MentionUser(id), " and ");
-
-        private static string GetMentionsText(IEnumerable<ulong> ids, Func<ulong, string> processingMethod, string lastSeparator = " or ", string normalSeparator = ", ")
-        {
-            int count = ids?.Count() ?? default;
-            if (count == default)
-                return null;
-            string lastMention = processingMethod(ids.Last());
-            if (count == 1)
-                return lastMention;
-            StringBuilder builder = new StringBuilder();
-            // separate all except last with commas
-            builder.AppendJoin(normalSeparator, ids.Take(count - 1).Select(i => processingMethod(i)));
-            // add last with "or"
-            builder.Append(lastSeparator);
-            builder.Append(lastMention);
-            return builder.ToString();
-        }
+            => ids.Select(id => MentionUtils.MentionUser(id)).JoinAsSentence(", ", " and ");
         #endregion
     }
 }
