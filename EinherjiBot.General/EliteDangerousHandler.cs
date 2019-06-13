@@ -62,6 +62,7 @@ namespace TehGM.EinherjiBot
             _autoModeCTS = new CancellationTokenSource();
             Task autoTask = Task.Run(async () =>
             {
+                Console.WriteLine("Starting ED automatic CG checker.");
                 CancellationToken token = _autoModeCTS.Token;
                 while (!token.IsCancellationRequested)
                 {
@@ -98,7 +99,6 @@ namespace TehGM.EinherjiBot
                     _lastAutoCgs = allCGs;
                     _cacheUpdateTimeUtc = DateTime.UtcNow;
 
-
                     // post all CGs
                     bool firstPost = true;
                     foreach (var cg in newOrJustFinishedCGs)
@@ -124,6 +124,7 @@ namespace TehGM.EinherjiBot
                     Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc = DateTime.UtcNow;
                     await Config.Data.SaveAsync();
                 }
+                Console.WriteLine("Stopping ED automatic CG checker.");
                 // clear CTS on exiting if it wasn't cleared yet
                 if (_autoModeCTS?.Token == token)
                     _autoModeCTS = null;
