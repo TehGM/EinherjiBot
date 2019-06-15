@@ -64,70 +64,76 @@ namespace TehGM.EinherjiBot
             {
                 Console.WriteLine("Starting ED automatic CG checker.");
                 CancellationToken token = _autoModeCTS.Token;
-                while (!token.IsCancellationRequested)
+                try
                 {
-                    TimeSpan nextUpdateIn = (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval) - DateTime.UtcNow;
-                    // if still waiting, await time, and repeat iteration
-                    if (nextUpdateIn > TimeSpan.Zero)
+                    while (!token.IsCancellationRequested)
                     {
-                        await Task.Delay(nextUpdateIn, token);
-                        continue;
-                    }
-
-                    // get guild channel
-                    if (!(Client.GetChannel(Config.EliteAPI.EliteAutoNewsChannelID) is SocketTextChannel guildChannel))
-                        throw new InvalidOperationException($"Channel {Config.EliteAPI.EliteAutoNewsChannelID} is not a valid guild text channel.");
-                    // get collection of subscribers that have to be PMed
-                    IEnumerable<ulong> pmSubscribers = Config.EliteAPI.PreferPingOverPM ?
-                        Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Where(uid => guildChannel.GetUser(uid) == null) :
-                        Config.Data.EliteAPI.CommunityGoalsSubscribersIDs;
-                    // get collection of users to be pinged in guild
-                    IEnumerable<ulong> pingSubscribers = pmSubscribers.Count() == Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Count ?
-                        null : Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Except(pmSubscribers);
-
-
-                    // with all collections prepared, retrieve CG data, take only new or finished ones, and then update cache
-                    IEnumerable<EliteCG> allCGs = await QueryForCGs();
-                    IList<EliteCG> newOrJustFinishedCGs = new List<EliteCG>(allCGs.Count());
-                    foreach (var cg in allCGs)
-                    {
-                        EliteCG lastCG = _lastAutoCgs.FirstOrDefault(ecg => ecg.Equals(cg));
-                        if (lastCG == null || lastCG.IsCompleted != cg.IsCompleted)
-                            newOrJustFinishedCGs.Add(cg);
-                    }
-                    _cgCache = allCGs.ToList();
-                    _lastAutoCgs = allCGs;
-                    _cacheUpdateTimeUtc = DateTime.UtcNow;
-
-                    // post all CGs
-                    bool firstPost = true;
-                    foreach (var cg in newOrJustFinishedCGs)
-                    {
-                        Embed cgEmbed = cg.ToEmbed(Config.EliteAPI.ThumbnailURL, Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
-                            .Build();
-
-                        // post in channel first, pinging all those who can be pinged
-                        await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
-                            string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
-                        firstPost = false;
-                        // pm each pm subscriber
-                        foreach (var pmID in pmSubscribers)
+                        TimeSpan nextUpdateIn = (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval) - DateTime.UtcNow;
+                        // if still waiting, await time, and repeat iteration
+                        if (nextUpdateIn > TimeSpan.Zero)
                         {
-                            IUser pmUser = await Client.GetUserAsync(pmID);
-                            IDMChannel pmChannel = await pmUser.GetOrCreateDMChannelAsync();
-                            await pmChannel.SendMessageAsync(null, false, cgEmbed);
+                            await Task.Delay(nextUpdateIn, token);
+                            continue;
                         }
+
+                        // get guild channel
+                        if (!(Client.GetChannel(Config.EliteAPI.EliteAutoNewsChannelID) is SocketTextChannel guildChannel))
+                            throw new InvalidOperationException($"Channel {Config.EliteAPI.EliteAutoNewsChannelID} is not a valid guild text channel.");
+                        // get collection of subscribers that have to be PMed
+                        IEnumerable<ulong> pmSubscribers = Config.EliteAPI.PreferPingOverPM ?
+                            Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Where(uid => guildChannel.GetUser(uid) == null) :
+                            Config.Data.EliteAPI.CommunityGoalsSubscribersIDs;
+                        // get collection of users to be pinged in guild
+                        IEnumerable<ulong> pingSubscribers = pmSubscribers.Count() == Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Count ?
+                            null : Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Except(pmSubscribers);
+
+
+                        // with all collections prepared, retrieve CG data, take only new or finished ones, and then update cache
+                        IEnumerable<EliteCG> allCGs = await QueryForCGs();
+                        IList<EliteCG> newOrJustFinishedCGs = new List<EliteCG>(allCGs.Count());
+                        foreach (var cg in allCGs)
+                        {
+                            EliteCG lastCG = _lastAutoCgs.FirstOrDefault(ecg => ecg.Equals(cg));
+                            if (lastCG == null || lastCG.IsCompleted != cg.IsCompleted)
+                                newOrJustFinishedCGs.Add(cg);
+                        }
+                        _cgCache = allCGs.ToList();
+                        _lastAutoCgs = allCGs;
+                        _cacheUpdateTimeUtc = DateTime.UtcNow;
+
+                        // post all CGs
+                        bool firstPost = true;
+                        foreach (var cg in newOrJustFinishedCGs)
+                        {
+                            Embed cgEmbed = cg.ToEmbed(Config.EliteAPI.ThumbnailURL, Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
+                                .Build();
+
+                            // post in channel first, pinging all those who can be pinged
+                            await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
+                                string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
+                            firstPost = false;
+                            // pm each pm subscriber
+                            foreach (var pmID in pmSubscribers)
+                            {
+                                IUser pmUser = await Client.GetUserAsync(pmID);
+                                IDMChannel pmChannel = await pmUser.GetOrCreateDMChannelAsync();
+                                await pmChannel.SendMessageAsync(null, false, cgEmbed);
+                            }
+                        }
+
+
+                        // finally, update last checked time
+                        Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc = DateTime.UtcNow;
+                        await Config.Data.SaveAsync();
                     }
-
-
-                    // finally, update last checked time
-                    Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc = DateTime.UtcNow;
-                    await Config.Data.SaveAsync();
                 }
-                Console.WriteLine("Stopping ED automatic CG checker.");
-                // clear CTS on exiting if it wasn't cleared yet
-                if (_autoModeCTS?.Token == token)
-                    _autoModeCTS = null;
+                finally
+                {
+                    Console.WriteLine("Stopping ED automatic CG checker.");
+                    // clear CTS on exiting if it wasn't cleared yet
+                    if (_autoModeCTS?.Token == token)
+                        _autoModeCTS = null;
+                }
             }, _autoModeCTS.Token);
         }
 
