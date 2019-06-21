@@ -10,6 +10,8 @@ namespace TehGM.EinherjiBot.Config
     {
         [JsonProperty("games", Required = Required.Always)]
         public PatchbotHelperGame[] Games { get; private set; }
+        [JsonProperty("patchbotIds")]
+        public HashSet<ulong> PatchbotIDs { get; private set; }
 
         public PatchbotHelperGame FindGame(string nameOrAlias)
         {
@@ -29,6 +31,20 @@ namespace TehGM.EinherjiBot.Config
                 }
             }
             return null;
+        }
+
+        public bool AddPatchbotID(ulong id)
+        {
+            if (PatchbotIDs == null)
+                PatchbotIDs = new HashSet<ulong>();
+            return PatchbotIDs.Add(id);
+        }
+
+        public bool RemovePatchbotID(ulong id)
+        {
+            if (PatchbotIDs == null)
+                return false;
+            return PatchbotIDs.Remove(id);
         }
     }
 }
