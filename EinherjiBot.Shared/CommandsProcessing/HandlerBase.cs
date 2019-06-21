@@ -49,13 +49,17 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         protected virtual Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
             => Task.CompletedTask;
 
-        protected virtual async Task OnMessageReceived(SocketMessage message)
+        protected virtual Task OnMessageReceived(SocketMessage message)
+            => ProcessCommandsStackAsync(message);
+
+        protected async Task<bool> ProcessCommandsStackAsync(SocketMessage message)
         {
             for (int i = 0; i < CommandsStack.Count; i++)
             {
                 if (await CommandsStack[i].ProcessAsync(Client, message))
-                    return;
+                    return true;
             }
+            return false;
         }
 
         private Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
