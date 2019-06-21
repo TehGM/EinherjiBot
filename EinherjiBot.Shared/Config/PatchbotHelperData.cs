@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.Config
                     return game;
                 if (game.Aliases == null)
                     continue;
-                for (int ii = 0; i < game.Aliases.Count; ii++)
+                for (int ii = 0; ii < game.Aliases.Count; ii++)
                 {
                     if (string.Equals(game.Aliases[ii], searchTrimmed, StringComparison.OrdinalIgnoreCase))
                         return game;

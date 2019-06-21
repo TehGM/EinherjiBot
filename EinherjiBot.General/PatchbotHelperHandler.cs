@@ -14,6 +14,7 @@ using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
+    [ProductionOnly]
     class PatchbotHelperHandler : HandlerBase
     {
         const char _namesSeparator = '|';
