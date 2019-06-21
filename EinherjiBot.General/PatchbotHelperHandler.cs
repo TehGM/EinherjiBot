@@ -94,6 +94,16 @@ namespace TehGM.EinherjiBot
         }
         private async Task CmdAddID(SocketCommandContext message, Match match)
         {
+            if (!(message.Channel is SocketTextChannel channel))
+                return;
+
+            // validate permissions
+            SocketGuildUser user = await channel.Guild.GetGuildUser(message.User);
+            if (user == null)
+                return;
+            if (!await ValidatePermissionsAsync(channel, user, GuildPermission.ManageGuild))
+                return;
+
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
                 await message.ReplyAsync("\u274C Please specify ID of bot/webhook.");
@@ -111,6 +121,15 @@ namespace TehGM.EinherjiBot
         }
         private async Task CmdRemoveID(SocketCommandContext message, Match match)
         {
+            if (!(message.Channel is SocketTextChannel channel))
+                return;
+            // validate permissions
+            SocketGuildUser user = await channel.Guild.GetGuildUser(message.User);
+            if (user == null)
+                return;
+            if (!await ValidatePermissionsAsync(channel, user, GuildPermission.ManageGuild))
+                return;
+
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
                 await message.ReplyAsync("\u274C Please specify ID of bot/webhook.");
@@ -127,6 +146,15 @@ namespace TehGM.EinherjiBot
             await message.ReplyAsync($"\u2705 {MentionUtils.MentionUser(id)} removed.");
         }
 
+        private async Task<bool> ValidatePermissionsAsync(SocketTextChannel channel, SocketGuildUser user, GuildPermission perms)
+        {
+            if (!user.GuildPermissions.Has(perms))
+            {
+                await channel.SendMessageAsync("\u274C Insufficient permissions.");
+                return false;
+            }
+            return true;
+        }
         private Task SendGameNotFoundAsync(ISocketMessageChannel channel, string gameName)
             => channel.SendMessageAsync($"\u274C Game `{gameName}` not found!");
         private Task SendIDNotValid(ISocketMessageChannel channel, string value)
