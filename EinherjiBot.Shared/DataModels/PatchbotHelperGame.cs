@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace TehGM.EinherjiBot.DataModels
@@ -16,8 +17,8 @@ namespace TehGM.EinherjiBot.DataModels
 
         public PatchbotHelperGame(string name, IEnumerable<string> aliases)
         {
-            this.Name = name;
-            this.Aliases = new List<string>(aliases);
+            this.Name = name.Trim();
+            this.Aliases = new List<string>(aliases.Select(al => al.Trim()));
         }
 
         public bool AddSubscriber(ulong id)

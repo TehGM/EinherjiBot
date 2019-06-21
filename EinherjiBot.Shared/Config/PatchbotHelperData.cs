@@ -23,16 +23,17 @@ namespace TehGM.EinherjiBot.Config
         {
             if (Games == null || Games.Count == 0)
                 return null;
+            string searchTrimmed = nameOrAlias.Trim();
             for (int i = 0; i < Games.Count; i++)
             {
                 PatchbotHelperGame game = Games[i];
-                if (string.Equals(game.Name, nameOrAlias, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(game.Name, searchTrimmed, StringComparison.OrdinalIgnoreCase))
                     return game;
                 if (game.Aliases == null)
                     continue;
                 for (int ii = 0; i < game.Aliases.Count; ii++)
                 {
-                    if (string.Equals(game.Aliases[ii], nameOrAlias, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(game.Aliases[ii], searchTrimmed, StringComparison.OrdinalIgnoreCase))
                         return game;
                 }
             }

@@ -162,7 +162,8 @@ namespace TehGM.EinherjiBot
                 await SendNameAndAliasesRequiredAsync(message.Channel);
                 return;
             }
-            string[] names = match.Groups[1].Value.Split(_namesSeparator, StringSplitOptions.RemoveEmptyEntries);
+            string[] names = match.Groups[1].Value.Split(_namesSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Select(name => name.Trim()).Where(name => !string.IsNullOrWhiteSpace(name)).ToArray();
             if (names.Length == 0)
             {
                 await SendNameAndAliasesRequiredAsync(message.Channel);
