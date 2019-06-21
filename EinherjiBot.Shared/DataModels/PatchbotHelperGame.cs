@@ -10,9 +10,15 @@ namespace TehGM.EinherjiBot.DataModels
         [JsonProperty("name", Required = Required.Always)]
         public string Name { get; private set; }
         [JsonProperty("aliases")]
-        public string[] Aliases { get; private set; }
+        public List<string> Aliases { get; private set; }
         [JsonProperty("subscribersIds")]
         public HashSet<ulong> SubscribersIDs { get; private set; }
+
+        public PatchbotHelperGame(string name, IEnumerable<string> aliases)
+        {
+            this.Name = name;
+            this.Aliases = new List<string>(aliases);
+        }
 
         public bool AddSubscriber(ulong id)
         {

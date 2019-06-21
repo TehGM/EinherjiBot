@@ -9,22 +9,22 @@ namespace TehGM.EinherjiBot.Config
     public class PatchbotHelperData
     {
         [JsonProperty("games", Required = Required.Always)]
-        public PatchbotHelperGame[] Games { get; private set; }
+        public List<PatchbotHelperGame> Games { get; private set; }
         [JsonProperty("patchbotIds")]
         public HashSet<ulong> PatchbotIDs { get; private set; }
 
         public PatchbotHelperGame FindGame(string nameOrAlias)
         {
-            if (Games == null || Games.Length == 0)
+            if (Games == null || Games.Count == 0)
                 return null;
-            for (int i = 0; i < Games.Length; i++)
+            for (int i = 0; i < Games.Count; i++)
             {
                 PatchbotHelperGame game = Games[i];
                 if (string.Equals(game.Name, nameOrAlias, StringComparison.OrdinalIgnoreCase))
                     return game;
                 if (game.Aliases == null)
                     continue;
-                for (int ii = 0; i < game.Aliases.Length; ii++)
+                for (int ii = 0; i < game.Aliases.Count; ii++)
                 {
                     if (string.Equals(game.Aliases[ii], nameOrAlias, StringComparison.OrdinalIgnoreCase))
                         return game;
