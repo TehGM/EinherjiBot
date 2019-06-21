@@ -17,7 +17,7 @@ using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
-    //[ProductionOnly]
+    [ProductionOnly]
     class EliteDangerousHandler : HandlerBase
     {
         private IList<EliteCG> _cgCache = new List<EliteCG>();
