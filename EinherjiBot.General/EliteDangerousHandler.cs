@@ -195,7 +195,9 @@ namespace TehGM.EinherjiBot
             string response = await _webClient.UploadStringTaskAsync("https://inara.cz/inapi/v1/", query.ToString());
 
             // return results
-            IEnumerable<JToken> responseObjectsArray = JObject.Parse(response)["events"][0]["eventData"].Children();
+            IEnumerable<JToken> responseObjectsArray = JObject.Parse(response)["events"][0]?["eventData"]?.Children();
+            if (responseObjectsArray == null)
+                responseObjectsArray = new List<JToken>();
             return responseObjectsArray.Select(cgJson => cgJson.ToObject<EliteCG>());
         }
     }
