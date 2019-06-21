@@ -15,20 +15,23 @@ namespace TehGM.EinherjiBot.Extensions
             EmbedBuilder builder = new EmbedBuilder()
                 .WithAuthor("Elite Dangerous Community Goals", authorIconUrl)
                 .WithTitle(cg.Name)
-                .WithDescription($"__**{cg.Objective}**__\n{descriptionTrimmed}")
+                //.WithDescription($"**Objective**: `{cg.Objective}`\n\n{descriptionTrimmed}")
+                .WithDescription($"```\n{cg.Objective}\n```\n{descriptionTrimmed}")
                 .AddField("System", cg.SystemName, true)
                 .AddField("Station", cg.StationName, true)
-                .AddField("Tier Reached", cg.TierReached.ToString())
+                .AddField("Tier Reached", $"*{cg.TierReached.ToString()}* / {cg.TierMax.ToString()}")
                 .AddField("Contributing Pilots", cg.ContributingPilotsCount.ToString(), true)
                 .AddField("Contributions Count", cg.ContributionsCount.ToString(), true)
                 .AddField("Last Updated", $"{(DateTime.UtcNow - cg.LastUpdateTime.ToUniversalTime()).ToLongFriendlyString()} ago")
-                .AddField("Is Completed?", cg.IsCompleted ? "\u2705" : "\u274C")
+                .AddField("Is Completed?", cg.IsCompleted ? "\u2705" : "\u274C", true)
                 .WithUrl(cg.InaraURL)
                 .WithColor(cg.IsCompleted ? Color.Green : (Color)System.Drawing.Color.Cyan)
                 .WithFooter("Powered by Inara | CG expiration time: ")
                 .WithTimestamp(cg.ExpirationTime);
             if (thubnailUrl != null)
                 builder.WithThumbnailUrl(thubnailUrl);
+            if (!cg.IsCompleted)
+                builder.AddField("Time Left", (cg.ExpirationTime - DateTimeOffset.Now).ToLongFriendlyString());
 
             if (!string.IsNullOrWhiteSpace(cg.Reward))
             {
