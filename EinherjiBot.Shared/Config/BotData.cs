@@ -22,6 +22,8 @@ namespace TehGM.EinherjiBot.Config
         public BotDataIntel Intel { get; set; }
         [JsonProperty("eliteApi")]
         public EliteApiData EliteAPI { get; set; }
+        [JsonProperty("patchbotHelper")]
+        public PatchbotHelperData PatchbotHelper { get; set; }
 
         [JsonIgnore]
         private readonly AsyncDelayedInvoker SaveDataInvoker = new AsyncDelayedInvoker();
@@ -58,6 +60,8 @@ namespace TehGM.EinherjiBot.Config
                 StellarisMods = new List<StellarisModInfo>();
             if (Intel == null)
                 Intel = new BotDataIntel(null);
+            if (PatchbotHelper == null)
+                PatchbotHelper = new PatchbotHelperData();
         }
     }
 }

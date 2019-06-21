@@ -12,16 +12,13 @@ namespace TehGM.EinherjiBot.DataModels
         [JsonProperty("aliases")]
         public string[] Aliases { get; private set; }
         [JsonProperty("subscribersIds")]
-        public List<ulong> SubscribersIDs { get; private set; }
+        public HashSet<ulong> SubscribersIDs { get; private set; }
 
         public bool AddSubscriber(ulong id)
         {
             if (SubscribersIDs == null)
-                SubscribersIDs = new List<ulong>();
-            else if (SubscribersIDs.Contains(id))
-                return false;
-            SubscribersIDs.Add(id);
-            return true;
+                SubscribersIDs = new HashSet<ulong>();
+            return SubscribersIDs.Add(id);
         }
 
         public bool RemoveSubscriber(ulong id)
