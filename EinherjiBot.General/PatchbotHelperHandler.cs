@@ -24,6 +24,8 @@ namespace TehGM.EinherjiBot
             CommandsStack.Add(new RegexUserCommand("^patchbot unsub(?:scribe)?(?: (.+))?", CmdUnsubscribe));
             CommandsStack.Add(new RegexUserCommand("^patchbot add id(?: (\\d+))?", CmdAddID));
             CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) id(?: (\\d+))?", CmdRemoveID));
+            CommandsStack.Add(new RegexUserCommand("^patchbot add game(?: (.+))?", CmdAddGame));
+            CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) game(?: (.+))?", CmdRemoveGame));
         }
 
         protected override Task OnMessageReceived(SocketMessage message)

@@ -8,10 +8,16 @@ namespace TehGM.EinherjiBot.Config
 {
     public class PatchbotHelperData
     {
-        [JsonProperty("games", Required = Required.Always)]
+        [JsonProperty("games")]
         public List<PatchbotHelperGame> Games { get; private set; }
         [JsonProperty("patchbotIds")]
         public HashSet<ulong> PatchbotIDs { get; private set; }
+
+        [JsonConstructor]
+        public PatchbotHelperData(List<PatchbotHelperGame> games)
+        {
+            this.Games = games ?? new List<PatchbotHelperGame>();
+        }
 
         public PatchbotHelperGame FindGame(string nameOrAlias)
         {

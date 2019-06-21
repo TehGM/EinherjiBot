@@ -61,7 +61,7 @@ namespace TehGM.EinherjiBot.Config
             if (Intel == null)
                 Intel = new BotDataIntel(null);
             if (PatchbotHelper == null)
-                PatchbotHelper = new PatchbotHelperData();
+                PatchbotHelper = new PatchbotHelperData(null);
         }
     }
 }
