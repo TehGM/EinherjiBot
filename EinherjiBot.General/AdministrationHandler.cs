@@ -20,9 +20,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             : base(client, config)
         {
             CommandsStack.Add(new RegexUserCommand("^purge(?:\\s+(\\d+))?", CmdPurge));
-            CommandsStack.Add(new RegexUserCommand("^kick(?: \\\\?<@!?(\\d+)>)?(?: (.+))?", CmdKick));
-            CommandsStack.Add(new RegexUserCommand("^ban(?: \\\\?<@!?(\\d+)>)?(?: (.+))?", CmdBan));
-            CommandsStack.Add(new RegexUserCommand("^unban(?: \\\\?<@!?(\\d+)>)?", CmdUnban));
+            //CommandsStack.Add(new RegexUserCommand("^kick(?: \\\\?<@!?(\\d+)>)?(?: (.+))?", CmdKick));
+            //CommandsStack.Add(new RegexUserCommand("^ban(?: \\\\?<@!?(\\d+)>)?(?: (.+))?", CmdBan));
+            //CommandsStack.Add(new RegexUserCommand("^unban(?: \\\\?<@!?(\\d+)>)?", CmdUnban));
         }
 
         private async Task CmdPurge(SocketCommandContext message, Match match)
