@@ -5,6 +5,7 @@ using TehGM.EinherjiBot.Extensions;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.DataModels;
 using System;
+using System.ComponentModel;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -23,6 +24,12 @@ namespace TehGM.EinherjiBot.Config
         public BotChannelsInfo BotChannels { get; private set; }
         [JsonProperty("eliteApi")]
         public EliteApiConfig EliteAPI { get; private set; }
+        [JsonProperty("defaultConfirmString", NullValueHandling = NullValueHandling.Include, DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue("\u274C")]
+        public string DefaultConfirm { get; private set; }
+        [JsonProperty("defaultRejectString", NullValueHandling = NullValueHandling.Include, DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue("\u2705")]
+        public string DefaultReject { get; private set; }
 
         public static async Task<BotConfig> LoadAllAsync()
         {

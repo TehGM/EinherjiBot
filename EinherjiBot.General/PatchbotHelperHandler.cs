@@ -77,7 +77,7 @@ namespace TehGM.EinherjiBot
             }
             if (game.AddSubscriber(message.User.Id))
                 await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 You will now get pinged about `{game.Name}` updates.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} You will now get pinged about `{game.Name}` updates.");
         }
         private async Task CmdUnsubscribe(SocketCommandContext message, Match match)
         {
@@ -95,7 +95,7 @@ namespace TehGM.EinherjiBot
             }
             if (game.RemoveSubscriber(message.User.Id))
                 await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 You will no longer be pinged about `{game.Name}` updates.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} You will no longer be pinged about `{game.Name}` updates.");
         }
         private async Task CmdAddID(SocketCommandContext message, Match match)
         {
@@ -111,7 +111,7 @@ namespace TehGM.EinherjiBot
 
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
-                await message.ReplyAsync("\u274C Please specify ID of bot/webhook.");
+                await message.ReplyAsync($"{Config.DefaultReject} Please specify ID of bot/webhook.");
                 return;
             }
             string idString = match.Groups[1].Value.Trim();
@@ -122,7 +122,7 @@ namespace TehGM.EinherjiBot
             }
             if (Config.Data.PatchbotHelper.AddPatchbotID(id))
                 await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 {MentionUtils.MentionUser(id)} added.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} {MentionUtils.MentionUser(id)} added.");
         }
         private async Task CmdRemoveID(SocketCommandContext message, Match match)
         {
@@ -137,7 +137,7 @@ namespace TehGM.EinherjiBot
 
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
-                await message.ReplyAsync("\u274C Please specify ID of bot/webhook.");
+                await message.ReplyAsync($"{Config.DefaultReject} Please specify ID of bot/webhook.");
                 return;
             }
             string idString = match.Groups[1].Value.Trim();
@@ -148,7 +148,7 @@ namespace TehGM.EinherjiBot
             }
             if (Config.Data.PatchbotHelper.RemovePatchbotID(id))
                 await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 {MentionUtils.MentionUser(id)} removed.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} {MentionUtils.MentionUser(id)} removed.");
         }
         private async Task CmdAddGame(SocketCommandContext message, Match match)
         {
@@ -190,7 +190,7 @@ namespace TehGM.EinherjiBot
             }
 
             await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 Game `{game.Name}` updated.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} Game `{game.Name}` updated.");
         }
         private async Task CmdRemoveGame(SocketCommandContext message, Match match)
         {
@@ -217,7 +217,7 @@ namespace TehGM.EinherjiBot
 
             Config.Data.PatchbotHelper.Games.Remove(game);
             await Config.Data.SaveAsync();
-            await message.ReplyAsync($"\u2705 Game `{game.Name}` removed.");
+            await message.ReplyAsync($"{Config.DefaultConfirm} Game `{game.Name}` removed.");
         }
 
         private async Task<bool> ValidatePermissionsAsync(SocketTextChannel channel, SocketGuildUser user, GuildPermission perms)
@@ -231,14 +231,14 @@ namespace TehGM.EinherjiBot
         }
 
         private Task SendInsufficientPermissionsAsync(ISocketMessageChannel channel)
-            => channel.SendMessageAsync("\u274C Insufficient permissions.");
+            => channel.SendMessageAsync($"{Config.DefaultReject} Insufficient permissions.");
         private Task SendGameNotFoundAsync(ISocketMessageChannel channel, string gameName)
-            => channel.SendMessageAsync($"\u274C Game `{gameName}` not found!");
+            => channel.SendMessageAsync($"{Config.DefaultReject} Game `{gameName}` not found!");
         private Task SendIDNotValid(ISocketMessageChannel channel, string value)
-            => channel.SendMessageAsync($"\u274C `{value}` is not a valid webhook/bot ID!");
+            => channel.SendMessageAsync($"{Config.DefaultReject} `{value}` is not a valid webhook/bot ID!");
         private Task SendNameAndAliasesRequiredAsync(ISocketMessageChannel channel)
-            => channel.SendMessageAsync($"\u274C Please specify game name and aliases (separated with `{_namesSeparator}`).");
+            => channel.SendMessageAsync($"{Config.DefaultReject} Please specify game name and aliases (separated with `{_namesSeparator}`).");
         private Task SendNameRequiredAsync(ISocketMessageChannel channel)
-            => channel.SendMessageAsync("\u274C Please specify game name.");
+            => channel.SendMessageAsync($"{Config.DefaultReject} Please specify game name.");
     }
 }
