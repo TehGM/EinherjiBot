@@ -137,29 +137,29 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         {
             if (!(message.Channel is SocketTextChannel channel))
             {
-                await message.ReplyAsync("Sir, this command is only applicable in guild channels.");
+                await message.ReplyAsync($"{Config.DefaultReject} Sir, this command is only applicable in guild channels.");
                 return;
             }
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
             if (!user.GetPermissions(channel).ManageMessages)
             {
-                await channel.SendMessageAsync("You can't order me to do that.");
+                await channel.SendMessageAsync($"{Config.DefaultReject} You can't order me to do that.");
                 return;
             }
             if (match.Groups.Count == 1 || match.Groups[1]?.Length < 1)
             {
-                await channel.SendMessageAsync("Sir, I need a positive number of messages to take down.");
+                await channel.SendMessageAsync($"{Config.DefaultReject} Sir, I need a positive number of messages to take down.");
                 return;
             }
             string countString = match.Groups[1].Value;
             if (!int.TryParse(countString, out int count))
             {
-                await channel.SendMessageAsync($"Sir, `{countString} is not a valid number.");
+                await channel.SendMessageAsync($"{Config.DefaultReject} Sir, `{countString} is not a valid number.");
                 return;
             }
             if (count < 0)
             {
-                await channel.SendMessageAsync($"Sir, how am I supposed to execute removal of {count} messages?.");
+                await channel.SendMessageAsync($"{Config.DefaultReject} Sir, how am I supposed to execute removal of {count} messages?.");
                 return;
             }
 
@@ -168,8 +168,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             int actualCount = msgs.Count() - 1;
             await channel.DeleteMessagesAsync(msgs);
             RestUserMessage confirmationMsg = actualCount > 0 ?
-                await channel.SendMessageAsync($"Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down.") :
-                await channel.SendMessageAsync($"Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
+                await channel.SendMessageAsync($"{Config.DefaultConfirm} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down.") :
+                await channel.SendMessageAsync($"{Config.DefaultConfirm} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
             await Task.Delay(6 * 1000);
             await channel.DeleteMessageAsync(confirmationMsg);
         }
