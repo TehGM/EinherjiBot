@@ -29,10 +29,10 @@ namespace TehGM.EinherjiBot
         private async Task CmdAddMod(SocketCommandContext message, Match match)
         {
             Task CreateInvalidUseResponse()
-                => message.ReplyAsync($"Please specify both name and URL of the mod.\nProper usage of this command:\n`{GetDefaultPrefix()}stellaris mods add <name> | <url>`");
+                => message.ReplyAsync($"{Config.DefaultReject} Please specify both name and URL of the mod.\nProper usage of this command:\n***{GetDefaultPrefix()}stellaris mods add <name> | <url>***");
             if (message.User.Id != AuthorUser.Id)
             {
-                await message.ReplyAsync("You can't order me to do that.");
+                await message.ReplyAsync($"{Config.DefaultReject} You can't order me to do that.");
                 return;
             }
             if (match.Groups.Count < 3)
@@ -50,26 +50,26 @@ namespace TehGM.EinherjiBot
             }
             if (url.Contains(' ', StringComparison.Ordinal))
             {
-                await message.ReplyAsync("Url can't contain any spaces.");
+                await message.ReplyAsync($"{Config.DefaultReject} Url can't contain any spaces.");
                 return;
             }
 
             StellarisModInfo mod = new StellarisModInfo(name, url);
             Config.Data.StellarisMods.Add(mod);
             await Config.Data.SaveAsync();
-            await message.ReplyAsync($"Added mod:\n\n{ModToMessageString(mod)}");
+            await message.ReplyAsync($"{Config.DefaultConfirm} Added mod:\n\n{ModToMessageString(mod)}");
         }
 
         private async Task CmdRemoveMod(SocketCommandContext message, Match match)
         {
             if (message.User.Id != AuthorUser.Id)
             {
-                await message.ReplyAsync("You can't order me to do that.");
+                await message.ReplyAsync($"{Config.DefaultReject} You can't order me to do that.");
                 return;
             }
             if (match.Groups.Count < 2)
             {
-                await message.ReplyAsync($"Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{GetDefaultPrefix()}stellaris mods`");
+                await message.ReplyAsync($"{Config.DefaultReject} Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{GetDefaultPrefix()}stellaris mods`");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace TehGM.EinherjiBot
             if (removedCount != 0)
             {
                 await Config.Data.SaveAsync();
-                await message.ReplyAsync($"Removed {removedCount} mods.{incompatibleString}");
+                await message.ReplyAsync($"{Config.DefaultConfirm} Removed {removedCount} mods.{incompatibleString}");
             }
             else
                 await message.ReplyAsync($"No mods removed.{incompatibleString}");
@@ -111,7 +111,7 @@ namespace TehGM.EinherjiBot
         private Task CmdListMods(SocketCommandContext message, Match match)
         {
             if (Config.Data.StellarisMods.Count == 0)
-                return message.Channel.SendMessageAsync("You did not have any mod on the list.");
+                return message.Channel.SendMessageAsync($"{Config.DefaultReject} You did not have any mod on the list.");
 
             string[] listStrings = new string[Config.Data.StellarisMods.Count];
             StellarisModInfo[] orderedMods = Config.Data.StellarisMods.OrderBy(mod => mod.Name).ToArray();

@@ -31,13 +31,13 @@ namespace TehGM.EinherjiBot
         {
             if (message.IsPrivate)
             {
-                await SendError($"You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", message.Channel);
+                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", message.Channel);
                 return;
             }
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
             if (!NetflixAccount.CanRetrieve(user))
             {
-                await SendError($"You need {GetAllowedRolesMentionsText()} role to do this.", message.Channel);
+                await SendError($"{Config.DefaultReject} You need {GetAllowedRolesMentionsText()} role to do this.", message.Channel);
                 return;
             }
             if (!NetflixAccount.IsChannelAllowed(message.Channel))
@@ -60,13 +60,13 @@ namespace TehGM.EinherjiBot
         {
             if (message.IsPrivate)
             {
-                await SendError($"You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", message.Channel);
+                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", message.Channel);
                 return;
             }
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
             if (!NetflixAccount.CanModify(user))
             {
-                await SendError($"You have no permissions to do this.", message.Channel);
+                await SendError($"{Config.DefaultReject} You have no permissions to do this.", message.Channel);
                 return;
             }
             if (!NetflixAccount.IsChannelAllowed(message.Channel))
@@ -81,12 +81,12 @@ namespace TehGM.EinherjiBot
             if (mode == SetMode.Login)
             {
                 NetflixAccount.SetLogin(value, message.User.Id);
-                responseText = $"You have set Netflix account login to `{value}`.";
+                responseText = $"{Config.DefaultConfirm} You have set Netflix account login to `{value}`.";
             }
             if (mode == SetMode.Password)
             {
                 NetflixAccount.SetPassword(value, message.User.Id);
-                responseText = $"You have set Netflix account password to `{value}`.";
+                responseText = $"{Config.DefaultConfirm} You have set Netflix account password to `{value}`.";
             }
             await Config.SaveAllAsync();
             // create message

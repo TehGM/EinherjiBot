@@ -34,13 +34,13 @@ namespace TehGM.EinherjiBot
             string idString = match.Groups[1].Value;
             if (!ulong.TryParse(idString, out ulong id))
             {
-                await message.ReplyAsync($"Could not parse user ID `{idString}`.");
+                await message.ReplyAsync($"{Config.DefaultReject} Could not parse user ID `{idString}`.");
                 return;
             }
             IUser user = await Client.GetUserAsync(id);
             if (user == null)
             {
-                await message.ReplyAsync($"Could not find user with ID `{id}`.");
+                await message.ReplyAsync($"{Config.DefaultReject} Could not find user with ID `{id}`.");
                 return;
             }
             await ProcessIntelUser(message, user);
@@ -49,7 +49,7 @@ namespace TehGM.EinherjiBot
         private Task CmdIntelGuild(SocketCommandContext message, Match match)
         {
             if (message.IsPrivate)
-                return message.ReplyAsync("This command can only be used in a guild channel.");
+                return message.ReplyAsync($"{Config.DefaultReject} This command can only be used in a guild channel.");
 
             EmbedBuilder embed = new EmbedBuilder();
             AddGuildInfo(embed, message.Guild);

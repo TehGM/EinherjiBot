@@ -55,7 +55,7 @@ namespace TehGM.EinherjiBot
             if (channelsText == null)
                 return;
 
-            await message.ReplyAsync($"{user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(botsIds)}.");
+            await message.ReplyAsync($"{Config.DefaultReject} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(botsIds)}.");
         }
         private Task RedirectToChannelsAsync(SocketCommandContext message, IEnumerable<ulong> allowedChannelsIds, params ulong[] botsIds)
             => RedirectToChannelsAsync(message, allowedChannelsIds, botsIds as IEnumerable<ulong>);
