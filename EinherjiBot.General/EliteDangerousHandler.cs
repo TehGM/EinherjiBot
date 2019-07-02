@@ -148,10 +148,10 @@ namespace TehGM.EinherjiBot
             if (Config.Data.EliteAPI.AddCommunityGoalsSubscriber(message.User))
             {
                 await Config.Data.SaveAsync();
-                await message.ReplyAsync("You will now get pinged or PMed when Elite Dangerous' Community Goals are updated. \u2705");
+                await message.ReplyAsync($"{Config.DefaultConfirm} You will now get pinged or PMed when Elite Dangerous' Community Goals are updated.");
             }
             else
-                await message.ReplyAsync("You already are subscribed to Elite Dangerous' Community Goals updates. \u274C");
+                await message.ReplyAsync($"{Config.DefaultReject} You already are subscribed to Elite Dangerous' Community Goals updates.");
         }
 
         private async Task CmdCommunityGoalsUnsubscribe(SocketCommandContext message, Match match)
@@ -159,10 +159,10 @@ namespace TehGM.EinherjiBot
             if (Config.Data.EliteAPI.RemoveCommunityGoalsSubscriber(message.User))
             {
                 await Config.Data.SaveAsync();
-                await message.ReplyAsync("You'll no longer get pinged or PMed when Elite Dangerous' Community Goals are updated. \u2705");
+                await message.ReplyAsync($"{Config.DefaultConfirm} You'll no longer get pinged or PMed when Elite Dangerous' Community Goals are updated.");
             }
             else
-                await message.ReplyAsync("You are not subscribed to Elite Dangerous' Community Goals updates. \u274C");
+                await message.ReplyAsync($"{Config.DefaultReject} You are not subscribed to Elite Dangerous' Community Goals updates.");
         }
 
         private async Task CmdCommunityGoals(SocketCommandContext message, Match match)
