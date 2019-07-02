@@ -114,7 +114,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             SocketGuildUser[] users = channelFrom.Users.ToArray();
             string channelFromMention = GetVoiceChannelMention(channelFrom);
             string channelToMention = GetVoiceChannelMention(channelTo);
-            RestUserMessage response = await message.ReplyAsync($"Moving {users.Length.ToString()} users from {channelFromMention} to {channelToMention}.");
+            RestUserMessage response = await message.ReplyAsync($"Moving {users.Length.ToString()} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.");
             int errCount = 0;
             for (int i = 0; i < users.Length; i++)
             {
@@ -126,9 +126,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             }
             // display confirmation
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat("{0} users moved from {1} to {2}.", (users.Length - errCount).ToString(), channelFromMention, channelToMention);
+            int successCount = users.Length - errCount;
+            builder.AppendFormat("{0} user{3} moved from {1} to {2}.", successCount.ToString(), channelFromMention, channelToMention, successCount > 1 ? "s" : null);
             if (errCount > 0)
-                builder.AppendFormat("\nFailed to move {0} users. {1}", errCount.ToString(), Config.DefaultReject);
+                builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errCount.ToString(), Config.DefaultReject, errCount > 1 ? "s" : null);
             await response.ModifyAsync(props => props.Content = builder.ToString());
         }
 
