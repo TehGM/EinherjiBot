@@ -165,13 +165,38 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
             // get last X messages
             var msgs = await channel.GetMessagesAsync(count + 1).FlattenAsync();
+            RestUserMessage confirmationMsg = null;
+            // bulk can only delete messages not older than 2 weeks
+            DateTimeOffset bulkMaxAge = DateTimeOffset.UtcNow - TimeSpan.FromDays(14) - TimeSpan.FromSeconds(2);
+            var newerMessages = msgs.Where(msg => msg.Timestamp >= bulkMaxAge);
+            var olderMessages = msgs.Except(newerMessages);
+            int olderCount = olderMessages.Count();
             int actualCount = msgs.Count() - 1;
-            await channel.DeleteMessagesAsync(msgs);
-            RestUserMessage confirmationMsg = actualCount > 0 ?
-                await channel.SendMessageAsync($"{Config.DefaultConfirm} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down.") :
-                await channel.SendMessageAsync($"{Config.DefaultConfirm} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
+            // first delete bulk-deletable
+            await channel.DeleteMessagesAsync(newerMessages);
+            // delete older msgs one by one
+            if (olderCount > 0)
+            {
+                await SendOrUpdateConfirmationAsync($"You are requesting deletion of {actualCount} messages, {olderCount} of which are older than 2 weeks.\n" +
+                    "Deleting these messages may take a while due to Discord's rate limiting, so please be patient.");
+                foreach (IMessage msg in olderMessages)
+                {
+                    await channel.DeleteMessageAsync(msg);
+                }
+            }
+            await SendOrUpdateConfirmationAsync(actualCount > 0 ?
+                $"{Config.DefaultConfirm} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down." :
+                $"{Config.DefaultConfirm} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.");
             await Task.Delay(6 * 1000);
             await channel.DeleteMessageAsync(confirmationMsg);
+
+            async Task SendOrUpdateConfirmationAsync(string text)
+            {
+                if (confirmationMsg == null)
+                    confirmationMsg = await channel.SendMessageAsync(text);
+                else
+                    await confirmationMsg.ModifyAsync(props => props.Content = text);
+            }
         }
     }
 }
