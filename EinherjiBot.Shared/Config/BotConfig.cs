@@ -25,10 +25,10 @@ namespace TehGM.EinherjiBot.Config
         [JsonProperty("eliteApi")]
         public EliteApiConfig EliteAPI { get; private set; }
         [JsonProperty("defaultConfirmString", NullValueHandling = NullValueHandling.Include, DefaultValueHandling = DefaultValueHandling.Populate)]
-        [DefaultValue("\u274C")]
+        [DefaultValue("\u2705")]
         public string DefaultConfirm { get; private set; }
         [JsonProperty("defaultRejectString", NullValueHandling = NullValueHandling.Include, DefaultValueHandling = DefaultValueHandling.Populate)]
-        [DefaultValue("\u2705")]
+        [DefaultValue("\u274C")]
         public string DefaultReject { get; private set; }
 
         public static async Task<BotConfig> LoadAllAsync()
