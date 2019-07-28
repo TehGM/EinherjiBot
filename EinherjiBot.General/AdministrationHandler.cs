@@ -204,8 +204,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             if (user.Guild.SystemChannel == null)
                 return Task.CompletedTask;
             EmbedBuilder embed = new EmbedBuilder()
-                .WithDescription($"{user.Mention} has left.")
-                .WithFooter($"{user.Username}#{user.Discriminator}", user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
+                //.WithDescription($"{user.Mention} has left.")
+                //.WithFooter($"{user.Username}#{user.Discriminator}", user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
+                .WithDescription($"**{user.Mention}** *(`{user.Username}#{user.Discriminator}`)* **has left.**")
                 .WithColor((Color)System.Drawing.Color.Cyan);
             return user.Guild.SystemChannel.SendMessageAsync(null, false, embed.Build());
         }
