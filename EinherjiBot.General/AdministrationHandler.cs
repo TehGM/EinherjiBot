@@ -198,5 +198,16 @@ namespace TehGM.EinherjiBot.CommandsProcessing
                     await confirmationMsg.ModifyAsync(props => props.Content = text);
             }
         }
+
+        protected override Task OnUserLeft(SocketGuildUser user)
+        {
+            if (user.Guild.SystemChannel == null)
+                return Task.CompletedTask;
+            EmbedBuilder embed = new EmbedBuilder()
+                .WithDescription($"{user.Mention} has left.")
+                .WithFooter($"{user.Username}#{user.Discriminator}", user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl())
+                .WithColor((Color)System.Drawing.Color.Cyan);
+            return user.Guild.SystemChannel.SendMessageAsync(null, false, embed.Build());
+        }
     }
 }

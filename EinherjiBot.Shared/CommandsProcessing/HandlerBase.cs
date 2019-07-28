@@ -38,19 +38,20 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             Client.MessageReceived += Client_MessageReceived;
             Client.ReactionAdded += Client_ReactionAdded;
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
+            Client.UserLeft += Client_UserLeft;
             // TODO: more event handlers as they become needed
 
             Console.WriteLine($"{this.GetType().Name} initialized.");
         }
 
-        protected virtual Task OnGuildMemberUpdated(SocketGuildUser userBefore, SocketGuildUser userAfter)
-            => Task.CompletedTask;
-
-        protected virtual Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-            => Task.CompletedTask;
-
         protected virtual Task OnMessageReceived(SocketMessage message)
             => ProcessCommandsStackAsync(message);
+        protected virtual Task OnReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+            => Task.CompletedTask;
+        protected virtual Task OnGuildMemberUpdated(SocketGuildUser userBefore, SocketGuildUser userAfter)
+            => Task.CompletedTask;
+        protected virtual Task OnUserLeft(SocketGuildUser user)
+            => Task.CompletedTask;
 
         protected async Task<bool> ProcessCommandsStackAsync(SocketMessage message)
         {
@@ -62,12 +63,15 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             return false;
         }
 
+
+        private Task Client_MessageReceived(SocketMessage message)
+            => InvokeTask(() => OnMessageReceived(message));
         private Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
             => InvokeTask(() => OnReactionAdded(message, channel, reaction));
         private Task Client_GuildMemberUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
             => InvokeTask(() => OnGuildMemberUpdated(arg1, arg2));
-        private Task Client_MessageReceived(SocketMessage message)
-            => InvokeTask(() => OnMessageReceived(message));
+        private Task Client_UserLeft(SocketGuildUser arg)
+            => InvokeTask(() => OnUserLeft(arg));
 
         private Task InvokeTask(Func<Task> task)
         {
