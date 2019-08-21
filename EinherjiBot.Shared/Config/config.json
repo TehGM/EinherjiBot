@@ -25,6 +25,7 @@
     "preferPingOverPm": true,
     "eliteAutoNewsIntervalSeconds": 5400,
     "chachedCgLifetimeSeconds": 300,
-    "thumbnailUrl": "https://i.imgur.com/2lQLSiG.png"
+    "thumbnailUrl": "https://i.imgur.com/2lQLSiG.png",
+    "maxAge": 30
   }
 }

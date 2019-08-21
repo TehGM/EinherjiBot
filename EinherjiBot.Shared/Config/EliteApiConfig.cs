@@ -17,6 +17,8 @@ namespace TehGM.EinherjiBot.Config
         public bool PreferPingOverPM { get; private set; }
         [JsonProperty("thumbnailUrl")]
         public string ThumbnailURL { get; private set; }
+        [JsonProperty("maxAge")]
+        public int MaxAge { get; private set; }
         [JsonIgnore]
         public TimeSpan EliteAutoNewsInterval
         {
@@ -28,6 +30,12 @@ namespace TehGM.EinherjiBot.Config
         {
             get { return TimeSpan.FromSeconds(_chachedCgLifetimeSeconds); }
             set { _chachedCgLifetimeSeconds = (uint)value.TotalSeconds; }
+        }
+        [JsonIgnore]
+        public DateTimeOffset MinDate
+        {
+            get { return DateTimeOffset.Now.Date.AddDays(-MaxAge); }
+            set { this.MaxAge = (int)(DateTimeOffset.Now.Date - value).TotalDays; }
         }
     }
 }

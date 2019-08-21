@@ -198,7 +198,12 @@ namespace TehGM.EinherjiBot
             IEnumerable<JToken> responseObjectsArray = JObject.Parse(response)["events"][0]?["eventData"]?.Children();
             if (responseObjectsArray == null)
                 responseObjectsArray = new List<JToken>();
-            return responseObjectsArray.Select(cgJson => cgJson.ToObject<EliteCG>());
+
+            return responseObjectsArray
+                .Select(cgJson => cgJson.ToObject<EliteCG>())
+                // new: filter out old finished ones
+                .Where(cg => !cg.IsCompleted || cg.ExpirationTime.Date >= Config.EliteAPI.MinDate);
+            ;
         }
     }
 }
