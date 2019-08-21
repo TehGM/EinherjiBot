@@ -8,16 +8,16 @@ namespace TehGM.EinherjiBot.Utilities
 {
     public class DelayedInvoker : IDisposable
     {
-        private CancellationTokenSource _delayedSaveCts;
+        private CancellationTokenSource _delayedInvokeTokenSource;
 
-        public bool IsInvokationDelayed => _delayedSaveCts != null;
+        public bool IsInvokationDelayed => _delayedInvokeTokenSource != null;
 
         public async Task InvokeDelayedAsync(TimeSpan delay, Action callback)
         {
             if (IsInvokationDelayed)
                 return;
-            _delayedSaveCts = new CancellationTokenSource();
-            CancellationToken ct = _delayedSaveCts.Token;
+            _delayedInvokeTokenSource = new CancellationTokenSource();
+            CancellationToken ct = _delayedInvokeTokenSource.Token;
             await Task.Delay(delay, ct);
             if (ct.IsCancellationRequested)
                 return;
@@ -32,8 +32,8 @@ namespace TehGM.EinherjiBot.Utilities
 
         public void Cancel()
         {
-            _delayedSaveCts?.Cancel();
-            _delayedSaveCts = null;
+            _delayedInvokeTokenSource?.Cancel();
+            _delayedInvokeTokenSource = null;
         }
 
         void IDisposable.Dispose()

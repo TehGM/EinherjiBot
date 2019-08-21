@@ -22,6 +22,7 @@ namespace TehGM.EinherjiBot
         {
             CommandsStack.Add(new RegexUserCommand("^intel on me", CmdIntelMe));
             CommandsStack.Add(new RegexUserCommand("^intel on \\\\?<@!?(\\d+)>", CmdIntelUser));
+            CommandsStack.Add(new RegexUserCommand("^intel on (\\d+)", CmdIntelUser));
             CommandsStack.Add(new RegexUserCommand("^intel on guild", CmdIntelGuild));
             CommandsStack.Add(new RegexUserCommand("^intel", CmdIntelHelp));
         }
