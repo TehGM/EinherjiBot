@@ -13,6 +13,7 @@ using TehGM.EinherjiBot.Extensions;
 
 namespace TehGM.EinherjiBot
 {
+    [ProductionOnly]
     class PermitsHandler : HandlerBase
     {
         public PermitsHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
@@ -24,22 +25,8 @@ namespace TehGM.EinherjiBot
 
         private async Task CmdRetrieve(SocketCommandContext message, Match match, PermitInfo permit)
         {
-            if (message.IsPrivate)
-            {
-                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
+            if (!await ValidateRequestAsync(message, permit))
                 return;
-            }
-            SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
-            if (!permit.CanRetrieve(user))
-            {
-                await SendError($"{Config.DefaultReject} You need {GetAllowedRolesMentionsText(permit)} role to do this.", message.Channel);
-                return;
-            }
-            if (!permit.IsChannelAllowed(message.Channel))
-            {
-                await SendError($"You can't do this here.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
-                return;
-            }
 
             // create message
             IUser modifiedUser = Client.GetUser(permit.LastModifiedByID);
@@ -53,22 +40,8 @@ namespace TehGM.EinherjiBot
 
         private async Task CmdSet(SocketCommandContext message, Match match, PermitInfo permit)
         {
-            if (message.IsPrivate)
-            {
-                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
+            if (!await ValidateRequestAsync(message, permit))
                 return;
-            }
-            SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
-            if (!permit.CanModify(user))
-            {
-                await SendError($"{Config.DefaultReject} You have no permissions to do this.", message.Channel);
-                return;
-            }
-            if (!permit.IsChannelAllowed(message.Channel))
-            {
-                await SendError($"You can't do this here.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
-                return;
-            }
 
             PermitInfo.UpdateResult result = permit.Update(message, match);
             EmbedBuilder embed;
@@ -90,6 +63,27 @@ namespace TehGM.EinherjiBot
             // auto remove
             if (permit.IsAutoRemoving)
                 await RemoveMessagesDelayed(permit.AutoRemoveDelay, sentMsg, message.Message);
+        }
+
+        private async Task<bool> ValidateRequestAsync(SocketCommandContext message, PermitInfo permit)
+        {
+            if (message.IsPrivate)
+            {
+                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
+                return false;
+            }
+            SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
+            if (!permit.CanRetrieve(user))
+            {
+                await SendError($"{Config.DefaultReject} You need {GetAllowedRolesMentionsText(permit)} role to do this.", message.Channel);
+                return false;
+            }
+            if (!permit.IsChannelAllowed(message.Channel))
+            {
+                await SendError($"You can't do this here.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
+                return false;
+            }
+            return true;
         }
 
         private string GetAllowedRolesMentionsText(PermitInfo permit)
