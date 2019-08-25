@@ -44,20 +44,16 @@ namespace TehGM.EinherjiBot
                 return;
 
             PermitInfo.UpdateResult result = permit.Update(message, match);
-            EmbedBuilder embed;
-            if (result.IsSuccess)
+            if (!result.IsSuccess)
             {
-                await Config.SaveAllAsync();
-                // create message
-                embed = permit.CreateConfirmationEmbed(message.User);
-                embed.WithDescription(result.Message);
+                await SendError($"{Config.DefaultReject} {result.Message}", message.Channel);
+                return;
             }
-            else
-            {
-                embed = new EmbedBuilder()
-                    .WithDescription($"{Config.DefaultReject} {result.Message}")
-                    .WithColor(255, 0, 0);
-            }
+            await Config.Data.SaveAsync();
+            // create message
+            EmbedBuilder embed = permit
+                .CreateConfirmationEmbed(message.User)
+                .WithDescription(result.Message);
             //send message
             RestUserMessage sentMsg = await message.ReplyAsync(GetWarningIfAutoremoving(permit), false, embed.Build());
             // auto remove

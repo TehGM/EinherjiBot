@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
-using TehGM.EinherjiBot.Config;
 
 namespace TehGM.EinherjiBot.DataModels.Permits
 {
