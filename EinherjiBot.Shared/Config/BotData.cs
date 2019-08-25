@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.DataModels;
+using TehGM.EinherjiBot.DataModels.Permits;
 using TehGM.EinherjiBot.Extensions;
 using TehGM.EinherjiBot.Utilities;
 
@@ -17,7 +18,7 @@ namespace TehGM.EinherjiBot.Config
         [JsonProperty("stellarisMods")]
         public List<StellarisModInfo> StellarisMods { get; set; }
         [JsonProperty("netflixAccount")]
-        public NetflixAccountInfo NetflixAccount { get; set; }
+        public NetflixPermitInfo NetflixAccount { get; set; }
         [JsonIgnore]
         public BotDataIntel Intel { get; set; }
         [JsonProperty("eliteApi")]
@@ -55,7 +56,7 @@ namespace TehGM.EinherjiBot.Config
             if (EliteAPI == null)
                 EliteAPI = new EliteApiData(null);
             if (NetflixAccount == null)
-                NetflixAccount = new NetflixAccountInfo();
+                NetflixAccount = new NetflixPermitInfo();
             if (StellarisMods == null)
                 StellarisMods = new List<StellarisModInfo>();
             if (Intel == null)

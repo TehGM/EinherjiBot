@@ -18,8 +18,8 @@ namespace TehGM.EinherjiBot
         public PermitsHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
         {
             // netflix permit
-            CommandsStack.Add(new RegexUserCommand("^netflix-test set (login|email|username|password|pass|pwd) (.+)", (msg, match) => CmdSet(msg, match, config.Data.NetflixAccount)));
-            CommandsStack.Add(new RegexUserCommand("^netflix-test (?:password|account|login)", (msg, match) => CmdRetrieve(msg, match, config.Data.NetflixAccount)));
+            CommandsStack.Add(new RegexUserCommand("^netflix set (login|email|username|password|pass|pwd) (.+)", (msg, match) => CmdSet(msg, match, config.Data.NetflixAccount)));
+            CommandsStack.Add(new RegexUserCommand("^netflix (?:password|account|login)", (msg, match) => CmdRetrieve(msg, match, config.Data.NetflixAccount)));
         }
 
         private async Task CmdRetrieve(SocketCommandContext message, Match match, PermitInfo permit)
