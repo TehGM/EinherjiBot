@@ -19,13 +19,13 @@ namespace TehGM.EinherjiBot
         public PermitsHandler(DiscordSocketClient client, BotConfig config) : base(client, config)
         {
             // netflix permit
-            CommandsStack.Add(new RegexUserCommand("^netflix set (login|email|username|password|pass|pwd) (.+)", (msg, match) => CmdSet(msg, match, config.Data.NetflixAccount)));
             CommandsStack.Add(new RegexUserCommand("^netflix (?:password|account|login)", (msg, match) => CmdRetrieve(msg, match, config.Data.NetflixAccount)));
+            CommandsStack.Add(new RegexUserCommand("^netflix set (login|email|username|password|pass|pwd) (.+)", (msg, match) => CmdSet(msg, match, config.Data.NetflixAccount)));
         }
 
         private async Task CmdRetrieve(SocketCommandContext message, Match match, PermitInfo permit)
         {
-            if (!await ValidateRequestAsync(message, permit))
+            if (!await ValidateRequestAsync(message, permit, false))
                 return;
 
             // create message
@@ -40,7 +40,7 @@ namespace TehGM.EinherjiBot
 
         private async Task CmdSet(SocketCommandContext message, Match match, PermitInfo permit)
         {
-            if (!await ValidateRequestAsync(message, permit))
+            if (!await ValidateRequestAsync(message, permit, true))
                 return;
 
             PermitInfo.UpdateResult result = permit.Update(message, match);
@@ -65,7 +65,7 @@ namespace TehGM.EinherjiBot
                 await RemoveMessagesDelayed(permit.AutoRemoveDelay, sentMsg, message.Message);
         }
 
-        private async Task<bool> ValidateRequestAsync(SocketCommandContext message, PermitInfo permit)
+        private async Task<bool> ValidateRequestAsync(SocketCommandContext message, PermitInfo permit, bool modifying)
         {
             if (message.IsPrivate)
             {
@@ -76,6 +76,11 @@ namespace TehGM.EinherjiBot
             if (!permit.CanRetrieve(user))
             {
                 await SendError($"{Config.DefaultReject} You need {GetAllowedRolesMentionsText(permit)} role to do this.", message.Channel);
+                return false;
+            }
+            if (modifying && !permit.CanModify(user))
+            {
+                await SendError($"{Config.DefaultReject} You have no permissions to do this.", message.Channel);
                 return false;
             }
             if (!permit.IsChannelAllowed(message.Channel))
