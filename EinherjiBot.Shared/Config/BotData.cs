@@ -55,8 +55,6 @@ namespace TehGM.EinherjiBot.Config
         {
             if (EliteAPI == null)
                 EliteAPI = new EliteApiData(null);
-            if (NetflixAccount == null)
-                NetflixAccount = new NetflixPermitInfo();
             if (StellarisMods == null)
                 StellarisMods = new List<StellarisModInfo>();
             if (Intel == null)

@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot
             PermitInfo.UpdateResult result = permit.Update(message, match);
             if (!result.IsSuccess)
             {
-                await SendError($"{Config.DefaultReject} {result.Message}", message.Channel);
+                await SendError($"{result.Message}", message.Channel);
                 return;
             }
             await Config.Data.SaveAsync();
@@ -63,20 +63,25 @@ namespace TehGM.EinherjiBot
 
         private async Task<bool> ValidateRequestAsync(SocketCommandContext message, PermitInfo permit, bool modifying)
         {
+            if (permit == null)
+            {
+                await SendError($"Configuration data missing.", message.Channel);
+                return false;
+            }
             if (message.IsPrivate)
             {
-                await SendError($"{Config.DefaultReject} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
+                await SendError($"You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText(permit)}.", message.Channel);
                 return false;
             }
             SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
             if (!permit.CanRetrieve(user))
             {
-                await SendError($"{Config.DefaultReject} You need {GetAllowedRolesMentionsText(permit)} role to do this.", message.Channel);
+                await SendError($"You need {GetAllowedRolesMentionsText(permit)} role to do this.", message.Channel);
                 return false;
             }
             if (modifying && !permit.CanModify(user))
             {
-                await SendError($"{Config.DefaultReject} You have no permissions to do this.", message.Channel);
+                await SendError($"You have no permissions to do this.", message.Channel);
                 return false;
             }
             if (!permit.IsChannelAllowed(message.Channel))
