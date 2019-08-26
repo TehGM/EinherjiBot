@@ -12,6 +12,8 @@ namespace TehGM.EinherjiBot.Config
         public List<PatchbotHelperGame> Games { get; private set; }
         [JsonProperty("patchbotIds")]
         public HashSet<ulong> PatchbotIDs { get; private set; }
+        [JsonProperty("webhookIds")]
+        public HashSet<ulong> WebhookIDs { get; private set; }
 
         [JsonConstructor]
         public PatchbotHelperData(List<PatchbotHelperGame> games)
@@ -21,6 +23,8 @@ namespace TehGM.EinherjiBot.Config
 
         public PatchbotHelperGame FindGame(string nameOrAlias)
         {
+            if (string.IsNullOrWhiteSpace(nameOrAlias))
+                return null;
             if (Games == null || Games.Count == 0)
                 return null;
             string searchTrimmed = nameOrAlias.Trim();
@@ -52,6 +56,20 @@ namespace TehGM.EinherjiBot.Config
             if (PatchbotIDs == null)
                 return false;
             return PatchbotIDs.Remove(id);
+        }
+
+        public bool AddWebhookID(ulong id)
+        {
+            if (WebhookIDs == null)
+                PatchbotIDs = new HashSet<ulong>();
+            return PatchbotIDs.Add(id);
+        }
+
+        public bool RemoveWebhookID(ulong id)
+        {
+            if (WebhookIDs == null)
+                return false;
+            return WebhookIDs.Remove(id);
         }
     }
 }

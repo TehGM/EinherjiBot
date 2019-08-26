@@ -23,42 +23,63 @@ namespace TehGM.EinherjiBot
         {
             CommandsStack.Add(new RegexUserCommand("^patchbot sub(?:scribe)?(?: (.+))?", CmdSubscribe));
             CommandsStack.Add(new RegexUserCommand("^patchbot unsub(?:scribe)?(?: (.+))?", CmdUnsubscribe));
-            CommandsStack.Add(new RegexUserCommand("^patchbot add id(?: (\\d+))?", CmdAddID));
-            CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) id(?: (\\d+))?", CmdRemoveID));
             CommandsStack.Add(new RegexUserCommand("^patchbot add game(?: (.+))?", CmdAddGame));
             CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) game(?: (.+))?", CmdRemoveGame));
+            // patchbot ids handling
+            CommandsStack.Add(new RegexUserCommand("^patchbot add id(?: (\\d+))?", CmdAddPatchbotID));
+            CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) id(?: (\\d+))?", CmdRemovePatchbotID));
+            // webhook ids handling
+            CommandsStack.Add(new RegexUserCommand("^patchbot add webhook(?: (\\d+))?", CmdAddWebhookID));
+            CommandsStack.Add(new RegexUserCommand("^patchbot (?:remove|del|delete) webhook(?: (\\d+))?", CmdRemoveWebhookID));
         }
 
         protected override Task OnMessageReceived(SocketMessage message)
         {
             if (Config.Data.PatchbotHelper.PatchbotIDs?.Contains(message.Author.Id) == true)
                 return ProcessPatchbotMessageAsync(message);
+            if (Config.Data.PatchbotHelper.WebhookIDs?.Contains(message.Author.Id) == true)
+                return ProcessWebhookMessageAsync(message);
             return ProcessCommandsStackAsync(message);
         }
 
-        private async Task ProcessPatchbotMessageAsync(SocketMessage message)
+        private Task ProcessPatchbotMessageAsync(SocketMessage message)
         {
-            if (!(message.Channel is SocketTextChannel channel))
-                return;
             if (message.Embeds.Count == 0)
-                return;
+                return Task.CompletedTask;
 
             // get game from embed author text
             Embed embed = message.Embeds.First();
             string gameName = embed.Author?.Name;
-            if (string.IsNullOrEmpty(gameName))
-                return;
-            PatchbotHelperGame game = Config.Data.PatchbotHelper.FindGame(gameName);
 
+            return PingGameAsync(message, gameName);
+        }
+
+        private Task ProcessWebhookMessageAsync(SocketMessage message)
+        {
+            int hashIndex = message.Author.Username.IndexOf('#');
+            string gameName = hashIndex < 0
+                ? message.Author.Username
+                : message.Author.Username.Remove(hashIndex).TrimEnd();
+
+            return PingGameAsync(message, gameName);
+        }
+
+        private Task PingGameAsync(SocketMessage message, string gameName)
+        {
+            PatchbotHelperGame game = Config.Data.PatchbotHelper.FindGame(gameName);
+            if (game == null)
+                return Task.CompletedTask;
+            if (!(message.Channel is SocketTextChannel channel))
+                return Task.CompletedTask;
             // if no one subscribes to this game, abort
             if (game.SubscribersIDs.Count == 0)
-                return;
+                return Task.CompletedTask;
 
             // get only subscribers that are present in this channel
             IEnumerable<SocketGuildUser> presentSubscribers = channel.Users.Where(user => game.SubscribersIDs.Contains(user.Id));
 
             // ping them all
-            await message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}");
+            return message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}");
         }
 
         private async Task CmdSubscribe(SocketCommandContext message, Match match)
@@ -97,7 +118,7 @@ namespace TehGM.EinherjiBot
                 await Config.Data.SaveAsync();
             await message.ReplyAsync($"{Config.DefaultConfirm} You will no longer be pinged about `{game.Name}` updates.");
         }
-        private async Task CmdAddID(SocketCommandContext message, Match match)
+        private async Task CmdAddID(SocketCommandContext message, Match match, Func<ulong, bool> addMethod)
         {
             if (!(message.Channel is SocketTextChannel channel))
                 return;
@@ -120,11 +141,11 @@ namespace TehGM.EinherjiBot
                 await SendIDNotValid(message.Channel, idString);
                 return;
             }
-            if (Config.Data.PatchbotHelper.AddPatchbotID(id))
+            if (addMethod(id))
                 await Config.Data.SaveAsync();
             await message.ReplyAsync($"{Config.DefaultConfirm} {MentionUtils.MentionUser(id)} added.");
         }
-        private async Task CmdRemoveID(SocketCommandContext message, Match match)
+        private async Task CmdRemoveID(SocketCommandContext message, Match match, Func<ulong, bool> removeMethod)
         {
             if (!(message.Channel is SocketTextChannel channel))
                 return;
@@ -146,10 +167,22 @@ namespace TehGM.EinherjiBot
                 await SendIDNotValid(message.Channel, idString);
                 return;
             }
-            if (Config.Data.PatchbotHelper.RemovePatchbotID(id))
+            if (removeMethod(id))
                 await Config.Data.SaveAsync();
             await message.ReplyAsync($"{Config.DefaultConfirm} {MentionUtils.MentionUser(id)} removed.");
         }
+        // patchbot ids handling
+        private Task CmdAddPatchbotID(SocketCommandContext message, Match match)
+            => CmdAddID(message, match, (id) => Config.Data.PatchbotHelper.AddPatchbotID(id));
+        private Task CmdRemovePatchbotID(SocketCommandContext message, Match match)
+            => CmdRemoveID(message, match, (id) => Config.Data.PatchbotHelper.RemovePatchbotID(id));
+        // webhook ids handling
+        private Task CmdAddWebhookID(SocketCommandContext message, Match match)
+            => CmdAddID(message, match, (id) => Config.Data.PatchbotHelper.AddWebhookID(id));
+        private Task CmdRemoveWebhookID(SocketCommandContext message, Match match)
+            => CmdRemoveID(message, match, (id) => Config.Data.PatchbotHelper.RemoveWebhookID(id));
+
+
         private async Task CmdAddGame(SocketCommandContext message, Match match)
         {
             if (message.User.Id != Config.AuthorID)
