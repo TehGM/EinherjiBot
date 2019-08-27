@@ -8,10 +8,11 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Config;
 using TehGM.EinherjiBot.Extensions;
 
-namespace TehGM.EinherjiBot.CommandsProcessing
+namespace TehGM.EinherjiBot
 {
     [ProductionOnly]
     class AdministrationHandler : HandlerBase
