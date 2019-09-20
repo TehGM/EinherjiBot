@@ -61,8 +61,8 @@ namespace TehGM.EinherjiBot.Config
         public bool AddWebhookID(ulong id)
         {
             if (WebhookIDs == null)
-                PatchbotIDs = new HashSet<ulong>();
-            return PatchbotIDs.Add(id);
+                WebhookIDs = new HashSet<ulong>();
+            return WebhookIDs.Add(id);
         }
 
         public bool RemoveWebhookID(ulong id)

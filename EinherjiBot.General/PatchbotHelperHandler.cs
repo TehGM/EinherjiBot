@@ -54,14 +54,25 @@ namespace TehGM.EinherjiBot
             return PingGameAsync(message, gameName);
         }
 
-        private Task ProcessWebhookMessageAsync(SocketMessage message)
+        private async Task ProcessWebhookMessageAsync(SocketMessage message)
         {
-            int hashIndex = message.Author.Username.IndexOf('#');
-            string gameName = hashIndex < 0
-                ? message.Author.Username
-                : message.Author.Username.Remove(hashIndex).TrimEnd();
+            if (!(message is SocketUserMessage msg))
+                return;
+            // attempt to get nickname, but use username if unavailable
+            string authorName = message.Author.Username;
+            SocketGuild guild = (msg.Channel as SocketGuildChannel)?.Guild;
+            if (guild != null)
+            {
+                SocketGuildUser guildUser = await guild.GetGuildUser(message.Author);
+                if (guildUser != null)
+                    authorName = guildUser.Nickname ?? authorName;
+            }
 
-            return PingGameAsync(message, gameName);
+            // trim to #
+            int hashIndex = authorName.IndexOf('#');
+            string gameName = hashIndex < 0 ? authorName : authorName.Remove(hashIndex).TrimEnd();
+
+            await PingGameAsync(message, gameName);
         }
 
         private Task PingGameAsync(SocketMessage message, string gameName)
