@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Config;
 using TehGM.EinherjiBot.Extensions;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot
 {
@@ -19,15 +20,19 @@ namespace TehGM.EinherjiBot
 
         public bool LoadConfigs { get; set; } = true;
         public bool HandleLogs { get; set; } = true;
-        public LogSeverity DebuggingLogLevel { get; set; } = LogSeverity.Debug;
-        public LogSeverity ProductionLogLevel { get; set; } = LogSeverity.Info;
+        public LogSeverity LogLevel { get; set; } = LogSeverity.Debug;
         public bool AutoLoadHandlers { get; set; } = true;
 
-        public virtual async Task<DiscordSocketClient> StartClient()
+        public virtual Task<DiscordSocketClient> StartClient()
         {
             DiscordSocketConfig clientConfig = new DiscordSocketConfig();
             clientConfig.WebSocketProvider = Discord.Net.WebSockets.DefaultWebSocketProvider.Instance;
-            clientConfig.LogLevel = Debugger.IsAttached ? DebuggingLogLevel : ProductionLogLevel;
+            clientConfig.LogLevel = LogLevel;
+            return StartClient(clientConfig);
+        }
+
+        public virtual async Task<DiscordSocketClient> StartClient(DiscordSocketConfig clientConfig)
+        {
             Client = new DiscordSocketClient(clientConfig);
             Config = await BotConfig.LoadAllAsync();
 
@@ -43,7 +48,8 @@ namespace TehGM.EinherjiBot
 
         private Task Client_Log(LogMessage arg)
         {
-            Console.WriteLine(arg.ToString());
+            if (HandleLogs)
+                Logging.HandleDiscordNetLog(arg);
             return Task.CompletedTask;
         }
 

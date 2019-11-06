@@ -1,6 +1,7 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Discord;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot
 {
@@ -10,7 +11,15 @@ namespace TehGM.EinherjiBot
 
         static async Task Main(string[] args)
         {
+            // initialize logging
+            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Verbose : LogSeverity.Info;
+            Logging.Default = Logging.CreateDefaultConfiguration()
+                .MinimumLevel.Is(Logging.SeverityToSerilogLevel(logLevel))      // convert Discord.NET severity to serilog level to keep it consistent
+                .CreateLogger();
+
+            // initialize bot
             _initializer = new BotInitializer();
+            _initializer.LogLevel = logLevel;
             await _initializer.StartClient();
             _initializer.Client.Connected += Client_Connected;
             await Task.Delay(-1);
