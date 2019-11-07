@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TehGM.EinherjiBot.DataModels;
 using System;
 using System.ComponentModel;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -49,6 +50,7 @@ namespace TehGM.EinherjiBot.Config
 
         public static async Task<BotConfig> LoadAsync(string filePath)
         {
+            Logging.Default.Debug("Loading bot configuration from {FilePath}", filePath);
             JToken fileContents = await JsonFileExtensions.LoadFromFileAsync(filePath);
             return fileContents.ToObject<BotConfig>();
         }

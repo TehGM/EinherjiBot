@@ -30,6 +30,7 @@ namespace TehGM.EinherjiBot.Config
 
         public static async Task<BotData> LoadAsync(string filePath = DefaultPath)
         {
+            Logging.Default.Debug("Loading bot variable data from {FilePath}", filePath);
             JToken fileContents = await JsonFileExtensions.LoadFromFileAsync(filePath);
             BotData data = fileContents.ToObject<BotData>();
             data.Intel = await BotDataIntel.LoadAsync();
@@ -45,6 +46,7 @@ namespace TehGM.EinherjiBot.Config
 
         private Task SaveInternalAsync(string filePath = DefaultPath)
         {
+            Logging.Default.Debug("Saving bot variable data to {FilePath}", filePath);
             Task t1 = JsonFileExtensions.SaveToFileAsync(this, filePath);
             Task t2 = Intel.SaveAsync();
             return Task.WhenAll(t1, t2);

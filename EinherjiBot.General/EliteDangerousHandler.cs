@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +13,11 @@ using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Config;
 using TehGM.EinherjiBot.DataModels;
 using TehGM.EinherjiBot.Extensions;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot
 {
-    [ProductionOnly]
+    //[ProductionOnly]
     class EliteDangerousHandler : HandlerBase
     {
         private IList<EliteCG> _cgCache = new List<EliteCG>();
@@ -59,16 +59,19 @@ namespace TehGM.EinherjiBot
         {
             if (_autoModeCTS != null)
                 return;
+
             _autoModeCTS = new CancellationTokenSource();
             Task autoTask = Task.Run(async () =>
             {
-                Console.WriteLine("Starting ED automatic CG checker.");
+                using IDisposable context = Logging.UseSource("Inara CGs");
+                Logging.Default.Debug("Starting ED automatic CG checker");
                 CancellationToken token = _autoModeCTS.Token;
                 try
                 {
                     while (!token.IsCancellationRequested)
                     {
                         TimeSpan nextUpdateIn = (Config.Data.EliteAPI.AutoNewsRetrievalTimeUtc + Config.EliteAPI.EliteAutoNewsInterval) - DateTime.UtcNow;
+                        Logging.Default.Verbose("Next update in: {TimeRemaining}", nextUpdateIn);
                         // if still waiting, await time, and repeat iteration
                         if (nextUpdateIn > TimeSpan.Zero)
                         {
@@ -81,11 +84,11 @@ namespace TehGM.EinherjiBot
                             throw new InvalidOperationException($"Channel {Config.EliteAPI.EliteAutoNewsChannelID} is not a valid guild text channel.");
                         // get collection of subscribers that have to be PMed
                         IEnumerable<ulong> pmSubscribers = Config.EliteAPI.PreferPingOverPM ?
-                            Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Where(uid => guildChannel.GetUser(uid) == null) :
-                            Config.Data.EliteAPI.CommunityGoalsSubscribersIDs;
+                                Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Where(uid => guildChannel.GetUser(uid) == null) :
+                                Config.Data.EliteAPI.CommunityGoalsSubscribersIDs;
                         // get collection of users to be pinged in guild
                         IEnumerable<ulong> pingSubscribers = pmSubscribers.Count() == Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Count ?
-                            null : Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Except(pmSubscribers);
+                                null : Config.Data.EliteAPI.CommunityGoalsSubscribersIDs.Except(pmSubscribers);
 
 
                         // with all collections prepared, retrieve CG data, take only new or finished ones, and then update cache
@@ -97,20 +100,22 @@ namespace TehGM.EinherjiBot
                             if (lastCG == null || lastCG.IsCompleted != cg.IsCompleted)
                                 newOrJustFinishedCGs.Add(cg);
                         }
+                        Logging.Default.Verbose("New or just finished CGs count: {Count}", newOrJustFinishedCGs.Count);
                         _cgCache = allCGs.ToList();
                         _lastAutoCgs = allCGs;
                         _cacheUpdateTimeUtc = DateTime.UtcNow;
 
                         // post all CGs
                         bool firstPost = true;
+                        Logging.Default.Debug("Sending CGs");
                         foreach (var cg in newOrJustFinishedCGs)
                         {
                             Embed cgEmbed = cg.ToEmbed(Config.EliteAPI.ThumbnailURL, Client.CurrentUser.GetAvatarUrl() ?? Client.CurrentUser.GetDefaultAvatarUrl())
-                                .Build();
+                                    .Build();
 
                             // post in channel first, pinging all those who can be pinged
-                            await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
-                                string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
+                            //await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
+                            //        string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
                             firstPost = false;
                             // pm each pm subscriber
                             foreach (var pmID in pmSubscribers)
@@ -129,7 +134,7 @@ namespace TehGM.EinherjiBot
                 }
                 finally
                 {
-                    Console.WriteLine("Stopping ED automatic CG checker.");
+                    Logging.Default.Debug("Stopping ED automatic CG checker");
                     // clear CTS on exiting if it wasn't cleared yet
                     if (_autoModeCTS?.Token == token)
                         _autoModeCTS = null;
@@ -178,7 +183,10 @@ namespace TehGM.EinherjiBot
         {
             // use cache if it's too early for retrieving again
             if ((DateTime.UtcNow - _cacheUpdateTimeUtc) < Config.EliteAPI.CachedCGLifetime)
+            {
+                Logging.Default.Debug("CG cache is recent, not updating");
                 return _cgCache;
+            }
 
             // build query content
             const string eventName = "getCommunityGoalsRecent";
@@ -191,13 +199,14 @@ namespace TehGM.EinherjiBot
             query.Add("events", new JArray(eventParams));
 
             // send query and get results
-            Console.WriteLine($"Sending {eventName} to Inara.");
+            Logging.Default.Information("Sending {EventName} event to Inara", eventName);
             string response = await _webClient.UploadStringTaskAsync("https://inara.cz/inapi/v1/", query.ToString());
 
             // return results
             IEnumerable<JToken> responseObjectsArray = JObject.Parse(response)["events"][0]?["eventData"]?.Children();
             if (responseObjectsArray == null)
                 responseObjectsArray = new List<JToken>();
+            Logging.Default.Debug("Retrieved {ObjectsCount} JSON event data objects from Inara", responseObjectsArray.Count());
 
             return responseObjectsArray
                 .Select(cgJson => cgJson.ToObject<EliteCG>())

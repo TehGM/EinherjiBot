@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.Config;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
@@ -31,6 +32,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
         public HandlerBase(DiscordSocketClient client, BotConfig config)
         {
+            Logging.Default.Debug("Initializing {HandlerName}", this.GetType().FullName);
+
             this.Client = client;
             this.Config = config;
             this.CommandsStack = new List<ICommandProcessor>();
@@ -40,8 +43,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
             Client.UserLeft += Client_UserLeft;
             // TODO: more event handlers as they become needed
-
-            Console.WriteLine($"{this.GetType().Name} initialized.");
         }
 
         protected virtual Task OnMessageReceived(SocketMessage message)

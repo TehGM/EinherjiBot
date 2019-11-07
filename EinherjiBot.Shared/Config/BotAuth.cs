@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.Extensions;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.Config
 {
@@ -17,6 +18,7 @@ namespace TehGM.EinherjiBot.Config
 
         public static async Task<BotAuth> LoadAsync(string filePath)
         {
+            Logging.Default.Debug("Loading bot auth config from {FilePath}", filePath);
             JToken fileContents = await JsonFileExtensions.LoadFromFileAsync(filePath);
             return fileContents.ToObject<BotAuth>();
         }

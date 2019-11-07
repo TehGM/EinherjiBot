@@ -55,6 +55,7 @@ namespace TehGM.EinherjiBot
 
         public static IList<HandlerBase> InitializeHandlers(DiscordSocketClient client, BotConfig config)
         {
+            Logging.Default.Verbose("Loading all handlers");
             Type[] types = Assembly.GetEntryAssembly().FindDerivedTypes(typeof(HandlerBase));
             List<HandlerBase> handlers = new List<HandlerBase>(types.Length);
 
@@ -62,7 +63,10 @@ namespace TehGM.EinherjiBot
             {
                 Type t = types[i];
                 if (Debugger.IsAttached && Attribute.IsDefined(t, typeof(ProductionOnlyAttribute)))
+                {
+                    Logging.Default.Debug("Skipping {HandlerName}: [ProductionOnly] attribute", t.FullName);
                     continue;
+                }
                 HandlerBase handler = (HandlerBase)Activator.CreateInstance(t, client, config);
                 handlers.Add(handler);
             }
