@@ -1,6 +1,7 @@
 ﻿using System;
 using Discord;
 using Serilog;
+using Serilog.Context;
 using Serilog.Events;
 
 namespace TehGM.EinherjiBot.Utilities
@@ -18,10 +19,14 @@ namespace TehGM.EinherjiBot.Utilities
             set => Log.Logger = value;
         }
 
+        public static IDisposable UseSource(string source)
+            => LogContext.PushProperty("Source", source);
+
         public static LoggerConfiguration CreateDefaultConfiguration()
         {
             string format = "[{Timestamp:HH:mm:ss} {Level}] {Source} {Message:lj}{NewLine}{Exception}";
             return new LoggerConfiguration()
+                .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: format)
                 .WriteTo.Async(to => to.File("logs/bot.log",
                     fileSizeLimitBytes: 1048576,        // 10MB
@@ -34,8 +39,8 @@ namespace TehGM.EinherjiBot.Utilities
         public static void HandleDiscordNetLog(LogMessage logMessage)
         {
             LogEventLevel level = SeverityToSerilogLevel(logMessage.Severity);
-            ILogger log = Default.ForContext("Source", logMessage.Source);
-            log.Write(level, logMessage.Exception, logMessage.Message);
+            using (UseSource(logMessage.Source))
+                Default.Write(level, logMessage.Exception, logMessage.Message);
         }
 
         public static LogEventLevel SeverityToSerilogLevel(LogSeverity severity)
