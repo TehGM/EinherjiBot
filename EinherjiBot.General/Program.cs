@@ -14,7 +14,7 @@ namespace TehGM.EinherjiBot
         {
             // initialize logging
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Verbose : LogSeverity.Info;
+            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Debug : LogSeverity.Info;
             Logging.Default = Logging.CreateDefaultConfiguration()
                 .MinimumLevel.Is(Logging.SeverityToSerilogLevel(logLevel))      // convert Discord.NET severity to serilog level to keep it consistent
                 .CreateLogger();
