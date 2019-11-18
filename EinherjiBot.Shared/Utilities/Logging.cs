@@ -29,9 +29,9 @@ namespace TehGM.EinherjiBot.Utilities
                 .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: format)
                 .WriteTo.Async(to => to.File("logs/bot.log",
-                    fileSizeLimitBytes: 1048576,        // 10MB
+                    fileSizeLimitBytes: 5242880,        // 5MB
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 10,
+                    retainedFileCountLimit: 7,
                     rollingInterval: RollingInterval.Day,
                     outputTemplate: format));
         }
