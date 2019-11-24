@@ -22,10 +22,10 @@ namespace TehGM.EinherjiBot.Utilities
         public static IDisposable UseSource(string source)
             => LogContext.PushProperty("Source", source);
 
-        public static LoggerConfiguration CreateDefaultConfiguration()
+        public static LoggerConfiguration CreateDefaultConfiguration(LogSeverity? minimumLevel = null)
         {
             string format = "[{Timestamp:HH:mm:ss} {Level}] {Source} {Message:lj}{NewLine}{Exception}";
-            return new LoggerConfiguration()
+            LoggerConfiguration config = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: format)
                 .WriteTo.Async(to => to.File("logs/bot.log",
@@ -34,6 +34,10 @@ namespace TehGM.EinherjiBot.Utilities
                     retainedFileCountLimit: 7,
                     rollingInterval: RollingInterval.Day,
                     outputTemplate: format));
+            if (minimumLevel != null)
+                // convert Discord.NET severity to serilog level to keep it consistent
+                config.MinimumLevel.Is(SeverityToSerilogLevel(minimumLevel.Value));
+            return config;
         }
 
         public static void HandleDiscordNetLog(LogMessage logMessage)

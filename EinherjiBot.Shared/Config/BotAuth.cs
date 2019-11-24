@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog.Sinks.Datadog.Logs;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.Extensions;
 using TehGM.EinherjiBot.Utilities;
@@ -15,6 +17,8 @@ namespace TehGM.EinherjiBot.Config
         public string Token { get; private set; }
         [JsonProperty("inaraApi")]
         public InaraApiAuth InaraAPI { get; private set; }
+        [JsonProperty("datadogApi")]
+        public DatadogApiAuth DatadogAPI { get; private set; }
 
         public static async Task<BotAuth> LoadAsync(string filePath)
         {
@@ -30,5 +34,35 @@ namespace TehGM.EinherjiBot.Config
         {
             this.Token = null;
         }
+    }
+
+    public class DatadogApiAuth
+    {
+        [JsonProperty("apiKey")]
+        public string ApiKey { get; private set; }
+        [JsonProperty("url", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue("intake.logs.datadoghq.com")]
+        public string URL { get; private set; }
+        [JsonProperty("port", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue(10516)]
+        public int Port { get; private set; }
+        [JsonProperty("ssl", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue(true)]
+        public bool UseSSL { get; private set; }
+        [JsonProperty("tcp", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [DefaultValue(true)]
+        public bool UseTCP { get; private set; }
+
+        [JsonProperty("source")]
+        public string Source { get; private set; }
+        [JsonProperty("service")]
+        public string Service { get; private set; }
+        [JsonProperty("host")]
+        public string Host { get; private set; }
+        [JsonProperty("tags")]
+        public string[] Tags { get; private set; }
+
+        public DatadogConfiguration ToDatadogConfiguration()
+            => new DatadogConfiguration(URL, Port, UseSSL, UseTCP);
     }
 }

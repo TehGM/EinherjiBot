@@ -114,8 +114,8 @@ namespace TehGM.EinherjiBot
                                     .Build();
 
                             // post in channel first, pinging all those who can be pinged
-                            //await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
-                            //        string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
+                            await guildChannel.SendMessageAsync(pingSubscribers == null || !firstPost ? null :
+                                    string.Join(' ', pingSubscribers.Select(uid => MentionUtils.MentionUser(uid))), false, cgEmbed);
                             firstPost = false;
                             // pm each pm subscriber
                             foreach (var pmID in pmSubscribers)

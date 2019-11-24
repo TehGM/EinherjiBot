@@ -23,18 +23,24 @@ namespace TehGM.EinherjiBot
         public LogSeverity LogLevel { get; set; } = LogSeverity.Debug;
         public bool AutoLoadHandlers { get; set; } = true;
 
-        public virtual Task<DiscordSocketClient> StartClient()
+        public async Task<DiscordSocketClient> StartClient()
+        {
+            BotConfig config = await BotConfig.LoadAllAsync();
+            return await StartClient(config);
+        }
+
+        public Task<DiscordSocketClient> StartClient(BotConfig botConfig)
         {
             DiscordSocketConfig clientConfig = new DiscordSocketConfig();
             clientConfig.WebSocketProvider = Discord.Net.WebSockets.DefaultWebSocketProvider.Instance;
             clientConfig.LogLevel = LogLevel;
-            return StartClient(clientConfig);
+            return StartClient(clientConfig, botConfig);
         }
 
-        public virtual async Task<DiscordSocketClient> StartClient(DiscordSocketConfig clientConfig)
+        public virtual async Task<DiscordSocketClient> StartClient(DiscordSocketConfig clientConfig, BotConfig botConfig)
         {
             Client = new DiscordSocketClient(clientConfig);
-            Config = await BotConfig.LoadAllAsync();
+            Config = botConfig;
 
             Client.Log += Client_Log;
 
