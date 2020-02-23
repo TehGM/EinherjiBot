@@ -15,6 +15,8 @@ namespace TehGM.EinherjiBot.Config
 
         [JsonProperty("token", Required = Required.Always)]
         public string Token { get; private set; }
+        [JsonProperty("pihole")]
+        public PiholeConfig Pihole { get; private set; }
         [JsonProperty("inaraApi")]
         public InaraApiAuth InaraAPI { get; private set; }
         [JsonProperty("datadogApi")]

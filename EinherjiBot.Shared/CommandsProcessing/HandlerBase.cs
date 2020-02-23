@@ -1,9 +1,7 @@
 ﻿using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.Config;
 using TehGM.EinherjiBot.Utilities;
@@ -91,6 +89,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
                 Client.MessageReceived -= Client_MessageReceived;
                 Client.ReactionAdded -= Client_ReactionAdded;
                 Client.GuildMemberUpdated -= Client_GuildMemberUpdated;
+                Client.UserLeft -= Client_UserLeft;
                 Client = null;
             }
         }

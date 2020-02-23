@@ -60,12 +60,12 @@ namespace TehGM.EinherjiBot
         private Task RedirectToChannelsAsync(SocketCommandContext message, IEnumerable<ulong> allowedChannelsIds, params ulong[] botsIds)
             => RedirectToChannelsAsync(message, allowedChannelsIds, botsIds as IEnumerable<ulong>);
 
-        private static string GetChannelsMentionsText(IEnumerable<ulong> ids, SocketGuildUser user)
+        public static string GetChannelsMentionsText(IEnumerable<ulong> ids, SocketGuildUser user)
             => ids.Where(id => user.Guild.GetChannel(id) != null
                 && user.GetPermissions(user.Guild.GetChannel(id)).Has(ChannelPermission.ViewChannel | ChannelPermission.SendMessages))
                 .Select(id => MentionUtils.MentionChannel(id)).JoinAsSentence(", ", " or ");
 
-        private static string GetUsersMentionsText(IEnumerable<ulong> ids)
+        public static string GetUsersMentionsText(IEnumerable<ulong> ids)
             => ids.Select(id => MentionUtils.MentionUser(id)).JoinAsSentence(", ", " and ");
         #endregion
     }
