@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configure);
 
             services.AddHostedService<SimpleCommandHandler>();
+            services.AddHostedService<RegexCommandHandler>();
 
             return services;
         }

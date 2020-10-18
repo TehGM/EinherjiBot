@@ -45,9 +45,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             config.IgnoreExtraArgs = options.IgnoreExtraArgs;
             this._commands = new CommandService(config);
             foreach (Assembly asm in options.Assemblies)
-                await this._commands.AddModulesAsync(asm, _serviceProvider);
+                await this._commands.AddModulesAsync(asm, _serviceProvider).ConfigureAwait(false);
             foreach (Type t in options.Classes)
-                await this._commands.AddModuleAsync(t, _serviceProvider);
+                await this._commands.AddModuleAsync(t, _serviceProvider).ConfigureAwait(false);
         }
 
         private async Task HandleCommandAsync(SocketMessage msg)
@@ -59,14 +59,21 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             if (!(msg is SocketUserMessage message))
                 return;
 
-            // Create a number to track where the prefix ends and the command begins
-            int argPos = 0;
-
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             CommandOptions options = this._commandOptions.CurrentValue;
-            if (!((!string.IsNullOrWhiteSpace(options.Prefix) && message.HasStringPrefix(options.Prefix, ref argPos)) ||
-                (options.AcceptMentionPrefix && message.HasMentionPrefix(_client.CurrentUser, ref argPos))) ||
-                (!options.AcceptBotMessages && message.Author.IsBot))
+            // only execute if not a bot message
+            if (!options.AcceptBotMessages && message.Author.IsBot)
+                return;
+            // get prefix and argPos
+            int argPos = 0;
+            bool requirePrefix = msg.Channel is SocketGuildChannel ? options.RequirePublicMessagePrefix : options.RequirePrivateMessagePrefix;
+            bool hasStringPrefix = message.HasStringPrefix(options.Prefix, ref argPos);
+            bool hasMentionPrefix = false;
+            if (!hasStringPrefix)
+                hasMentionPrefix = message.HasMentionPrefix(_client.CurrentUser, ref argPos);
+
+            // if prefix not found but is required, return
+            if (requirePrefix && (!string.IsNullOrWhiteSpace(options.Prefix) && !hasStringPrefix) && (options.AcceptMentionPrefix && !hasMentionPrefix))
                 return;
 
             // Create a WebSocket-based command context based on the message
@@ -80,14 +87,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             IResult result = await _commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
-                services: null)
+                services: _serviceProvider)
                 .ConfigureAwait(false);
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
             => InitializeCommandServiceAsync();
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
         {
             Dispose();
             return Task.CompletedTask;

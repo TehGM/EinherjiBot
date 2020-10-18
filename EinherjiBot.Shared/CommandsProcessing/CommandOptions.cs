@@ -10,6 +10,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         public string Prefix { get; set; } = ".";
         public bool AcceptMentionPrefix { get; set; } = true;
         public bool AcceptBotMessages { get; set; } = false;
+        public bool RequirePublicMessagePrefix { get; set; } = true;
+        public bool RequirePrivateMessagePrefix { get; set; } = false;
 
         public bool CaseSensitive { get; set; } = false;
         public RunMode DefaultRunMode { get; set; } = RunMode.Default;
