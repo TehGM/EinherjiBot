@@ -1,5 +1,6 @@
 ﻿using System;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.CommandsProcessing.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

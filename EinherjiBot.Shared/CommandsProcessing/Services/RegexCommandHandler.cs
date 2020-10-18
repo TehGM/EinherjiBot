@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace TehGM.EinherjiBot.CommandsProcessing
+namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandHandler : IHostedService, IDisposable
     {

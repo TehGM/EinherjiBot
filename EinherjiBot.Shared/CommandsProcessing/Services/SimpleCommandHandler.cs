@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace TehGM.EinherjiBot.CommandsProcessing
+namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     /// <summary>Handler that allows use of Discord.NET's default commands system.</summary>
     public class SimpleCommandHandler : IHostedService, IDisposable

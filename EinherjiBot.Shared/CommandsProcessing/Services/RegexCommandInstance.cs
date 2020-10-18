@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ParameterInfo = System.Reflection.ParameterInfo;
 
-namespace TehGM.EinherjiBot.CommandsProcessing
+namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandInstance
     {
