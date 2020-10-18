@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7553FD26-3F86-4106-B4A7-F536856EA7E4}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		appsecrets-example.json = appsecrets-example.json
 	EndProjectSection
 EndProject
 Global
