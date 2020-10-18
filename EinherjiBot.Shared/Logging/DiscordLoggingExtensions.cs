@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Discord;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using Serilog.Context;
-using Serilog.Events;
-using TehGM.EinherjiBot.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace TehGM.EinherjiBot
@@ -33,55 +28,6 @@ namespace TehGM.EinherjiBot
             => LogContext.PushProperty("Source", source);
         public static IDisposable UseSource(this ILogger log, string source)
             => LogContext.PushProperty("Source", source);
-
-        public static void ConfigureSerilog(HostBuilderContext context, LoggerConfiguration config)
-        {
-            config.ReadFrom.Configuration(context.Configuration)
-                .Enrich.FromLogContext();
-            DatadogOptions ddOptions = context.Configuration.GetSection("Serilog")?.GetSection("DataDog")?.Get<DatadogOptions>();
-            if (!string.IsNullOrWhiteSpace(ddOptions?.ApiKey))
-            {
-                config.WriteTo.DatadogLogs(
-                    ddOptions.ApiKey,
-                    source: ".NET",
-                    service: ddOptions.ServiceName ?? "SubBot-CS",
-                    host: ddOptions.HostName ?? Environment.MachineName,
-                    new string[] {
-                                $"env:{(ddOptions.EnvironmentName ?? context.HostingEnvironment.EnvironmentName)}",
-                                $"assembly:{(ddOptions.AssemblyName ?? context.HostingEnvironment.ApplicationName)}"
-                    },
-                    ddOptions.ToDatadogConfiguration(),
-                    // no need for debug logs in datadag
-                    logLevel: ddOptions.OverrideLogLevel ?? LogEventLevel.Information
-                );
-            }
-        }
-
-        public static void EnableUnhandledExceptionLogging()
-        {
-            // add default logger for errors that happen before host runs
-            Serilog.Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.File("logs/unhandled.log",
-                fileSizeLimitBytes: 1048576,        // 1MB
-                rollOnFileSizeLimit: true,
-                retainedFileCountLimit: 5,
-                rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            // capture unhandled exceptions
-            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-        }
-
-        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            try
-            {
-                Serilog.Log.Logger.Error((Exception)e.ExceptionObject, "An exception was unhandled");
-                Serilog.Log.CloseAndFlush();
-            }
-            catch { }
-        }
 
         public static LogLevel ToLogLevel(this LogSeverity severity)
         {
