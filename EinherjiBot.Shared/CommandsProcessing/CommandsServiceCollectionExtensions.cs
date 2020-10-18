@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CommandsServiceCollectionExtensions
     {
-        public static IServiceCollection AddCommands(this IServiceCollection services, Action<CommandOptions> configure = null)
+        public static IServiceCollection AddCommands(this IServiceCollection services, Action<CommandsOptions> configure = null)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));

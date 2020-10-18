@@ -16,14 +16,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     public class RegexCommandHandler : IHostedService, IDisposable
     {
         private readonly DiscordSocketClient _client;
-        private readonly IOptionsMonitor<CommandOptions> _commandOptions;
+        private readonly IOptionsMonitor<CommandsOptions> _commandOptions;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _log;
         private readonly ICollection<RegexCommandInstance> _commands;
         private readonly SemaphoreSlim _lock;
         private CancellationToken _hostCancellationToken;
 
-        public RegexCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandOptions> commandOptions, ILogger<RegexCommandHandler> log)
+        public RegexCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
         {
             this._client = client;
             this._commandOptions = commandOptions;
@@ -45,7 +45,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 this._log.LogDebug("Initializing commands");
 
                 this._commands.Clear();
-                CommandOptions options = this._commandOptions.CurrentValue;
+                CommandsOptions options = this._commandOptions.CurrentValue;
                 CommandServiceConfig config = new CommandServiceConfig();
                 foreach (Assembly asm in options.Assemblies)
                     this.AddAssembly(asm);
@@ -105,7 +105,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            CommandOptions options = this._commandOptions.CurrentValue;
+            CommandsOptions options = this._commandOptions.CurrentValue;
             // only execute if not a bot message
             if (!options.AcceptBotMessages && message.Author.IsBot)
                 return;

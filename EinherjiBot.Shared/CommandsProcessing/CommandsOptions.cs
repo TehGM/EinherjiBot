@@ -5,7 +5,7 @@ using Discord.Commands;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
-    public class CommandOptions
+    public class CommandsOptions
     {
         public string Prefix { get; set; } = ".";
         public bool AcceptMentionPrefix { get; set; } = true;

@@ -15,11 +15,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     {
         private readonly DiscordSocketClient _client;
         private CommandService _commands;
-        private readonly IOptionsMonitor<CommandOptions> _commandOptions;
+        private readonly IOptionsMonitor<CommandsOptions> _commandOptions;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _log;
 
-        public SimpleCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandOptions> commandOptions, ILogger<SimpleCommandHandler> log)
+        public SimpleCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<SimpleCommandHandler> log)
         {
             this._client = client;
             this._commandOptions = commandOptions;
@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             try { (_commands as IDisposable)?.Dispose(); } catch { }
 
-            CommandOptions options = this._commandOptions.CurrentValue;
+            CommandsOptions options = this._commandOptions.CurrentValue;
             CommandServiceConfig config = new CommandServiceConfig();
             config.CaseSensitiveCommands = options.CaseSensitive;
             if (options.DefaultRunMode != RunMode.Default)
@@ -60,7 +60,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            CommandOptions options = this._commandOptions.CurrentValue;
+            CommandsOptions options = this._commandOptions.CurrentValue;
             // only execute if not a bot message
             if (!options.AcceptBotMessages && message.Author.IsBot)
                 return;

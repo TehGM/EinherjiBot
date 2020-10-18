@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using TehGM.EinherjiBot.Logging;
 
-namespace TehGM.EinherjiBot.Logging
+namespace Microsoft.Extensions.Hosting
 {
     public static class LoggingInitializationExtensions
     {
@@ -13,8 +13,6 @@ namespace TehGM.EinherjiBot.Logging
 
         public static void ConfigureSerilog(HostBuilderContext context, LoggerConfiguration config)
         {
-            EnableUnhandledExceptionLogging();
-
             config.ReadFrom.Configuration(context.Configuration)
                 .Enrich.FromLogContext();
             DatadogOptions ddOptions = context.Configuration.GetSection("Serilog")?.GetSection("DataDog")?.Get<DatadogOptions>();
