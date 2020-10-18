@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
 
+            services.AddSingleton<IRegexCommandModuleProvider, RegexComandModuleProvider>();
             services.AddHostedService<SimpleCommandHandler>();
             services.AddHostedService<RegexCommandHandler>();
 

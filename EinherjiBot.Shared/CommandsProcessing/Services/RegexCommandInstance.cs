@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -17,6 +16,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         public Regex Regex { get; }
         public int Priority { get; private set; }
         public IEnumerable<PreconditionAttribute> Preconditions { get; private set; }
+        public Type ModuleType => _method.DeclaringType;
         public RunMode RunMode
         {
             get => _runMode == RunMode.Default ? RunMode.Sync : _runMode;
@@ -26,8 +26,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private RunMode _runMode = RunMode.Default;
         private readonly MethodInfo _method;
         private readonly ParameterInfo[] _params;
-        private readonly InstanceClassCreator _cachedCreator;
-        private object _cachedInstance;
+        private readonly IRegexCommandModuleProvider _moduleProvider;
 
         private RegexCommandInstance(Regex regex, MethodInfo method, IServiceProvider services)
         {
@@ -38,14 +37,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._method = method;
             this._params = method.GetParameters();
 
-            // init instance creator
-            IEnumerable<ConstructorInfo> constructors = _method.DeclaringType
-                .GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .OrderByDescending(ctor => ctor.GetParameters().Length);
-            foreach (ConstructorInfo ctor in constructors)
-                _cachedCreator = TryGetCreator(ctor, services);
-            if (_cachedCreator == null)
-                throw new InvalidOperationException($"Cannot create {_method.DeclaringType.FullName} - none of the constructors can have its dependencies resolved");
+            this._moduleProvider
         }
 
         public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
@@ -84,9 +76,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         break;
                     case PriorityAttribute priority:
                         this.Priority = priority.Priority;
-                        break;
-                    case InitializeOnceAttribute _:
-                        this._cachedInstance = _cachedCreator.Create();
                         break;
                 }
             }
@@ -151,7 +140,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // create class instance, or use pre-initialized if command has that flag
             cancellationToken.ThrowIfCancellationRequested();
-            object instance = _cachedInstance ?? _cachedCreator.Create();
+            object instance = _moduleProvider.GetModuleInstance(this);
 
             // execute
             try
@@ -169,41 +158,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 return ExecuteResult.FromError(ex);
             }
-        }
-
-        private InstanceClassCreator TryGetCreator(ConstructorInfo constructor, IServiceProvider services)
-        {
-            ParameterInfo[] ctorParams = constructor.GetParameters();
-            object[] paramsValues = new object[ctorParams.Length];
-            foreach (ParameterInfo param in ctorParams)
-            {
-                object value = services.GetService(param.ParameterType);
-                if (value == null)
-                {
-                    if (param.IsOptional)
-                        value = param.HasDefaultValue ? param.DefaultValue : null;
-                    else
-                        return null;
-                }
-                paramsValues[param.Position] = value;
-            }
-            return new InstanceClassCreator(constructor, paramsValues);
-        }
-
-        /// <summary>Info on matched constructor in params. For caching purposes.</summary>
-        private class InstanceClassCreator
-        {
-            private readonly ConstructorInfo _ctor;
-            private readonly object[] _params;
-
-            public InstanceClassCreator(ConstructorInfo ctor, object[] parameters)
-            {
-                this._ctor = ctor;
-                this._params = parameters;
-            }
-
-            public object Create()
-                => _ctor.Invoke(_params);
         }
     }
 }
