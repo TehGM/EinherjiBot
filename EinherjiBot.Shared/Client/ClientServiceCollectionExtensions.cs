@@ -1,10 +1,11 @@
 ﻿using System;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TehGM.EinherjiBot;
+using TehGM.EinherjiBot.Client;
 
-namespace TehGM.EinherjiBot.Client
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ClientServiceCollectionExtensions
     {
