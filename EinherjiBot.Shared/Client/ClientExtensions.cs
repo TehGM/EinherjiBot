@@ -1,11 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace TehGM.EinherjiBot.Extensions
+namespace TehGM.EinherjiBot
 {
     public static class ClientExtensions
     {

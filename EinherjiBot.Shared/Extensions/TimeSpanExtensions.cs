@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace TehGM.EinherjiBot.Extensions
+namespace TehGM.EinherjiBot
 {
     public static class TimeSpanExtensions
     {

@@ -1,10 +1,8 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using TehGM.EinherjiBot.DataModels;
 
-namespace TehGM.EinherjiBot.Extensions
+namespace TehGM.EinherjiBot
 {
     public static class EmbedGenerator
     {
