@@ -32,6 +32,7 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix (?:password|account|login")]
+        [Priority(100)]
         private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
             _log.LogDebug("User {User} ({UserID}) retrieving Netlix account credentials", $"{context.User.Username}#{context.User.Discriminator}", context.User.Id);
@@ -71,6 +72,7 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix set (login|email|username|password|pass|pwd) (.+)")]
+        [Priority(99)]
         private async Task CmdUpdateAccountAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             _log.LogDebug("User {User} ({UserID}) updating Netlix account credentials", $"{context.User.Username}#{context.User.Discriminator}", context.User.Id);
