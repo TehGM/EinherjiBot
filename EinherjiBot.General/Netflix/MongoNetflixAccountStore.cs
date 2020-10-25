@@ -9,7 +9,7 @@ using TehGM.EinherjiBot.Database;
 
 namespace TehGM.EinherjiBot.Netflix.Services
 {
-    public class NetflixAccountStore : INetflixAccountStore, IDisposable
+    public class MongoNetflixAccountStore : INetflixAccountStore, IDisposable
     {
         // caching
         public const string CacheOptionName = "NetflixAccount";
@@ -26,7 +26,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
 
-        public NetflixAccountStore(IMongoConnection databaseConnection, ILogger<NetflixAccountStore> log,
+        public MongoNetflixAccountStore(IMongoConnection databaseConnection, ILogger<MongoNetflixAccountStore> log,
             IOptionsMonitor<DatabaseOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions, IOptionsMonitor<NetflixAccountOptions> netflixAccountOptions)
         {
             this._databaseConnection = databaseConnection;

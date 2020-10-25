@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
+using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Client;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Netflix;
@@ -20,6 +21,7 @@ namespace TehGM.EinherjiBot
                 {
                     // configure options
                     services.Configure<EinherjiOptions>(context.Configuration);
+                    services.Configure<CachingOptions>(context.Configuration.GetSection("Caching").GetSection("UserData"));
                     services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
@@ -30,6 +32,8 @@ namespace TehGM.EinherjiBot
                     services.AddDiscordClient();
                     services.AddCommands();
 
+                    // add bot features
+                    services.AddIntel();
                     services.AddNetflixAccount();
                 })
                 .Build();

@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.Caching.Services
 
         public EntityCache() : this(EqualityComparer<TKey>.Default) { }
 
-        public virtual void AddOrReplace(TKey key, TEntity entity, TimeSpan lifetime)
+        public void AddOrReplace(TKey key, TEntity entity, TimeSpan lifetime)
         {
             lock (_cachedEntities)
                 _cachedEntities[key] = new CachedEntity<TKey, TEntity>(key, entity, lifetime);
@@ -42,7 +42,7 @@ namespace TehGM.EinherjiBot.Caching.Services
                 return _cachedEntities.Where(pair => predicate(pair.Value)).Select(pair => pair.Value).ToImmutableArray();
         }
 
-        public virtual TEntity Get(TKey key)
+        public TEntity Get(TKey key)
         {
             TEntity result = default;
             lock (_cachedEntities)

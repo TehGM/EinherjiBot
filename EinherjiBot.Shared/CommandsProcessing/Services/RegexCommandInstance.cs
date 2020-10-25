@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._method = method;
             this._params = method.GetParameters();
 
-            this._moduleProvider
+            this._moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
         }
 
         public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
@@ -59,6 +59,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             result.LoadCustomAttributes(method.DeclaringType);
             // then load method attributes (and let them overwrite class ones if necessary)
             result.LoadCustomAttributes(method);
+
+            // pre-init if requested - this may be the case if module listens to some gateway events directly
+            PersistentModuleAttribute persistent = method.DeclaringType.GetCustomAttribute<PersistentModuleAttribute>();
+            if (persistent != null && persistent.PreInitialize)
+                result._moduleProvider.GetModuleInstance(result);
 
             return result;
         }

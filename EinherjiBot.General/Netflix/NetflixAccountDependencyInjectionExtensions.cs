@@ -16,10 +16,11 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
             if (configureCaching != null)
-                services.Configure(NetflixAccountStore.CacheOptionName, configureCaching);
+                services.Configure(MongoNetflixAccountStore.CacheOptionName, configureCaching);
 
+            services.AddDiscordClient();
             services.AddMongoConnection();
-            services.TryAddSingleton<INetflixAccountStore, NetflixAccountStore>();
+            services.TryAddSingleton<INetflixAccountStore, MongoNetflixAccountStore>();
 
             return services;
         }

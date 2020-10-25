@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.CommandsProcessing.Services;
 
@@ -16,8 +17,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configure);
 
             services.TryAddSingleton<IRegexCommandModuleProvider, RegexComandModuleProvider>();
-            services.AddHostedService<SimpleCommandHandler>();
-            services.AddHostedService<RegexCommandHandler>();
+            services.TryAddEnumerable(new ServiceDescriptor[] 
+            {
+                ServiceDescriptor.Transient<IHostedService, SimpleCommandHandler>(),
+                ServiceDescriptor.Transient<IHostedService, RegexCommandHandler>()
+            });
 
             return services;
         }

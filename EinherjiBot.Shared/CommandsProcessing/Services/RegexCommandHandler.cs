@@ -139,7 +139,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     IResult result = await command.ExecuteAsync(
                         context: context,
                         argPos: argPos,
-                        services: _serviceProvider)
+                        services: _serviceProvider,
+                        cancellationToken: _hostCancellationToken)
                         .ConfigureAwait(false);
                     if (result.IsSuccess)
                         return;
