@@ -35,10 +35,10 @@ namespace TehGM.EinherjiBot.Netflix.Services
             this._netflixAccountOptions = netflixAccountOptions;
             this._log = log;
 
-            this._databaseConnection.ClientChanged += OnDatabaseChanged;
+            this._databaseConnection.ClientChanged += OnClientChanged;
         }
 
-        private void OnDatabaseChanged(MongoClient client)
+        private void OnClientChanged(MongoClient client)
         {
             this._netflixAccountsCollection = client
                 .GetDatabase(this._databaseOptions.CurrentValue.DatabaseName)
@@ -98,7 +98,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
 
         public void Dispose()
         {
-            this._databaseConnection.ClientChanged -= OnDatabaseChanged;
+            this._databaseConnection.ClientChanged -= OnClientChanged;
         }
     }
 }

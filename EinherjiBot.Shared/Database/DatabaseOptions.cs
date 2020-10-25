@@ -10,5 +10,6 @@
         // collections
         public const string MiscellaneousCollectionName = "Miscellaneous";
         public string UserDataCollectionName { get; set; } = "UserData";
+        public string StellarisModsCollectionName { get; set; } = "StellarisMods";
     }
 }
