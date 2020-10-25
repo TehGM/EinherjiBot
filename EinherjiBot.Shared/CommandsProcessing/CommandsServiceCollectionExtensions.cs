@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.CommandsProcessing.Services;
 
@@ -14,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
 
-            services.AddSingleton<IRegexCommandModuleProvider, RegexComandModuleProvider>();
+            services.TryAddSingleton<IRegexCommandModuleProvider, RegexComandModuleProvider>();
             services.AddHostedService<SimpleCommandHandler>();
             services.AddHostedService<RegexCommandHandler>();
 

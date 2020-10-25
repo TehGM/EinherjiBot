@@ -17,5 +17,8 @@ namespace TehGM.EinherjiBot.Caching
             this.CachingTimeUtc = DateTime.UtcNow;
             this.ExpirationTimeUtc = this.CachingTimeUtc + lifetime;
         }
+
+        public static implicit operator TEntity(CachedEntity<TKey, TEntity> cached)
+            => cached.Entity;
     }
 }

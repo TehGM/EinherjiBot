@@ -1,55 +1,39 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
-using Discord;
-using TehGM.EinherjiBot.Config;
-using TehGM.EinherjiBot.Utilities;
-using Serilog;
+using TehGM.EinherjiBot.Client;
+using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.Netflix;
 
 namespace TehGM.EinherjiBot
 {
     class Program
     {
-        private static BotInitializer _initializer;
-
         static async Task Main(string[] args)
         {
-            // load configuration early - needed for datadog sink
-            BotConfig config = await BotConfig.LoadAllAsync();
+            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
 
-            // initialize logging
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Debug : LogSeverity.Info;
-            Logging.Default = Logging.CreateDefaultConfiguration(logLevel)
-                .WriteTo.DatadogLogs(
-                    config.Auth.DatadogAPI.ApiKey, 
-                    config.Auth.DatadogAPI.Source,
-                    config.Auth.DatadogAPI.Service,
-                    config.Auth.DatadogAPI.Host,
-                    config.Auth.DatadogAPI.Tags,
-                    config.Auth.DatadogAPI.ToDatadogConfiguration())
-                .CreateLogger();
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureSecretsFiles()
+                .ConfigureSerilog()
+                .ConfigureServices((context, services) =>
+                {
+                    // configure options
+                    services.Configure<EinherjiOptions>(context.Configuration);
+                    services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
+                    services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
+                    services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
 
-            // initialize bot
-            _initializer = new BotInitializer();
-            _initializer.LogLevel = logLevel;
-            await _initializer.StartClient(config);
-            _initializer.Client.Connected += Client_Connected;
-            await Task.Delay(-1);
-        }
+                    // add framework services
 
-        private static Task Client_Connected()
-        {
-            return _initializer.Client.SetGameAsync("TehGM's orders", null, ActivityType.Listening);
-        }
+                    // add custom services
+                    services.AddDiscordClient();
+                    services.AddCommands();
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            try
-            {
-                Logging.Default.Fatal((Exception)e.ExceptionObject, "Unhandled exception");
-            }
-            catch { }
+                    services.AddNetflixAccount();
+                })
+                .Build();
+            await host.RunAsync().ConfigureAwait(false);
         }
     }
 }
