@@ -19,7 +19,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private readonly IOptionsMonitor<CommandsOptions> _commandOptions;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _log;
-        private readonly ICollection<RegexCommandInstance> _commands;
+        private ICollection<RegexCommandInstance> _commands;
         private readonly SemaphoreSlim _lock;
         private CancellationToken _hostCancellationToken;
 
@@ -51,6 +51,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     this.AddAssembly(asm);
                 foreach (Type t in options.Classes)
                     this.AddType(t.GetTypeInfo());
+
+                this._commands = _commands.OrderByDescending(cmd => cmd.Priority).ToArray();
             }
             finally
             {
