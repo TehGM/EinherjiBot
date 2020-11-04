@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.3.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\EinherjiBot.Shared\EinherjiBot.Shared.csproj" />
   </ItemGroup>
 
