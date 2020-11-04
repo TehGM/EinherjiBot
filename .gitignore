@@ -342,6 +342,8 @@ healthchecksdb
 # PROJECT SPECIFIC
 # Authorization tokens
 auth.json
+appsecrets.json
+appsecrets.*.json
 # Bot data
 data.json
 data_intel.json
