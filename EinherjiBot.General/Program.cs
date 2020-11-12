@@ -54,6 +54,7 @@ namespace TehGM.EinherjiBot
                     services.AddNetflixAccount();
                     services.AddStellaris();
                     services.AddAdministration();
+                    services.AddBotChannelsRedirection();
                     services.AddPihole();
                 })
                 .Build();
