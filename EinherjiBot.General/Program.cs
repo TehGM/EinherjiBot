@@ -41,6 +41,7 @@ namespace TehGM.EinherjiBot
                     services.AddIntel();
                     services.AddNetflixAccount();
                     services.AddStellaris();
+                    services.AddAdministration();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);
