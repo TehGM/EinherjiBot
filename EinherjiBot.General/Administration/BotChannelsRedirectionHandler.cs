@@ -61,7 +61,7 @@ namespace TehGM.EinherjiBot.Administration
 
                     // if regex matched, means that the bot should not be used in this channel - tell the user off!
 
-                    SocketGuildUser user = await channel.Guild.GetGuildUser(message.Author).ConfigureAwait(false);
+                    SocketGuildUser user = await channel.Guild.GetGuildUserAsync(message.Author).ConfigureAwait(false);
                     string channelsText = GetChannelsMentionsText(redirection.AllowedChannelIDs, user);
                     if (channelsText == null)
                         return;

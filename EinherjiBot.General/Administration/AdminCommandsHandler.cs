@@ -120,7 +120,7 @@ namespace TehGM.EinherjiBot.Administration
                 return;
 
             // verify user can see both channels, and has move permission in both
-            SocketGuildUser user = await message.Guild.GetGuildUser(message.User).ConfigureAwait(false);
+            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User).ConfigureAwait(false);
             if (!user.GuildPermissions.Administrator)
             {
                 if (!await VerifyUserCanMoveAsync(channelFrom, user, channel).ConfigureAwait(false)
@@ -161,7 +161,7 @@ namespace TehGM.EinherjiBot.Administration
                 await message.ReplyAsync($"{options.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await message.Guild.GetGuildUser(message.User);
+            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User);
             if (!user.GetPermissions(channel).ManageMessages)
             {
                 await channel.SendMessageAsync($"{options.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);

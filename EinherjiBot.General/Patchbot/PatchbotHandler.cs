@@ -1,0 +1,236 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Discord;
+using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using TehGM.EinherjiBot.CommandsProcessing;
+using System.Linq;
+using Discord.Commands;
+using System.Text.RegularExpressions;
+using System.Threading;
+
+namespace TehGM.EinherjiBot.Patchbot
+{
+    [LoadRegexCommands]
+    [PersistentModule(PreInitialize = true)]
+    public class PatchbotHandler : IDisposable
+    {
+        private const char _namesSeparator = '|';
+        private readonly DiscordSocketClient _client;
+        private readonly IPatchbotGamesStore _patchbotGamesStore;
+        private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
+        private readonly IOptionsMonitor<PatchbotOptions> _patchbotOptions;
+        private readonly ILogger _log;
+
+        public PatchbotHandler(DiscordSocketClient client, ILogger<PatchbotHandler> log, IPatchbotGamesStore patchbotGameStore,
+            IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<PatchbotOptions> patchbotOptions)
+        {
+            this._client = client;
+            this._patchbotGamesStore = patchbotGameStore;
+            this._einherjiOptions = einherjiOptions;
+            this._patchbotOptions = patchbotOptions;
+            this._log = log;
+
+            this._client.MessageReceived += OnClientMessageReceivedAsync;
+        }
+
+        protected Task OnClientMessageReceivedAsync(SocketMessage message)
+        {
+            // verify this is a webhook messages
+            if (!message.Author.IsWebhook)
+                return Task.CompletedTask;
+
+            // verify this is a valid channel
+            if (_patchbotOptions.CurrentValue.ChannelIDs?.Contains(message.Channel.Id) != true)
+                return Task.CompletedTask;
+            if (!(message.Channel is SocketTextChannel))
+                return Task.CompletedTask;
+
+            // determine type of the webhook
+            if (_patchbotOptions.CurrentValue.PatchbotWebhookIDs?.Contains(message.Author.Id) == true)
+                return ProcessPatchbotMessageAsync(message);
+            return ProcessFollowedChannelMessageAsync(message);
+        }
+
+        private Task ProcessPatchbotMessageAsync(SocketMessage message)
+        {
+            if (message.Embeds.Count == 0)
+                return Task.CompletedTask;
+
+            // get game from embed author text
+            Embed embed = message.Embeds.First();
+            string gameName = embed.Author?.Name;
+
+            return PingGameAsync(message, gameName);
+        }
+
+        private async Task ProcessFollowedChannelMessageAsync(SocketMessage message)
+        {
+            if (!(message is SocketUserMessage msg))
+                return;
+            // attempt to get nickname, but use username if unavailable
+            string authorName = message.Author.Username;
+            SocketGuild guild = (msg.Channel as SocketGuildChannel)?.Guild;
+            if (guild != null)
+            {
+                SocketGuildUser guildUser = await guild.GetGuildUserAsync(message.Author);
+                if (guildUser != null)
+                    authorName = guildUser.Nickname ?? authorName;
+            }
+
+            // trim to #
+            int hashIndex = authorName.IndexOf('#');
+            string gameName = hashIndex < 0 ? authorName : authorName.Remove(hashIndex).TrimEnd();
+
+            await PingGameAsync(message, gameName);
+        }
+
+        private async Task PingGameAsync(SocketMessage message, string gameName)
+        {
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName).ConfigureAwait(false);
+            if (game == null)
+                return;
+            // if no one subscribes to this game, abort
+            if (game.SubscriberIDs.Count == 0)
+                return;
+
+            // get only subscribers that are present in this channel
+            IEnumerable<SocketGuildUser> presentSubscribers = (message.Channel as SocketGuildChannel).Users.Where(user => game.SubscriberIDs.Contains(user.Id));
+
+            // abort if none of the users has access to the channel
+            if (!presentSubscribers.Any())
+                return;
+
+            // ping them all
+            await message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}");
+        }
+
+        [RegexCommand(@"^patchbot sub(?:scribe)?(?: (.+))?")]
+        private async Task CmdSubscribeAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        {
+            if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
+            {
+                await SendNameRequiredAsync(message.Channel);
+                return;
+            }
+            string gameName = match.Groups[1].Value.Trim();
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
+            if (game == null)
+            {
+                await SendGameNotFoundAsync(message.Channel, gameName, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            if (game.SubscriberIDs.Add(message.User.Id))
+                await _patchbotGamesStore.SetAsync(game, cancellationToken).ConfigureAwait(false);
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will now get pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
+        }
+
+        [RegexCommand(@"^patchbot unsub(?:scribe)?(?: (.+))?")]
+        private async Task CmdUnsubscribeAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        {
+            if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
+            {
+                await SendNameRequiredAsync(message.Channel);
+                return;
+            }
+            string gameName = match.Groups[1].Value.Trim();
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
+            if (game == null)
+            {
+                await SendGameNotFoundAsync(message.Channel, gameName, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            if (game.SubscriberIDs.Remove(message.User.Id))
+                await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.");
+        }
+
+        [RegexCommand(@"^patchbot add (?: (.+))?")]
+        private async Task CmdAddGameAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        {
+            if (message.User.Id != _einherjiOptions.CurrentValue.AuthorID)
+            {
+                await SendInsufficientPermissionsAsync(message.Channel, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            // get names
+            if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
+            {
+                await SendNameAndAliasesRequiredAsync(message.Channel, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            string[] names = match.Groups[1].Value.Split(_namesSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Select(name => name.Trim()).Where(name => !string.IsNullOrWhiteSpace(name)).ToArray();
+            if (names.Length == 0)
+            {
+                await SendNameAndAliasesRequiredAsync(message.Channel, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // check if game doesn't yet exist
+            string gameName = names.First();
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
+            if (game == null)
+                game = new PatchbotGame(names.First(), names.TakeLast(names.Length - 1));
+            // if it does, just add new aliases
+            else
+            {
+                for (int i = 1; i < names.Length; i++)
+                {
+                    if (game.Aliases.Contains(names[i], StringComparer.OrdinalIgnoreCase))
+                        continue;
+                    game.Aliases.Add(names[i]);
+                }
+            }
+
+            await _patchbotGamesStore.SetAsync(game, cancellationToken).ConfigureAwait(false);
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` updated.");
+        }
+
+        [RegexCommand(@"^patchbot (?:remove|del|delete) (?: (.+))?")]
+        private async Task CmdRemoveGameAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        {
+            if (message.User.Id != _einherjiOptions.CurrentValue.AuthorID)
+            {
+                await SendInsufficientPermissionsAsync(message.Channel, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
+            {
+                await SendNameRequiredAsync(message.Channel, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+
+            // check if game exists
+            string gameName = match.Groups[1].Value.Trim();
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
+            if (game == null)
+            {
+                await SendGameNotFoundAsync(message.Channel, gameName, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` removed.");
+        }
+
+        private Task SendInsufficientPermissionsAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
+            => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Insufficient permissions.", cancellationToken);
+        private Task SendGameNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
+            => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Game `{gameName}` not found!", cancellationToken);
+        private Task SendIDNotValid(ISocketMessageChannel channel, string value, CancellationToken cancellationToken = default)
+            => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} `{value}` is not a valid webhook/bot ID!", cancellationToken);
+        private Task SendNameAndAliasesRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
+            => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Please specify game name and aliases (separated with `{_namesSeparator}`).", cancellationToken);
+        private Task SendNameRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
+            => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Please specify game name.", cancellationToken);
+
+        public void Dispose()
+        {
+            try { this._client.MessageReceived -= OnClientMessageReceivedAsync; } catch { }
+        }
+    }
+}

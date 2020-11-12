@@ -10,6 +10,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Netflix;
 using TehGM.EinherjiBot.Netflix.Services;
+using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Services;
 using TehGM.EinherjiBot.Stellaris.Services;
 
@@ -42,6 +43,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
                     services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
                     services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
+                    services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
 
                     // add framework services
 
@@ -56,6 +58,7 @@ namespace TehGM.EinherjiBot
                     services.AddAdministration();
                     services.AddBotChannelsRedirection();
                     services.AddPihole();
+                    services.AddPatchbot();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);

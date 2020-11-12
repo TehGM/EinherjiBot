@@ -42,7 +42,7 @@ namespace TehGM.EinherjiBot.Netflix
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUser(context.User).ConfigureAwait(false);
+            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanRetrieve(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: User not privileged");
@@ -82,7 +82,7 @@ namespace TehGM.EinherjiBot.Netflix
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUser(context.User).ConfigureAwait(false);
+            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanModify(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: User not privileged");

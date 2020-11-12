@@ -63,7 +63,7 @@ namespace TehGM.EinherjiBot
             SocketGuild guild = (msg.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                SocketGuildUser guildUser = await guild.GetGuildUser(message.Author);
+                SocketGuildUser guildUser = await guild.GetGuildUserAsync(message.Author);
                 if (guildUser != null)
                     authorName = guildUser.Nickname ?? authorName;
             }
@@ -135,7 +135,7 @@ namespace TehGM.EinherjiBot
                 return;
 
             // validate permissions
-            SocketGuildUser user = await channel.Guild.GetGuildUser(message.User);
+            SocketGuildUser user = await channel.Guild.GetGuildUserAsync(message.User);
             if (user == null)
                 return;
             if (!await ValidatePermissionsAsync(channel, user, GuildPermission.ManageGuild))
@@ -161,7 +161,7 @@ namespace TehGM.EinherjiBot
             if (!(message.Channel is SocketTextChannel channel))
                 return;
             // validate permissions
-            SocketGuildUser user = await channel.Guild.GetGuildUser(message.User);
+            SocketGuildUser user = await channel.Guild.GetGuildUserAsync(message.User);
             if (user == null)
                 return;
             if (!await ValidatePermissionsAsync(channel, user, GuildPermission.ManageGuild))

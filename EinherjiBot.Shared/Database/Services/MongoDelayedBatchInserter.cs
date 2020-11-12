@@ -47,6 +47,21 @@ namespace TehGM.EinherjiBot.Database.Services
             }
         }
 
+        public async Task UnbatchAsync(TKey key, CancellationToken cancellationToken = default)
+        {
+            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                this._batchedInserts.Remove(key);
+                if (_batchedInserts.Count == 0)
+                    _batchTcs?.TrySetCanceled();
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
         public void Flush()
         {
             _batchTcs?.TrySetResult(null);
@@ -57,26 +72,35 @@ namespace TehGM.EinherjiBot.Database.Services
             _batchTcs = new TaskCompletionSource<object>();
             Task delayTask = Task.Delay(this._delay);
 
-            await Task.WhenAny(_batchTcs.Task, delayTask).ConfigureAwait(false);
-
-            await _lock.WaitAsync().ConfigureAwait(false);
             try
             {
-                int batchCount = _batchedInserts.Count;
-                _log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
-                foreach (KeyValuePair<TKey, MongoDelayedInsert<TItem>> inserts in _batchedInserts)
-                    await this.Collection.ReplaceOneAsync(inserts.Value.Filter, inserts.Value.Item, inserts.Value.ReplaceOptions ?? this.DefaultReplaceOptions).ConfigureAwait(false);
-                _batchedInserts.Clear();
-                _log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
+                await Task.WhenAny(_batchTcs.Task, delayTask).ConfigureAwait(false);
+
+                await _lock.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    int batchCount = _batchedInserts.Count;
+                    _log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
+                    foreach (KeyValuePair<TKey, MongoDelayedInsert<TItem>> inserts in _batchedInserts)
+                        await this.Collection.ReplaceOneAsync(inserts.Value.Filter, inserts.Value.Item, inserts.Value.ReplaceOptions ?? this.DefaultReplaceOptions).ConfigureAwait(false);
+                    _batchedInserts.Clear();
+                    _log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex) when (ex.LogAsError(_log, "Error occured when flushing a batch"))
+                {
+                    throw;
+                }
+                finally
+                {
+                    _batchTcs = null;
+                    _lock.Release();
+                }
             }
-            catch (Exception ex) when (ex.LogAsError(_log, "Error occured when flushing a batch"))
-            {
-                throw;
-            }
+            catch (OperationCanceledException) { }
             finally
             {
                 _batchTcs = null;
-                _lock.Release();
             }
         }
 
