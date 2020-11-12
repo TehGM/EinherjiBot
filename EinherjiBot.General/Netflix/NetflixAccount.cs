@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.Netflix
         public void SetLogin(string login, ulong modifiedBy)
         {
             this.Login = login;
-            UpdateLastModified(modifiedBy);
+            UpdateModified(modifiedBy);
         }
 
         public void SetPassword(string password, ulong modifiedBy)

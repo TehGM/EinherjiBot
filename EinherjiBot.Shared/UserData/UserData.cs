@@ -31,8 +31,8 @@ namespace TehGM.EinherjiBot
         public bool ChangeStatus(UserStatus status)
         {
             if (status == UserStatus.Offline)
-                return ChangeState(false);
-            else return ChangeState(true);
+                return ChangeStatus(false);
+            else return ChangeStatus(true);
         }
     }
 }
