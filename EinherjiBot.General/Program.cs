@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using System.Globalization;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.Administration;
 using TehGM.EinherjiBot.Caching;
@@ -23,12 +21,6 @@ namespace TehGM.EinherjiBot
     {
         static async Task Main(string[] args)
         {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings()
-            {
-                Formatting = Formatting.None,
-                Culture = CultureInfo.InvariantCulture
-            };
-
             LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
 
             IHost host = Host.CreateDefaultBuilder(args)
