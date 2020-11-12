@@ -8,10 +8,12 @@ using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Client;
 using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.EliteDangerous;
+using TehGM.EinherjiBot.EliteDangerous.Services;
 using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Netflix;
 using TehGM.EinherjiBot.Netflix.Services;
 using TehGM.EinherjiBot.Patchbot;
+using TehGM.EinherjiBot.Patchbot.Services;
 using TehGM.EinherjiBot.Services;
 using TehGM.EinherjiBot.Stellaris.Services;
 
@@ -39,6 +41,8 @@ namespace TehGM.EinherjiBot
                     services.Configure<CachingOptions>(MongoUserDataStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoUserDataStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoNetflixAccountStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoNetflixAccountStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoStellarisModsStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoStellarisModsStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoCommunityGoalsHistoryStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoCommunityGoalsHistoryStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoPatchbotGameStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoPatchbotGameStore.CacheOptionName));
                     services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
