@@ -7,6 +7,7 @@ using TehGM.EinherjiBot.Administration;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Client;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.EliteDangerous;
 using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Netflix;
 using TehGM.EinherjiBot.Netflix.Services;
@@ -44,6 +45,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
                     services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
+                    services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
 
                     // add framework services
 
@@ -59,6 +61,7 @@ namespace TehGM.EinherjiBot
                     services.AddBotChannelsRedirection();
                     services.AddPihole();
                     services.AddPatchbot();
+                    services.AddEliteCommunityGoals();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);
