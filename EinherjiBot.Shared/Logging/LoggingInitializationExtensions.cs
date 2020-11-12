@@ -32,6 +32,7 @@ namespace Microsoft.Extensions.Hosting
                     logLevel: ddOptions.OverrideLogLevel ?? LogEventLevel.Information
                 );
             }
+            Log.Logger = config.CreateLogger();
         }
 
         public static void EnableUnhandledExceptionLogging()
