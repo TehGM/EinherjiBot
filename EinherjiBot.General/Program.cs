@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
+using TehGM.EinherjiBot.Administration;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Client;
 using TehGM.EinherjiBot.CommandsProcessing;
@@ -30,6 +31,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
+                    services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
 
                     // add framework services
 
