@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDiscordClient();
             services.AddMongoConnection();
             services.TryAddSingleton<IEntityCache<ObjectId, StellarisMod>, EntityCache<ObjectId, StellarisMod>>();
-            services.TryAddTransient<IStellarisModsStore, MongoStellarisModsStore>();
+            services.TryAddSingleton<IStellarisModsStore, MongoStellarisModsStore>();
 
             return services;
         }

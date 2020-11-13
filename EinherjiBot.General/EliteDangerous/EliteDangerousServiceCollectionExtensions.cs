@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddMongoConnection();
             services.TryAddSingleton<IEntityCache<int, CommunityGoal>, EntityCache<int, CommunityGoal>>();
-            services.TryAddTransient<ICommunityGoalsHistoryStore, MongoCommunityGoalsHistoryStore>();
+            services.TryAddSingleton<ICommunityGoalsHistoryStore, MongoCommunityGoalsHistoryStore>();
 
             return services;
         }

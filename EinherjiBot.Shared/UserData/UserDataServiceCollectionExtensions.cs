@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddMongoConnection();
             services.TryAddSingleton<IEntityCache<ulong, UserData>, EntityCache<ulong, UserData>>();
-            services.TryAddTransient<IUserDataStore, MongoUserDataStore>();
+            services.TryAddSingleton<IUserDataStore, MongoUserDataStore>();
 
             return services;
         }
