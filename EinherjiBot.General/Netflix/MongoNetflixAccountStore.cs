@@ -36,6 +36,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
             this._log = log;
 
             this._databaseConnection.ClientChanged += OnClientChanged;
+            this.OnClientChanged(this._databaseConnection.Client);
         }
 
         private void OnClientChanged(MongoClient client)
