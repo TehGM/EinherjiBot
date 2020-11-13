@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using TehGM.EinherjiBot.DataMigration.Migrations;
 
 namespace TehGM.EinherjiBot.DataMigration
 {
@@ -30,7 +31,8 @@ namespace TehGM.EinherjiBot.DataMigration
             ConventionRegistry.Register("Conventions", conventionPack, _ => true);
             IMongoDatabase db = client.GetDatabase(settings.DatabaseName);
 
-            // migrations go here
+            // run migrations
+            await (new NetflixAccountMigration(_log, db, "Miscellaneous")).RunMigrationAsync(dataJson["netflixAccount"]);
 
             _log.Information("Done");
             Console.ReadLine();
