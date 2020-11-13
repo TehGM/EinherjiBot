@@ -29,6 +29,9 @@ namespace TehGM.EinherjiBot.EliteDangerous
         private DateTime _cacheUpdateTimeUtc;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
+        private bool _enabled = false;
+        private readonly IDisposable _optionsChangeRegistration;
+
         public CommunityGoalsHandler(DiscordSocketClient client, IHttpClientFactory httpClientFactory, ILogger<CommunityGoalsHandler> log, ICommunityGoalsHistoryStore cgHistoryStore,
             IOptionsMonitor<CommunityGoalsOptions> options)
         {
@@ -39,12 +42,25 @@ namespace TehGM.EinherjiBot.EliteDangerous
             this._cgHistoryStore = cgHistoryStore;
             this._options = options;
 
-            if (this._client.ConnectionState == ConnectionState.Connected)
+            this._enabled = ValidateInaraCredentials();
+            if (!this._enabled)
+                _log.LogWarning("Inara credentials missing. Elite Dangerous Community Goals feature will be disabled");
+            else if (this._client.ConnectionState == ConnectionState.Connected)
                 StartAutomaticNewsPosting();
 
             this._client.Ready += OnClientReady;
             this._client.Connected += OnClientConnected;
             this._client.Disconnected += OnClientDisconnected;
+            this._optionsChangeRegistration = this._options.OnChange(o =>
+            {
+                bool previousState = this._enabled;
+                this._enabled = ValidateInaraCredentials();
+                if (previousState != this._enabled)
+                {
+                    StopAutomaticNewsPosting();
+                    StartAutomaticNewsPosting();
+                }
+            });
         }
 
         private Task OnClientConnected()
@@ -52,7 +68,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
 
         private Task OnClientReady()
         {
-            if (this._client.ConnectionState == ConnectionState.Connected && this._client.CurrentUser != null)
+            if (this._enabled && this._client.ConnectionState == ConnectionState.Connected && this._client.CurrentUser != null)
                 StartAutomaticNewsPosting();
             return Task.CompletedTask;
         }
@@ -81,7 +97,13 @@ namespace TehGM.EinherjiBot.EliteDangerous
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        TimeSpan nextUpdateIn = (_lastRetrievalTime + _options.CurrentValue.AutoNewsInterval) - DateTime.UtcNow;
+                        if (!this._enabled)
+                        {
+                            _log.LogWarning("Inara credentials missing. Elite Dangerous Community Goals feature will be disabled");
+                            return;
+                        }
+
+                         TimeSpan nextUpdateIn = (_lastRetrievalTime + _options.CurrentValue.AutoNewsInterval) - DateTime.UtcNow;
                         // if still waiting, await time, and repeat iteration
                         if (nextUpdateIn > TimeSpan.Zero)
                         {
@@ -136,10 +158,24 @@ namespace TehGM.EinherjiBot.EliteDangerous
             _autoModeCTS = null;
         }
 
+        private bool ValidateInaraCredentials()
+        {
+            CommunityGoalsOptions options = _options.CurrentValue;
+
+            return !string.IsNullOrWhiteSpace(options.InaraApiKey) &&
+                !string.IsNullOrWhiteSpace(options.InaraAppName) &&
+                !string.IsNullOrWhiteSpace(options.InaraAppVersion);
+        }
+
         [RegexCommand("^elite (?:cgs?|community goals?)")]
         private async Task CmdCommunityGoals(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
+            if (!this._enabled)
+            {
+                _log.LogDebug("Unable to handle Elite Dangerous Community Goals command - Inara credentials missing");
+                return;
+            }
             IEnumerable<CommunityGoal> cgs = await QueryCommunityGoalsAsync(cancellationToken).ConfigureAwait(false);
             foreach (CommunityGoal cg in cgs)
                 await context.ReplyAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
@@ -200,7 +236,6 @@ namespace TehGM.EinherjiBot.EliteDangerous
             EmbedBuilder builder = new EmbedBuilder()
                 .WithAuthor("Elite Dangerous Community Goals", _client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
                 .WithTitle(cg.Name)
-                //.WithDescription($"**Objective**: `{cg.Objective}`\n\n{descriptionTrimmed}")
                 .WithDescription($"```\n{cg.Objective}\n```\n{descriptionTrimmed}")
                 .AddField("System", cg.SystemName, true)
                 .AddField("Station", cg.StationName, true)
@@ -230,6 +265,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
         public void Dispose()
         {
             StopAutomaticNewsPosting();
+            try { this._optionsChangeRegistration?.Dispose(); } catch { }
             try { this._client.Ready -= OnClientReady; } catch { }
             try { this._client.Connected -= OnClientConnected; } catch { }
             try { this._client.Disconnected -= OnClientDisconnected; } catch { }

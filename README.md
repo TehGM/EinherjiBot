@@ -29,7 +29,7 @@ This file will hold secrets, so it should not be included in source control repo
 7. *(optional)* If you're registered with Inara API, create a following section in `appsecrets.json`, replacing all tags as needed:
 ```json
 "EliteCommunityGoals": {
-  "InaraAppInDevelopment": <true/false>,
+  "InaraAppInDevelopment": true,
   "InaraAppName": "<app-name>",
   "InaraAppVersion": "<app-version>",
   "InaraApiKey": "<api-key>"
