@@ -39,9 +39,9 @@ namespace TehGM.EinherjiBot.Administration
             // allow if channel or user is on exceptions list
             if (!(message.Channel is SocketTextChannel channel))
                 return;
-            if (options.IgnoredChannelIDs.Contains(message.Channel.Id))
+            if (options.IgnoredChannelIDs?.Contains(message.Channel.Id) == true)
                 return;
-            if (options.IgnoredUserIDs.Contains(message.Author.Id))
+            if (options.IgnoredUserIDs?.Contains(message.Author.Id) == true)
                 return;
             if (options.IgnoreBots && (message.Author.IsBot || message.Author.IsWebhook))
                 return;
