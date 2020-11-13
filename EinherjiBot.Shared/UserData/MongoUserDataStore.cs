@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.Services
             DatabaseOptions options = base.DatabaseOptions.CurrentValue;
             this._collection = base.MongoConnection.Client
                 .GetDatabase(options.DatabaseName)
-                .GetCollection<UserData>(options.UserDataCollectionName);
+                .GetCollection<UserData>(options.UsersDataCollectionName);
             base.RecreateBatchInserter(_cachingOptions.Get(CacheOptionName).Lifetime, this._collection);
         }
 

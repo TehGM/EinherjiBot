@@ -13,7 +13,7 @@ The bot is split into 2 projects:
 
 ## Running locally
 1. Clone this repository to get all files.
-2. Set up MongoDB database with following collections: `Miscellaneous`, `StellarisMods`, `PatchbotGames`, `EliteCommunityGoals` and `UserData`.
+2. Set up MongoDB database with following collections: `Miscellaneous`, `StellarisMods`, `PatchbotGames`, `EliteCommunityGoals` and `UsersData`.
 3. Create `appsecrets.json` file. See [example file](appsecrets-example.json) for example structure.  
 This file will hold secrets, so it should not be included in source control repository. `.gitignore` file included with this repo will ignore `appsecrets.json` and `appsecrets.*.json` files.
 4. Add bot token from Discord Developer Portal to secrets file.
