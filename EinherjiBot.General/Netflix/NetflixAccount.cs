@@ -1,4 +1,5 @@
 ﻿using System;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.Netflix
@@ -6,6 +7,8 @@ namespace TehGM.EinherjiBot.Netflix
     [BsonDiscriminator("NetflixAccount", Required = true)]
     public class NetflixAccount
     {
+        [BsonId]
+        private ObjectId _id;
         [BsonElement("login")]
         public string Login { get; private set; }
         [BsonElement("password")]
@@ -14,6 +17,11 @@ namespace TehGM.EinherjiBot.Netflix
         public ulong? ModifiedByID { get; private set; }
         [BsonElement("modifiedTimestamp")]
         public DateTime ModifiedTimestampUTC { get; private set; }
+
+        public NetflixAccount()
+        {
+            this._id = ObjectId.GenerateNewId();
+        }
 
         public void SetLogin(string login, ulong modifiedBy)
         {
