@@ -111,7 +111,7 @@ namespace TehGM.EinherjiBot.Intel
             if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
                 return;
 
-            _log.LogTrace("Updating intel on user {{UserID}", userBefore.Id);
+            _log.LogTrace("Updating intel on user {UserID}", userBefore.Id);
             UserData data = await _userDataStore.GetAsync(userAfter.Id, _hostCts.Token).ConfigureAwait(false);
             if (data.ChangeStatus(userAfter.Status))
                 await _userDataStore.SetAsync(data, _hostCts.Token).ConfigureAwait(false);
