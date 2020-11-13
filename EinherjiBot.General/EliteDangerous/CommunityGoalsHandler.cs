@@ -109,6 +109,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                         _log.LogTrace("Sending CGs");
                         foreach (CommunityGoal cg in newOrJustFinishedCGs)
                             await guildChannel.SendMessageAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
+                        _lastRetrievalTime = DateTime.UtcNow;
                     }
                 }
                 catch (OperationCanceledException) { }
