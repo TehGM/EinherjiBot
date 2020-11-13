@@ -127,8 +127,8 @@ namespace TehGM.EinherjiBot.Intel
         {
             if (user.Activity == null)
                 return "-";
-            if (user.Activity.Type == ActivityType.CustomStatus)
-                return user.Activity.Details;
+            if (user.Activity is CustomStatusGame customStatus)
+                return customStatus.State;
             return $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
         }
 
