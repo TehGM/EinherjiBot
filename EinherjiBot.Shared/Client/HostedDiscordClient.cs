@@ -82,8 +82,9 @@ namespace TehGM.EinherjiBot.Client
 
         public void Dispose()
         {
-            _client.Log -= OnClientLog;
-            _client?.Dispose();
+            try { _client.Ready -= OnClientReady; } catch { }
+            try { _client.Log -= OnClientLog; } catch { }
+            try { _client?.Dispose(); } catch { }
         }
     }
 }

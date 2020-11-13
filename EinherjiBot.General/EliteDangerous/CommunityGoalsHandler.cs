@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -44,12 +43,17 @@ namespace TehGM.EinherjiBot.EliteDangerous
                 StartAutomaticNewsPosting();
 
             this._client.Ready += OnClientReady;
+            this._client.Connected += OnClientConnected;
             this._client.Disconnected += OnClientDisconnected;
         }
 
+        private Task OnClientConnected()
+            => OnClientReady();
+
         private Task OnClientReady()
         {
-            StartAutomaticNewsPosting();
+            if (this._client.ConnectionState == ConnectionState.Connected && this._client.CurrentUser != null)
+                StartAutomaticNewsPosting();
             return Task.CompletedTask;
         }
 
@@ -225,6 +229,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
         {
             StopAutomaticNewsPosting();
             try { this._client.Ready -= OnClientReady; } catch { }
+            try { this._client.Connected -= OnClientConnected; } catch { }
             try { this._client.Disconnected -= OnClientDisconnected; } catch { }
             try { this._lock?.Dispose(); } catch { }
         }
