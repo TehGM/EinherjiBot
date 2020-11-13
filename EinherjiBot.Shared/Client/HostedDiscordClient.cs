@@ -23,6 +23,7 @@ namespace TehGM.EinherjiBot.Client
             this._log = log;
 
             DiscordSocketConfig clientConfig = new DiscordSocketConfig();
+            clientConfig.LogLevel = LogSeverity.Verbose;
             _client = new DiscordSocketClient(clientConfig);
             _client.Log += OnClientLog;
 
