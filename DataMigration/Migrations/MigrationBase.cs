@@ -28,6 +28,7 @@ namespace TehGM.EinherjiBot.DataMigration.Migrations
 
         public async Task RunMigrationAsync(JToken itemsJson, CancellationToken cancellationToken = default)
         {
+            Console.WriteLine();
             this.Log.Information("Starting migration {OldEntityType} -> {NewEntityType}", typeof(TOld).Name, typeof(TNew).Name);
             this.Log.Debug("Reading items from JSON");
             List<TOld> oldItems;
@@ -52,6 +53,7 @@ namespace TehGM.EinherjiBot.DataMigration.Migrations
             this.Log.Debug("Inserting {Count} new items of type {OldEntityType}", newItems.Count, typeof(TNew).Name);
             await collection.InsertManyAsync(newItems, _options, cancellationToken).ConfigureAwait(false);
             this.Log.Debug("Finished migration {OldEntityType} -> {NewEntityType}", typeof(TOld).Name, typeof(TNew).Name);
+            Console.WriteLine();
         }
 
         protected abstract TNew ConvertEntity(TOld oldEntity);

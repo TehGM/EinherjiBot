@@ -35,6 +35,7 @@ namespace TehGM.EinherjiBot.DataMigration
             // run migrations
             await new NetflixAccountMigration(_log, db, "Miscellaneous").RunMigrationAsync(dataJson["netflixAccount"]);
             await new StellarisModsMigration(_log, db, "StellarisMods").RunMigrationAsync(dataJson["stellarisMods"]);
+            await new PatchbotGamesMigration(_log, db, "PatchbotGames").RunMigrationAsync(dataJson["patchbotHelper"]["games"]);
 
             _log.Information("Done");
             Console.ReadLine();
