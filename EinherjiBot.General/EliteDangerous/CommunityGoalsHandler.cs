@@ -72,8 +72,10 @@ namespace TehGM.EinherjiBot.EliteDangerous
             Task autoTask = Task.Run(async () =>
             {
                 using IDisposable context = _log.UseSource("Elite CGs");
-                _log.LogDebug("Starting automatic ED CG checker");
                 CancellationToken cancellationToken = _autoModeCTS.Token;
+                // wait 5 seconds to let the client get connection state in check
+                await Task.Delay(5 * 1000, cancellationToken).ConfigureAwait(false);
+                _log.LogDebug("Starting automatic ED CG checker");
                 DateTime _lastRetrievalTime = DateTime.MinValue;
                 try
                 {
