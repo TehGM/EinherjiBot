@@ -5,6 +5,7 @@ using TehGM.EinherjiBot.Administration;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Client;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.Database;
 using TehGM.EinherjiBot.EliteDangerous;
 using TehGM.EinherjiBot.EliteDangerous.Services;
 using TehGM.EinherjiBot.Kathara;
@@ -30,6 +31,7 @@ namespace TehGM.EinherjiBot
                 {
                     // configure options
                     services.Configure<EinherjiOptions>(context.Configuration);
+                    services.Configure<DatabaseOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<CachingOptions>(MongoUserDataStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoUserDataStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoNetflixAccountStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoNetflixAccountStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoStellarisModsStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoStellarisModsStore.CacheOptionName));
