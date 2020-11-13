@@ -32,6 +32,9 @@ namespace TehGM.EinherjiBot
             => LogContext.PushProperty("Source", source);
 
         public static IDisposable BeginCommandScope(this ILogger log, SocketCommandContext context, object handler = null, [CallerMemberName] string cmdName = null)
+            => BeginCommandScope(log, context, handler?.GetType(), cmdName);
+
+        public static IDisposable BeginCommandScope(this ILogger log, SocketCommandContext context, Type handlerType = null, [CallerMemberName] string cmdName = null)
         {
             Dictionary<string, object> state = new Dictionary<string, object>
             {
@@ -42,8 +45,8 @@ namespace TehGM.EinherjiBot
             };
             if (!string.IsNullOrWhiteSpace(cmdName))
                 state.Add("Command.Method", cmdName);
-            if (handler != null)
-                state.Add("Command.Handler", handler.GetType().Name);
+            if (handlerType != null)
+                state.Add("Command.Handler", handlerType.Name);
             return log.BeginScope(state);
         }
 

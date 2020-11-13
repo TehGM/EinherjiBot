@@ -136,6 +136,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 foreach (RegexCommandInstance command in _commands)
                 {
+                    using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
                         ExecuteResult result = (ExecuteResult)await command.ExecuteAsync(
