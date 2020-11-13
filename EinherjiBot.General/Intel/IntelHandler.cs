@@ -214,7 +214,7 @@ namespace TehGM.EinherjiBot.Intel
                 case DefaultMessageNotifications.MentionsOnly:
                     return "Mentions only";
                 default:
-                    return null;
+                    return value.ToString();
             }
         }
 
@@ -229,7 +229,7 @@ namespace TehGM.EinherjiBot.Intel
                 case ExplicitContentFilterLevel.AllMembers:
                     return "Filtered for all members";
                 default:
-                    return null;
+                    return value.ToString();
             }
         }
 
@@ -248,7 +248,7 @@ namespace TehGM.EinherjiBot.Intel
                 case ActivityType.CustomStatus:
                     return string.Empty;
                 default:
-                    return null;
+                    return value.ToString();
             }
         }
         #endregion
