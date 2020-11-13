@@ -38,7 +38,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         break;
                     }
                 }
-                throw new InvalidOperationException($"Cannot create {commandInstance.ModuleType.FullName} - none of the constructors can have its dependencies resolved");
+                if (moduleInfo == null)
+                    throw new InvalidOperationException($"Cannot create {commandInstance.ModuleType.FullName} - none of the constructors can have its dependencies resolved");
             }
 
             // check if there is already a persistent or shared instance

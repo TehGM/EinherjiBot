@@ -33,6 +33,7 @@ namespace TehGM.EinherjiBot.Patchbot
             this._einherjiOptions = einherjiOptions;
             this._patchbotOptions = patchbotOptions;
             this._log = log;
+            this._hostCts = new CancellationTokenSource();
 
             this._client.MessageReceived += OnClientMessageReceivedAsync;
         }
