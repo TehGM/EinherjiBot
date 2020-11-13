@@ -192,39 +192,48 @@ namespace TehGM.EinherjiBot.Administration
                 return;
             }
 
-            // get last X messages
-            IEnumerable<IMessage> msgs = await channel.GetMessagesAsync(count + 1, cancellationToken).FlattenAsync().ConfigureAwait(false);
-            RestUserMessage confirmationMsg = null;
-            // bulk can only delete messages not older than 2 weeks
-            DateTimeOffset bulkMaxAge = DateTimeOffset.UtcNow - TimeSpan.FromDays(14) - TimeSpan.FromSeconds(2);
-            IEnumerable<IMessage> newerMessages = msgs.Where(msg => msg.Timestamp >= bulkMaxAge);
-            IEnumerable<IMessage> olderMessages = msgs.Except(newerMessages);
-            int olderCount = olderMessages.Count();
-            int actualCount = msgs.Count() - 1;
-            _log.LogDebug("Removing {TotalCount} messages. {BulkIncompatibleCount} messages cannot be removed in bulk", msgs.Count(), olderCount);
-            // first delete bulk-deletable
-            await channel.DeleteMessagesAsync(newerMessages, cancellationToken).ConfigureAwait(false);
-            // delete older msgs one by one
-            if (olderCount > 0)
+            // start a new task to prevent deletion from blocking gateway task
+            _ = Task.Run(async () =>
             {
-                await SendOrUpdateConfirmationAsync($"You are requesting deletion of {actualCount} messages, {olderCount} of which are older than 2 weeks.\n" +
-                    "Deleting these messages may take a while due to Discord's rate limiting, so please be patient.").ConfigureAwait(false);
-                foreach (IMessage msg in olderMessages)
-                    await channel.DeleteMessageAsync(msg, cancellationToken).ConfigureAwait(false);
-            }
-            await SendOrUpdateConfirmationAsync(actualCount > 0 ?
-                $"{options.SuccessSymbol} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down." :
-                $"{options.SuccessSymbol} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.").ConfigureAwait(false);
-            await Task.Delay(6 * 1000, cancellationToken).ConfigureAwait(false);
-            await channel.DeleteMessageAsync(confirmationMsg, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    // get last X messages
+                    IEnumerable<IMessage> msgs = await channel.GetMessagesAsync(count + 1, cancellationToken).FlattenAsync().ConfigureAwait(false);
+                    RestUserMessage confirmationMsg = null;
+                    // bulk can only delete messages not older than 2 weeks
+                    DateTimeOffset bulkMaxAge = DateTimeOffset.UtcNow - TimeSpan.FromDays(14) - TimeSpan.FromSeconds(2);
+                    IEnumerable<IMessage> newerMessages = msgs.Where(msg => msg.Timestamp >= bulkMaxAge);
+                    IEnumerable<IMessage> olderMessages = msgs.Except(newerMessages);
+                    int olderCount = olderMessages.Count();
+                    int actualCount = msgs.Count() - 1;
+                    _log.LogDebug("Removing {TotalCount} messages. {BulkIncompatibleCount} messages cannot be removed in bulk", msgs.Count(), olderCount);
+                    // first delete bulk-deletable
+                    await channel.DeleteMessagesAsync(newerMessages, cancellationToken).ConfigureAwait(false);
+                    // delete older msgs one by one
+                    if (olderCount > 0)
+                    {
+                        await SendOrUpdateConfirmationAsync($"You are requesting deletion of {actualCount} messages, {olderCount} of which are older than 2 weeks.\n" +
+                            "Deleting these messages may take a while due to Discord's rate limiting, so please be patient.").ConfigureAwait(false);
+                        foreach (IMessage msg in olderMessages)
+                            await channel.DeleteMessageAsync(msg, cancellationToken).ConfigureAwait(false);
+                    }
+                    await SendOrUpdateConfirmationAsync(actualCount > 0 ?
+                        $"{options.SuccessSymbol} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down." :
+                        $"{options.SuccessSymbol} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.").ConfigureAwait(false);
+                    await Task.Delay(6 * 1000, cancellationToken).ConfigureAwait(false);
+                    await channel.DeleteMessageAsync(confirmationMsg, cancellationToken).ConfigureAwait(false);
 
-            async Task SendOrUpdateConfirmationAsync(string text)
-            {
-                if (confirmationMsg == null)
-                    confirmationMsg = await channel.SendMessageAsync(text, cancellationToken).ConfigureAwait(false);
-                else
-                    await confirmationMsg.ModifyAsync(props => props.Content = text, cancellationToken).ConfigureAwait(false);
-            }
+                    async Task SendOrUpdateConfirmationAsync(string text)
+                    {
+                        if (confirmationMsg == null)
+                            confirmationMsg = await channel.SendMessageAsync(text, cancellationToken).ConfigureAwait(false);
+                        else
+                            await confirmationMsg.ModifyAsync(props => props.Content = text, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex) when (ex.LogAsError(_log, "Exception occured when purging messages")) { }
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         protected Task OnUserLeftAsync(SocketGuildUser user)
