@@ -32,7 +32,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
         public uint ContributingPilotsCount { get; private set; }
         [BsonIgnore]
         [JsonProperty("contributionsTotal")]
-        public uint ContributionsCount { get; private set; }
+        public ulong ContributionsCount { get; private set; }
         [BsonElement("isCompleted")]
         [JsonProperty("isCompleted")]
         public bool IsCompleted { get; private set; }

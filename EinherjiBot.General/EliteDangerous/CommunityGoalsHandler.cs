@@ -68,7 +68,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
             Task autoTask = Task.Run(async () =>
             {
                 using IDisposable context = _log.UseSource("Elite CGs");
-                _log.LogDebug("Starting ED automatic CG checker");
+                _log.LogDebug("Starting automatic ED CG checker");
                 CancellationToken cancellationToken = _autoModeCTS.Token;
                 DateTime _lastRetrievalTime = DateTime.MinValue;
                 try
@@ -111,9 +111,11 @@ namespace TehGM.EinherjiBot.EliteDangerous
                             await guildChannel.SendMessageAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
                     }
                 }
+                catch (OperationCanceledException) { }
+                catch (Exception ex) when (ex.LogAsError(_log, "Error occured in automatic ED CG checker loop")) { }
                 finally
                 {
-                    _log.LogDebug("Stopping ED automatic CG checker");
+                    _log.LogDebug("Stopping automatic ED CG checker");
                     // clear CTS on exiting if it wasn't cleared yet
                     if (_autoModeCTS?.Token == cancellationToken)
                         _autoModeCTS = null;
