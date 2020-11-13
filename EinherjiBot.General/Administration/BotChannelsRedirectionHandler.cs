@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -20,6 +20,7 @@ namespace TehGM.EinherjiBot.Administration
         private readonly IOptionsMonitor<BotChannelsRedirectionOptions> _redirectionOptions;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly ILogger _log;
+        private readonly CancellationTokenSource _hostCts;
 
         public BotChannelsRedirectionHandler(DiscordSocketClient client, ILogger<BotChannelsRedirectionHandler> log,
             IOptionsMonitor<BotChannelsRedirectionOptions> redirectionOptions, IOptionsMonitor<EinherjiOptions> einherjiOptions)
@@ -28,6 +29,7 @@ namespace TehGM.EinherjiBot.Administration
             this._redirectionOptions = redirectionOptions;
             this._einherjiOptions = einherjiOptions;
             this._log = log;
+            this._hostCts = new CancellationTokenSource();
 
             this._client.MessageReceived += OnClientMessageReceivedAsync;
         }
@@ -65,7 +67,7 @@ namespace TehGM.EinherjiBot.Administration
                     string channelsText = GetChannelsMentionsText(redirection.AllowedChannelIDs, user);
                     if (channelsText == null)
                         return;
-                    await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.");
+                    await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
                 }
             }
         }
@@ -85,6 +87,8 @@ namespace TehGM.EinherjiBot.Administration
 
         public void Dispose()
         {
+            try { this._hostCts?.Cancel(); } catch { }
+            try { this._hostCts?.Dispose(); } catch { }
             try { this._client.MessageReceived -= OnClientMessageReceivedAsync; } catch { }
         }
     }

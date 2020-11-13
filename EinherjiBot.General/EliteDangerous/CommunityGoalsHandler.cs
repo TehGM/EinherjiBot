@@ -80,6 +80,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                         if (nextUpdateIn > TimeSpan.Zero)
                         {
                             _log.LogTrace("Next update in: {TimeRemaining}", nextUpdateIn);
+                            // this will not reflect on updates to options monitor, but that's ok
                             await Task.Delay(nextUpdateIn, cancellationToken).ConfigureAwait(false);
                             continue;
                         }
@@ -91,7 +92,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                             throw new InvalidOperationException($"Channel {options.AutoNewsChannelID} is not a valid guild text channel.");
 
                         // retrieve CG data, take only new or finished ones, and then update cache
-                        IEnumerable<CommunityGoal> allCGs = await QueryCommunityGoalsAsync();
+                        IEnumerable<CommunityGoal> allCGs = await QueryCommunityGoalsAsync(cancellationToken).ConfigureAwait(false);
                         IList<CommunityGoal> newOrJustFinishedCGs = new List<CommunityGoal>(allCGs.Count());
                         foreach (CommunityGoal cg in allCGs)
                         {
@@ -127,7 +128,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
         }
 
         [RegexCommand("^elite (?:cgs?|community goals?)")]
-        private async Task CmdCommunityGoals(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdCommunityGoals(SocketCommandContext message, CancellationToken cancellationToken = default)
         {
             IEnumerable<CommunityGoal> cgs = await QueryCommunityGoalsAsync(cancellationToken).ConfigureAwait(false);
             foreach (CommunityGoal cg in cgs)
@@ -219,8 +220,8 @@ namespace TehGM.EinherjiBot.EliteDangerous
         public void Dispose()
         {
             StopAutomaticNewsPosting();
-            try { this._client.Ready += OnClientReady; } catch { }
-            try { this._client.Disconnected += OnClientDisconnected; } catch { }
+            try { this._client.Ready -= OnClientReady; } catch { }
+            try { this._client.Disconnected -= OnClientDisconnected; } catch { }
             try { this._lock?.Dispose(); } catch { }
         }
     }

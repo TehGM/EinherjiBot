@@ -22,6 +22,7 @@ namespace TehGM.EinherjiBot.Patchbot
         private readonly IPatchbotGamesStore _patchbotGamesStore;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<PatchbotOptions> _patchbotOptions;
+        private readonly CancellationTokenSource _hostCts;
         private readonly ILogger _log;
 
         public PatchbotHandler(DiscordSocketClient client, ILogger<PatchbotHandler> log, IPatchbotGamesStore patchbotGameStore,
@@ -50,11 +51,11 @@ namespace TehGM.EinherjiBot.Patchbot
 
             // determine type of the webhook
             if (_patchbotOptions.CurrentValue.PatchbotWebhookIDs?.Contains(message.Author.Id) == true)
-                return ProcessPatchbotMessageAsync(message);
-            return ProcessFollowedChannelMessageAsync(message);
+                return ProcessPatchbotMessageAsync(message, _hostCts.Token);
+            return ProcessFollowedChannelMessageAsync(message, _hostCts.Token);
         }
 
-        private Task ProcessPatchbotMessageAsync(SocketMessage message)
+        private Task ProcessPatchbotMessageAsync(SocketMessage message, CancellationToken cancellationToken = default)
         {
             if (message.Embeds.Count == 0)
                 return Task.CompletedTask;
@@ -63,10 +64,10 @@ namespace TehGM.EinherjiBot.Patchbot
             Embed embed = message.Embeds.First();
             string gameName = embed.Author?.Name;
 
-            return PingGameAsync(message, gameName);
+            return PingGameAsync(message, gameName, cancellationToken);
         }
 
-        private async Task ProcessFollowedChannelMessageAsync(SocketMessage message)
+        private async Task ProcessFollowedChannelMessageAsync(SocketMessage message, CancellationToken cancellationToken = default)
         {
             if (!(message is SocketUserMessage msg))
                 return;
@@ -75,7 +76,7 @@ namespace TehGM.EinherjiBot.Patchbot
             SocketGuild guild = (msg.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                SocketGuildUser guildUser = await guild.GetGuildUserAsync(message.Author);
+                SocketGuildUser guildUser = await guild.GetGuildUserAsync(message.Author).ConfigureAwait(false);
                 if (guildUser != null)
                     authorName = guildUser.Nickname ?? authorName;
             }
@@ -84,12 +85,12 @@ namespace TehGM.EinherjiBot.Patchbot
             int hashIndex = authorName.IndexOf('#');
             string gameName = hashIndex < 0 ? authorName : authorName.Remove(hashIndex).TrimEnd();
 
-            await PingGameAsync(message, gameName);
+            await PingGameAsync(message, gameName, cancellationToken);
         }
 
-        private async Task PingGameAsync(SocketMessage message, string gameName)
+        private async Task PingGameAsync(SocketMessage message, string gameName, CancellationToken cancellationToken = default)
         {
-            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName).ConfigureAwait(false);
+            PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
             if (game == null)
                 return;
             // if no one subscribes to this game, abort
@@ -104,7 +105,7 @@ namespace TehGM.EinherjiBot.Patchbot
                 return;
 
             // ping them all
-            await message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}");
+            await message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot sub(?:scribe)?(?: (.+))?")]
@@ -112,7 +113,7 @@ namespace TehGM.EinherjiBot.Patchbot
         {
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
-                await SendNameRequiredAsync(message.Channel);
+                await SendNameRequiredAsync(message.Channel, cancellationToken).ConfigureAwait(false);
                 return;
             }
             string gameName = match.Groups[1].Value.Trim();
@@ -132,7 +133,7 @@ namespace TehGM.EinherjiBot.Patchbot
         {
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
-                await SendNameRequiredAsync(message.Channel);
+                await SendNameRequiredAsync(message.Channel, cancellationToken).ConfigureAwait(false);
                 return;
             }
             string gameName = match.Groups[1].Value.Trim();
@@ -144,7 +145,7 @@ namespace TehGM.EinherjiBot.Patchbot
             }
             if (game.SubscriberIDs.Remove(message.User.Id))
                 await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
-            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.");
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot add (?: (.+))?")]
@@ -186,7 +187,7 @@ namespace TehGM.EinherjiBot.Patchbot
             }
 
             await _patchbotGamesStore.SetAsync(game, cancellationToken).ConfigureAwait(false);
-            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` updated.");
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` updated.", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot (?:remove|del|delete) (?: (.+))?")]
@@ -214,14 +215,14 @@ namespace TehGM.EinherjiBot.Patchbot
             }
 
             await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
-            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` removed.");
+            await message.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` removed.", cancellationToken).ConfigureAwait(false);
         }
 
         private Task SendInsufficientPermissionsAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
             => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Insufficient permissions.", cancellationToken);
         private Task SendGameNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
             => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Game `{gameName}` not found!", cancellationToken);
-        private Task SendIDNotValid(ISocketMessageChannel channel, string value, CancellationToken cancellationToken = default)
+        private Task SendIDNotValidAsync(ISocketMessageChannel channel, string value, CancellationToken cancellationToken = default)
             => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} `{value}` is not a valid webhook/bot ID!", cancellationToken);
         private Task SendNameAndAliasesRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
             => channel.SendMessageAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Please specify game name and aliases (separated with `{_namesSeparator}`).", cancellationToken);
@@ -230,6 +231,8 @@ namespace TehGM.EinherjiBot.Patchbot
 
         public void Dispose()
         {
+            try { this._hostCts?.Cancel(); } catch { }
+            try { this._hostCts?.Dispose(); } catch { }
             try { this._client.MessageReceived -= OnClientMessageReceivedAsync; } catch { }
         }
     }

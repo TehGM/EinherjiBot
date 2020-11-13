@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,6 +24,8 @@ namespace TehGM.EinherjiBot.Administration
         private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
         private readonly ILogger _log;
 
+        private readonly CancellationTokenSource _hostCts;
+
         public AdminCommandsHandler(DiscordSocketClient client, ILogger<AdminCommandsHandler> log,
             IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
         {
@@ -30,6 +33,7 @@ namespace TehGM.EinherjiBot.Administration
             this._log = log;
             this._einherjiOptions = einherjiOptions;
             this._commandsOptions = commandsOptions;
+            this._hostCts = new CancellationTokenSource();
 
             this._client.UserLeft += OnUserLeftAsync;
         }
@@ -138,7 +142,7 @@ namespace TehGM.EinherjiBot.Administration
             {
                 try
                 {
-                    await users[i].ModifyAsync(props => props.Channel = channelTo).ConfigureAwait(false);
+                    await users[i].ModifyAsync(props => props.Channel = channelTo, cancellationToken).ConfigureAwait(false);
                 }
                 catch { errCount++; }
             }
@@ -148,7 +152,7 @@ namespace TehGM.EinherjiBot.Administration
             builder.AppendFormat("{0} user{3} moved from {1} to {2}.", successCount.ToString(), channelFromMention, channelToMention, successCount > 1 ? "s" : null);
             if (errCount > 0)
                 builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errCount.ToString(), options.FailureSymbol, errCount > 1 ? "s" : null);
-            await response.ModifyAsync(props => props.Content = builder.ToString()).ConfigureAwait(false);
+            await response.ModifyAsync(props => props.Content = builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand("^purge(?:\\s+(\\d+))?")]
@@ -161,7 +165,7 @@ namespace TehGM.EinherjiBot.Administration
                 await message.ReplyAsync($"{options.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User);
+            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User).ConfigureAwait(false);
             if (!user.GetPermissions(channel).ManageMessages)
             {
                 await channel.SendMessageAsync($"{options.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
@@ -185,38 +189,36 @@ namespace TehGM.EinherjiBot.Administration
             }
 
             // get last X messages
-            var msgs = await channel.GetMessagesAsync(count + 1).FlattenAsync().ConfigureAwait(false);
+            IEnumerable<IMessage> msgs = await channel.GetMessagesAsync(count + 1, cancellationToken).FlattenAsync().ConfigureAwait(false);
             RestUserMessage confirmationMsg = null;
             // bulk can only delete messages not older than 2 weeks
             DateTimeOffset bulkMaxAge = DateTimeOffset.UtcNow - TimeSpan.FromDays(14) - TimeSpan.FromSeconds(2);
-            var newerMessages = msgs.Where(msg => msg.Timestamp >= bulkMaxAge);
-            var olderMessages = msgs.Except(newerMessages);
+            IEnumerable<IMessage> newerMessages = msgs.Where(msg => msg.Timestamp >= bulkMaxAge);
+            IEnumerable<IMessage> olderMessages = msgs.Except(newerMessages);
             int olderCount = olderMessages.Count();
             int actualCount = msgs.Count() - 1;
             // first delete bulk-deletable
-            await channel.DeleteMessagesAsync(newerMessages).ConfigureAwait(false);
+            await channel.DeleteMessagesAsync(newerMessages, cancellationToken).ConfigureAwait(false);
             // delete older msgs one by one
             if (olderCount > 0)
             {
                 await SendOrUpdateConfirmationAsync($"You are requesting deletion of {actualCount} messages, {olderCount} of which are older than 2 weeks.\n" +
                     "Deleting these messages may take a while due to Discord's rate limiting, so please be patient.").ConfigureAwait(false);
                 foreach (IMessage msg in olderMessages)
-                {
-                    await channel.DeleteMessageAsync(msg).ConfigureAwait(false);
-                }
+                    await channel.DeleteMessageAsync(msg, cancellationToken).ConfigureAwait(false);
             }
             await SendOrUpdateConfirmationAsync(actualCount > 0 ?
                 $"{options.SuccessSymbol} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down." :
                 $"{options.SuccessSymbol} Sir, I deleted your message. Specify count greater than 0 to remove more than just that.").ConfigureAwait(false);
             await Task.Delay(6 * 1000, cancellationToken).ConfigureAwait(false);
-            await channel.DeleteMessageAsync(confirmationMsg).ConfigureAwait(false);
+            await channel.DeleteMessageAsync(confirmationMsg, cancellationToken).ConfigureAwait(false);
 
             async Task SendOrUpdateConfirmationAsync(string text)
             {
                 if (confirmationMsg == null)
                     confirmationMsg = await channel.SendMessageAsync(text, cancellationToken).ConfigureAwait(false);
                 else
-                    await confirmationMsg.ModifyAsync(props => props.Content = text).ConfigureAwait(false);
+                    await confirmationMsg.ModifyAsync(props => props.Content = text, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -227,12 +229,14 @@ namespace TehGM.EinherjiBot.Administration
             EmbedBuilder embed = new EmbedBuilder()
                 .WithDescription($"**{user.Mention}** *(`{user.Username}#{user.Discriminator}`)* **has left.**")
                 .WithColor((Color)System.Drawing.Color.Cyan);
-            return user.Guild.SystemChannel.SendMessageAsync(null, false, embed.Build());
+            return user.Guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), _hostCts.Token);
         }
 
         public void Dispose()
         {
-            try { this._client.UserLeft += OnUserLeftAsync; } catch { }
+            try { this._hostCts?.Cancel(); } catch { }
+            try { this._hostCts?.Dispose(); } catch { }
+            try { this._client.UserLeft -= OnUserLeftAsync; } catch { }
         }
     }
 }

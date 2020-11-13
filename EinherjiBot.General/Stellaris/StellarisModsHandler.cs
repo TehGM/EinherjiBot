@@ -54,7 +54,7 @@ namespace TehGM.EinherjiBot.Stellaris.Services
             }
             if (url.Contains(' ', StringComparison.Ordinal))
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} URL can't contain any spaces.");
+                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} URL can't contain any spaces.", cancellationToken).ConfigureAwait(false);
                 return;
             }
 

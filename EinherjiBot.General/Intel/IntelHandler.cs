@@ -20,6 +20,7 @@ namespace TehGM.EinherjiBot.Intel
         private readonly IUserDataStore _userDataStore;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
+        private readonly CancellationTokenSource _hostCts;
         private readonly ILogger _log;
 
         public IntelHandler(DiscordSocketClient client, IUserDataStore userDataStore, ILogger<IntelHandler> log,
@@ -30,6 +31,7 @@ namespace TehGM.EinherjiBot.Intel
             this._log = log;
             this._einherjiOptions = einherjiOptions;
             this._commandsOptions = commandsOptions;
+            this._hostCts = new CancellationTokenSource();
 
             this._client = client;
             this._client.GuildMemberUpdated += OnGuildMemberUpdatedAsync;
@@ -57,7 +59,7 @@ namespace TehGM.EinherjiBot.Intel
                 await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not find user with ID `{id}`.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            await ProcessIntelUserAsync(message, user, cancellationToken);
+            await ProcessIntelUserAsync(message, user, cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand("^intel on guild")]
@@ -92,7 +94,7 @@ namespace TehGM.EinherjiBot.Intel
             AddUserInfo(embed, user, userData);
             if (!message.IsPrivate)
             {
-                SocketGuildUser guildUser = message.Guild.GetUser(user.Id);
+                SocketGuildUser guildUser = await message.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
                 if (guildUser != null)
                     AddGuildUserInfo(embed, guildUser);
             }
@@ -106,9 +108,9 @@ namespace TehGM.EinherjiBot.Intel
             if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
                 return;
 
-            UserData data = await _userDataStore.GetAsync(userAfter.Id).ConfigureAwait(false);
+            UserData data = await _userDataStore.GetAsync(userAfter.Id, _hostCts.Token).ConfigureAwait(false);
             if (data.ChangeStatus(userAfter.Status))
-                await _userDataStore.SetAsync(data).ConfigureAwait(false);
+                await _userDataStore.SetAsync(data, _hostCts.Token).ConfigureAwait(false);
         }
 
 
@@ -249,6 +251,8 @@ namespace TehGM.EinherjiBot.Intel
 
         public void Dispose()
         {
+            try { this._hostCts?.Cancel(); } catch { }
+            try { this._hostCts?.Dispose(); } catch { }
             try { this._client.GuildMemberUpdated -= OnGuildMemberUpdatedAsync; } catch { }
         }
     }

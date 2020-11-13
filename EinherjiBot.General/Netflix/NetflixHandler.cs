@@ -65,7 +65,7 @@ namespace TehGM.EinherjiBot.Netflix
                 modifiedByUser = await context.Client.GetUserAsync(account.ModifiedByID.Value).ConfigureAwait(false);
             EmbedBuilder embed = CreateConfirmationEmbed(account, modifiedByUser);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build()).ConfigureAwait(false);
+            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);
@@ -120,7 +120,7 @@ namespace TehGM.EinherjiBot.Netflix
             EmbedBuilder embed = CreateConfirmationEmbed(account, context.User);
             embed.WithDescription(responseText);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build());
+            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);
@@ -144,13 +144,13 @@ namespace TehGM.EinherjiBot.Netflix
             return embed;
         }
 
-        private Task SendErrorAsync(string text, IMessageChannel channel, string mention = null)
+        private Task SendErrorAsync(string text, ISocketMessageChannel channel, string mention = null, CancellationToken cancellationToken = default)
         {
             EmbedBuilder embed = new EmbedBuilder()
                 .WithColor(_einherjiOptions.EmbedErrorColor)
                 .WithTitle("Error")
                 .WithDescription(text);
-            return channel.SendMessageAsync(mention, false, embed.Build());
+            return channel.SendMessageAsync(mention, false, embed.Build(), cancellationToken);
         }
 
         private string GetAllowedRolesMentionsText()
