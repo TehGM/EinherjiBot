@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace TehGM.EinherjiBot.DataMigration.Migrations
             this.Log.Debug("Reading items from JSON");
             List<TOld> oldItems;
             if (itemsJson is JArray jarray)
-                oldItems = new List<TOld>(jarray.Children<JToken, TOld>());
+                oldItems = new List<TOld>(jarray.Children().Select(e => e.ToObject<TOld>()));
             else if (itemsJson is JObject jobj)
                 oldItems = new List<TOld>(1) { jobj.ToObject<TOld>() };
             else
