@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.Patchbot
             this.SubscriberIDs = new HashSet<ulong>();
         }
 
-        public PatchbotGame(string name)
+        public PatchbotGame(string name) : this()
         {
             this.Name = name.Trim();
         }
