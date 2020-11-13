@@ -35,7 +35,8 @@ namespace TehGM.EinherjiBot.Netflix
         [Priority(100)]
         private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
-            _log.LogDebug("User {User} ({UserID}) retrieving Netlix account credentials", $"{context.User.Username}#{context.User.Discriminator}", context.User.Id);
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
+            _log.LogDebug("Retrieving Netlix account credentials");
             if (context.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: Group only");
@@ -75,7 +76,8 @@ namespace TehGM.EinherjiBot.Netflix
         [Priority(99)]
         private async Task CmdUpdateAccountAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            _log.LogDebug("User {User} ({UserID}) updating Netlix account credentials", $"{context.User.Username}#{context.User.Discriminator}", context.User.Id);
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
+            _log.LogDebug("Updating Netlix account credentials");
             if (context.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: Group only");

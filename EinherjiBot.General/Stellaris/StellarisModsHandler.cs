@@ -30,13 +30,14 @@ namespace TehGM.EinherjiBot.Stellaris.Services
 
         [RegexCommand("^stellaris mods add(?:\\s+(.+)\\s*\\|\\s*(.+)){0,1}\\s*$")]
         [Priority(400)]
-        private async Task CmdAddModAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdAddModAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             Task CreateInvalidUseResponse()
-                => message.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify both name and URL of the mod.\nProper usage of this command:\n***{_commandsOptions.Prefix}stellaris mods add <name> | <url>***", cancellationToken);
-            if (message.User.Id != _einherjiOptions.AuthorID)
+                => context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify both name and URL of the mod.\nProper usage of this command:\n***{_commandsOptions.Prefix}stellaris mods add <name> | <url>***", cancellationToken);
+            if (context.User.Id != _einherjiOptions.AuthorID)
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
                 return;
             }
             if (match.Groups.Count < 3)
@@ -54,27 +55,29 @@ namespace TehGM.EinherjiBot.Stellaris.Services
             }
             if (url.Contains(' ', StringComparison.Ordinal))
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} URL can't contain any spaces.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} URL can't contain any spaces.", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
             StellarisMod mod = new StellarisMod(name, url);
+            _log.LogDebug("Adding stellaris mod {ModName}", mod.Name);
             await _stellarisModsStore.AddAsync(mod, cancellationToken).ConfigureAwait(false);
-            await message.ReplyAsync($"{_einherjiOptions.SuccessSymbol} Added mod:\n\n{ModToMessageString(mod)}", cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{_einherjiOptions.SuccessSymbol} Added mod:\n\n{ModToMessageString(mod)}", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand("^stellaris mods (?:remove|del|delete)(?:\\s+(.+))?$")]
         [Priority(399)]
-        private async Task CmdRemoveModAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdRemoveModAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            if (message.User.Id != _einherjiOptions.AuthorID)
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
+            if (context.User.Id != _einherjiOptions.AuthorID)
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
                 return;
             }
             if (match.Groups.Count < 2)
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{_commandsOptions.Prefix}stellaris mods`", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify numbers of mods to remove. Can be multiple numbers separated with spaces.\nTo get numbers of mods, use `{_commandsOptions.Prefix}stellaris mods`", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -94,21 +97,23 @@ namespace TehGM.EinherjiBot.Stellaris.Services
             string incompatibleString = invalidIdStrings.Count != 0 ? $"\nFollowing IDs are invalid: {string.Join(", ", invalidIdStrings.Select(s => $"`{s}`"))}." : null;
             if (removalList.Any())
             {
+                _log.LogDebug("Removing {Count} stellaris mods: {ModNames}", removalList.Count, string.Join(", ", removalList.Select(s => s.Name)));
                 await _stellarisModsStore.RemoveAsync(removalList, cancellationToken).ConfigureAwait(false);
-                await message.ReplyAsync($"{_einherjiOptions.SuccessSymbol} Removed {removalList.Count} mods.{incompatibleString}", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.SuccessSymbol} Removed {removalList.Count} mods.{incompatibleString}", cancellationToken).ConfigureAwait(false);
             }
             else
-                await message.ReplyAsync($"No mods removed.{incompatibleString}", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"No mods removed.{incompatibleString}", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand("^stellaris mods")]
         [Priority(398)]
-        private async Task CmdListModsAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdListModsAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             IOrderedEnumerable<StellarisMod> mods = (await _stellarisModsStore.GetAllAsync(cancellationToken).ConfigureAwait(false)).OrderBy(m => m.Name);
             if (!mods.Any())
             {
-                await message.ReplyAsync($"{_einherjiOptions.FailureSymbol} You did not have any mod on the list.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} You did not have any mod on the list.", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -117,11 +122,11 @@ namespace TehGM.EinherjiBot.Stellaris.Services
                 listStrings.Add(ModToListString(mod, listStrings.Count + 1));
             EmbedBuilder embed = new EmbedBuilder()
                 .WithDescription(string.Join('\n', listStrings))
-                .WithFooter($"Currently you guys are using {listStrings.Count} mods.", message.Client.CurrentUser.GetAvatarUrl())
+                .WithFooter($"Currently you guys are using {listStrings.Count} mods.", context.Client.CurrentUser.GetAvatarUrl())
                 .WithTimestamp(DateTimeOffset.Now)
-                .WithAuthor("Your Stellaris mods", message.Client.CurrentUser.GetAvatarUrl());
+                .WithAuthor("Your Stellaris mods", context.Client.CurrentUser.GetAvatarUrl());
 
-            await message.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
         }
 
         private static string ModToMessageString(StellarisMod mod)

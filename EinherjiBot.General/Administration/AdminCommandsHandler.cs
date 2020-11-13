@@ -39,8 +39,9 @@ namespace TehGM.EinherjiBot.Administration
         }
 
         [RegexCommand("^move\\s?all(?:(?: from)?\\s+(?:<#)?(\\d+)(?:>)?)?(?:(?: to)?\\s+(?:<#)?(\\d+)(?:>)?)?")]
-        private async Task CmdMoveAllAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdMoveAllAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             EinherjiOptions options = _einherjiOptions.CurrentValue;
 
             // helper method for verifying a valid channel ID
@@ -102,9 +103,9 @@ namespace TehGM.EinherjiBot.Administration
             }
 
             // verify it's a guild message
-            if (!(message.Channel is SocketTextChannel channel))
+            if (!(context.Channel is SocketTextChannel channel))
             {
-                await message.ReplyAsync($"{options.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{options.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -112,19 +113,20 @@ namespace TehGM.EinherjiBot.Administration
             if (match.Groups.Count < 3)
             {
                 string prefix = _commandsOptions.CurrentValue.Prefix;
-                await message.ReplyAsync($"{options.FailureSymbol} Please specify __both__ channels IDs.\n***{_commandsOptions.CurrentValue.Prefix}move all from <original channel ID> to <target channel ID>***", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{options.FailureSymbol} Please specify __both__ channels IDs.\n***{_commandsOptions.CurrentValue.Prefix}move all from <original channel ID> to <target channel ID>***", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
             // verify channels exist
             // we can do both at once, it's okay if user gets warn about both at once, and it just simplifies the code
-            SocketVoiceChannel channelFrom = await VerifyValidChannelAsync(match.Groups[1], message.Guild, message.Channel).ConfigureAwait(false);
-            SocketVoiceChannel channelTo = await VerifyValidChannelAsync(match.Groups[2], message.Guild, message.Channel).ConfigureAwait(false);
+            SocketVoiceChannel channelFrom = await VerifyValidChannelAsync(match.Groups[1], context.Guild, context.Channel).ConfigureAwait(false);
+            SocketVoiceChannel channelTo = await VerifyValidChannelAsync(match.Groups[2], context.Guild, context.Channel).ConfigureAwait(false);
             if (channelFrom == null || channelTo == null)
                 return;
 
             // verify user can see both channels, and has move permission in both
-            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User).ConfigureAwait(false);
+            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
+            _log.LogTrace("Verifying user {ID} has permission to move users between channels ({ChannelFromID}) and {ChannelToName} ({ChannelToID})", user.Id, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
             if (!user.GuildPermissions.Administrator)
             {
                 if (!await VerifyUserCanMoveAsync(channelFrom, user, channel).ConfigureAwait(false)
@@ -136,7 +138,8 @@ namespace TehGM.EinherjiBot.Administration
             SocketGuildUser[] users = channelFrom.Users.ToArray();
             string channelFromMention = GetVoiceChannelMention(channelFrom);
             string channelToMention = GetVoiceChannelMention(channelTo);
-            RestUserMessage response = await message.ReplyAsync($"Moving {users.Length} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.", cancellationToken).ConfigureAwait(false);
+            _log.LogDebug("Moving {Count} users from channel {ChannelFromName} ({ChannelFromID}) to {ChannelToName} ({ChannelToID})", users.Length, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
+            RestUserMessage response = await context.ReplyAsync($"Moving {users.Length} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.", cancellationToken).ConfigureAwait(false);
             int errCount = 0;
             for (int i = 0; i < users.Length; i++)
             {
@@ -158,6 +161,7 @@ namespace TehGM.EinherjiBot.Administration
         [RegexCommand("^purge(?:\\s+(\\d+))?")]
         private async Task CmdPurgeAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(message, this);
             EinherjiOptions options = _einherjiOptions.CurrentValue;
 
             if (!(message.Channel is SocketTextChannel channel))
@@ -197,6 +201,7 @@ namespace TehGM.EinherjiBot.Administration
             IEnumerable<IMessage> olderMessages = msgs.Except(newerMessages);
             int olderCount = olderMessages.Count();
             int actualCount = msgs.Count() - 1;
+            _log.LogDebug("Removing {TotalCount} messages. {BulkIncompatibleCount} messages cannot be removed in bulk", msgs.Count(), olderCount);
             // first delete bulk-deletable
             await channel.DeleteMessagesAsync(newerMessages, cancellationToken).ConfigureAwait(false);
             // delete older msgs one by one

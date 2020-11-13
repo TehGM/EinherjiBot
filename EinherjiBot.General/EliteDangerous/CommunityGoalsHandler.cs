@@ -128,11 +128,12 @@ namespace TehGM.EinherjiBot.EliteDangerous
         }
 
         [RegexCommand("^elite (?:cgs?|community goals?)")]
-        private async Task CmdCommunityGoals(SocketCommandContext message, CancellationToken cancellationToken = default)
+        private async Task CmdCommunityGoals(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             IEnumerable<CommunityGoal> cgs = await QueryCommunityGoalsAsync(cancellationToken).ConfigureAwait(false);
             foreach (CommunityGoal cg in cgs)
-                await message.ReplyAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<IEnumerable<CommunityGoal>> QueryCommunityGoalsAsync(CancellationToken cancellationToken = default)
@@ -194,7 +195,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                 .WithDescription($"```\n{cg.Objective}\n```\n{descriptionTrimmed}")
                 .AddField("System", cg.SystemName, true)
                 .AddField("Station", cg.StationName, true)
-                .AddField("Tier Reached", $"*{cg.TierReached.ToString()}* / {cg.TierMax.ToString()}")
+                .AddField("Tier Reached", $"*{cg.TierReached}* / {cg.TierMax}")
                 .AddField("Contributing Pilots", cg.ContributingPilotsCount.ToString(), true)
                 .AddField("Contributions Count", cg.ContributionsCount.ToString(), true)
                 .AddField("Last Updated", $"{(DateTime.UtcNow - cg.LastUpdateTime.ToUniversalTime()).ToLongFriendlyString()} ago")

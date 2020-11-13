@@ -68,11 +68,11 @@ namespace TehGM.EinherjiBot.Patchbot.Services
                     Builders<PatchbotGame>.Filter.AnyEq(dbData => dbData.Aliases, lowercaseName));
                 result = await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-                // if not found, return default data
+                // if not found, return null
                 if (result == null)
                 {
-                    _log.LogTrace("Patchbot game {Game} not found, creating new with defaults", trimmedName);
-                    result = new PatchbotGame(trimmedName);
+                    _log.LogTrace("Patchbot game {Game} not found", trimmedName);
+                    return null;
                 }
 
                 _patchbotGameCache.AddOrReplace(result.Name, result, cachingOptions.Lifetime);

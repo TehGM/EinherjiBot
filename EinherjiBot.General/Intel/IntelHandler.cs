@@ -39,66 +39,69 @@ namespace TehGM.EinherjiBot.Intel
 
         [RegexCommand("^intel on me")]
         [Priority(200)]
-        private Task CmdIntelMeAsync(SocketCommandContext message, CancellationToken cancellationToken = default)
-            => ProcessIntelUserAsync(message, message.User, cancellationToken);
+        private Task CmdIntelMeAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+            => ProcessIntelUserAsync(context, context.User, cancellationToken);
 
         [RegexCommand("^intel on \\\\?<@!?(\\d+)>")]
         [RegexCommand("^intel on (\\d+)")]
         [Priority(199)]
-        private async Task CmdIntelUserAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdIntelUserAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             string idString = match.Groups[1].Value;
             if (!ulong.TryParse(idString, out ulong id))
             {
-                await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not parse user ID `{idString}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not parse user ID `{idString}`.", cancellationToken).ConfigureAwait(false);
                 return;
             }
             IUser user = await _client.GetUserAsync(id).ConfigureAwait(false);
             if (user == null)
             {
-                await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not find user with ID `{id}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not find user with ID `{id}`.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            await ProcessIntelUserAsync(message, user, cancellationToken).ConfigureAwait(false);
+            await ProcessIntelUserAsync(context, user, cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand("^intel on guild")]
         [Priority(198)]
-        private Task CmdIntelGuildAsync(SocketCommandContext message, CancellationToken cancellationToken = default)
+        private Task CmdIntelGuildAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
-            if (message.IsPrivate)
-                return message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} This command can only be used in a guild channel.", cancellationToken);
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
+            if (context.IsPrivate)
+                return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} This command can only be used in a guild channel.", cancellationToken);
 
             EmbedBuilder embed = new EmbedBuilder();
-            AddGuildInfo(embed, message.Guild);
-            return message.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            AddGuildInfo(embed, context.Guild);
+            return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
         }
 
         [RegexCommand("^intel")]
         [Priority(197)]
-        private Task CmdIntelHelpAsync(SocketCommandContext message, CancellationToken cancellationToken = default)
+        private Task CmdIntelHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
+            using IDisposable logScope = _log.BeginCommandScope(context, this);
             string prefix = _commandsOptions.CurrentValue.Prefix;
             EmbedBuilder embed = new EmbedBuilder()
                 .AddField("Intel Commands",
                     $"**{prefix}intel on me** - get intel on yourself\n" +
                     $"**{prefix}intel on** ***<user ping>*** - get intel on pinged user\n" +
                     $"**{prefix}intel on guild** - *(guild only)* get intel on current guild");
-            return message.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
         }
 
-        private async Task ProcessIntelUserAsync(SocketCommandContext message, IUser user, CancellationToken cancellationToken)
+        private async Task ProcessIntelUserAsync(SocketCommandContext context, IUser user, CancellationToken cancellationToken)
         {
             UserData userData = await _userDataStore.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
             EmbedBuilder embed = new EmbedBuilder();
             AddUserInfo(embed, user, userData);
-            if (!message.IsPrivate)
+            if (!context.IsPrivate)
             {
-                SocketGuildUser guildUser = await message.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
+                SocketGuildUser guildUser = await context.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
                 if (guildUser != null)
                     AddGuildUserInfo(embed, guildUser);
             }
-            await message.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task OnGuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
@@ -108,6 +111,7 @@ namespace TehGM.EinherjiBot.Intel
             if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
                 return;
 
+            _log.LogTrace("Updating intel on user {{UserID}", userBefore.Id);
             UserData data = await _userDataStore.GetAsync(userAfter.Id, _hostCts.Token).ConfigureAwait(false);
             if (data.ChangeStatus(userAfter.Status))
                 await _userDataStore.SetAsync(data, _hostCts.Token).ConfigureAwait(false);
