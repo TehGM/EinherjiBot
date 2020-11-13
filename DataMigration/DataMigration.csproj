@@ -10,6 +10,8 @@
   <ItemGroup>
     <None Remove="appsecrets.Development.json" />
     <None Remove="appsecrets.json" />
+    <None Remove="data.json" />
+    <None Remove="data_intel.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +19,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="appsecrets.json" Condition="Exists('appsecrets.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data.json" Condition="Exists('data.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data_intel.json" Condition="Exists('data_intel.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
