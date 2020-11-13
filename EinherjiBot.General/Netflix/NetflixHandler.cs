@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.Netflix
             this._einherjiOptions = einherjiOptions.Value;
         }
 
-        [RegexCommand("^netflix (?:password|account|login")]
+        [RegexCommand("^netflix (?:password|account|login)")]
         [Priority(100)]
         private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
