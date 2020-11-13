@@ -1,55 +1,68 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
-using Discord;
-using TehGM.EinherjiBot.Config;
-using TehGM.EinherjiBot.Utilities;
-using Serilog;
+using TehGM.EinherjiBot.Administration;
+using TehGM.EinherjiBot.Caching;
+using TehGM.EinherjiBot.Client;
+using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.Database;
+using TehGM.EinherjiBot.EliteDangerous;
+using TehGM.EinherjiBot.EliteDangerous.Services;
+using TehGM.EinherjiBot.Kathara;
+using TehGM.EinherjiBot.Netflix;
+using TehGM.EinherjiBot.Netflix.Services;
+using TehGM.EinherjiBot.Patchbot;
+using TehGM.EinherjiBot.Patchbot.Services;
+using TehGM.EinherjiBot.Services;
+using TehGM.EinherjiBot.Stellaris.Services;
 
 namespace TehGM.EinherjiBot
 {
     class Program
     {
-        private static BotInitializer _initializer;
-
         static async Task Main(string[] args)
         {
-            // load configuration early - needed for datadog sink
-            BotConfig config = await BotConfig.LoadAllAsync();
+            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
 
-            // initialize logging
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Debug : LogSeverity.Info;
-            Logging.Default = Logging.CreateDefaultConfiguration(logLevel)
-                .WriteTo.DatadogLogs(
-                    config.Auth.DatadogAPI.ApiKey, 
-                    config.Auth.DatadogAPI.Source,
-                    config.Auth.DatadogAPI.Service,
-                    config.Auth.DatadogAPI.Host,
-                    config.Auth.DatadogAPI.Tags,
-                    config.Auth.DatadogAPI.ToDatadogConfiguration())
-                .CreateLogger();
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureSecretsFiles()
+                .ConfigureSerilog()
+                .ConfigureServices((context, services) =>
+                {
+                    // configure options
+                    services.Configure<EinherjiOptions>(context.Configuration);
+                    services.Configure<DatabaseOptions>(context.Configuration.GetSection("Database"));
+                    services.Configure<CachingOptions>(MongoUserDataStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoUserDataStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoNetflixAccountStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoNetflixAccountStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoStellarisModsStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoStellarisModsStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoCommunityGoalsHistoryStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoCommunityGoalsHistoryStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoPatchbotGameStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoPatchbotGameStore.CacheOptionName));
+                    services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
+                    services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
+                    services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
+                    services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
+                    services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
+                    services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
+                    services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
 
-            // initialize bot
-            _initializer = new BotInitializer();
-            _initializer.LogLevel = logLevel;
-            await _initializer.StartClient(config);
-            _initializer.Client.Connected += Client_Connected;
-            await Task.Delay(-1);
-        }
+                    // add framework services
 
-        private static Task Client_Connected()
-        {
-            return _initializer.Client.SetGameAsync("TehGM's orders", null, ActivityType.Listening);
-        }
+                    // add custom services
+                    services.AddDiscordClient();
+                    services.AddCommands();
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            try
-            {
-                Logging.Default.Fatal((Exception)e.ExceptionObject, "Unhandled exception");
-            }
-            catch { }
+                    // add bot features
+                    services.AddIntel();
+                    services.AddNetflixAccount();
+                    services.AddStellaris();
+                    services.AddAdministration();
+                    services.AddBotChannelsRedirection();
+                    services.AddPihole();
+                    services.AddPatchbot();
+                    services.AddEliteCommunityGoals();
+                })
+                .Build();
+            await host.RunAsync().ConfigureAwait(false);
         }
     }
 }

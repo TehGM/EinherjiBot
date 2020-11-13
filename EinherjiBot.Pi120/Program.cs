@@ -1,38 +1,34 @@
-﻿using Discord;
-using System;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
-using TehGM.EinherjiBot.Utilities;
+using TehGM.EinherjiBot.Client;
+using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot
 {
     class Program
     {
-        private static BotInitializer _initializer;
-
         static async Task Main(string[] args)
         {
-            // initialize logging
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            LogSeverity logLevel = Debugger.IsAttached ? LogSeverity.Debug : LogSeverity.Info;
-            Logging.Default = Logging.CreateDefaultConfiguration()
-                .MinimumLevel.Is(Logging.SeverityToSerilogLevel(logLevel))      // convert Discord.NET severity to serilog level to keep it consistent
-                .CreateLogger();
+            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
 
-            // initialize bot
-            _initializer = new BotInitializer();
-            _initializer.LogLevel = logLevel;
-            await _initializer.StartClient();
-            await Task.Delay(-1);
-        }
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureSecretsFiles()
+                .ConfigureSerilog()
+                .ConfigureServices((context, services) =>
+                {
+                    // configure options
+                    services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
+                    services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            try
-            {
-                Logging.Default.Fatal((Exception)e.ExceptionObject, "Unhandled exception");
-            }
-            catch { }
+                    // add framework services
+
+                    // add custom services
+                    services.AddDiscordClient();
+                    services.AddCommands();
+                })
+                .Build();
+            await host.RunAsync().ConfigureAwait(false);
         }
     }
 }

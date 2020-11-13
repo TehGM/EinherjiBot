@@ -340,7 +340,9 @@ ASALocalRun/
 healthchecksdb
 
 # PROJECT SPECIFIC
-# Authorization tokens
+# secrets
+appsecrets.json
+appsecrets.*.json
 auth.json
 appsecrets.json
 appsecrets.*.json
