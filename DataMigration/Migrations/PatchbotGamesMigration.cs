@@ -2,6 +2,7 @@
 using Serilog;
 using TehGM.EinherjiBot.DataMigration.Entities.Old;
 using TehGM.EinherjiBot.Patchbot;
+using System.Collections.Generic;
 
 namespace TehGM.EinherjiBot.DataMigration.Migrations
 {
@@ -13,7 +14,7 @@ namespace TehGM.EinherjiBot.DataMigration.Migrations
         {
             base.Log.Debug("Converting PatchbotHelperGame {GameName}", oldEntity.Name);
             PatchbotGame result = new PatchbotGame(oldEntity.Name, oldEntity.Aliases);
-            foreach (ulong sub in oldEntity.SubscribersIDs)
+            foreach (ulong sub in oldEntity.SubscribersIDs ?? new HashSet<ulong>())
                 result.SubscriberIDs.Add(sub);
             return result;
         }
