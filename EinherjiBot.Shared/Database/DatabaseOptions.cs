@@ -9,7 +9,7 @@
 
         // collections
         public const string MiscellaneousCollectionName = "Miscellaneous";
-        public string UserDataCollectionName { get; set; } = "UserData";
+        public string UsersDataCollectionName { get; set; } = "UsersData";
         public string StellarisModsCollectionName { get; set; } = "StellarisMods";
         public string PatchbotGamesCollectionName { get; set; } = "PatchbotGames";
         public string EliteCommunityGoalsCollectionName { get; set; } = "EliteCommunityGoals";
