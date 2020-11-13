@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using TehGM.EinherjiBot.Database.Conventions;
 using TehGM.EinherjiBot.DataMigration.Migrations;
 
 namespace TehGM.EinherjiBot.DataMigration
@@ -32,7 +33,8 @@ namespace TehGM.EinherjiBot.DataMigration
             IMongoDatabase db = client.GetDatabase(settings.DatabaseName);
 
             // run migrations
-            await (new NetflixAccountMigration(_log, db, "Miscellaneous")).RunMigrationAsync(dataJson["netflixAccount"]);
+            await new NetflixAccountMigration(_log, db, "Miscellaneous").RunMigrationAsync(dataJson["netflixAccount"]);
+            await new StellarisModsMigration(_log, db, "StellarisMods").RunMigrationAsync(dataJson["stellarisMods"]);
 
             _log.Information("Done");
             Console.ReadLine();
