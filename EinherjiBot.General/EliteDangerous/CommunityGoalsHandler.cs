@@ -163,8 +163,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
             CommunityGoalsOptions options = _options.CurrentValue;
 
             return !string.IsNullOrWhiteSpace(options.InaraApiKey) &&
-                !string.IsNullOrWhiteSpace(options.InaraAppName) &&
-                !string.IsNullOrWhiteSpace(options.InaraAppVersion);
+                !string.IsNullOrWhiteSpace(options.InaraAppName);
         }
 
         [RegexCommand("^elite (?:cgs?|community goals?)")]
@@ -196,7 +195,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
             JObject query = new JObject();
             query.Add("header", new JObject(
                 new JProperty("appName", options.InaraAppName),
-                new JProperty("appVersion", options.InaraAppVersion),
+                new JProperty("appVersion", options.InaraAppVersion ?? BotInfoUtility.GetVersion()),
                 new JProperty("isDeveloped", options.InaraAppInDevelopment),
                 new JProperty("APIkey", options.InaraApiKey)));
             JObject eventParams = new JObject(

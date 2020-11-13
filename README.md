@@ -31,7 +31,6 @@ This file will hold secrets, so it should not be included in source control repo
 "EliteCommunityGoals": {
   "InaraAppInDevelopment": true,
   "InaraAppName": "<app-name>",
-  "InaraAppVersion": "<app-version>",
   "InaraApiKey": "<api-key>"
 }
 ```
