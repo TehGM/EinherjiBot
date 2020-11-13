@@ -7,12 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EinherjiBot.General", "Einh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EinherjiBot.Shared", "EinherjiBot.Shared\EinherjiBot.Shared.csproj", "{3A1362F6-61BD-471B-9C3E-A3EDA07E475F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EinherjiBot.Pi120", "EinherjiBot.Pi120\EinherjiBot.Pi120.csproj", "{12FD6884-F635-4D1F-8501-BE313CC7D254}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7553FD26-3F86-4106-B4A7-F536856EA7E4}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		appsecrets-example.json = appsecrets-example.json
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
@@ -29,10 +29,6 @@ Global
 		{3A1362F6-61BD-471B-9C3E-A3EDA07E475F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A1362F6-61BD-471B-9C3E-A3EDA07E475F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A1362F6-61BD-471B-9C3E-A3EDA07E475F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12FD6884-F635-4D1F-8501-BE313CC7D254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12FD6884-F635-4D1F-8501-BE313CC7D254}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12FD6884-F635-4D1F-8501-BE313CC7D254}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12FD6884-F635-4D1F-8501-BE313CC7D254}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
