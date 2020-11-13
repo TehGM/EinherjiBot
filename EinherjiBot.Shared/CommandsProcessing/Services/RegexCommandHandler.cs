@@ -136,14 +136,18 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 foreach (RegexCommandInstance command in _commands)
                 {
-                    IResult result = await command.ExecuteAsync(
-                        context: context,
-                        argPos: argPos,
-                        services: _serviceProvider,
-                        cancellationToken: _hostCancellationToken)
-                        .ConfigureAwait(false);
-                    if (result.IsSuccess)
-                        return;
+                    try
+                    {
+                        ExecuteResult result = (ExecuteResult)await command.ExecuteAsync(
+                            context: context,
+                            argPos: argPos,
+                            services: _serviceProvider,
+                            cancellationToken: _hostCancellationToken)
+                            .ConfigureAwait(false);
+                        if (result.IsSuccess)
+                            return;
+                    }
+                    catch (Exception ex) when (ex.LogAsError(_log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
                 }
             }
             finally

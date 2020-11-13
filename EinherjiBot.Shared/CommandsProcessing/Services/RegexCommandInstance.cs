@@ -17,6 +17,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         public int Priority { get; private set; }
         public IEnumerable<PreconditionAttribute> Preconditions { get; private set; }
         public Type ModuleType => _method.DeclaringType;
+        public string MethodName => _method.Name;
         public RunMode RunMode
         {
             get => _runMode == RunMode.Default ? RunMode.Sync : _runMode;
@@ -148,21 +149,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             object instance = _moduleProvider.GetModuleInstance(this);
 
             // execute
-            try
+            if (_method.Invoke(instance, paramsValues) is Task returnTask)
             {
-                if (_method.Invoke(instance, paramsValues) is Task returnTask)
-                {
-                    if (RunMode == RunMode.Sync)
-                        await returnTask.ConfigureAwait(false);
-                    else
-                        _ = Task.Run(async () => await returnTask.ConfigureAwait(false), cancellationToken);
-                }
-                return ExecuteResult.FromSuccess();
+                if (RunMode == RunMode.Sync)
+                    await returnTask.ConfigureAwait(false);
+                else
+                    _ = Task.Run(async () => await returnTask.ConfigureAwait(false), cancellationToken);
             }
-            catch (Exception ex)
-            {
-                return ExecuteResult.FromError(ex);
-            }
+            return ExecuteResult.FromSuccess();
         }
     }
 }

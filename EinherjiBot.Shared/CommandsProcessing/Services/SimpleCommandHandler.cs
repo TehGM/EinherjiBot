@@ -89,6 +89,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 argPos: argPos,
                 services: _serviceProvider)
                 .ConfigureAwait(false);
+            if (!result.IsSuccess && result is ExecuteResult executeResult && executeResult.Exception != null)
+                _log.LogError(executeResult.Exception, "Unhandled Exception when executing a basic command");
         }
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
