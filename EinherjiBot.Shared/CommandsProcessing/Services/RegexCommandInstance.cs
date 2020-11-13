@@ -48,7 +48,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 throw new ArgumentNullException(nameof(regexAttribute));
 
             // init instance
-            CommandsOptions options = services.GetService<IOptionsSnapshot<CommandsOptions>>()?.Value;
+            CommandsOptions options = services.GetService<IOptions<CommandsOptions>>()?.Value;
             RegexOptions regexOptions = regexAttribute.RegexOptions;
             if (options?.CaseSensitive != true)
                 regexOptions |= RegexOptions.IgnoreCase;

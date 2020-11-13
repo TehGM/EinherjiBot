@@ -155,7 +155,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
             this._hostCancellationToken = cancellationToken;
-            return Task.CompletedTask;
+            return InitializeCommandsAsync();
         }
 
         Task IHostedService.StopAsync(CancellationToken cancellationToken)
