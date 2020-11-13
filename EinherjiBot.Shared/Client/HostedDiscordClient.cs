@@ -16,6 +16,7 @@ namespace TehGM.EinherjiBot.Client
         private readonly ILogger _log;
         private readonly IOptionsMonitor<DiscordOptions> _discordOptions;
         private DiscordSocketClient _client;
+        private bool _started = false;
 
         public HostedDiscordClient(IOptionsMonitor<DiscordOptions> discordOptions, ILogger<HostedDiscordClient> log)
         {
@@ -60,6 +61,10 @@ namespace TehGM.EinherjiBot.Client
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
+            if (_started)
+                return Task.CompletedTask;
+
+            _started = true;
             if (_discordOptions.CurrentValue.AutoConnectGateway)
                 return StartClientAsync();
             else
