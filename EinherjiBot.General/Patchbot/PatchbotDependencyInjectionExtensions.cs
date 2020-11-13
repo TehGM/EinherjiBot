@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.Caching;
+using TehGM.EinherjiBot.Caching.Services;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
 
@@ -21,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDiscordClient();
             services.AddMongoConnection();
             services.TryAddSingleton<IPatchbotGamesStore, MongoPatchbotGameStore>();
+            services.TryAddSingleton<IEntityCache<string, PatchbotGame>, EntityCache<string, PatchbotGame>>();
 
             return services;
         }
