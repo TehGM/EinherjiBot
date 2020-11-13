@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configure);
 
             services.AddDiscordClient();
+            services.AddHostedService<BotChannelsRedirectionHandler>();
 
             return services;
         }

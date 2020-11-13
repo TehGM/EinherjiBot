@@ -6,15 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Administration
 {
-    [LoadRegexCommands]
-    [PersistentModule(PreInitialize = true)]
-    class BotChannelsRedirectionHandler : IDisposable
+    class BotChannelsRedirectionHandler : IHostedService, IDisposable
     {
         private readonly DiscordSocketClient _client;
         private readonly IOptionsMonitor<BotChannelsRedirectionOptions> _redirectionOptions;
@@ -91,5 +89,11 @@ namespace TehGM.EinherjiBot.Administration
             try { this._hostCts?.Dispose(); } catch { }
             try { this._client.MessageReceived -= OnClientMessageReceivedAsync; } catch { }
         }
+
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
+            => Task.CompletedTask;
+
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
+            => Task.CompletedTask;
     }
 }
