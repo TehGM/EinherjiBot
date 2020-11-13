@@ -21,8 +21,10 @@ namespace TehGM.EinherjiBot.Caching.Services
         public void AddOrReplace(TKey key, TEntity entity, TimeSpan lifetime)
         {
             lock (_cachedEntities)
+            {
                 _cachedEntities[key] = new CachedEntity<TKey, TEntity>(key, entity, lifetime);
-            this.ClearExpired();
+                this.ClearExpiredInternal();
+            }
         }
 
         public void Clear()
@@ -36,10 +38,11 @@ namespace TehGM.EinherjiBot.Caching.Services
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            this.ClearExpired();
-
             lock (_cachedEntities)
+            {
+                this.ClearExpiredInternal();
                 return _cachedEntities.Where(pair => predicate(pair.Value)).Select(pair => pair.Value).ToImmutableArray();
+            }
         }
 
         public TEntity Get(TKey key)
@@ -53,16 +56,33 @@ namespace TehGM.EinherjiBot.Caching.Services
                         result = entity.Entity;
                     else _cachedEntities.Remove(key);
                 }
+                this.ClearExpiredInternal();
             }
-            this.ClearExpired();
             return result;
         }
 
         public void Remove(TKey key)
         {
             lock (_cachedEntities)
+            {
                 _cachedEntities.Remove(key);
-            this.ClearExpired();
+                this.ClearExpiredInternal();
+            }
+        }
+
+        public void ClearExpired()
+        {
+            lock (_cachedEntities)
+            {
+                this.ClearExpiredInternal();
+            }
+        }
+
+        private void ClearExpiredInternal()
+        {
+            IEnumerable<KeyValuePair<TKey, CachedEntity<TKey, TEntity>>> expired = this._cachedEntities.Where(e => e.Value.IsExpired);
+            foreach (KeyValuePair<TKey, CachedEntity<TKey, TEntity>> e in expired)
+                _cachedEntities.Remove(e.Key);
         }
     }
 }

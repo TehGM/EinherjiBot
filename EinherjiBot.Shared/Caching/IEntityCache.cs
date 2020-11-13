@@ -8,6 +8,7 @@ namespace TehGM.EinherjiBot.Caching
         int CachedCount { get; }
 
         void Clear();
+        void ClearExpired();
         IEnumerable<CachedEntity<TKey, TEntity>> Find(Func<CachedEntity<TKey, TEntity>, bool> predicate);
         void AddOrReplace(TKey key, TEntity entity, TimeSpan lifetime);
         void Remove(TKey key);

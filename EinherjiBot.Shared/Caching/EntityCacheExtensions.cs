@@ -5,9 +5,6 @@ namespace TehGM.EinherjiBot.Caching
 {
     public static class EntityCacheExtensions
     {
-        public static void ClearExpired<TKey, TEntity>(this IEntityCache<TKey, TEntity> cache)
-            => RemoveWhere(cache, entity => entity.IsExpired);
-
         public static void RemoveWhere<TKey, TEntity>(this IEntityCache<TKey, TEntity> cache, Func<CachedEntity<TKey, TEntity>, bool> predicate)
         {
             IEnumerable<CachedEntity<TKey, TEntity>> selectedEntities = cache.Find(predicate);
