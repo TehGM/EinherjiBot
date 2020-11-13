@@ -89,7 +89,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 argPos: argPos,
                 services: _serviceProvider)
                 .ConfigureAwait(false);
-            if (!result.IsSuccess && result is ExecuteResult executeResult && executeResult.Exception != null)
+            if (!result.IsSuccess && result is ExecuteResult executeResult && executeResult.Exception != null && !(executeResult.Exception is OperationCanceledException))
                 _log.LogError(executeResult.Exception, "Unhandled Exception when executing a basic command");
         }
 

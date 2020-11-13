@@ -147,6 +147,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         if (result.IsSuccess)
                             return;
                     }
+                    catch (OperationCanceledException) { return; }
                     catch (Exception ex) when (ex.LogAsError(_log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
                 }
             }
