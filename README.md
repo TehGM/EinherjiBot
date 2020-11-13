@@ -26,7 +26,7 @@ This file will hold secrets, so it should not be included in source control repo
   }
 }
 ```
-7. *(optional)* If you're registered with Inara API, create a following section in `appsecrets.json`, replacing all tags as needed:
+7. *(optional)* If you're registered with Inara API, create a following section in `appsecrets.json`, replacing all tags as needed. Note: not prividing these values will disable Elite Dangerous Community Goals checker feature.
 ```json
 "EliteCommunityGoals": {
   "InaraAppInDevelopment": true,
@@ -34,8 +34,7 @@ This file will hold secrets, so it should not be included in source control repo
   "InaraAppVersion": "<app-version>",
   "InaraApiKey": "<api-key>"
 }
-```  
-Note: not prividing these values will disable Elite Dangerous Community Goals checker feature.
+```
 8. Update [appsettings.json](EinherjiBot.General/appsettings.json). At very least, all channel, user and role IDs will need changing to match values in your Discord guild.
 9. Build and run `EinherjiBot.General` project.
 
