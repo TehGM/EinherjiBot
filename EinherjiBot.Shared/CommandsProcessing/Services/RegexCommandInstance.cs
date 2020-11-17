@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private readonly ParameterInfo[] _params;
         private readonly IRegexCommandModuleProvider _moduleProvider;
 
-        private RegexCommandInstance(Regex regex, MethodInfo method, IServiceProvider services)
+        private RegexCommandInstance(Regex regex, MethodInfo method, IRegexCommandModuleProvider moduleProvider)
         {
             this.Regex = regex;
             this.Priority = 0;
@@ -38,7 +38,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._method = method;
             this._params = method.GetParameters();
 
-            this._moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
+            this._moduleProvider = moduleProvider;
         }
 
         public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
@@ -53,7 +53,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             RegexOptions regexOptions = regexAttribute.RegexOptions;
             if (options?.CaseSensitive != true)
                 regexOptions |= RegexOptions.IgnoreCase;
-            RegexCommandInstance result = new RegexCommandInstance(new Regex(regexAttribute.Pattern, regexOptions), method, services);
+            IRegexCommandModuleProvider moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
+            RegexCommandInstance result = new RegexCommandInstance(new Regex(regexAttribute.Pattern, regexOptions), method, moduleProvider);
             result.RunMode = options?.DefaultRunMode ?? RunMode.Default;
 
             // first load base type attributes
