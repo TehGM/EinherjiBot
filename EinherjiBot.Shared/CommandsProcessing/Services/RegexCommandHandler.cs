@@ -139,6 +139,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
+                        IResult preconditionsResult = await command.CheckPreconditionsAsync(context, _serviceProvider);
+                        if (!preconditionsResult.IsSuccess)
+                            continue;
                         ExecuteResult result = (ExecuteResult)await command.ExecuteAsync(
                             context: context,
                             argPos: argPos,
