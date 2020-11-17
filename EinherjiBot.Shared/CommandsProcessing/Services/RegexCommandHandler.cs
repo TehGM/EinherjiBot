@@ -46,7 +46,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
                 this._commands.Clear();
                 CommandsOptions options = this._commandOptions.CurrentValue;
-                CommandServiceConfig config = new CommandServiceConfig();
                 foreach (Assembly asm in options.Assemblies)
                     this.AddAssembly(asm);
                 foreach (Type t in options.Classes)
