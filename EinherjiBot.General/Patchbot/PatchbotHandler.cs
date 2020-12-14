@@ -115,7 +115,7 @@ namespace TehGM.EinherjiBot.Patchbot
             await message.ReplyAsync($"{string.Join(' ', presentSubscribers.Select(user => user.Mention))}\n{message.GetJumpUrl()}", cancellationToken).ConfigureAwait(false);
         }
 
-        [RegexCommand(@"^patchbot sub(?:scribe)?(?: (.+))?")]
+        [RegexCommand(@"^patchbot\ssub(?:scribe)?(?: (.+))?")]
         private async Task CmdSubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -138,7 +138,7 @@ namespace TehGM.EinherjiBot.Patchbot
             await context.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will now get pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
-        [RegexCommand(@"^patchbot unsub(?:scribe)?(?: (.+))?")]
+        [RegexCommand(@"^patchbot\sunsub(?:scribe)?(?: (.+))?")]
         private async Task CmdUnsubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -161,7 +161,7 @@ namespace TehGM.EinherjiBot.Patchbot
             await context.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
-        [RegexCommand(@"^patchbot add (?: (.+))?")]
+        [RegexCommand(@"^patchbot add(?:\s(.+))?")]
         private async Task CmdAddGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -208,7 +208,7 @@ namespace TehGM.EinherjiBot.Patchbot
             await context.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` updated.", cancellationToken).ConfigureAwait(false);
         }
 
-        [RegexCommand(@"^patchbot (?:remove|del|delete) (?: (.+))?")]
+        [RegexCommand(@"^patchbot\s(?:remove|del|delete)(?:\s(.+))?")]
         private async Task CmdRemoveGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
