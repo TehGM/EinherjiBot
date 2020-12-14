@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Database;
@@ -64,7 +65,7 @@ namespace TehGM.EinherjiBot.Patchbot.Services
                 // get from DB
                 _log.LogTrace("Retrieving patchbot game {Game} from database", trimmedName);
                 FilterDefinition<PatchbotGame> filter = Builders<PatchbotGame>.Filter.Or(
-                    Builders<PatchbotGame>.Filter.Eq(dbData => dbData.Name.ToLowerInvariant(), lowercaseName),
+                    Builders<PatchbotGame>.Filter.Regex(dbData => dbData.Name, new BsonRegularExpression($"/^{trimmedName}$/i")),
                     Builders<PatchbotGame>.Filter.AnyEq(dbData => dbData.Aliases, lowercaseName));
                 result = await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
