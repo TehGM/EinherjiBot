@@ -19,6 +19,10 @@ namespace TehGM.EinherjiBot.Caching
         }
 
         public static implicit operator TEntity(CachedEntity<TKey, TEntity> cached)
-            => cached.Entity;
+        {
+            if (cached == null)
+                return default;
+            return cached.Entity;
+        }
     }
 }
