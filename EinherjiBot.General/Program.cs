@@ -13,6 +13,7 @@ using TehGM.EinherjiBot.Netflix;
 using TehGM.EinherjiBot.Netflix.Services;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
+using TehGM.EinherjiBot.RandomStatus;
 using TehGM.EinherjiBot.Services;
 using TehGM.EinherjiBot.Stellaris.Services;
 
@@ -44,6 +45,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
+                    services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
 
                     // add framework services
 
