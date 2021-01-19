@@ -128,7 +128,7 @@ namespace TehGM.EinherjiBot.Intel
             if (user.Activity == null)
                 return "-";
             if (user.Activity is CustomStatusGame customStatus)
-                return customStatus.State;
+                return $"{customStatus.Emote} {customStatus.State}";
             return $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
         }
 
