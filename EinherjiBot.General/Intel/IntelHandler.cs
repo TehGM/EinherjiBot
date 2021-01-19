@@ -168,7 +168,10 @@ namespace TehGM.EinherjiBot.Intel
 
             // get roles, respecting hierarchy
             IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
-            embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
+            if (roles.Any())
+                embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
+            else
+                embed.AddField("Roles", "-");
             embed.Color = roles.FirstOrDefault(r => r.Color != Color.Default)?.Color;
 
             // add joined time
