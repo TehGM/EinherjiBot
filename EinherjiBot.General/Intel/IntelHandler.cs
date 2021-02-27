@@ -119,10 +119,6 @@ namespace TehGM.EinherjiBot.Intel
 
 
         #region Embed Builders
-        protected static string GetMaxUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto)
-            => GetUserAvatarUrl(user, format, (ushort)(user is SocketUser ? 2048 : 1024));
-        protected static string GetUserAvatarUrl(IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
-            => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
         protected static string GetUserActivity(IUser user)
         {
             if (user.Activity == null)
@@ -135,8 +131,8 @@ namespace TehGM.EinherjiBot.Intel
         private EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user, UserData userData)
         {
             // add basic user info
-            embed.WithAuthor($"Intel on {user.Username}", GetUserAvatarUrl(_client.CurrentUser))
-                .WithThumbnailUrl(GetMaxUserAvatarUrl(user))
+            embed.WithAuthor($"Intel on {user.Username}", _client.CurrentUser.GetSafeAvatarUrl())
+                .WithThumbnailUrl(user.GetMaxAvatarUrl())
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
                 .AddField("Status", (user is SocketUser) ? user.Status.ToString() : "???", true);
@@ -155,7 +151,7 @@ namespace TehGM.EinherjiBot.Intel
             // add remaining user info
             embed.AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
                 .WithTimestamp(user.CreatedAt)
-                .WithFooter($"User ID: {user.Id}", GetUserAvatarUrl(user));
+                .WithFooter($"User ID: {user.Id}", user.GetSafeAvatarUrl());
             return embed;
         }
 
@@ -164,7 +160,7 @@ namespace TehGM.EinherjiBot.Intel
             // add nickname if present
             if (user.Nickname != null)
                 embed.AddField("Guild nickname", user.Nickname, true)
-                    .WithAuthor($"Intel on {user.Nickname}", GetUserAvatarUrl(_client.CurrentUser));
+                    .WithAuthor($"Intel on {user.Nickname}", _client.CurrentUser.GetSafeAvatarUrl());
 
             // get roles, respecting hierarchy
             IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
@@ -182,7 +178,7 @@ namespace TehGM.EinherjiBot.Intel
 
         private EmbedBuilder AddGuildInfo(EmbedBuilder embed, SocketGuild guild)
         {
-            embed.WithAuthor($"Intel on {guild.Name}", GetUserAvatarUrl(_client.CurrentUser))
+            embed.WithAuthor($"Intel on {guild.Name}", _client.CurrentUser.GetSafeAvatarUrl())
                 .WithThumbnailUrl(guild.IconUrl)
                 .AddField("Owner", MentionUtils.MentionUser(guild.OwnerId))
                 .AddField("Guild age", (DateTimeOffset.UtcNow - guild.CreatedAt).ToLongFriendlyString(), true)
