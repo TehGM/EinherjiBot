@@ -8,6 +8,8 @@ using TehGM.EinherjiBot.CommandsProcessing;
 using TehGM.EinherjiBot.Database;
 using TehGM.EinherjiBot.EliteDangerous;
 using TehGM.EinherjiBot.EliteDangerous.Services;
+using TehGM.EinherjiBot.GameServers;
+using TehGM.EinherjiBot.GameServers.Services;
 using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Netflix;
 using TehGM.EinherjiBot.Netflix.Services;
@@ -38,6 +40,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<CachingOptions>(MongoStellarisModsStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoStellarisModsStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoCommunityGoalsHistoryStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoCommunityGoalsHistoryStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoPatchbotGameStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoPatchbotGameStore.CacheOptionName));
+                    services.Configure<CachingOptions>(MongoGameServerStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoGameServerStore.CacheOptionName));
                     services.Configure<DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
@@ -46,6 +49,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
                     services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
+                    services.Configure<GameServersOptions>(context.Configuration.GetSection("GameServers"));
 
                     // add framework services
 
@@ -62,6 +66,7 @@ namespace TehGM.EinherjiBot
                     services.AddPihole();
                     services.AddPatchbot();
                     services.AddEliteCommunityGoals();
+                    services.AddGameServers();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);
