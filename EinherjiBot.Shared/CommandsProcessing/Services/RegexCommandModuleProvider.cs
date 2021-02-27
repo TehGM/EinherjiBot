@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -65,11 +66,13 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         private RegexCommandModuleInfo InitializeModuleInfo(ConstructorInfo constructor)
         {
+            using IServiceScope scope = _services.CreateScope();
+
             ParameterInfo[] ctorParams = constructor.GetParameters();
             object[] paramsValues = new object[ctorParams.Length];
             foreach (ParameterInfo param in ctorParams)
             {
-                object value = _services.GetService(param.ParameterType);
+                object value = scope.ServiceProvider.GetService(param.ParameterType);
                 if (value == null)
                 {
                     if (param.IsOptional)
