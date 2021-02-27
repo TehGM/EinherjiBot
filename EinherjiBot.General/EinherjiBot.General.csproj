@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <Authors>TehGM</Authors>
     <AssemblyName>EinherjiBot</AssemblyName>
     <Description>A personal administration bot for Discord. Features may seem truly random!</Description>
@@ -14,8 +14,7 @@
     <RepositoryUrl>https://github.com/TehGM/EinherjiBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Discord, Bot</PackageTags>
-    <PackageReleaseNotes>- Added Game Servers feature.
-- Fixed DI scoping for transient regex commands.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Fix exception when Guild is null (in private).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
