@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -121,7 +122,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     value = regexMatch;
                 else if (param.ParameterType.IsAssignableFrom(context.Message.GetType()))
                     value = context.Message;
-                else if (param.ParameterType.IsAssignableFrom(context.Guild.GetType()))
+                else if (context.Guild != null && param.ParameterType.IsAssignableFrom(context.Guild.GetType()))
+                    value = context.Guild;
+                else if (context.Guild == null && param.ParameterType.IsAssignableFrom(typeof(IGuild)))
                     value = context.Guild;
                 else if (param.ParameterType.IsAssignableFrom(context.Channel.GetType()))
                     value = context.Channel;
