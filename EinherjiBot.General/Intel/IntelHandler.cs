@@ -14,6 +14,7 @@ namespace TehGM.EinherjiBot.Intel
 {
     [LoadRegexCommands]
     [PersistentModule(PreInitialize = true)]
+    [HelpCategory("General", 99999)]
     public class IntelHandler : IDisposable
     {
         private readonly DiscordSocketClient _client;
@@ -38,12 +39,14 @@ namespace TehGM.EinherjiBot.Intel
         }
 
         [RegexCommand("^intel on me")]
+        [Hidden]
         [Priority(200)]
         private Task CmdIntelMeAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
             => ProcessIntelUserAsync(context, context.User, cancellationToken);
 
         [RegexCommand("^intel on \\\\?<@!?(\\d+)>")]
         [RegexCommand("^intel on (\\d+)")]
+        [Hidden]
         [Priority(199)]
         private async Task CmdIntelUserAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
@@ -64,6 +67,7 @@ namespace TehGM.EinherjiBot.Intel
         }
 
         [RegexCommand("^intel on guild")]
+        [Hidden]
         [Priority(198)]
         private Task CmdIntelGuildAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
@@ -77,6 +81,8 @@ namespace TehGM.EinherjiBot.Intel
         }
 
         [RegexCommand("^intel")]
+        [Name("intel")]
+        [Summary("Shows help for intel feature.")]
         [Priority(197)]
         private Task CmdIntelHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {

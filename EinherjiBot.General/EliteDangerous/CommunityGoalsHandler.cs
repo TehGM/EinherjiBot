@@ -17,6 +17,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
 {
     [LoadRegexCommands]
     [PersistentModule(PreInitialize = true)]
+    [HelpCategory("Games", 10)]
     public class CommunityGoalsHandler : IDisposable
     {
         private readonly DiscordSocketClient _client;
@@ -167,6 +168,9 @@ namespace TehGM.EinherjiBot.EliteDangerous
         }
 
         [RegexCommand("^elite (?:cgs?|community goals?)")]
+        [Name("elite community goals")]
+        [Summary("Shows list of currently ongoing Community Goals in Elite Dangerous.")]
+        [Priority(-19)]
         private async Task CmdCommunityGoals(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);

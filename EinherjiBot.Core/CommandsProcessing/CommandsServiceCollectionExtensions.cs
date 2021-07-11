@@ -17,10 +17,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configure);
 
             services.TryAddSingleton<IRegexCommandModuleProvider, RegexComandModuleProvider>();
-            services.TryAddEnumerable(new ServiceDescriptor[] 
+            services.TryAddSingleton<SimpleCommandHandler>();
+            services.TryAddSingleton<RegexCommandHandler>();
+            services.TryAddEnumerable(new ServiceDescriptor[]
             {
-                ServiceDescriptor.Transient<IHostedService, SimpleCommandHandler>(),
-                ServiceDescriptor.Transient<IHostedService, RegexCommandHandler>()
+                ServiceDescriptor.Transient<IHostedService, SimpleCommandHandler>(services => services.GetRequiredService<SimpleCommandHandler>()),
+                ServiceDescriptor.Transient<IHostedService, RegexCommandHandler>(services => services.GetRequiredService<RegexCommandHandler>())
             });
 
             return services;

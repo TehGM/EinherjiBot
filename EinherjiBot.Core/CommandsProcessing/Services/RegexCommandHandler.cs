@@ -13,12 +13,12 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandHandler : CommandHandlerBase
     {
-        private ICollection<RegexCommandInstance> _commands;
+        public ICollection<RegexCommandInstance> Commands { get; private set; }
 
         public RegexCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
             : base(serviceProvider, client, commandOptions, log)
         {
-            this._commands = new List<RegexCommandInstance>();
+            this.Commands = new List<RegexCommandInstance>();
         }
 
         protected override async Task InitializeCommandsAsync()
@@ -28,14 +28,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 this._log.LogDebug("Initializing commands");
 
-                this._commands.Clear();
+                this.Commands.Clear();
                 CommandsOptions options = this._commandOptions.CurrentValue;
                 foreach (Assembly asm in options.Assemblies)
                     this.AddAssembly(asm);
                 foreach (Type t in options.Classes)
                     this.AddType(t.GetTypeInfo());
 
-                this._commands = _commands.OrderByDescending(cmd => cmd.Priority).ToArray();
+                this.Commands = Commands.OrderByDescending(cmd => cmd.Priority).ToArray();
             }
             finally
             {
@@ -77,7 +77,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
             }
             foreach (RegexCommandAttribute attribute in attributes)
-                _commands.Add(RegexCommandInstance.Build(method, attribute, _serviceProvider));
+                Commands.Add(RegexCommandInstance.Build(method, attribute, _serviceProvider));
         }
 
         protected override async Task HandleCommandAsync(SocketCommandContext context, int argPos)
@@ -90,7 +90,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             await _lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
             try
             {
-                foreach (RegexCommandInstance command in _commands)
+                foreach (RegexCommandInstance command in Commands)
                 {
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
