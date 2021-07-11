@@ -6,6 +6,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing
     {
         public static string MainGuild => "MainGuild";
 
-        public IEnumerable<ulong> GuildIDs { get; set; } = new HashSet<ulong>();
+        public ICollection<ulong> GuildIDs { get; set; } = new HashSet<ulong>();
     }
 }
