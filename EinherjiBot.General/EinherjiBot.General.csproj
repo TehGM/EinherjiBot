@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
-    <Version>2.2.1</Version>
+    <Version>2.3.0</Version>
     <Authors>TehGM</Authors>
     <AssemblyName>EinherjiBot</AssemblyName>
     <Description>A personal administration bot for Discord. Features may seem truly random!</Description>
@@ -41,9 +41,8 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>

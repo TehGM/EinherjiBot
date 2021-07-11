@@ -12,6 +12,8 @@ The bot is split into 2 projects:
 - EinherjiBot.Shared - contains extensions and core abstractions.
 
 ## Running locally
+> Note: requires [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0) since version 2.3.0.
+
 1. Clone this repository to get all files.
 2. Set up MongoDB database with following collections: `Miscellaneous`, `StellarisMods`, `PatchbotGames`, `EliteCommunityGoals` and `UsersData`.
 3. Create `appsecrets.json` file. See [example file](appsecrets-example.json) for example structure.  

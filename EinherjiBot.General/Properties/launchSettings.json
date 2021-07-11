@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "EinherjiBot.General": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
