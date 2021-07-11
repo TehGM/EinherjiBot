@@ -49,17 +49,16 @@ namespace TehGM.EinherjiBot
             IOrderedEnumerable<IGrouping<string, CommandDescriptor>> commands = this.GetCommandDescriptors(context);
             if (commands.Any())
             {
+                string prefix = _commandsOptions.Prefix;
+                if (string.IsNullOrWhiteSpace(prefix))
+                    prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
+
                 StringBuilder commandsList = new StringBuilder();
                 foreach (IGrouping<string, CommandDescriptor> group in commands)
                 {
                     commandsList.AppendFormat("__{0}__\n", group.Key);
                     foreach (CommandDescriptor cmd in group)
-                    {
-                        string prefix = _commandsOptions.Prefix;
-                        if (string.IsNullOrWhiteSpace(prefix))
-                            prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
                         commandsList.Append($"***{prefix}{cmd.DisplayName}***: {cmd.Summary}\n");
-                    }
                 }
                 embed.AddField("Commands", commandsList.ToString(), inline: false);
             }
