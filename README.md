@@ -5,11 +5,11 @@ Einherji is my private Discord administration bot. It mainly contains features t
 Einherji is built using .NET Core Hosting approach, making use of its Dependency Injection container, Logging abstractions and configuration loading.
 
 Uses [Discord.Net](https://github.com/discord-net/Discord.Net) for connection and MongoDB (using [C# MongoDB Driver](https://docs.mongodb.com/drivers/csharp)) for storage.
-The bot contains a custom Regex Commands System built on top of [Discord.Net](https://discord.foxbot.me/stable/guides/commands/intro.html)'s default command system. Its implementation can be found in [CommandsProcessing](https://github.com/TehGM/EinherjiBot/tree/master/EinherjiBot.Shared/CommandsProcessing) directory.
+The bot contains a custom Regex Commands System built on top of [Discord.Net](https://discord.foxbot.me/stable/guides/commands/intro.html)'s default command system. Its implementation can be found in [CommandsProcessing](https://github.com/TehGM/EinherjiBot/tree/master/EinherjiBot.Core/CommandsProcessing) directory.
 
 The bot is split into 2 projects:
 - EinherjiBot.General - contains bot's main features.
-- EinherjiBot.Shared - contains extensions and core abstractions.
+- EinherjiBot.Core - contains extensions and core abstractions.
 
 ## Running locally
 > Note: requires [.NET 5 SDK](https://dotnet.microsoft.com/download/dotnet/5.0) since version 2.3.0.
