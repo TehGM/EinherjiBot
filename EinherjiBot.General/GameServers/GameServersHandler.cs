@@ -85,7 +85,7 @@ namespace TehGM.EinherjiBot.GameServers
                 sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             else
             {
-                _ = context.ReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
+                _ = context.InlineReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
                 Task<IUserMessage> pmTask = context.User.SendMessageAsync(text, false, embed.Build(), new RequestOptions { CancelToken = cancellationToken });
                 sentMsg = await pmTask.ConfigureAwait(false);
             }
