@@ -128,14 +128,6 @@ namespace TehGM.EinherjiBot
             return orderedGroups;
         }
 
-        private string BuildCommandLine(string command, string description, SocketCommandContext context)
-        {
-            string prefix = _commandsOptions.Prefix;
-            if (string.IsNullOrWhiteSpace(prefix))
-                prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
-            return $"***{prefix}{command}***: {description}\n";
-        }
-
         private string GetLeaveChannel(SocketCommandContext context)
         {
             if (context.IsPrivate)
