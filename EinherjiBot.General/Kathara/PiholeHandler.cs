@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -21,6 +20,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 namespace TehGM.EinherjiBot.Kathara
 {
     [LoadRegexCommands]
+    [HelpCategory("Special", -99999)]
     public class PiholeHandler
     {
         private readonly ILogger _log;
@@ -40,6 +40,8 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand("^pihole")]
+        [Name("pihole")]
+        [Summary("Access to commands for managing PiHole instances in TehGM's Kathara network.")]
         [RestrictCommand]
         [Priority(-105)]
         private Task CmdHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
@@ -68,6 +70,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})")]
+        [Hidden]
         [RestrictCommand]
         [Priority(-103)]
         private async Task CmdInstanceInfoAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
@@ -158,6 +161,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+enable")]
+        [Hidden]
         [RestrictCommand]
         [Priority(-102)]
         private async Task CmdEnableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
@@ -215,6 +219,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+disable(?:\s+(\d+))?")]
+        [Hidden]
         [RestrictCommand]
         [Priority(-101)]
         private async Task CmdDisableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)

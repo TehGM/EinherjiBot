@@ -14,6 +14,7 @@ using System.Text;
 namespace TehGM.EinherjiBot.GameServers
 {
     [LoadRegexCommands]
+    [HelpCategory("Games", 10)]
     public class GameServersHandler
     {
         private readonly IGameServerStore _gameServersStore;
@@ -33,6 +34,9 @@ namespace TehGM.EinherjiBot.GameServers
         }
 
         [RegexCommand(@"^server(?:\s(.+))?")]
+        [Name("server <game>")]
+        [Summary("If you're authorized, will give you info how to connect to our game servers.")]
+        [Priority(-18)]
         [RestrictCommand]
         private async Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {

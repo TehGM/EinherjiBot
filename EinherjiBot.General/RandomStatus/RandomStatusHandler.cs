@@ -65,6 +65,7 @@ namespace TehGM.EinherjiBot.RandomStatus
         }
 
         [RegexCommand("^randomize status")]
+        [Hidden]
         private async Task CmdRandomizeStatus(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
             EinherjiOptions einherjiOptions = this._einherjiOptions.CurrentValue;

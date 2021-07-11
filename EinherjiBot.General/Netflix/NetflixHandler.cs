@@ -14,6 +14,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 namespace TehGM.EinherjiBot.Netflix
 {
     [LoadRegexCommands]
+    [HelpCategory("Special", -99999)]
     public class NetflixHandler
     {
         private readonly INetflixAccountStore _netflixAccountStore;
@@ -32,6 +33,8 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix (?:password|account|login)")]
+        [Name("netflix account")]
+        [Summary("If you're a part of our Netflix team, will provide Netflix credentials.")]
         [RestrictCommand]
         [Priority(100)]
         private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
@@ -74,6 +77,7 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix set (login|email|username|password|pass|pwd) (.+)")]
+        [Hidden]
         [RestrictCommand]
         [Priority(99)]
         private async Task CmdUpdateAccountAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)

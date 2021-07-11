@@ -13,6 +13,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 namespace TehGM.EinherjiBot.Stellaris.Services
 {
     [LoadRegexCommands]
+    [HelpCategory("Games", 10)]
     public class StellarisModsHandler
     {
         private readonly IStellarisModsStore _stellarisModsStore;
@@ -29,6 +30,7 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         }
 
         [RegexCommand("^stellaris mods add(?:\\s+(.+)\\s*\\|\\s*(.+)){0,1}\\s*$")]
+        [Hidden]
         [Priority(400)]
         private async Task CmdAddModAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
@@ -66,6 +68,7 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         }
 
         [RegexCommand("^stellaris mods (?:remove|del|delete)(?:\\s+(.+))?$")]
+        [Hidden]
         [Priority(399)]
         private async Task CmdRemoveModAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
@@ -106,6 +109,8 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         }
 
         [RegexCommand("^stellaris mods")]
+        [Name("stellaris mods")]
+        [Summary("Shows list of Stellaris mods we use in multiplayer.")]
         [Priority(398)]
         private async Task CmdListModsAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {

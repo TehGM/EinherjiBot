@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class RestrictCommandAttribute : PreconditionAttribute
     {
         private readonly HashSet<string> _groupNames;
@@ -38,34 +38,38 @@ namespace TehGM.EinherjiBot.CommandsProcessing
 
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            IEnumerable<CommandRestrictionGroup> groups = this.GetRestrictionGroups(services);
-            if (!this.IsAllowedInAnyGroup(context, groups))
+            CommandsOptions options = services.GetRequiredService<IOptionsMonitor<CommandsOptions>>().CurrentValue;
+            if (!this.CheckRestriction(context, options.RestrictionGroups))
                 return Task.FromResult(PreconditionResult.FromError("Command restricted"));
             return Task.FromResult(PreconditionResult.FromSuccess());
         }
 
-        private IEnumerable<CommandRestrictionGroup> GetRestrictionGroups(IServiceProvider services)
+        public bool CheckRestriction(ICommandContext context, IDictionary<string, CommandRestrictionGroup> allRestrictionGroups)
         {
-            CommandsOptions options = services.GetRequiredService<IOptionsMonitor<CommandsOptions>>().CurrentValue;
-            if (options.RestrictionGroups?.Any() != true)
-                return null;
+            if (allRestrictionGroups?.Any() != true)
+                return false;
 
-            List<CommandRestrictionGroup> results = new List<CommandRestrictionGroup>(this._groupNames.Count);
-            foreach (string groupName in this.GroupNames)
-            {
-                if (options.RestrictionGroups.TryGetValue(groupName, out CommandRestrictionGroup group))
-                    results.Add(group);
-            }
-            return results.AsEnumerable();
-        }
+            IEnumerable<CommandRestrictionGroup> groups = this.GetRestrictionGroups(allRestrictionGroups);
 
-        private bool IsAllowedInAnyGroup(ICommandContext context, IEnumerable<CommandRestrictionGroup> groups)
-        {
             if (groups?.Any() != true)
                 return false;
             if (context.Guild == null)
                 return false;
             return groups.Any(group => group.GuildIDs.Contains(context.Guild.Id));
+        }
+
+        private IEnumerable<CommandRestrictionGroup> GetRestrictionGroups(IDictionary<string, CommandRestrictionGroup> allRestrictionGroups)
+        {
+            if (allRestrictionGroups?.Any() != true)
+                return null;
+
+            List<CommandRestrictionGroup> results = new List<CommandRestrictionGroup>(this._groupNames.Count);
+            foreach (string groupName in this.GroupNames)
+            {
+                if (allRestrictionGroups.TryGetValue(groupName, out CommandRestrictionGroup group))
+                    results.Add(group);
+            }
+            return results.AsEnumerable();
         }
     }
 }

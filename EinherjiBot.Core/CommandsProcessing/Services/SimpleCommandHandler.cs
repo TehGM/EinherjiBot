@@ -11,7 +11,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     /// <summary>Handler that allows use of Discord.NET's default commands system.</summary>
     public class SimpleCommandHandler : CommandHandlerBase
     {
-        private CommandService _commands;
+        public CommandService Commands { get; private set; }
 
         public SimpleCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<SimpleCommandHandler> log)
             : base(serviceProvider, client, commandOptions, log) { }
@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         {
             _log.LogDebug("Initializing CommandService");
 
-            try { (_commands as IDisposable)?.Dispose(); } catch { }
+            try { (Commands as IDisposable)?.Dispose(); } catch { }
 
             CommandsOptions options = this._commandOptions.CurrentValue;
             CommandServiceConfig config = new CommandServiceConfig();
@@ -28,11 +28,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             if (options.DefaultRunMode != RunMode.Default)
                 config.DefaultRunMode = options.DefaultRunMode;
             config.IgnoreExtraArgs = options.IgnoreExtraArgs;
-            this._commands = new CommandService(config);
+            this.Commands = new CommandService(config);
             foreach (Assembly asm in options.Assemblies)
-                await this._commands.AddModulesAsync(asm, _serviceProvider).ConfigureAwait(false);
+                await this.Commands.AddModulesAsync(asm, _serviceProvider).ConfigureAwait(false);
             foreach (Type t in options.Classes)
-                await this._commands.AddModuleAsync(t, _serviceProvider).ConfigureAwait(false);
+                await this.Commands.AddModuleAsync(t, _serviceProvider).ConfigureAwait(false);
         }
 
         protected override async Task HandleCommandAsync(SocketCommandContext context, int argPos)
@@ -42,7 +42,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // Keep in mind that result does not indicate a return value
             // rather an object stating if the command executed successfully.
-            IResult result = await _commands.ExecuteAsync(
+            IResult result = await Commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
                 services: _serviceProvider)

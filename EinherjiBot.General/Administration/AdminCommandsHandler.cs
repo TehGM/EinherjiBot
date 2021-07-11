@@ -16,6 +16,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 namespace TehGM.EinherjiBot.Administration
 {
     [LoadRegexCommands]
+    [HelpCategory("Special", -99999)]
     [PersistentModule(PreInitialize = true)]
     public class AdminCommandsHandler : IDisposable
     {
@@ -39,6 +40,9 @@ namespace TehGM.EinherjiBot.Administration
         }
 
         [RegexCommand("^move\\s?all(?:(?: from)?\\s+(?:<#)?(\\d+)(?:>)?)?(?:(?: to)?\\s+(?:<#)?(\\d+)(?:>)?)?")]
+        [Name("move all <from-id> <to-id>")]
+        [Summary("Moves all users from voice channel *<from-id>* to *<to-id>*. You need to have appropiate permissions.")]
+        [Priority(-29)]
         private async Task CmdMoveAllAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -159,6 +163,9 @@ namespace TehGM.EinherjiBot.Administration
         }
 
         [RegexCommand("^purge(?:\\s+(\\d+))?")]
+        [Name("purge <number>")]
+        [Summary("Removes last *<number>* messages. You need to have permissions to remove messages.")]
+        [Priority(-28)]
         private async Task CmdPurgeAsync(SocketCommandContext message, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(message, this);
