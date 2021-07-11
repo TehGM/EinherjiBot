@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EinherjiBot.Shared\EinherjiBot.Shared.csproj" />
+    <ProjectReference Include="..\EinherjiBot.Core\EinherjiBot.Core.csproj" />
   </ItemGroup>
 
 </Project>
