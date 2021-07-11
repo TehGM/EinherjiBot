@@ -33,6 +33,7 @@ namespace TehGM.EinherjiBot.GameServers
         }
 
         [RegexCommand(@"^server(?:\s(.+))?")]
+        [RestrictCommand]
         private async Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             // check if command has game name

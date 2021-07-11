@@ -116,6 +116,7 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\ssub(?:scribe)?(?: (.+))?")]
+        [RestrictCommand]
         private async Task CmdSubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -139,6 +140,7 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\sunsub(?:scribe)?(?: (.+))?")]
+        [RestrictCommand]
         private async Task CmdUnsubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -162,6 +164,7 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot add(?:\s(.+))?")]
+        [RestrictCommand]
         private async Task CmdAddGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -209,6 +212,7 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\s(?:remove|del|delete)(?:\s(.+))?")]
+        [RestrictCommand]
         private async Task CmdRemoveGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);

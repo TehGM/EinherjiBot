@@ -32,6 +32,7 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix (?:password|account|login)")]
+        [RestrictCommand]
         [Priority(100)]
         private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
@@ -73,6 +74,7 @@ namespace TehGM.EinherjiBot.Netflix
         }
 
         [RegexCommand("^netflix set (login|email|username|password|pass|pwd) (.+)")]
+        [RestrictCommand]
         [Priority(99)]
         private async Task CmdUpdateAccountAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {

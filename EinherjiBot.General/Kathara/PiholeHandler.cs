@@ -40,6 +40,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand("^pihole")]
+        [RestrictCommand]
         [Priority(-105)]
         private Task CmdHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
@@ -67,6 +68,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})")]
+        [RestrictCommand]
         [Priority(-103)]
         private async Task CmdInstanceInfoAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
@@ -156,6 +158,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+enable")]
+        [RestrictCommand]
         [Priority(-102)]
         private async Task CmdEnableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
@@ -212,6 +215,7 @@ namespace TehGM.EinherjiBot.Kathara
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+disable(?:\s+(\d+))?")]
+        [RestrictCommand]
         [Priority(-101)]
         private async Task CmdDisableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
