@@ -64,11 +64,20 @@ namespace TehGM.EinherjiBot
                 embed.AddField("Commands", commandsList.ToString(), inline: false);
             }
 
-            embed.AddField("Additional features",
-                "If you try to use an another bot in a wrong channel, I'll direct you to the correct channel.\n" +
-                $"I'll automatically post new or just finished Elite Dangerous Community Goals in {MentionUtils.MentionChannel(_eliteOptions.AutoNewsChannelID)}.\n" +
-                $"I'll post a message in {GetLeaveChannel(context)} when a user leaves the guild.", 
-                inline: false);
+            if (this.IsMainRestrictionGroup(context))
+            {
+                embed.AddField("Additional features",
+                    "If you try to use an another bot in a wrong channel, I'll direct you to the correct channel.\n" +
+                    $"I'll automatically post new or just finished Elite Dangerous Community Goals in {MentionUtils.MentionChannel(_eliteOptions.AutoNewsChannelID)}.\n" +
+                    $"I'll post a message in {GetLeaveChannel(context)} when a user leaves the guild.",
+                    inline: false);
+            }
+            else
+            {
+                embed.AddField("Additional features", 
+                    $"I'll post a message in {GetLeaveChannel(context)} when a user leaves the guild.\n" + 
+                    $"More additional features are provided in {GetAuthorText(context)}'s server.", inline: false);
+            }
             embed.AddField("Support",
                 $"To submit bugs or suggestions, please open an issue on [GitHub](https://github.com/TehGM/EinherjiBot/issues). Alternatively, you can message {GetAuthorText(context)}.\n" +
                 "To support the developer, consider donating on [GitHub Sponsors](https://github.com/sponsors/TehGM), [Patreon](https://patreon.com/TehGMdev) or [Buy Me A Coffee](https://www.buymeacoffee.com/TehGM). **Thank you!**",
@@ -76,6 +85,15 @@ namespace TehGM.EinherjiBot
             embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfoUtility.GetVersion()}", context.Client.CurrentUser.GetSafeAvatarUrl());
 
             return context.ReplyAsync(null, false, embed.Build(), cancellationToken); 
+        }
+
+        private bool IsMainRestrictionGroup(ICommandContext context)
+        {
+            if (context.Guild == null)
+                return false;
+            if (!this._commandsOptions.RestrictionGroups.TryGetValue(CommandRestrictionGroup.MainGuild, out CommandRestrictionGroup group))
+                return false;
+            return group.GuildIDs.Contains(context.Guild.Id);
         }
 
         private IOrderedEnumerable<IGrouping<string, CommandDescriptor>> GetCommandDescriptors(ICommandContext context)
