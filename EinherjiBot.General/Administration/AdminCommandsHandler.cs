@@ -222,7 +222,10 @@ namespace TehGM.EinherjiBot.Administration
                         await SendOrUpdateConfirmationAsync($"You are requesting deletion of {actualCount} messages, {olderCount} of which are older than 2 weeks.\n" +
                             "Deleting these messages may take a while due to Discord's rate limiting, so please be patient.").ConfigureAwait(false);
                         foreach (IMessage msg in olderMessages)
+                        {
+                            await Task.Delay(1500).ConfigureAwait(false);
                             await channel.DeleteMessageAsync(msg, cancellationToken).ConfigureAwait(false);
+                        }
                     }
                     await SendOrUpdateConfirmationAsync(actualCount > 0 ?
                         $"{options.SuccessSymbol} Sir, your message and {actualCount} previous message{(actualCount > 1 ? "s were" : " was")} taken down." :
