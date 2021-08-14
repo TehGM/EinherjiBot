@@ -36,32 +36,41 @@ namespace TehGM.EinherjiBot
             this._regexCommands = regexCommands;
         }
 
+        [RegexCommand(@"^commands")]
+        [Hidden]
+        [Priority(-999998)]
+        private Task CmdCommandsAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        {
+            IOrderedEnumerable<IGrouping<string, CommandDescriptor>> commands = this.GetCommandDescriptors(context);
+            if (commands.Any())
+            {
+                EmbedBuilder embed = this.StartEmbed(context);
+                string prefix = this.GetPrefix(context);
+
+                StringBuilder commandsList = new StringBuilder();
+                foreach (IGrouping<string, CommandDescriptor> group in commands)
+                {
+                    commandsList.Clear();
+                    foreach (CommandDescriptor cmd in group)
+                        commandsList.Append($"***{prefix}{cmd.DisplayName}***: {cmd.Summary}\n");
+
+                    embed.AddField(group.Key, commandsList.ToString(), inline: false);
+                }
+
+                return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            }
+            else
+                return context.InlineReplyAsync($"{_einherjiOptions.FailureSymbol} Ooops, I detected no commands... this obviously isn't right. Please let {GetAuthorText(context)} know!", cancellationToken);
+        }
+
         [RegexCommand(@"^help")]
         [Hidden]
         [Priority(-999999)]
         private Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.Title = $"{context.Client.CurrentUser.Username} Bot";
-            embed.Description = $"Personal administration bot developed by {GetAuthorText(context)}.";
-            embed.ThumbnailUrl = context.Client.CurrentUser.GetMaxAvatarUrl();
+            EmbedBuilder embed = this.StartEmbed(context);
 
-            IOrderedEnumerable<IGrouping<string, CommandDescriptor>> commands = this.GetCommandDescriptors(context);
-            if (commands.Any())
-            {
-                string prefix = _commandsOptions.Prefix;
-                if (string.IsNullOrWhiteSpace(prefix))
-                    prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
-
-                StringBuilder commandsList = new StringBuilder();
-                foreach (IGrouping<string, CommandDescriptor> group in commands)
-                {
-                    commandsList.AppendFormat("__{0}__\n", group.Key);
-                    foreach (CommandDescriptor cmd in group)
-                        commandsList.Append($"***{prefix}{cmd.DisplayName}***: {cmd.Summary}\n");
-                }
-                embed.AddField("Commands", commandsList.ToString(), inline: false);
-            }
+            embed.AddField("Commands", $"Use **{this.GetPrefix(context)}commands** to get list of commands that you can use here!", inline: false);
 
             if (this.IsMainRestrictionGroup(context))
             {
@@ -81,9 +90,18 @@ namespace TehGM.EinherjiBot
                 $"To submit bugs or suggestions, please open an issue on [GitHub](https://github.com/TehGM/EinherjiBot/issues). Alternatively, you can message {GetAuthorText(context)}.\n" +
                 "To support the developer, consider donating on [GitHub Sponsors](https://github.com/sponsors/TehGM), [Patreon](https://patreon.com/TehGMdev) or [Buy Me A Coffee](https://www.buymeacoffee.com/TehGM). **Thank you!**",
                 inline: false);
-            embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfoUtility.GetVersion()}", context.Client.CurrentUser.GetSafeAvatarUrl());
 
             return context.ReplyAsync(null, false, embed.Build(), cancellationToken); 
+        }
+
+        private EmbedBuilder StartEmbed(SocketCommandContext context)
+        {
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.Title = $"{context.Client.CurrentUser.Username} Bot";
+            embed.Description = $"Personal administration bot developed by {GetAuthorText(context)}.";
+            embed.ThumbnailUrl = context.Client.CurrentUser.GetMaxAvatarUrl();
+            embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfoUtility.GetVersion()}", context.Client.CurrentUser.GetSafeAvatarUrl());
+            return embed;
         }
 
         private bool IsMainRestrictionGroup(ICommandContext context)
@@ -149,6 +167,14 @@ namespace TehGM.EinherjiBot
             if (user != null)
                 return $"{user.Username}#{user.Discriminator}";
             return "TehGM";
+        }
+
+        private string GetPrefix(SocketCommandContext context)
+        {
+            string prefix = _commandsOptions.Prefix;
+            if (string.IsNullOrWhiteSpace(prefix))
+                prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
+            return prefix;
         }
     }
 }
