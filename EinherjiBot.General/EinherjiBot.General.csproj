@@ -14,7 +14,13 @@
     <RepositoryUrl>https://github.com/TehGM/EinherjiBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Discord, Bot</PackageTags>
-    <PackageReleaseNotes>- Fix exception when Guild is null (in private).</PackageReleaseNotes>
+    <PackageReleaseNotes>- Separated help and commands list
+- Automatic commands list
+- Don't list commands that are not available in current guild
+- Added commands to muting/unmuting and deafening/undeafening users in voice channels
+- Separated voice admin and other admin commands
+- Removed delay for messages removal
+- Added support for inline replies</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
