@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,53 +11,65 @@ namespace TehGM.EinherjiBot.Client
 {
     public class HostedDiscordClient : IHostedDiscordClient, IHostedService, IDisposable
     {
-        public IDiscordClient Client => _client;
+        public DiscordClient Client { get; private set; }
 
         private readonly ILogger _log;
+        private readonly ILoggerFactory _logFactory;
+        private readonly IServiceProvider _services;
         private readonly IOptionsMonitor<DiscordOptions> _discordOptions;
-        private DiscordSocketClient _client;
         private bool _started = false;
 
-        public HostedDiscordClient(IOptionsMonitor<DiscordOptions> discordOptions, ILogger<HostedDiscordClient> log)
+        public HostedDiscordClient(IOptionsMonitor<DiscordOptions> discordOptions, ILogger<HostedDiscordClient> log, ILoggerFactory logFactory, IServiceProvider services)
         {
             this._discordOptions = discordOptions;
             this._log = log;
+            this._logFactory = logFactory;
 
-            DiscordSocketConfig clientConfig = new DiscordSocketConfig();
-            clientConfig.LogLevel = LogSeverity.Verbose;
-            _client = new DiscordSocketClient(clientConfig);
-            _client.Log += OnClientLog;
+            this.RecreateClient();
 
             _discordOptions.OnChange(async _ =>
             {
-                if (Client.ConnectionState == ConnectionState.Connected || Client.ConnectionState == ConnectionState.Connecting)
+                bool needsReconnection = this.Client.GatewayInfo != null;
+                if (needsReconnection)
                 {
                     _log.LogInformation("Options changed, reconnecting client");
                     await StopClientAsync().ConfigureAwait(false);
-                    await StartClientAsync().ConfigureAwait(false);
                 }
+                this.RecreateClient();
+                if (needsReconnection)
+                    await StartClientAsync().ConfigureAwait(false);
             });
         }
 
-        public async Task StartClientAsync()
+        private void RecreateClient()
         {
-            await _client.LoginAsync(TokenType.Bot, _discordOptions.CurrentValue.BotToken).ConfigureAwait(false);
-            await _client.StartAsync().ConfigureAwait(false);
+            this._log.LogDebug("Creating Discord client");
+
+            DiscordConfiguration clientConfig = new DiscordConfiguration();
+            clientConfig.AutoReconnect = this._discordOptions.CurrentValue.AutoConnectGateway;
+            clientConfig.Intents = DiscordIntents.DirectMessages | DiscordIntents.GuildBans | DiscordIntents.GuildMembers | DiscordIntents.GuildMessages | DiscordIntents.GuildPresences;
+            clientConfig.LoggerFactory = this._logFactory;
+            clientConfig.MessageCacheSize = 512;
+            clientConfig.Token = this._discordOptions.CurrentValue.BotToken;
+            clientConfig.TokenType = TokenType.Bot;
+
+            this.Client?.Dispose();
+            this.Client = new DiscordClient(clientConfig);
+            this.Client.UseCommandsNext(new CommandsNextConfiguration()
+            {
+                UseDefaultCommandHandler = false,
+                Services = this._services,
+                EnableDms = true,
+                CaseSensitive = false,
+                EnableDefaultHelp = false
+            });
         }
 
-        public async Task StopClientAsync()
-        {
-            if (_client.LoginState == LoginState.LoggedIn || _client.LoginState == LoginState.LoggingIn)
-                await _client.LogoutAsync().ConfigureAwait(false);
-            if (_client.ConnectionState == ConnectionState.Connected || _client.ConnectionState == ConnectionState.Connecting)
-                await _client.StopAsync().ConfigureAwait(false);
-        }
+        public Task StartClientAsync()
+            => this.Client.ConnectAsync();
 
-        private Task OnClientLog(LogMessage message)
-        {
-            _log.Log(message);
-            return Task.CompletedTask;
-        }
+        public Task StopClientAsync()
+            => this.Client.DisconnectAsync();
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
@@ -77,13 +89,13 @@ namespace TehGM.EinherjiBot.Client
             Dispose();
         }
 
-        public static implicit operator DiscordSocketClient(HostedDiscordClient client)
-            => client._client;
+        public static implicit operator DiscordClient(HostedDiscordClient client)
+            => client.Client;
 
         public void Dispose()
         {
-            try { _client.Log -= OnClientLog; } catch { }
-            try { _client?.Dispose(); } catch { }
+            try { this.Client?.Dispose(); } catch { }
+            this.Client = null;
         }
     }
 }

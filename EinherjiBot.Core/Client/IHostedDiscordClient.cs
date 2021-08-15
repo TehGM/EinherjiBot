@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using Discord;
+using DSharpPlus;
 
 namespace TehGM.EinherjiBot
 {
     public interface IHostedDiscordClient
     {
-        IDiscordClient Client { get; }
+        DiscordClient Client { get; }
 
         Task StartClientAsync();
         Task StopClientAsync();

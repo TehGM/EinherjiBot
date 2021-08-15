@@ -1,6 +1,5 @@
 ﻿using System;
-using Discord;
-using Discord.WebSocket;
+using DSharpPlus;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using TehGM.EinherjiBot;
@@ -20,8 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<IHostedDiscordClient, HostedDiscordClient>();
             services.AddTransient<IHostedService>(s => (IHostedService)s.GetRequiredService<IHostedDiscordClient>());
-            services.TryAddSingleton<IDiscordClient>(s => s.GetRequiredService<IHostedDiscordClient>().Client);
-            services.TryAddSingleton<DiscordSocketClient>(s => (DiscordSocketClient)s.GetRequiredService<IDiscordClient>());
+            services.TryAddSingleton<DiscordClient>(s => s.GetRequiredService<IHostedDiscordClient>().Client);
 
             return services;
         }
