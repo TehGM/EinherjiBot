@@ -17,6 +17,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         public RunMode DefaultRunMode { get; set; } = RunMode.Default;
         public bool IgnoreExtraArgs { get; set; } = true;
 
+        public IDictionary<string, CommandRestrictionGroup> RestrictionGroups { get; set; } 
+            = new Dictionary<string, CommandRestrictionGroup>(StringComparer.OrdinalIgnoreCase);
+
         // for loading
         public ICollection<Type> Classes { get; set; } = new List<Type>();
         public ICollection<Assembly> Assemblies { get; set; } = new List<Assembly>() { Assembly.GetEntryAssembly() };

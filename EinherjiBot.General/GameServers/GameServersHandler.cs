@@ -14,6 +14,7 @@ using System.Text;
 namespace TehGM.EinherjiBot.GameServers
 {
     [LoadRegexCommands]
+    [HelpCategory("Games", 10)]
     public class GameServersHandler
     {
         private readonly IGameServerStore _gameServersStore;
@@ -33,6 +34,10 @@ namespace TehGM.EinherjiBot.GameServers
         }
 
         [RegexCommand(@"^server(?:\s(.+))?")]
+        [Name("server <game>")]
+        [Summary("If you're authorized, will give you info how to connect to our game servers.")]
+        [Priority(-18)]
+        [RestrictCommand]
         private async Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             // check if command has game name
@@ -80,7 +85,7 @@ namespace TehGM.EinherjiBot.GameServers
                 sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             else
             {
-                _ = context.ReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
+                _ = context.InlineReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
                 Task<IUserMessage> pmTask = context.User.SendMessageAsync(text, false, embed.Build(), new RequestOptions { CancelToken = cancellationToken });
                 sentMsg = await pmTask.ConfigureAwait(false);
             }

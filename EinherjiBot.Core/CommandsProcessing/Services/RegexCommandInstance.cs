@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -17,6 +18,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         public Regex Regex { get; }
         public int Priority { get; private set; }
         public IEnumerable<PreconditionAttribute> Preconditions { get; private set; }
+        public IEnumerable<Attribute> Attributes => this._attributes?.AsEnumerable();
         public Type ModuleType => _method.DeclaringType;
         public string MethodName => _method.Name;
         public RunMode RunMode
@@ -29,6 +31,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private readonly MethodInfo _method;
         private readonly ParameterInfo[] _params;
         private readonly IRegexCommandModuleProvider _moduleProvider;
+        private ICollection<Attribute> _attributes;
 
         private RegexCommandInstance(Regex regex, MethodInfo method, IRegexCommandModuleProvider moduleProvider)
         {
@@ -58,6 +61,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             RegexCommandInstance result = new RegexCommandInstance(new Regex(regexAttribute.Pattern, regexOptions), method, moduleProvider);
             result.RunMode = options?.DefaultRunMode ?? RunMode.Default;
 
+            result._attributes = new List<Attribute>();
             // first load base type attributes
             result.LoadCustomAttributes(method.DeclaringType);
             // then load method attributes (and let them overwrite class ones if necessary)
@@ -86,6 +90,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         this.Priority = priority.Priority;
                         break;
                 }
+
+                if (attr is Attribute a)
+                    this._attributes.Add(a);
             }
         }
 

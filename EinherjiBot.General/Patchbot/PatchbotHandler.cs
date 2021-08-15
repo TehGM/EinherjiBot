@@ -15,6 +15,7 @@ namespace TehGM.EinherjiBot.Patchbot
 {
     [LoadRegexCommands]
     [PersistentModule(PreInitialize = true)]
+    [HelpCategory("Game Updates", 20)]
     public class PatchbotHandler : IDisposable
     {
         private const char _namesSeparator = '|';
@@ -116,6 +117,10 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\ssub(?:scribe)?(?: (.+))?")]
+        [Name("patchbot subscribe <game>")]
+        [Summary("Subscribes you for pings whenever there's a patchbot update about *<game>*.")]
+        [Priority(559)]
+        [RestrictCommand]
         private async Task CmdSubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -139,6 +144,10 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\sunsub(?:scribe)?(?: (.+))?")]
+        [Name("patchbot unsubscribe <game>")]
+        [Summary("As above, but for cancelling your subscription.")]
+        [Priority(558)]
+        [RestrictCommand]
         private async Task CmdUnsubscribeAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -162,6 +171,8 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot add(?:\s(.+))?")]
+        [Hidden]
+        [RestrictCommand]
         private async Task CmdAddGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
@@ -209,6 +220,8 @@ namespace TehGM.EinherjiBot.Patchbot
         }
 
         [RegexCommand(@"^patchbot\s(?:remove|del|delete)(?:\s(.+))?")]
+        [Hidden]
+        [RestrictCommand]
         private async Task CmdRemoveGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
