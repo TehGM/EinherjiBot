@@ -21,18 +21,16 @@ namespace TehGM.EinherjiBot.Administration
     {
         private readonly DiscordSocketClient _client;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
-        private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
         private readonly ILogger _log;
 
         private readonly CancellationTokenSource _hostCts;
 
         public AdminCommandsHandler(DiscordSocketClient client, ILogger<AdminCommandsHandler> log,
-            IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
+            IOptionsMonitor<EinherjiOptions> einherjiOptions)
         {
             this._client = client;
             this._log = log;
             this._einherjiOptions = einherjiOptions;
-            this._commandsOptions = commandsOptions;
             this._hostCts = new CancellationTokenSource();
 
             this._client.UserLeft += OnUserLeftAsync;
@@ -56,6 +54,12 @@ namespace TehGM.EinherjiBot.Administration
             if (!user.GetPermissions(channel).ManageMessages)
             {
                 await channel.SendMessageAsync($"{options.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            SocketGuildUser botUser = await message.Guild.GetGuildUserAsync(message.Client.CurrentUser.Id).ConfigureAwait(false);
+            if (!botUser.GetPermissions(channel).ManageMessages)
+            {
+                await channel.SendMessageAsync($"{options.FailureSymbol} I am missing *Manage Messages* permission in this channel.", cancellationToken).ConfigureAwait(false);
                 return;
             }
             if (match.Groups.Count == 1 || match.Groups[1]?.Length < 1)

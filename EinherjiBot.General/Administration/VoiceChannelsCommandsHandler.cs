@@ -90,8 +90,6 @@ namespace TehGM.EinherjiBot.Administration
 
         private async Task PerformActionOnAllAsync(SocketCommandContext context, VoiceChannelMatch channelMatch, VoiceChannelAction action, CancellationToken cancellationToken)
         {
-            EinherjiOptions options = _einherjiOptions.CurrentValue;
-
             if (!channelMatch.IsSuccess)
                 return;
 
@@ -100,37 +98,36 @@ namespace TehGM.EinherjiBot.Administration
             if (responseChannel == null)
                 return;
 
-            // verify permissions
+            // verify user's permissions
             _log.LogTrace("Verifying user {ID} has {Permission} permission in channel {ChannelName} ({ChannelFromID})", channelMatch.User.Id, action.RequiredPermission, channelMatch.Channel.Name, channelMatch.Channel.Id);
-            if (!await this.VerifyUserCanConnectAsync(channelMatch.Channel, channelMatch.User, responseChannel, cancellationToken).ConfigureAwait(false))
+            if (!await this.VerifyUserPermissionsAsync(context, channelMatch.Channel, channelMatch.User.Id, action.RequiredPermission, cancellationToken).ConfigureAwait(false))
                 return;
-            if (!channelMatch.User.GuildPermissions.Administrator && !channelMatch.User.GetPermissions(channelMatch.Channel).Has(action.RequiredPermission))
-            {
-                await responseChannel.SendMessageAsync($"{options.FailureSymbol} You don't have *{action.PermissionDisplayName}* permission in {GetVoiceChannelMention(channelMatch.Channel)}.", cancellationToken).ConfigureAwait(false);
-                return;
-            }
 
+            // verify bot's permissions
+            _log.LogTrace("Verifying the bot has {Permission} permission in channel {ChannelName} ({ChannelFromID})", action.RequiredPermission, channelMatch.Channel.Name, channelMatch.Channel.Id);
+            if (!await this.VerifyUserPermissionsAsync(context, channelMatch.Channel, context.Client.CurrentUser.Id, action.RequiredPermission, cancellationToken).ConfigureAwait(false))
+                return;
 
             // perform the action on the users
             SocketGuildUser[] users = channelMatch.Channel.Users.ToArray();
             string channelMention = GetVoiceChannelMention(channelMatch.Channel);
             _log.LogDebug($"{action.ModeWord} {{Count}} users from channel {{ChannelName}} ({{ChannelID}})", users.Length, channelMatch.Channel.Name, channelMatch.Channel.Id);
             RestUserMessage response = await context.ReplyAsync($"{action.ModeWord} {users.Length} user{(users.Length > 1 ? "s" : null)} in {channelMention}.", cancellationToken).ConfigureAwait(false);
-            int errCount = 0;
-            for (int i = 0; i < users.Length; i++)
+            int errorCount = 0;
+            foreach (SocketGuildUser user in users)
             {
                 try
                 {
-                    await users[i].ModifyAsync(action.Action, cancellationToken).ConfigureAwait(false);
+                    await user.ModifyAsync(action.Action, cancellationToken).ConfigureAwait(false);
                 }
-                catch { errCount++; }
+                catch { errorCount++; }
             }
             // display confirmation
             StringBuilder builder = new StringBuilder();
-            int successCount = users.Length - errCount;
+            int successCount = users.Length - errorCount;
             builder.AppendFormat("{0} user{1} {2} in {3}.", successCount.ToString(), successCount > 1 || successCount == 0 ? "s" : null, action.ActionCompletedWord, channelMention);
-            if (errCount > 0)
-                builder.AppendFormat("\nFailed to {3} {0} user{2}. {1} Please make sure I have correct permissions!", errCount.ToString(), options.FailureSymbol, errCount > 1 ? "s" : null, action.ActionFailedWord);
+            if (errorCount > 0)
+                builder.AppendFormat("\nFailed to {3} {0} user{2}. {1}", errorCount.ToString(), this._einherjiOptions.CurrentValue.FailureSymbol, errorCount > 1 ? "s" : null, action.ActionFailedWord);
             await response.ModifyAsync(props => props.Content = builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
@@ -142,19 +139,6 @@ namespace TehGM.EinherjiBot.Administration
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             EinherjiOptions options = _einherjiOptions.CurrentValue;
-
-            // helper method to verify if user can move user between channels
-            async Task<bool> VerifyUserCanMoveAsync(IVoiceChannel channel, IGuildUser user, ISocketMessageChannel responseChannel)
-            {
-                if (!await VerifyUserCanConnectAsync(channel, user, responseChannel, cancellationToken).ConfigureAwait(false))
-                    return false;
-                if (!user.GetPermissions(channel).MoveMembers)
-                {
-                    await responseChannel.SendMessageAsync($"{options.FailureSymbol} You don't have *Move Members* permission in {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
-                    return false;
-                }
-                return true;
-            }
 
             // verify it's a guild message
             SocketTextChannel channel = await this.VerifyGuildChannelAsync(context, cancellationToken).ConfigureAwait(false);
@@ -177,14 +161,18 @@ namespace TehGM.EinherjiBot.Administration
                 return;
 
             // verify user can see both channels, and has move permission in both
-            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
-            _log.LogTrace("Verifying user {ID} has permission to move users between channels {ChannelFromName} ({ChannelFromID}) and {ChannelToName} ({ChannelToID})", user.Id, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
-            if (!user.GuildPermissions.Administrator)
-            {
-                if (!await VerifyUserCanMoveAsync(channelFrom, user, channel).ConfigureAwait(false)
-                    || !await VerifyUserCanMoveAsync(channelTo, user, channel).ConfigureAwait(false))
-                    return;
-            }
+            _log.LogTrace("Verifying user {ID} has permission to move users between channels {ChannelFromName} ({ChannelFromID}) and {ChannelToName} ({ChannelToID})", 
+                context.User.Id, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
+            if (!await this.VerifyUserPermissionsAsync(context, channelFrom, context.User.Id, ChannelPermission.MoveMembers, cancellationToken).ConfigureAwait(false) || 
+                !await this.VerifyUserPermissionsAsync(context, channelTo, context.User.Id, ChannelPermission.MoveMembers, cancellationToken).ConfigureAwait(false))
+                return;
+
+            // verify bot also has permissions
+            _log.LogTrace("Verifying the bot has permission to move users between channels {ChannelFromName} ({ChannelFromID}) and {ChannelToName} ({ChannelToID})", 
+                channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
+            if (!await this.VerifyUserPermissionsAsync(context, channelFrom, context.Client.CurrentUser.Id, ChannelPermission.MoveMembers, cancellationToken).ConfigureAwait(false) ||
+                !await this.VerifyUserPermissionsAsync(context, channelTo, context.Client.CurrentUser.Id, ChannelPermission.MoveMembers, cancellationToken).ConfigureAwait(false))
+                return;
 
             // move the users
             SocketGuildUser[] users = channelFrom.Users.ToArray();
@@ -192,21 +180,21 @@ namespace TehGM.EinherjiBot.Administration
             string channelToMention = GetVoiceChannelMention(channelTo);
             _log.LogDebug("Moving {Count} users from channel {ChannelFromName} ({ChannelFromID}) to {ChannelToName} ({ChannelToID})", users.Length, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
             RestUserMessage response = await context.ReplyAsync($"Moving {users.Length} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.", cancellationToken).ConfigureAwait(false);
-            int errCount = 0;
-            for (int i = 0; i < users.Length; i++)
+            int errorCount = 0;
+            foreach (SocketGuildUser user in users)
             {
                 try
                 {
-                    await users[i].ModifyAsync(props => props.Channel = channelTo, cancellationToken).ConfigureAwait(false);
+                    await user.ModifyAsync(props => props.Channel = channelTo, cancellationToken).ConfigureAwait(false);
                 }
-                catch { errCount++; }
+                catch { errorCount++; }
             }
             // display confirmation
             StringBuilder builder = new StringBuilder();
-            int successCount = users.Length - errCount;
+            int successCount = users.Length - errorCount;
             builder.AppendFormat("{0} user{3} moved from {1} to {2}.", successCount.ToString(), channelFromMention, channelToMention, successCount > 1 || successCount == 0 ? "s" : null);
-            if (errCount > 0)
-                builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errCount.ToString(), options.FailureSymbol, errCount > 1 ? "s" : null);
+            if (errorCount > 0)
+                builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errorCount.ToString(), options.FailureSymbol, errorCount > 1 ? "s" : null);
             await response.ModifyAsync(props => props.Content = builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
@@ -249,11 +237,23 @@ namespace TehGM.EinherjiBot.Administration
             return voiceChannel;
         }
 
-        private async Task<bool> VerifyUserCanConnectAsync(IVoiceChannel channel, IGuildUser user, ISocketMessageChannel responseChannel, CancellationToken cancellationToken)
+        private async Task<bool> VerifyUserPermissionsAsync(SocketCommandContext context, IVoiceChannel channel, ulong userID, ChannelPermission permission, CancellationToken cancellationToken)
         {
-            if (!CanUserConnect(channel, user))
+            IGuildUser user = await channel.Guild.GetUserAsync(context.User.Id, CacheMode.AllowDownload, new RequestOptions { CancelToken = cancellationToken }).ConfigureAwait(false);
+
+            if (user.GuildPermissions.Administrator)
+                return true;
+
+            bool isSelf = user.Id == context.User.Id;
+            string memberName = isSelf ? "I" : "You";
+            if (!user.GetPermissions(channel).Has(ChannelPermission.ViewChannel | ChannelPermission.Connect))
             {
-                await responseChannel.SendMessageAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} You don't have access to {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} {memberName} don't have access to {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
+                return false;
+            }
+            if (!user.GetPermissions(channel).Has(permission))
+            {
+                await context.InlineReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} {memberName} don't have *{GetPermissionDisplayName(permission)}* permission in {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
                 return false;
             }
             return true;
@@ -263,7 +263,7 @@ namespace TehGM.EinherjiBot.Administration
         {
             if (!(context.Channel is SocketTextChannel channel))
             {
-                await context.ReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return null;
             }
             return channel;
@@ -272,22 +272,34 @@ namespace TehGM.EinherjiBot.Administration
         private static string GetVoiceChannelMention(IVoiceChannel channel, bool isEmbed = false)
             => isEmbed ? $"[#{channel.Name}](https://discordapp.com/channels/{channel.Guild.Id}/{channel.Id})" : $"**#{channel.Name}**";
 
-        private static bool CanUserConnect(IVoiceChannel channel, IGuildUser user)
-            => user.GetPermissions(channel).Has(ChannelPermission.ViewChannel | ChannelPermission.Connect);
-
         private async Task<VoiceChannelMatch> MatchChannelAsync(SocketCommandContext context, Match match, int groupIndex, CancellationToken cancellationToken)
         {
-            SocketVoiceChannel targetChannel = null;
             SocketGuildUser user = context.Guild.GetUser(context.User.Id);
+            SocketVoiceChannel targetChannel;
             if (match.Groups.Count >= groupIndex + 1 && match.Groups[groupIndex].Success)
                 targetChannel = await this.VerifyValidVoiceChannelAsync(match.Groups[groupIndex], context.Guild, context.Channel, cancellationToken).ConfigureAwait(false);
             else
                 targetChannel = user.VoiceChannel;
             if (targetChannel == null)
             {
-                await context.ReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} You need to either provide a voice channel ID, or be in a voice channel currently. Also ensure I have access to that voice channel.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{this._einherjiOptions.CurrentValue.FailureSymbol} You need to either provide a voice channel ID, or be in a voice channel currently. Also ensure I have access to that voice channel.", cancellationToken).ConfigureAwait(false);
             }
             return new VoiceChannelMatch(targetChannel, user);
+        }
+
+        private static string GetPermissionDisplayName(ChannelPermission permission)
+        {
+            switch (permission)
+            {
+                case ChannelPermission.DeafenMembers:
+                    return "Deafen Members";
+                case ChannelPermission.MoveMembers:
+                    return "Move Members";
+                case ChannelPermission.MuteMembers:
+                    return "Mute Members";
+                default:
+                    return permission.ToString();
+            }
         }
 
         private class VoiceChannelMatch
@@ -310,24 +322,6 @@ namespace TehGM.EinherjiBot.Administration
             public string ActionFailedWord { get; init; }
             public Action<GuildUserProperties> Action { get; }
             public ChannelPermission RequiredPermission { get; }
-
-            public string PermissionDisplayName
-            {
-                get
-                {
-                    switch (this.RequiredPermission)
-                    {
-                        case ChannelPermission.DeafenMembers:
-                            return "Deafen Members";
-                        case ChannelPermission.MoveMembers:
-                            return "Move Members";
-                        case ChannelPermission.MuteMembers:
-                            return "Mute Members";
-                        default:
-                            return this.RequiredPermission.ToString();
-                    }
-                }
-            }
 
             public VoiceChannelAction(Action<GuildUserProperties> action, ChannelPermission requiredPermission, string modeWord, string completeWord, string failWord)
             {
