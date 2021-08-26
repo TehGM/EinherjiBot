@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -30,12 +31,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             if (this._guildMemberProcessed)
                 return this._guildMember;
 
-            new Lazy<DiscordMember>(() => this.Guild != null && this.Guild.Members.TryGetValue(this.User.Id, out var member) ? member : this.Guild?.GetMemberAsync(this.User.Id).ConfigureAwait(false).GetAwaiter().GetResult());
             if (this.Guild == null)
                 return SetAndReturn(null);
             if (this.Guild.Members.TryGetValue(this.User.Id, out DiscordMember result))
                 return SetAndReturn(result);
-
             result = await this.Guild.GetMemberAsync(this.User.Id).ConfigureAwait(false);
             return SetAndReturn(result);
 
@@ -45,6 +44,35 @@ namespace TehGM.EinherjiBot.CommandsProcessing
                 this._guildMemberProcessed = true;
                 return this._guildMember;
             }
+        }
+
+        public Task<DiscordMessage> ReplyAsync(string content, DiscordEmbed embed = null)
+            => this.ReplyAsync(content, embed, Mentions.All);
+
+        public Task<DiscordMessage> ReplyAsync(string content, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        {
+            return this.CreateBuilder(content, embed, mentions)
+                .SendAsync(this.Channel);
+        }
+
+        public Task<DiscordMessage> InlineReplyAsync(string content, DiscordEmbed embed = null)
+            => this.InlineReplyAsync(content, embed, Mentions.All);
+
+        public Task<DiscordMessage> InlineReplyAsync(string content, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        {
+            DiscordMessageBuilder builder = this.CreateBuilder(content, embed, mentions);
+            builder.WithReply(this.Message.Id, true);
+            return builder.SendAsync(this.Channel);
+        }
+
+        private DiscordMessageBuilder CreateBuilder(string content, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        {
+            DiscordMessageBuilder builder = new DiscordMessageBuilder();
+            builder.Content = content;
+            builder.WithEmbed(embed);
+            if (mentions?.Any() == true)
+                builder.WithAllowedMentions(mentions);
+            return builder;
         }
     }
 }
