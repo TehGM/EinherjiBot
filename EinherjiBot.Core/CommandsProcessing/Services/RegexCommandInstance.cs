@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TehGM.EinherjiBot.CommandsProcessing.Checks;
-using ParameterInfo = System.Reflection.ParameterInfo;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -21,7 +20,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         private readonly MethodInfo _method;
         private readonly ParameterInfo[] _params;
-        private readonly IRegexCommandModuleProvider _moduleProvider;
         private ICollection<Attribute> _attributes;
 
         public RegexCommandInstance(MethodInfo method, RegexCommandAttribute regexAttribute, CommandsOptions options)
