@@ -23,26 +23,7 @@ namespace TehGM.EinherjiBot.Client
             this._log = log;
             this._logFactory = logFactory;
 
-            this.RecreateClient();
-
-            _discordOptions.OnChange(async _ =>
-            {
-                bool needsReconnection = this.Client.GatewayInfo != null;
-                if (needsReconnection)
-                {
-                    _log.LogInformation("Options changed, reconnecting client");
-                    await StopClientAsync().ConfigureAwait(false);
-                }
-                this.RecreateClient();
-                if (needsReconnection)
-                    await StartClientAsync().ConfigureAwait(false);
-            });
-        }
-
-        private void RecreateClient()
-        {
             this._log.LogDebug("Creating Discord client");
-
             DiscordConfiguration clientConfig = new DiscordConfiguration();
             clientConfig.AutoReconnect = this._discordOptions.CurrentValue.AutoConnectGateway;
             clientConfig.Intents = DiscordIntents.All | DiscordIntents.AllUnprivileged;
@@ -50,8 +31,6 @@ namespace TehGM.EinherjiBot.Client
             clientConfig.MessageCacheSize = 512;
             clientConfig.Token = this._discordOptions.CurrentValue.BotToken;
             clientConfig.TokenType = TokenType.Bot;
-
-            this.Client?.Dispose();
             this.Client = new DiscordClient(clientConfig);
         }
 
