@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
-    <Version>2.3.1</Version>
+    <Version>3.0.0</Version>
     <Authors>TehGM</Authors>
     <AssemblyName>EinherjiBot</AssemblyName>
     <Description>A personal administration bot for Discord. Features may seem truly random!</Description>
@@ -14,9 +14,7 @@
     <RepositoryUrl>https://github.com/TehGM/EinherjiBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Discord, Bot</PackageTags>
-    <PackageReleaseNotes>- Fix permission check never checking Bot's permissions.
-- Stellaris mods command is now restricted to main guild.
-- Mention in help that posting members leaving requires bot to have posting permissions.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Full transition from Discord.NET to DSharpPlus.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
