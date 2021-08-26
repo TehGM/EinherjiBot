@@ -5,14 +5,11 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TehGM.EinherjiBot.CommandsProcessing.Checks;
 using ParameterInfo = System.Reflection.ParameterInfo;
-using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -22,17 +19,12 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         public Regex Regex { get; }
         public int Priority { get; private set; }
-        public IEnumerable<CheckBaseAttribute> Preconditions { get; private set; }
+        private ICollection<CommandCheckAttribute> _commandChecks;
+        public IEnumerable<CommandCheckAttribute> CommandChecks => this._commandChecks;
         public IEnumerable<Attribute> Attributes => this._attributes?.AsEnumerable();
         public Type ModuleType => _method.DeclaringType;
         public string MethodName => _method.Name;
-        public RunMode RunMode
-        {
-            get => _runMode == RunMode.Default ? RunMode.Sync : _runMode;
-            set => _runMode = value;
-        }
 
-        private RunMode _runMode = RunMode.Default;
         private readonly MethodInfo _method;
         private readonly ParameterInfo[] _params;
         private readonly IRegexCommandModuleProvider _moduleProvider;
@@ -42,7 +34,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         {
             this.Regex = regex;
             this.Priority = 0;
-            this.Preconditions = new List<CheckBaseAttribute>();
+            this._commandChecks = new List<CommandCheckAttribute>();
 
             this._method = method;
             this._params = method.GetParameters();
@@ -64,7 +56,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 regexOptions |= RegexOptions.IgnoreCase;
             IRegexCommandModuleProvider moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
             RegexCommandInstance result = new RegexCommandInstance(new Regex(regexAttribute.Pattern, regexOptions), method, moduleProvider);
-            result.RunMode = options?.DefaultRunMode ?? RunMode.Default;
 
             result._attributes = new List<Attribute>();
             // first load base type attributes
@@ -91,8 +82,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 switch (attr)
                 {
-                    case CheckBaseAttribute precondition:
-                        (this.Preconditions as ICollection<CheckBaseAttribute>).Add(precondition);
+                    case CommandCheckAttribute commandCheck:
+                        this._commandChecks.Add(commandCheck);
                         break;
                     case PriorityAttribute priority:
                         this.Priority = priority.Priority;
@@ -104,30 +95,19 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             }
         }
 
-        public Task<PreconditionResult> CheckPreconditionsAsync(ICommandContext context, IServiceProvider services)
+        public async Task<CommandCheckResult> RunChecksAsync(CommandContext context, IServiceProvider services, CancellationToken cancellationToken = default)
         {
-            // TODO: DsharpPlus contexts are not extensible, so will need own set of attributes
-            // for now, just don't check, to be implemented later
-            return Task.FromResult(PreconditionResult.FromSuccess());
-            //foreach (CheckBaseAttribute precondition in Preconditions)
-            //{
-            //    PreconditionResult result = await precondition.ExecuteCheckAsync(context, null, services).ConfigureAwait(false);
-            //    if (!result.IsSuccess)
-            //        return result;
-            //}
-            //return PreconditionResult.FromSuccess();
+            foreach (CommandCheckAttribute commandCheck in this._commandChecks)
+            {
+                CommandCheckResult result = await commandCheck.RunCheckAsync(context, services, cancellationToken).ConfigureAwait(false);
+                if (result.ResultType == CommandCheckResultType.Skip || result.ResultType == CommandCheckResultType.Abort)
+                    return result;
+            }
+            return CommandCheckResult.Success;
         }
 
-        public async Task<IResult> ExecuteAsync(CommandContext context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
+        public async Task ExecuteAsync(CommandContext context, Match regexMatch, IServiceProvider services, CancellationToken cancellationToken = default)
         {
-            // check regex
-            string msg = context.Message.Content;
-            if (argPos > 0)
-                msg = context.Message.Content.Substring(argPos);
-            Match regexMatch = this.Regex.Match(msg);
-            if (regexMatch == null || !regexMatch.Success)
-                return ExecuteResult.FromError(CommandError.ParseFailed, "Regex did not match");
-
             // build params
             cancellationToken.ThrowIfCancellationRequested();
             object[] paramsValues = new object[_params.Length];
@@ -141,8 +121,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 else if (param.ParameterType.IsAssignableFrom(context.Message.GetType()))
                     value = context.Message;
                 else if (context.Guild != null && param.ParameterType.IsAssignableFrom(context.Guild.GetType()))
-                    value = context.Guild;
-                else if (context.Guild == null && param.ParameterType.IsAssignableFrom(typeof(IGuild)))
                     value = context.Guild;
                 else if (param.ParameterType.IsAssignableFrom(context.Channel.GetType()))
                     value = context.Channel;
@@ -160,7 +138,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         if (param.IsOptional)
                             value = param.HasDefaultValue ? param.DefaultValue : null;
                         else
-                            return ExecuteResult.FromError(CommandError.ObjectNotFound, $"Unsupported param type: {param.ParameterType.FullName}");
+                            throw new InvalidOperationException($"Unsupported param type: {param.ParameterType.FullName}");
                     }
                 }
                 paramsValues[param.Position] = value;
@@ -172,13 +150,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // execute
             if (_method.Invoke(instance, paramsValues) is Task returnTask)
-            {
-                if (RunMode == RunMode.Sync)
-                    await returnTask.ConfigureAwait(false);
-                else
-                    _ = Task.Run(async () => await returnTask.ConfigureAwait(false), cancellationToken);
-            }
-            return ExecuteResult.FromSuccess();
+                await returnTask.ConfigureAwait(false);
         }
     }
 }

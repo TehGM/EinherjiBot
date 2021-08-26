@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Discord.Commands;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TehGM.EinherjiBot.CommandsProcessing.Checks;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -83,34 +84,43 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
         {
-            // Execute the command with the command context we just
-            // created, along with the service provider for precondition checks.
+            string msg = e.Message.Content;
+            if (argPos > 0)
+                msg = msg.Substring(argPos);
 
-            // Keep in mind that result does not indicate a return value
-            // rather an object stating if the command executed successfully.
             await _lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
             try
             {
                 foreach (RegexCommandInstance command in Commands)
                 {
-                    CommandContext context = new CommandContext(command.Descriptor, e, _client);
+                    // first check if command matches at all
+                    Match regexMatch = command.Regex.Match(msg);
+                    if (regexMatch == null || !regexMatch.Success)
+                        continue;
 
+                    // start context and log scope
+                    CommandContext context = new CommandContext(command.Descriptor, e, _client);
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
-                        // TODO: DsharpPlus contexts are not extensible, so will need own set of attributes
-                        // for now, just don't check, to be implemented later
-                        //IResult preconditionsResult = await command.CheckPreconditionsAsync(context, _serviceProvider);
-                        //if (!preconditionsResult.IsSuccess)
-                        //    continue;
-                        ExecuteResult result = (ExecuteResult)await command.ExecuteAsync(
+                        // run command checks
+                        CommandCheckResult result = await command.RunChecksAsync(context, this._serviceProvider, this._hostCancellationToken).ConfigureAwait(false);
+                        if (result.ResultType != CommandCheckResultType.Continue)
+                        {
+                            this.LogCommandCheck(result, context, command);
+                            if (result.ResultType == CommandCheckResultType.Skip)
+                                continue;
+                            if (result.ResultType == CommandCheckResultType.Abort)
+                                break;
+                        }
+
+                        // execute the command
+                        await command.ExecuteAsync(
                             context: context,
-                            argPos: argPos,
-                            services: _serviceProvider,
-                            cancellationToken: _hostCancellationToken)
+                            regexMatch: regexMatch,
+                            services: this._serviceProvider,
+                            cancellationToken: this._hostCancellationToken)
                             .ConfigureAwait(false);
-                        if (result.IsSuccess)
-                            return;
                     }
                     catch (OperationCanceledException) { return; }
                     catch (Exception ex) when (ex.LogAsError(_log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
@@ -120,6 +130,19 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 _lock.Release();
             }
+        }
+
+        private void LogCommandCheck(CommandCheckResult result, CommandContext context, RegexCommandInstance command)
+        {
+            string resultText = string.Empty;
+            if (result.ResultType == CommandCheckResultType.Skip)
+                resultText = " skipping";
+            else if (result.ResultType == CommandCheckResultType.Abort)
+                resultText = " aborting";
+            string message = $"Command {{CommandType}}.{{CommandMethod}}{resultText}";
+            if (!string.IsNullOrWhiteSpace(result.Message))
+                message += $": {result.Message}";
+            base._log.Log(result.Error != null ? LogLevel.Error : LogLevel.Trace, result.Error, message, command.ModuleType.Name, command.MethodName);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Discord.Commands;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
 {
@@ -14,7 +13,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         public bool RequirePrivateMessagePrefix { get; set; } = false;
 
         public bool CaseSensitive { get; set; } = false;
-        public RunMode DefaultRunMode { get; set; } = RunMode.Default;
         public bool IgnoreExtraArgs { get; set; } = true;
 
         public IDictionary<string, CommandRestrictionGroup> RestrictionGroups { get; set; } 
