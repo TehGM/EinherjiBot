@@ -20,16 +20,18 @@ namespace TehGM.EinherjiBot.Intel
     {
         private readonly DiscordClient _client;
         private readonly IUserDataStore _userDataStore;
+        private readonly IStatusChecker _statusChecker;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
         private readonly CancellationTokenSource _hostCts;
         private readonly ILogger _log;
 
-        public IntelHandler(DiscordClient client, IUserDataStore userDataStore, ILogger<IntelHandler> log,
+        public IntelHandler(DiscordClient client, IUserDataStore userDataStore, IStatusChecker statusChecker, ILogger<IntelHandler> log,
             IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
         {
             this._client = client;
             this._userDataStore = userDataStore;
+            this._statusChecker = statusChecker;
             this._log = log;
             this._einherjiOptions = einherjiOptions;
             this._commandsOptions = commandsOptions;
@@ -101,8 +103,12 @@ namespace TehGM.EinherjiBot.Intel
         {
             UserData userData = await _userDataStore.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
-            
-            AddUserInfo(embed, user, userData);
+
+            // get user presence and populate main data
+            UserStatus? status = await this._statusChecker.GetStatusAsync(user.Id).ConfigureAwait(false);
+            AddUserInfo(embed, user, userData, status);
+
+            // populate guild member data
             if (!context.Channel.IsPrivate)
             {
                 DiscordMember guildUser = await context.Guild.GetMemberSafeAsync(user.Id).ConfigureAwait(false);
@@ -148,24 +154,23 @@ namespace TehGM.EinherjiBot.Intel
             return $"*{ActivityTypeToString(user.Presence.Activity.ActivityType)}* `{user.Presence.Activity.Name}`";
         }
 
-        private DiscordEmbedBuilder AddUserInfo(DiscordEmbedBuilder embed, DiscordUser user, UserData userData)
+        private DiscordEmbedBuilder AddUserInfo(DiscordEmbedBuilder embed, DiscordUser user, UserData userData, UserStatus? status)
         {
             // add basic user info
             embed.WithAuthor($"Intel on {user.Username}", _client.CurrentUser.GetSafeAvatarUrl())
                 .WithThumbnail(user.GetSafeAvatarUrl())
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
                 .AddField("Account age", (DateTimeOffset.UtcNow - user.CreationTimestamp).ToLongFriendlyString())
-                .AddField("Status", user.Presence?.Status.ToString() ?? "???", true);
+                .AddField("Status", status?.ToString() ?? "???", true);
 
             // if user has some activity, add it as well
             if (user.Presence?.Activity != null)
                 embed.AddField("Activity", GetUserActivity(user), true);
 
             // if user was previously tracked, add data on visibility
-            if (userData.StatusChangeTimeUTC != null)
+            if (userData.StatusChangeTimeUTC != null && status != null)
             {
-                bool isOffline = this.GetSafeStatus(user.Presence) == UserStatus.Offline;
-                embed.AddField(isOffline ? "No visual for" : "Online for",
+                embed.AddField(status == UserStatus.Offline ? "No visual for" : "Online for",
                     (DateTimeOffset.UtcNow - userData.StatusChangeTimeUTC.Value).ToFriendlyString(), true);
             }
 

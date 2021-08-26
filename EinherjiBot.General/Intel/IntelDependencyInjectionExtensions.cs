@@ -1,4 +1,6 @@
 ﻿using System;
+using TehGM.EinherjiBot.Intel;
+using TehGM.EinherjiBot.Intel.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -12,6 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDiscordClient();
             services.AddMongoConnection();
             services.AddUserData();
+            services.AddSingleton<IStatusChecker, StatusChecker>();
 
             return services;
         }
