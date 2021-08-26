@@ -3,14 +3,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+using DSharpPlus;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
-using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.Intel
 {
@@ -19,14 +18,14 @@ namespace TehGM.EinherjiBot.Intel
     [HelpCategory("General", 99999)]
     public class IntelHandler : IDisposable
     {
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordClient _client;
         private readonly IUserDataStore _userDataStore;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
         private readonly CancellationTokenSource _hostCts;
         private readonly ILogger _log;
 
-        public IntelHandler(DiscordSocketClient client, IUserDataStore userDataStore, ILogger<IntelHandler> log,
+        public IntelHandler(DiscordClient client, IUserDataStore userDataStore, ILogger<IntelHandler> log,
             IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
         {
             this._client = client;
@@ -37,32 +36,32 @@ namespace TehGM.EinherjiBot.Intel
             this._hostCts = new CancellationTokenSource();
 
             this._client = client;
-            this._client.GuildMemberUpdated += OnGuildMemberUpdatedAsync;
+            this._client.PresenceUpdated += OnGuildMemberUpdatedAsync;
         }
 
         [RegexCommand("^intel on me")]
         [Hidden]
         [Priority(200)]
-        private Task CmdIntelMeAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private Task CmdIntelMeAsync(CommandContext context, CancellationToken cancellationToken = default)
             => ProcessIntelUserAsync(context, context.User, cancellationToken);
 
         [RegexCommand("^intel on \\\\?<@!?(\\d+)>")]
         [RegexCommand("^intel on (\\d+)")]
         [Hidden]
         [Priority(199)]
-        private async Task CmdIntelUserAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdIntelUserAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             string idString = match.Groups[1].Value;
             if (!ulong.TryParse(idString, out ulong id))
             {
-                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not parse user ID `{idString}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not parse user ID `{idString}`.").ConfigureAwait(false);
                 return;
             }
-            IUser user = await _client.GetUserAsync(id).ConfigureAwait(false);
+            DiscordUser user = await _client.GetUserAsync(id).ConfigureAwait(false);
             if (user == null)
             {
-                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not find user with ID `{id}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} Could not find user with ID `{id}`.").ConfigureAwait(false);
                 return;
             }
             await ProcessIntelUserAsync(context, user, cancellationToken).ConfigureAwait(false);
@@ -71,99 +70,113 @@ namespace TehGM.EinherjiBot.Intel
         [RegexCommand("^intel on guild")]
         [Hidden]
         [Priority(198)]
-        private Task CmdIntelGuildAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private Task CmdIntelGuildAsync(CommandContext context)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
-            if (context.IsPrivate)
-                return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} This command can only be used in a guild channel.", cancellationToken);
+            if (context.Channel.IsPrivate)
+                return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} This command can only be used in a guild channel.");
 
-            EmbedBuilder embed = new EmbedBuilder();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             AddGuildInfo(embed, context.Guild);
-            return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            return context.ReplyAsync(null, embed.Build());
         }
 
         [RegexCommand("^intel")]
         [Name("intel")]
         [Summary("Shows help for intel feature.")]
         [Priority(197)]
-        private Task CmdIntelHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private Task CmdIntelHelpAsync(CommandContext context)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             string prefix = _commandsOptions.CurrentValue.Prefix;
-            EmbedBuilder embed = new EmbedBuilder()
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .AddField("Intel Commands",
                     $"**{prefix}intel on me** - get intel on yourself\n" +
                     $"**{prefix}intel on** ***<user ping>*** - get intel on pinged user\n" +
                     $"**{prefix}intel on guild** - *(guild only)* get intel on current guild");
-            return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            return context.ReplyAsync(null, embed.Build());
         }
 
-        private async Task ProcessIntelUserAsync(SocketCommandContext context, IUser user, CancellationToken cancellationToken)
+        private async Task ProcessIntelUserAsync(CommandContext context, DiscordUser user, CancellationToken cancellationToken)
         {
             UserData userData = await _userDataStore.GetAsync(user.Id, cancellationToken).ConfigureAwait(false);
-            EmbedBuilder embed = new EmbedBuilder();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+            
             AddUserInfo(embed, user, userData);
-            if (!context.IsPrivate)
+            if (!context.Channel.IsPrivate)
             {
-                SocketGuildUser guildUser = await context.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
+                DiscordMember guildUser = await context.Guild.GetMemberSafeAsync(user.Id).ConfigureAwait(false);
                 if (guildUser != null)
                     AddGuildUserInfo(embed, guildUser);
             }
-            await context.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync(null, embed.Build()).ConfigureAwait(false);
         }
 
-        private async Task OnGuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
+        private async Task OnGuildMemberUpdatedAsync(DiscordClient client, PresenceUpdateEventArgs e)
         {
-            if (userBefore.Status == userAfter.Status)
+            // dsharp+ likes to give null for presence before, so handle that accordingly
+            UserStatus before = this.GetSafeStatus(e.PresenceBefore);
+            UserStatus after = this.GetSafeStatus(e.PresenceAfter);
+
+            if (before == after)
                 return;
-            if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
+            if (before != UserStatus.Offline && after != UserStatus.Offline)
                 return;
 
-            _log.LogTrace("Updating intel on user {UserID}", userBefore.Id);
-            UserData data = await _userDataStore.GetAsync(userAfter.Id, _hostCts.Token).ConfigureAwait(false);
-            if (data.ChangeStatus(userAfter.Status))
+            _log.LogTrace("Updating intel on user {UserID}", e.UserBefore.Id);
+            UserData data = await _userDataStore.GetAsync(e.UserAfter.Id, _hostCts.Token).ConfigureAwait(false);
+            if (data.ChangeStatus(after))
                 await _userDataStore.SetAsync(data, _hostCts.Token).ConfigureAwait(false);
+        }
+
+        private UserStatus GetSafeStatus(DiscordPresence presence)
+        {
+            if (presence == null)
+                return UserStatus.Offline;
+            return presence.Status;
         }
 
 
         #region Embed Builders
-        protected static string GetUserActivity(IUser user)
+        protected static string GetUserActivity(DiscordUser user)
         {
-            if (user.Activity == null)
+            if (user.Presence?.Activity == null)
                 return "-";
-            if (user.Activity is CustomStatusGame customStatus)
-                return $"{customStatus.Emote} {customStatus.State}";
-            return $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
+            DiscordCustomStatus customStatus = user.Presence?.Activity?.CustomStatus;
+            if (customStatus != null)
+                return $"{customStatus.Emoji} {customStatus.Name}";
+            return $"*{ActivityTypeToString(user.Presence.Activity.ActivityType)}* `{user.Presence.Activity.Name}`";
         }
 
-        private EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user, UserData userData)
+        private DiscordEmbedBuilder AddUserInfo(DiscordEmbedBuilder embed, DiscordUser user, UserData userData)
         {
             // add basic user info
             embed.WithAuthor($"Intel on {user.Username}", _client.CurrentUser.GetSafeAvatarUrl())
-                .WithThumbnailUrl(user.GetMaxAvatarUrl())
+                .WithThumbnail(user.GetSafeAvatarUrl())
                 .AddField("Username and Discriminator", $"{user.Username}#{user.Discriminator}")
-                .AddField("Account age", (DateTimeOffset.UtcNow - user.CreatedAt).ToLongFriendlyString())
-                .AddField("Status", (user is SocketUser) ? user.Status.ToString() : "???", true);
+                .AddField("Account age", (DateTimeOffset.UtcNow - user.CreationTimestamp).ToLongFriendlyString())
+                .AddField("Status", user.Presence?.Status.ToString() ?? "???", true);
 
             // if user has some activity, add it as well
-            if (user.Activity != null)
+            if (user.Presence?.Activity != null)
                 embed.AddField("Activity", GetUserActivity(user), true);
 
             // if user was previously tracked, add data on visibility
             if (userData.StatusChangeTimeUTC != null)
             {
-                embed.AddField(user.Status == UserStatus.Offline ? "No visual for" : "Online for",
+                bool isOffline = this.GetSafeStatus(user.Presence) == UserStatus.Offline;
+                embed.AddField(isOffline ? "No visual for" : "Online for",
                     (DateTimeOffset.UtcNow - userData.StatusChangeTimeUTC.Value).ToFriendlyString(), true);
             }
 
             // add remaining user info
-            embed.AddField("User type", user.IsWebhook ? "Webhook" : user.IsBot ? "Bot" : "Normal user")
-                .WithTimestamp(user.CreatedAt)
+            embed.AddField("User type", user.IsBot ? "Bot" : "Normal user")
+                .WithTimestamp(user.CreationTimestamp)
                 .WithFooter($"User ID: {user.Id}", user.GetSafeAvatarUrl());
             return embed;
         }
 
-        private EmbedBuilder AddGuildUserInfo(EmbedBuilder embed, SocketGuildUser user)
+        private DiscordEmbedBuilder AddGuildUserInfo(DiscordEmbedBuilder embed, DiscordMember user)
         {
             // add nickname if present
             if (user.Nickname != null)
@@ -171,40 +184,39 @@ namespace TehGM.EinherjiBot.Intel
                     .WithAuthor($"Intel on {user.Nickname}", _client.CurrentUser.GetSafeAvatarUrl());
 
             // get roles, respecting hierarchy
-            IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
+            IOrderedEnumerable<DiscordRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
             if (roles.Any())
-                embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
+                embed.AddField("Roles", string.Join(", ", roles.Select(r => Formatter.Mention(r))), true);
             else
                 embed.AddField("Roles", "-");
-            embed.Color = roles.FirstOrDefault(r => r.Color != Color.Default)?.Color;
+            embed.WithColor(roles.FirstOrDefault(r => r.Color.Value != DiscordColor.None.Value)?.Color ?? DiscordColor.None);
 
             // add joined time
-            if (user.JoinedAt != null)
-                embed.AddField("Time in this guild", (DateTimeOffset.UtcNow - user.JoinedAt.Value).ToLongFriendlyString(), true);
+            embed.AddField("Time in this guild", (DateTimeOffset.UtcNow - user.JoinedAt).ToLongFriendlyString(), true);
             return embed;
         }
 
-        private EmbedBuilder AddGuildInfo(EmbedBuilder embed, SocketGuild guild)
+        private DiscordEmbedBuilder AddGuildInfo(DiscordEmbedBuilder embed, DiscordGuild guild)
         {
             embed.WithAuthor($"Intel on {guild.Name}", _client.CurrentUser.GetSafeAvatarUrl())
-                .WithThumbnailUrl(guild.IconUrl)
-                .AddField("Owner", MentionUtils.MentionUser(guild.OwnerId))
-                .AddField("Guild age", (DateTimeOffset.UtcNow - guild.CreatedAt).ToLongFriendlyString(), true)
+                .WithThumbnail(guild.IconUrl)
+                .AddField("Owner", MentionID.User(guild.OwnerId))
+                .AddField("Guild age", (DateTimeOffset.UtcNow - guild.CreationTimestamp).ToLongFriendlyString(), true)
                 .AddField("Members", guild.MemberCount.ToString(), true)
                 .AddField("Roles", guild.Roles.Count.ToString(), true)
                 .AddField("Channels", guild.Channels.Count.ToString(), true)
-                .AddField("Default channel", guild.DefaultChannel.Mention, true);
-            if (guild.AFKChannel != null)
+                .AddField("Default channel", guild.GetDefaultChannel().Mention, true);
+            if (guild.AfkChannel != null)
             {
-                embed.AddField("AFK Channel", MentionUtils.MentionChannel(guild.AFKChannel.Id), true)
-                    .AddField("AFK Timeout", TimeSpan.FromSeconds(guild.AFKTimeout).ToShortFriendlyString(), true);
+                embed.AddField("AFK Channel", MentionID.Channel(guild.AfkChannel.Id), true)
+                    .AddField("AFK Timeout", TimeSpan.FromSeconds(guild.AfkTimeout).ToShortFriendlyString(), true);
             }
-            embed.AddField("Custom emotes", $"{guild.Emotes.Count}: {string.Join(' ', guild.Emotes.Select(e => e.ToString()))}")
+            embed.AddField("Custom emotes", $"{guild.Emojis.Count}: {string.Join(' ', guild.Emojis.Select(e => e.ToString()))}")
                 .AddField("Admin 2FA requirement", guild.MfaLevel.ToString(), true)
                 .AddField("Verification level", guild.VerificationLevel.ToString(), true)
                 .AddField("Default notifications", DefaultMessageNotificationsToString(guild.DefaultMessageNotifications), true)
                 .AddField("Explicit content filter", ExplicitContentFilterLevelToString(guild.ExplicitContentFilter), true)
-                .WithTimestamp(guild.CreatedAt)
+                .WithTimestamp(guild.CreationTimestamp)
                 .WithFooter($"Guild ID: {guild.Id}", guild.IconUrl);
             return embed;
         }
@@ -225,15 +237,15 @@ namespace TehGM.EinherjiBot.Intel
             }
         }
 
-        protected static string ExplicitContentFilterLevelToString(ExplicitContentFilterLevel value)
+        protected static string ExplicitContentFilterLevelToString(ExplicitContentFilter value)
         {
             switch (value)
             {
-                case ExplicitContentFilterLevel.Disabled:
+                case ExplicitContentFilter.Disabled:
                     return "Disabled";
-                case ExplicitContentFilterLevel.MembersWithoutRoles:
+                case ExplicitContentFilter.MembersWithoutRoles:
                     return "Filtered for members without roles";
-                case ExplicitContentFilterLevel.AllMembers:
+                case ExplicitContentFilter.AllMembers:
                     return "Filtered for all members";
                 default:
                     return value.ToString();
@@ -244,7 +256,7 @@ namespace TehGM.EinherjiBot.Intel
         {
             switch (value)
             {
-                case ActivityType.Listening:
+                case ActivityType.ListeningTo:
                     return "Listening to";
                 case ActivityType.Playing:
                     return "Playing";
@@ -252,7 +264,7 @@ namespace TehGM.EinherjiBot.Intel
                     return "Streaming";
                 case ActivityType.Watching:
                     return "Watching";
-                case ActivityType.CustomStatus:
+                case ActivityType.Custom:
                     return string.Empty;
                 default:
                     return value.ToString();
@@ -264,7 +276,7 @@ namespace TehGM.EinherjiBot.Intel
         {
             try { this._hostCts?.Cancel(); } catch { }
             try { this._hostCts?.Dispose(); } catch { }
-            try { this._client.GuildMemberUpdated -= OnGuildMemberUpdatedAsync; } catch { }
+            try { this._client.PresenceUpdated -= OnGuildMemberUpdatedAsync; } catch { }
         }
     }
 }

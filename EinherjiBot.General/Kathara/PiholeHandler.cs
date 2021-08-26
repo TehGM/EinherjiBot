@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.Rest;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TehGM.EinherjiBot.CommandsProcessing;
-using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.Kathara
 {
@@ -46,7 +41,7 @@ namespace TehGM.EinherjiBot.Kathara
         [Summary("Access to commands for managing PiHole instances in TehGM's Kathara network.")]
         [RestrictCommand]
         [Priority(-105)]
-        private Task CmdHelpAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private Task CmdHelpAsync(CommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions options = _piholeOptions.CurrentValue;
@@ -54,11 +49,11 @@ namespace TehGM.EinherjiBot.Kathara
 
             // check user is authorized to manage any instance
             if (instances?.Any() != true)
-                return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} You are not authorized to manage any of Kathara PiHole instance.", cancellationToken);
+                return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} You are not authorized to manage any of Kathara PiHole instance.");
 
             string prefix = _commandsOptions.CurrentValue.Prefix;
-            EmbedBuilder embed = new EmbedBuilder()
-                .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Pi-hole_vector_logo.svg/1200px-Pi-hole_vector_logo.svg.png")
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithThumbnail("https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Pi-hole_vector_logo.svg/1200px-Pi-hole_vector_logo.svg.png")
                 .WithDescription("Management utility for PiHoles present in Kathara network");
             embed.AddField("Commands",
                 $"**{prefix}pihole <instance id>** - show info on specific PiHole instance\n" +
@@ -68,14 +63,14 @@ namespace TehGM.EinherjiBot.Kathara
                 $"**{prefix}pihole** - display this message and check which instances you can manage");
             embed.AddField("Instances you can manage", string.Join(", ", instances.Keys));
 
-            return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
+            return context.ReplyAsync(null, embed.Build());
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})")]
         [Hidden]
         [RestrictCommand]
         [Priority(-103)]
-        private async Task CmdInstanceInfoAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdInstanceInfoAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
@@ -85,31 +80,28 @@ namespace TehGM.EinherjiBot.Kathara
             // check instance exists
             if (!piholeOptions.Instances.TryGetValue(instanceID, out PiholeInstanceOptions instance))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.").ConfigureAwait(false);
                 return;
             }
             string instanceName = string.IsNullOrWhiteSpace(instance.DisplayName) ? instanceID : instance.DisplayName;
             // check user is authorized to manage that instance
-            if (!instance.IsAuthorized(context.User))
-            {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no permissions to manage PiHole instance `{instanceName}`.", cancellationToken).ConfigureAwait(false);
+            if (!await ValidateInstanceAuthorizationAsync(context, instanceID, instance).ConfigureAwait(false))
                 return;
-            }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            DiscordMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...").ConfigureAwait(false);
 
-            EmbedBuilder embed = new EmbedBuilder()
-                .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Pi-hole_vector_logo.svg/1200px-Pi-hole_vector_logo.svg.png")
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithThumbnail("https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Pi-hole_vector_logo.svg/1200px-Pi-hole_vector_logo.svg.png")
                 .WithDescription($"Information on **{instanceName}** Kathara PiHole instance");
 
             // add stored instance config
             if (!instance.HideURL)
                 embed.AddField("PiHole Address", instance.PiholeURL, false);
             if (instance.AuthorizedUserIDs.Count > 0)
-                embed.AddField("Authorized users", string.Join(", ", instance.AuthorizedUserIDs.Select(uid => MentionUtils.MentionUser(uid))), true);
+                embed.AddField("Authorized users", string.Join(", ", instance.AuthorizedUserIDs.Select(uid => MentionID.User(uid))), true);
             if (instance.AuthorizedRoleIDs.Count > 0)
-                embed.AddField("Authorized roles", string.Join(", ", instance.AuthorizedRoleIDs.Select(rid => MentionUtils.MentionRole(rid))), true);
+                embed.AddField("Authorized roles", string.Join(", ", instance.AuthorizedRoleIDs.Select(rid => MentionID.Role(rid))), true);
             if (instance.AuthorizedUserIDs.Count + instance.AuthorizedRoleIDs.Count == 0)
                 embed.AddField("Authorized users", "-", true);
 
@@ -121,16 +113,16 @@ namespace TehGM.EinherjiBot.Kathara
                 if (!response.IsSuccessStatusCode)
                 {
                     embed.WithColor(einherjiOptions.EmbedErrorColor);
-                    await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})", false, embed.Build(), cancellationToken).ConfigureAwait(false);
-                    await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                    await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})", embed.Build()).ConfigureAwait(false);
+                    await workingNotification.DeleteAsync().ConfigureAwait(false);
                     return;
                 }
                 string responseContentRaw = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!TryParseJObject(responseContentRaw, out JObject responseContentJson))
                 {
                     embed.WithColor(einherjiOptions.EmbedErrorColor);
-                    await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to query PiHole. Please refer to bot logs.", false, embed.Build(), cancellationToken).ConfigureAwait(false);
-                    await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                    await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to query PiHole. Please refer to bot logs.", embed.Build()).ConfigureAwait(false);
+                    await workingNotification.DeleteAsync().ConfigureAwait(false);
                     _log.LogError("Failed querying PiHole instance {InstanceID}: {ResponseMessage}", instanceName, responseContentRaw);
                     return;
                 }
@@ -158,15 +150,15 @@ namespace TehGM.EinherjiBot.Kathara
                     embed.AddField("PiHole version", responseContentJson["version"].ToString());
             }
 
-            await context.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
-            await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync(null, embed.Build()).ConfigureAwait(false);
+            await workingNotification.DeleteAsync().ConfigureAwait(false);
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+enable")]
         [Hidden]
         [RestrictCommand]
         [Priority(-102)]
-        private async Task CmdEnableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdEnableAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
@@ -176,19 +168,16 @@ namespace TehGM.EinherjiBot.Kathara
             // check instance exists
             if (!piholeOptions.Instances.TryGetValue(instanceID, out PiholeInstanceOptions instance))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.").ConfigureAwait(false);
                 return;
             }
             string instanceName = string.IsNullOrWhiteSpace(instance.DisplayName) ? instanceID : instance.DisplayName;
             // check user is authorized to manage that instance
-            if (!instance.IsAuthorized(context.User))
-            {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no permissions to manage PiHole instance `{instanceName}`.", cancellationToken).ConfigureAwait(false);
+            if (!await ValidateInstanceAuthorizationAsync(context, instanceID, instance).ConfigureAwait(false))
                 return;
-            }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            DiscordMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...").ConfigureAwait(false);
 
             // communicate with pihole API
             _log.LogDebug("Enabling Pihole through API at {URL} (Instance: {Instance})", instance.PiholeURL, instanceName);
@@ -196,35 +185,35 @@ namespace TehGM.EinherjiBot.Kathara
             using HttpResponseMessage response = await client.GetAsync($"{instance.PiholeURL}/admin/api.php?enable&auth={instance.AuthToken}", cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 return;
             }
             string responseContentRaw = await response.Content.ReadAsStringAsync();
             if (!TryParseJObject(responseContentRaw, out JObject responseContentJson))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to enable PiHole. Please refer to bot logs.", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to enable PiHole. Please refer to bot logs.").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 _log.LogError("Failed enabling PiHole instance {InstanceID}: {ResponseMessage}", instanceName, responseContentRaw);
                 return;
             }
             if (!string.Equals(responseContentJson["status"]?.ToString(), "enabled", StringComparison.OrdinalIgnoreCase))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to enable PiHole. Please refer to bot logs.", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to enable PiHole. Please refer to bot logs.").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 _log.LogError("Failed enabling PiHole instance {InstanceID}: 'status' is not 'enabled'", instanceName);
                 return;
             }
 
-            await context.ReplyAsync($"{einherjiOptions.SuccessSymbol} PiHole instance `{instanceName}` has been enabled.", cancellationToken).ConfigureAwait(false);
-            await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{einherjiOptions.SuccessSymbol} PiHole instance `{instanceName}` has been enabled.").ConfigureAwait(false);
+            await workingNotification.DeleteAsync().ConfigureAwait(false);
         }
 
         [RegexCommand(@"^pihole\s+(\S{1,})\s+disable(?:\s+(\d+))?")]
         [Hidden]
         [RestrictCommand]
         [Priority(-101)]
-        private async Task CmdDisableAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdDisableAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
@@ -234,16 +223,15 @@ namespace TehGM.EinherjiBot.Kathara
             // check instance exists
             if (!piholeOptions.Instances.TryGetValue(instanceID, out PiholeInstanceOptions instance))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Unknown PiHole instance `{instanceID}`.").ConfigureAwait(false);
                 return;
             }
             string instanceName = string.IsNullOrWhiteSpace(instance.DisplayName) ? instanceID : instance.DisplayName;
+
+
             // check user is authorized to access that instance
-            if (!instance.IsAuthorized(context.User))
-            {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no permissions to access PiHole instance `{instanceName}`.", cancellationToken).ConfigureAwait(false);
+            if (!await ValidateInstanceAuthorizationAsync(context, instanceID, instance).ConfigureAwait(false))
                 return;
-            }
 
             // parse disable time, defaulting to 5 mins
             TimeSpan disableTime = piholeOptions.DefaultDisableTime;
@@ -251,12 +239,12 @@ namespace TehGM.EinherjiBot.Kathara
                 disableTime = TimeSpan.FromMinutes(disableMinutes);
             if (disableTime <= TimeSpan.FromMinutes(1))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Minimum disable time is 1 minute.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Minimum disable time is 1 minute.").ConfigureAwait(false);
                 return;
             }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            DiscordMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...").ConfigureAwait(false);
 
             // communicate with pihole API
             _log.LogDebug("Disabling Pihole through API at {URL} for {Duration} (Instance: {Instance})", instance.PiholeURL, instanceName, disableTime);
@@ -265,28 +253,42 @@ namespace TehGM.EinherjiBot.Kathara
                 await client.GetAsync($"{instance.PiholeURL}/admin/api.php?disable={disableMinutes * 60}&auth={instance.AuthToken}", cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 return;
             }
             string responseContentRaw = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (!TryParseJObject(responseContentRaw, out JObject responseContentJson))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to disable PiHole. Please refer to bot logs.", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to disable PiHole. Please refer to bot logs.").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 _log.LogError("Failed disabling PiHole instance {InstanceID}: {ResponseMessage}", instanceName, responseContentRaw);
                 return;
             }
             if (!string.Equals(responseContentJson["status"]?.ToString(), "disabled", StringComparison.OrdinalIgnoreCase))
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to disable PiHole. Please refer to bot logs.", cancellationToken).ConfigureAwait(false);
-                await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Failed to disable PiHole. Please refer to bot logs.").ConfigureAwait(false);
+                await workingNotification.DeleteAsync().ConfigureAwait(false);
                 _log.LogError("Failed disabling PiHole instance {InstanceID}: 'status' is not 'disabled'", instanceName);
                 return;
             }
 
-            await context.ReplyAsync($"{einherjiOptions.FailureSymbol} PiHole instance `{instanceName}` has been disabled for {disableTime.TotalMinutes} minutes.", cancellationToken).ConfigureAwait(false);
-            await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{einherjiOptions.FailureSymbol} PiHole instance `{instanceName}` has been disabled for {disableTime.TotalMinutes} minutes.").ConfigureAwait(false);
+            await workingNotification.DeleteAsync().ConfigureAwait(false);
+        }
+
+        private string GetInstanceName(string instanceID, PiholeInstanceOptions instance)
+            => string.IsNullOrWhiteSpace(instance.DisplayName) ? instanceID : instance.DisplayName;
+
+        private async Task<bool> ValidateInstanceAuthorizationAsync(CommandContext context, string instanceID, PiholeInstanceOptions instance)
+        {
+            DiscordUser user = (await context.GetGuildMemberAsync().ConfigureAwait(false)) ?? context.User;
+            if (!instance.IsAuthorized(user))
+            {
+                await context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} You have no permissions to access PiHole instance `{GetInstanceName(instanceID, instance)}`.").ConfigureAwait(false);
+                return false;
+            }
+            return true;
         }
 
         private static bool TryParseJObject(string content, out JObject json)

@@ -1,10 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
-using Discord.Commands;
 using System.Text.RegularExpressions;
 using System.Threading;
 using TehGM.EinherjiBot.EliteDangerous;
@@ -13,7 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DSharpPlus.CommandsNext.Attributes;
-using PriorityAttribute = Discord.Commands.PriorityAttribute;
+using DSharpPlus.Entities;
+using DSharpPlus;
 
 namespace TehGM.EinherjiBot
 {
@@ -41,12 +39,13 @@ namespace TehGM.EinherjiBot
         [RegexCommand(@"^commands")]
         [Hidden]
         [Priority(-999998)]
-        private Task CmdCommandsAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdCommandsAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
+            string authorText = await this.GetAuthorTextAsync(context).ConfigureAwait(false);
             IOrderedEnumerable<IGrouping<string, CommandDescriptor>> commands = this.GetCommandDescriptors(context);
             if (commands.Any())
             {
-                EmbedBuilder embed = this.StartEmbed(context);
+                DiscordEmbedBuilder embed = this.StartEmbed(context, authorText);
                 string prefix = this.GetPrefix(context);
 
                 StringBuilder commandsList = new StringBuilder();
@@ -59,26 +58,26 @@ namespace TehGM.EinherjiBot
                     embed.AddField(group.Key, commandsList.ToString(), inline: false);
                 }
 
-                return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
+                await context.ReplyAsync(null, embed.Build()).ConfigureAwait(false);
             }
             else
-                return context.InlineReplyAsync($"{_einherjiOptions.FailureSymbol} Ooops, I detected no commands... this obviously isn't right. Please let {GetAuthorText(context)} know!", cancellationToken);
+                await context.InlineReplyAsync($"{_einherjiOptions.FailureSymbol} Ooops, I detected no commands... this obviously isn't right. Please let {authorText} know!").ConfigureAwait(false);
         }
 
         [RegexCommand(@"^help")]
         [Hidden]
         [Priority(-999999)]
-        private Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdGetAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            EmbedBuilder embed = this.StartEmbed(context);
+            string authorText = await this.GetAuthorTextAsync(context).ConfigureAwait(false);
+            DiscordEmbedBuilder embed = this.StartEmbed(context, authorText);
 
             embed.AddField("Commands", $"Use **{this.GetPrefix(context)}commands** to get list of commands that you can use here!", inline: false);
-
             if (this.IsMainRestrictionGroup(context))
             {
                 embed.AddField("Additional features",
                     "If you try to use an another bot in a wrong channel, I'll direct you to the correct channel.\n" +
-                    $"I'll automatically post new or just finished Elite Dangerous Community Goals in {MentionUtils.MentionChannel(_eliteOptions.AutoNewsChannelID)}.\n" +
+                    $"I'll automatically post new or just finished Elite Dangerous Community Goals in {MentionID.Channel(_eliteOptions.AutoNewsChannelID)}.\n" +
                     $"I'll post a message in {GetLeaveChannel(context)} when a user leaves the guild.",
                     inline: false);
             }
@@ -86,27 +85,27 @@ namespace TehGM.EinherjiBot
             {
                 embed.AddField("Additional features", 
                     $"If I have permissions to post in {GetLeaveChannel(context)}, I'll post a message whenever a user leaves the guild.\n" + 
-                    $"More additional features are provided in {GetAuthorText(context)}'s server.", inline: false);
+                    $"More additional features are provided in {authorText}'s server.", inline: false);
             }
             embed.AddField("Support",
-                $"To submit bugs or suggestions, please open an issue on [GitHub](https://github.com/TehGM/EinherjiBot/issues). Alternatively, you can message {GetAuthorText(context)}.\n" +
+                $"To submit bugs or suggestions, please open an issue on [GitHub](https://github.com/TehGM/EinherjiBot/issues). Alternatively, you can message {authorText}.\n" +
                 "To support the developer, consider donating on [GitHub Sponsors](https://github.com/sponsors/TehGM), [Patreon](https://patreon.com/TehGMdev) or [Buy Me A Coffee](https://www.buymeacoffee.com/TehGM). **Thank you!**",
                 inline: false);
 
-            return context.ReplyAsync(null, false, embed.Build(), cancellationToken); 
+            await context.ReplyAsync(null, embed.Build()).ConfigureAwait(false);
         }
 
-        private EmbedBuilder StartEmbed(SocketCommandContext context)
+        private DiscordEmbedBuilder StartEmbed(CommandContext context, string authorText)
         {
-            EmbedBuilder embed = new EmbedBuilder();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             embed.Title = $"{context.Client.CurrentUser.Username} Bot";
-            embed.Description = $"Personal administration bot developed by {GetAuthorText(context)}.";
-            embed.ThumbnailUrl = context.Client.CurrentUser.GetMaxAvatarUrl();
+            embed.Description = $"Personal administration bot developed by {authorText}.";
+            embed.WithThumbnail(context.Client.CurrentUser.GetSafeAvatarUrl());
             embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfoUtility.GetVersion()}", context.Client.CurrentUser.GetSafeAvatarUrl());
             return embed;
         }
 
-        private bool IsMainRestrictionGroup(ICommandContext context)
+        private bool IsMainRestrictionGroup(CommandContext context)
         {
             if (context.Guild == null)
                 return false;
@@ -115,11 +114,11 @@ namespace TehGM.EinherjiBot
             return group.GuildIDs.Contains(context.Guild.Id);
         }
 
-        private IOrderedEnumerable<IGrouping<string, CommandDescriptor>> GetCommandDescriptors(ICommandContext context)
+        private IOrderedEnumerable<IGrouping<string, CommandDescriptor>> GetCommandDescriptors(CommandContext context)
         {
             // get commands
             IEnumerable<CommandDescriptor> commands = new List<CommandDescriptor>();
-            commands = commands.Union(this._regexCommands.Commands.Select(cmd => new CommandDescriptor(cmd)));
+            commands = commands.Union(this._regexCommands.Commands.Select(cmd => cmd.Descriptor));
             commands = commands.Union(this._simpleCommands.Commands.Select(cmd => new CommandDescriptor(cmd)));
 
             // exclude hidden, unnamed, without summary, and ones that are restricted
@@ -148,34 +147,34 @@ namespace TehGM.EinherjiBot
             return orderedGroups;
         }
 
-        private string GetLeaveChannel(SocketCommandContext context)
+        private string GetLeaveChannel(CommandContext context)
         {
-            if (context.IsPrivate)
+            if (context.Channel.IsPrivate)
                 return "a guild channel";
             else
-                return MentionUtils.MentionChannel(context.Guild.SystemChannel.Id);
+                return Formatter.Mention(context.Guild.SystemChannel);
         }
 
-        private string GetAuthorText(SocketCommandContext context)
+        private async Task<string> GetAuthorTextAsync(CommandContext context)
         {
             ulong id = _einherjiOptions.AuthorID;
-            if (!context.IsPrivate)
+            if (!context.Channel.IsPrivate)
             {
-                SocketGuildUser guildUser = context.Guild.GetUser(id);
+                DiscordMember guildUser = await context.Guild.GetMemberAsync(id).ConfigureAwait(false);
                 if (guildUser != null)
-                    return MentionUtils.MentionUser(id);
+                    return Formatter.Mention(guildUser);
             }
-            SocketUser user = context.Client.GetUser(id);
+            DiscordUser user = await context.Client.GetUserAsync(id).ConfigureAwait(false);
             if (user != null)
                 return $"{user.Username}#{user.Discriminator}";
             return "TehGM";
         }
 
-        private string GetPrefix(SocketCommandContext context)
+        private string GetPrefix(CommandContext context)
         {
             string prefix = _commandsOptions.Prefix;
             if (string.IsNullOrWhiteSpace(prefix))
-                prefix = $"{MentionUtils.MentionUser(context.Client.CurrentUser.Id)} ";
+                prefix = $"{Formatter.Mention(context.Client.CurrentUser)} ";
             return prefix;
         }
     }

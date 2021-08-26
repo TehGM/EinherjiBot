@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+using DSharpPlus;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -20,7 +22,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
     [HelpCategory("Games", 10)]
     public class CommunityGoalsHandler : IDisposable
     {
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordClient _client;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger _log;
         private readonly IOptionsMonitor<CommunityGoalsOptions> _options;
@@ -33,7 +35,9 @@ namespace TehGM.EinherjiBot.EliteDangerous
         private bool _enabled = false;
         private readonly IDisposable _optionsChangeRegistration;
 
-        public CommunityGoalsHandler(DiscordSocketClient client, IHttpClientFactory httpClientFactory, ILogger<CommunityGoalsHandler> log, ICommunityGoalsHistoryStore cgHistoryStore,
+        private bool IsConnected => this._client.GatewayInfo != null && this._client.CurrentUser != null;
+
+        public CommunityGoalsHandler(DiscordClient client, IHttpClientFactory httpClientFactory, ILogger<CommunityGoalsHandler> log, ICommunityGoalsHistoryStore cgHistoryStore,
             IOptionsMonitor<CommunityGoalsOptions> options)
         {
             this._client = client;
@@ -46,12 +50,12 @@ namespace TehGM.EinherjiBot.EliteDangerous
             this._enabled = ValidateInaraCredentials();
             if (!this._enabled)
                 _log.LogWarning("Inara credentials missing. Elite Dangerous Community Goals feature will be disabled");
-            else if (this._client.ConnectionState == ConnectionState.Connected)
+            else if (this.IsConnected)
                 StartAutomaticNewsPosting();
 
             this._client.Ready += OnClientReady;
-            this._client.Connected += OnClientConnected;
-            this._client.Disconnected += OnClientDisconnected;
+            this._client.SocketOpened += OnClientConnected;
+            this._client.SocketClosed += OnClientDisconnected;
             this._optionsChangeRegistration = this._options.OnChange(o =>
             {
                 bool previousState = this._enabled;
@@ -64,17 +68,17 @@ namespace TehGM.EinherjiBot.EliteDangerous
             });
         }
 
-        private Task OnClientConnected()
-            => OnClientReady();
+        private Task OnClientConnected(DiscordClient client, SocketEventArgs e)
+            => OnClientReady(client, null);
 
-        private Task OnClientReady()
+        private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
-            if (this._enabled && this._client.ConnectionState == ConnectionState.Connected && this._client.CurrentUser != null)
+            if (this._enabled && this.IsConnected)
                 StartAutomaticNewsPosting();
             return Task.CompletedTask;
         }
 
-        private Task OnClientDisconnected(Exception arg)
+        private Task OnClientDisconnected(DiscordClient client, SocketCloseEventArgs e)
         {
             StopAutomaticNewsPosting();
             return Task.CompletedTask;
@@ -117,7 +121,8 @@ namespace TehGM.EinherjiBot.EliteDangerous
                         CommunityGoalsOptions options = _options.CurrentValue;
 
                         // get guild channel
-                        if (!(_client.GetChannel(options.AutoNewsChannelID) is SocketTextChannel guildChannel))
+                        DiscordChannel channel = await _client.GetChannelAsync(options.AutoNewsChannelID).ConfigureAwait(false);
+                        if (!channel.IsGuildText())
                             throw new InvalidOperationException($"Channel {options.AutoNewsChannelID} is not a valid guild text channel.");
 
                         // retrieve CG data, take only new or finished ones, and then update cache
@@ -137,7 +142,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                         // post all CGs
                         _log.LogTrace("Sending CGs");
                         foreach (CommunityGoal cg in newOrJustFinishedCGs)
-                            await guildChannel.SendMessageAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
+                            await channel.SendMessageAsync(CommunityGoalToEmbed(cg).Build()).ConfigureAwait(false);
                         _lastRetrievalTime = DateTime.UtcNow;
                     }
                 }
@@ -171,7 +176,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
         [Name("elite community goals")]
         [Summary("Shows list of currently ongoing Community Goals in Elite Dangerous.")]
         [Priority(-19)]
-        private async Task CmdCommunityGoals(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private async Task CmdCommunityGoals(CommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (!this._enabled)
@@ -181,7 +186,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
             }
             IEnumerable<CommunityGoal> cgs = await QueryCommunityGoalsAsync(cancellationToken).ConfigureAwait(false);
             foreach (CommunityGoal cg in cgs)
-                await context.ReplyAsync(null, false, CommunityGoalToEmbed(cg).Build(), cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync(null, CommunityGoalToEmbed(cg).Build()).ConfigureAwait(false);
         }
 
         private async Task<IEnumerable<CommunityGoal>> QueryCommunityGoalsAsync(CancellationToken cancellationToken = default)
@@ -231,13 +236,14 @@ namespace TehGM.EinherjiBot.EliteDangerous
             return results;
         }
 
-        private EmbedBuilder CommunityGoalToEmbed(CommunityGoal cg)
+        private DiscordEmbedBuilder CommunityGoalToEmbed(CommunityGoal cg)
         {
             string thumbnailURL = _options.CurrentValue.ThumbnailURL;
-            string descriptionTrimmed = cg.Description.Length <= EmbedBuilder.MaxDescriptionLength ? cg.Description :
-                $"{cg.Description.Remove(EmbedBuilder.MaxDescriptionLength - 3)}...";
-            EmbedBuilder builder = new EmbedBuilder()
-                .WithAuthor("Elite Dangerous Community Goals", _client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl())
+            const int maxDescriptionLength = 4096;
+            string descriptionTrimmed = cg.Description.Length <= maxDescriptionLength ? cg.Description :
+                $"{cg.Description.Remove(maxDescriptionLength - 3)}...";
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder()
+                .WithAuthor("Elite Dangerous Community Goals", _client.CurrentUser.GetSafeAvatarUrl(size: 2048))
                 .WithTitle(cg.Name)
                 .WithDescription($"```\n{cg.Objective}\n```\n{descriptionTrimmed}")
                 .AddField("System", cg.SystemName, true)
@@ -248,18 +254,19 @@ namespace TehGM.EinherjiBot.EliteDangerous
                 .AddField("Last Updated", $"{(DateTime.UtcNow - cg.LastUpdateTime.ToUniversalTime()).ToLongFriendlyString()} ago")
                 .AddField("Is Completed?", cg.IsCompleted ? "\u2705" : "\u274C", true)
                 .WithUrl(cg.InaraURL)
-                .WithColor(cg.IsCompleted ? Color.Green : (Color)System.Drawing.Color.Cyan)
+                .WithColor(cg.IsCompleted ? Color.Green : Color.Cyan)
                 .WithFooter("Powered by Inara | CG expiration time: ")
                 .WithTimestamp(cg.ExpirationTime);
             if (!string.IsNullOrWhiteSpace(thumbnailURL))
-                builder.WithThumbnailUrl(thumbnailURL);
+                builder.WithThumbnail(thumbnailURL);
             if (!cg.IsCompleted)
                 builder.AddField("Time Left", (cg.ExpirationTime - DateTimeOffset.Now).ToLongFriendlyString());
 
             if (!string.IsNullOrWhiteSpace(cg.Reward))
             {
-                string rewardTrimmed = cg.Reward.Length <= EmbedFieldBuilder.MaxFieldValueLength ? cg.Reward :
-                    $"{cg.Reward.Remove(EmbedFieldBuilder.MaxFieldValueLength - 3)}...";
+                const int maxFieldValueLength = 1024;
+                string rewardTrimmed = cg.Reward.Length <= maxFieldValueLength ? cg.Reward :
+                    $"{cg.Reward.Remove(maxFieldValueLength - 3)}...";
                 builder.AddField("Reward", rewardTrimmed);
             }
             return builder;
@@ -270,8 +277,8 @@ namespace TehGM.EinherjiBot.EliteDangerous
             StopAutomaticNewsPosting();
             try { this._optionsChangeRegistration?.Dispose(); } catch { }
             try { this._client.Ready -= OnClientReady; } catch { }
-            try { this._client.Connected -= OnClientConnected; } catch { }
-            try { this._client.Disconnected -= OnClientDisconnected; } catch { }
+            try { this._client.SocketOpened -= OnClientConnected; } catch { }
+            try { this._client.SocketClosed -= OnClientDisconnected; } catch { }
             try { this._lock?.Dispose(); } catch { }
         }
     }

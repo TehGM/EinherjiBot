@@ -58,6 +58,20 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             return groups.Any(group => group.GuildIDs.Contains(context.Guild.Id));
         }
 
+        public bool CheckRestriction(CommandContext context, IDictionary<string, CommandRestrictionGroup> allRestrictionGroups)
+        {
+            if (allRestrictionGroups?.Any() != true)
+                return false;
+
+            IEnumerable<CommandRestrictionGroup> groups = this.GetRestrictionGroups(allRestrictionGroups);
+
+            if (groups?.Any() != true)
+                return false;
+            if (context.Guild == null)
+                return false;
+            return groups.Any(group => group.GuildIDs.Contains(context.Guild.Id));
+        }
+
         private IEnumerable<CommandRestrictionGroup> GetRestrictionGroups(IDictionary<string, CommandRestrictionGroup> allRestrictionGroups)
         {
             if (allRestrictionGroups?.Any() != true)

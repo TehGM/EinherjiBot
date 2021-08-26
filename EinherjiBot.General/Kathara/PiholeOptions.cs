@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Discord;
-using Discord.WebSocket;
+using DSharpPlus.Entities;
 
 namespace TehGM.EinherjiBot.Kathara
 {
@@ -11,10 +10,10 @@ namespace TehGM.EinherjiBot.Kathara
         public TimeSpan DefaultDisableTime { get; set; } = TimeSpan.FromMinutes(5);
         public IDictionary<string, PiholeInstanceOptions> Instances { get; set; } = new Dictionary<string, PiholeInstanceOptions>(StringComparer.OrdinalIgnoreCase);
 
-        public bool IsAuthorized(IUser user, string instanceID)
+        public bool IsAuthorized(DiscordUser user, string instanceID)
             => this.Instances[instanceID].IsAuthorized(user);
 
-        public IReadOnlyDictionary<string, PiholeInstanceOptions> GetUserAuthorizedInstances(IUser user)
+        public IReadOnlyDictionary<string, PiholeInstanceOptions> GetUserAuthorizedInstances(DiscordUser user)
             => this.Instances.Where(kvp => kvp.Value.IsAuthorized(user)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
@@ -27,11 +26,11 @@ namespace TehGM.EinherjiBot.Kathara
         public HashSet<ulong> AuthorizedRoleIDs { get; set; }
         public HashSet<ulong> AuthorizedUserIDs { get; set; }
 
-        public bool IsAuthorized(IUser user)
+        public bool IsAuthorized(DiscordUser user)
         {
             if (this.AuthorizedUserIDs.Contains(user.Id))
                 return true;
-            if (user is SocketGuildUser guildUser)
+            if (user is DiscordMember guildUser)
                 return this.AuthorizedRoleIDs.Intersect(guildUser.Roles.Select(role => role.Id)).Any();
             return false;
         }

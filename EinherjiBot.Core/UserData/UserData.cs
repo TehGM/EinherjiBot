@@ -1,5 +1,5 @@
 ﻿using System;
-using Discord;
+using DSharpPlus.Entities;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using DSharpPlus.Entities;
 
 namespace TehGM.EinherjiBot
 {
@@ -14,5 +15,8 @@ namespace TehGM.EinherjiBot
             => GetSafeAvatarUrl(user, format, (ushort)(user is SocketUser ? 2048 : 1024));
         public static string GetSafeAvatarUrl(this IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
+
+        public static string GetSafeAvatarUrl(this DiscordUser user, DSharpPlus.ImageFormat format = DSharpPlus.ImageFormat.Auto, ushort size = 2048)
+            => user.GetAvatarUrl(format, size) ?? user.DefaultAvatarUrl;
     }
 }

@@ -47,7 +47,7 @@ namespace TehGM.EinherjiBot.Client
 
             DiscordConfiguration clientConfig = new DiscordConfiguration();
             clientConfig.AutoReconnect = this._discordOptions.CurrentValue.AutoConnectGateway;
-            clientConfig.Intents = DiscordIntents.DirectMessages | DiscordIntents.GuildBans | DiscordIntents.GuildMembers | DiscordIntents.GuildMessages | DiscordIntents.GuildPresences;
+            clientConfig.Intents = DiscordIntents.All | DiscordIntents.AllUnprivileged;
             clientConfig.LoggerFactory = this._logFactory;
             clientConfig.MessageCacheSize = 512;
             clientConfig.Token = this._discordOptions.CurrentValue.BotToken;

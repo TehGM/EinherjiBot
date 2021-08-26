@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord.Commands;
-using Discord.WebSocket;
+using DSharpPlus;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
@@ -17,7 +18,7 @@ namespace TehGM.EinherjiBot.RandomStatus
     {
         private readonly IOptionsMonitor<RandomStatusOptions> _options;
         private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordClient _client;
         private readonly ILogger _log;
         private readonly IDisposable _optionsChangeRegistration;
         private readonly Random _random;
@@ -25,8 +26,8 @@ namespace TehGM.EinherjiBot.RandomStatus
 
         private DateTime _lastChangeUtc;
 
-        public RandomStatusHandler(IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<RandomStatusOptions> options, 
-            DiscordSocketClient client, ILogger<RandomStatusHandler> log)
+        public RandomStatusHandler(IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<RandomStatusOptions> options,
+            DiscordClient client, ILogger<RandomStatusHandler> log)
         {
             this._options = options;
             this._einherjiOptions = einherjiOptions;
@@ -43,7 +44,7 @@ namespace TehGM.EinherjiBot.RandomStatus
             this._client.Ready += OnClientReady;
         }
 
-        private Task OnClientReady()
+        private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
             StartBackgroundLoop();
             return Task.CompletedTask;
@@ -67,33 +68,32 @@ namespace TehGM.EinherjiBot.RandomStatus
 
         [RegexCommand("^randomize status")]
         [Hidden]
-        private async Task CmdRandomizeStatus(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private async Task CmdRandomizeStatus(CommandContext context, CancellationToken cancellationToken = default)
         {
             EinherjiOptions einherjiOptions = this._einherjiOptions.CurrentValue;
             if (context.User.Id != einherjiOptions.AuthorID)
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!",
-                    cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!").ConfigureAwait(false);
                 return;
             }
 
             Status status = await RandomizeStatusAsync(context.Client, cancellationToken).ConfigureAwait(false);
             if (status != null)
             {
-                await context.ReplyAsync($"{einherjiOptions.SuccessSymbol} Status changed: `{status.Text.Replace("`", "\\`")}`", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.SuccessSymbol} Status changed: `{status.Text.Replace("`", "\\`")}`").ConfigureAwait(false);
                 // restart loop
                 StartBackgroundLoop();
             }
             else if (this._options.CurrentValue.Statuses?.Any() != true)
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Status not changed - ensure status list is not empty.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Status not changed - ensure status list is not empty.").ConfigureAwait(false);
         }
 
-        private async Task<Status> RandomizeStatusAsync(DiscordSocketClient client, CancellationToken cancellationToken)
+        private async Task<Status> RandomizeStatusAsync(DiscordClient client, CancellationToken cancellationToken)
         {
             Status status = PickStatus();
             try
             {
-                if (client.ConnectionState != Discord.ConnectionState.Connected)
+                if (client.CurrentUser == null || client.GatewayInfo == null)
                     return null;
                 if (status == null)
                     return null;
@@ -101,7 +101,7 @@ namespace TehGM.EinherjiBot.RandomStatus
                     this._log.LogDebug("Changing status to `{NewStatus}`", status);
                 else
                     this._log.LogDebug("Clearing status");
-                await client.SetGameAsync(status.Text, status.Link, status.ActivityType);
+                await client.UpdateStatusAsync(new DiscordActivity(status.Text, status.ActivityType) { StreamUrl = status.Link }).ConfigureAwait(false);
                 return status;
             }
             catch (Exception ex) when (this._options.CurrentValue.IsEnabled && ex.LogAsError(this._log, "Failed changing status to {Status}", status))

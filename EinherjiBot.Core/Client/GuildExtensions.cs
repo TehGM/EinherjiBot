@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DSharpPlus.Entities;
 using System.Threading.Tasks;
 
 namespace TehGM.EinherjiBot
@@ -22,5 +23,17 @@ namespace TehGM.EinherjiBot
             => GetGuildUserAsync(channel, user.Id);
         public static Task<SocketGuildUser> GetGuildUserAsync(this SocketGuild guild, IUser user)
             => GetGuildUserAsync(guild, user.Id);
+
+        public static async Task<DiscordMember> GetMemberSafeAsync(this DiscordGuild guild, ulong id)
+        {
+            try
+            {
+                return await guild.GetMemberAsync(id).ConfigureAwait(false);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                return null;
+            }
+        }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
 using System.Linq;
-using Discord.Commands;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Text;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using System.Drawing;
 
 namespace TehGM.EinherjiBot.GameServers
 {
@@ -38,13 +38,13 @@ namespace TehGM.EinherjiBot.GameServers
         [Summary("If you're authorized, will give you info how to connect to our game servers.")]
         [Priority(-18)]
         [RestrictCommand]
-        private async Task CmdGetAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdGetAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             // check if command has game name
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
-                await SendNameRequiredAsync(context.Channel, cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify game name.").ConfigureAwait(false);
                 return;
             }
 
@@ -54,7 +54,7 @@ namespace TehGM.EinherjiBot.GameServers
             if (server == null)
             {
                 _log.LogDebug("Server for game {Game} not found", gameName);
-                await SendServerNotFoundAsync(context.Channel, gameName, cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Server for game `{gameName}` not found!").ConfigureAwait(false);
                 return;
             }
 
@@ -62,14 +62,14 @@ namespace TehGM.EinherjiBot.GameServers
             if (!await IsAuthorizedAsync(context, server).ConfigureAwait(false))
             {
                 _log.LogTrace("User {UserID} not authorized for server for game {Game} not found", context.User.Id, gameName);
-                await SendUnatuthorizedAsync(context.Channel, server, cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} You're not authorized to access {server.Game} server.").ConfigureAwait(false);
                 return;
             }
 
             // build server info embed
-            EmbedBuilder embed = new EmbedBuilder();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             embed.Title = $"{server.Game} Server Info";
-            embed.Color = Color.Blue;
+            embed.WithColor(Color.Blue);
             StringBuilder builder = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(server.RulesURL))
                 builder.AppendFormat("Before connecting, please read the [server rules]({0}).\n\n", server.RulesURL);
@@ -80,13 +80,14 @@ namespace TehGM.EinherjiBot.GameServers
 
             // send response - directly if PM, or direct to user's PM if in guild
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            IUserMessage sentMsg;
-            if (context.IsPrivate)
-                sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            DiscordMessage sentMsg;
+            if (context.Channel.IsPrivate)
+                sentMsg = await context.ReplyAsync(text, embed.Build()).ConfigureAwait(false);
             else
             {
                 _ = context.InlineReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
-                Task<IUserMessage> pmTask = context.User.SendMessageAsync(text, false, embed.Build(), new RequestOptions { CancelToken = cancellationToken });
+                DiscordMember user = await context.GetGuildMemberAsync().ConfigureAwait(false);
+                Task<DiscordMessage> pmTask = user.SendMessageAsync(text, embed.Build());
                 sentMsg = await pmTask.ConfigureAwait(false);
             }
 
@@ -95,7 +96,7 @@ namespace TehGM.EinherjiBot.GameServers
                 RemoveMessagesDelayed(_gameServersOptions.AutoRemoveDelay, cancellationToken, sentMsg);
         }   
 
-        private async ValueTask<bool> IsAuthorizedAsync(SocketCommandContext context, GameServer server)
+        private async Task<bool> IsAuthorizedAsync(CommandContext context, GameServer server)
         {
             if (server.IsPublic)
                 return true;
@@ -105,10 +106,10 @@ namespace TehGM.EinherjiBot.GameServers
             // scan server roles
             foreach (ulong guildID in _gameServersOptions.RoleScanGuildIDs)
             {
-                SocketGuild guild = context.Client.GetGuild(guildID);
+                DiscordGuild guild = await context.Client.GetGuildAsync(guildID);
                 if (guild == null)
                     continue;
-                SocketGuildUser guildUser = await guild.GetGuildUserAsync(context.User.Id).ConfigureAwait(false);
+                DiscordMember guildUser = await guild.GetMemberAsync(context.User.Id).ConfigureAwait(false);
                 if (guildUser == null)
                     continue;
                 if (guildUser.Roles.Any(role => server.AuthorizedRoleIDs.Contains(role.Id)))
@@ -119,7 +120,7 @@ namespace TehGM.EinherjiBot.GameServers
 
         private string GetAutoremoveText()
             => $"I will remove this message in {_gameServersOptions.AutoRemoveDelay.ToShortFriendlyString()}.";
-        private void RemoveMessagesDelayed(TimeSpan delay, CancellationToken cancellationToken, params IMessage[] messages)
+        private void RemoveMessagesDelayed(TimeSpan delay, CancellationToken cancellationToken, params DiscordMessage[] messages)
         {
             if (messages.Length == 0)
                 return;
@@ -131,8 +132,8 @@ namespace TehGM.EinherjiBot.GameServers
                     Task[] tasks = new Task[messages.Length];
                     for (int i = 0; i < messages.Length; i++)
                     {
-                        IMessage msg = messages[i];
-                        tasks[i] = msg.Channel.DeleteMessageAsync(msg, cancellationToken);
+                        DiscordMessage msg = messages[i];
+                        tasks[i] = msg.Channel.DeleteMessageAsync(msg);
                     }
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                 }
@@ -140,12 +141,5 @@ namespace TehGM.EinherjiBot.GameServers
                 catch (Exception ex) when (ex.LogAsError(_log, "Exception occured when auto-removing Game Server message")) { }
             }, cancellationToken).ConfigureAwait(false);
         }
-
-        private Task SendNameRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} Please specify game name.", cancellationToken);
-        private Task SendServerNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} Server for game `{gameName}` not found!", cancellationToken);
-        private Task SendUnatuthorizedAsync(ISocketMessageChannel channel, GameServer server, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} You're not authorized to access {server.Game} server.", cancellationToken);
     }
 }

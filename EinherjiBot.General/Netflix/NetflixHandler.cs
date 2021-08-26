@@ -3,15 +3,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.Rest;
-using Discord.WebSocket;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
-using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.Netflix
 {
@@ -39,17 +35,17 @@ namespace TehGM.EinherjiBot.Netflix
         [Summary("If you're a part of our Netflix team, will provide Netflix credentials.")]
         [RestrictCommand]
         [Priority(100)]
-        private async Task CmdRetrieveAccountAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
+        private async Task CmdRetrieveAccountAsync(CommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             _log.LogDebug("Retrieving Netlix account credentials");
-            if (context.IsPrivate)
+            if (context.Channel.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: Group only");
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
+            DiscordMember user = await context.GetGuildMemberAsync().ConfigureAwait(false);
             if (!_netflixAccountOptions.CanRetrieve(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: User not privileged");
@@ -67,12 +63,12 @@ namespace TehGM.EinherjiBot.Netflix
             NetflixAccount account = await _netflixAccountStore.GetAsync(cancellationToken).ConfigureAwait(false);
 
             // create message
-            IUser modifiedByUser = null;
+            DiscordUser modifiedByUser = null;
             if (account.ModifiedByID != null)
                 modifiedByUser = await context.Client.GetUserAsync(account.ModifiedByID.Value).ConfigureAwait(false);
-            EmbedBuilder embed = CreateConfirmationEmbed(account, modifiedByUser);
+            DiscordEmbedBuilder embed = CreateConfirmationEmbed(account, modifiedByUser);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            DiscordMessage sentMsg = await context.ReplyAsync(text, embed.Build()).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);
@@ -82,17 +78,17 @@ namespace TehGM.EinherjiBot.Netflix
         [Hidden]
         [RestrictCommand]
         [Priority(99)]
-        private async Task CmdUpdateAccountAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
+        private async Task CmdUpdateAccountAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             _log.LogDebug("Updating Netlix account credentials");
-            if (context.IsPrivate)
+            if (context.Channel.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: Group only");
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
+            DiscordMember user = await context.GetGuildMemberAsync().ConfigureAwait(false);
             if (!_netflixAccountOptions.CanModify(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: User not privileged");
@@ -127,10 +123,10 @@ namespace TehGM.EinherjiBot.Netflix
             await _netflixAccountStore.SetAsync(account, cancellationToken).ConfigureAwait(false);
 
             // create message
-            EmbedBuilder embed = CreateConfirmationEmbed(account, context.User);
+            DiscordEmbedBuilder embed = CreateConfirmationEmbed(account, context.User);
             embed.WithDescription(responseText);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            DiscordMessage sentMsg = await context.ReplyAsync(text, embed.Build()).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);
@@ -139,47 +135,47 @@ namespace TehGM.EinherjiBot.Netflix
         private string GetAutoremoveText()
             => $"I will remove this and your message in {_netflixAccountOptions.AutoRemoveDelay.ToShortFriendlyString()}.";
 
-        private EmbedBuilder CreateConfirmationEmbed(NetflixAccount account, IUser modifiedBy)
+        private DiscordEmbedBuilder CreateConfirmationEmbed(NetflixAccount account, DiscordUser modifiedBy)
         {
-            EmbedBuilder embed = new EmbedBuilder()
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .AddField("Login", account.Login)
                 .AddField("Password", account.Password)
                 .WithColor(_einherjiOptions.EmbedSuccessColor)
-                .WithThumbnailUrl("https://historia.org.pl/wp-content/uploads/2018/04/netflix-logo.jpg");
+                .WithThumbnail("https://historia.org.pl/wp-content/uploads/2018/04/netflix-logo.jpg");
             if (modifiedBy != null)
             {
                 embed.WithTimestamp(account.ModifiedTimestampUTC)
-                .WithFooter($"Last modified by {modifiedBy.Username}#{modifiedBy.Discriminator}", modifiedBy.GetAvatarUrl());
+                .WithFooter($"Last modified by {modifiedBy.Username}#{modifiedBy.Discriminator}", modifiedBy.GetSafeAvatarUrl());
             }
             return embed;
         }
 
-        private Task SendErrorAsync(string text, ISocketMessageChannel channel, string mention = null, CancellationToken cancellationToken = default)
+        private Task SendErrorAsync(string text, DiscordChannel channel, string mention = null, CancellationToken cancellationToken = default)
         {
-            EmbedBuilder embed = new EmbedBuilder()
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithColor(_einherjiOptions.EmbedErrorColor)
                 .WithTitle("Error")
                 .WithDescription(text);
-            return channel.SendMessageAsync(mention, false, embed.Build(), cancellationToken);
+            return channel.SendMessageAsync(mention, embed.Build());
         }
 
         private string GetAllowedRolesMentionsText()
-            => _netflixAccountOptions.RetrieveRoleIDs.Select(id => MentionUtils.MentionRole(id)).JoinAsSentence(lastSeparator: " or ");
+            => _netflixAccountOptions.RetrieveRoleIDs.Select(id => MentionID.Role(id)).JoinAsSentence(lastSeparator: " or ");
 
         private string GetAllowedChannelsMentionsText()
-            => _netflixAccountOptions.AllowedChannelsIDs.Select(id => MentionUtils.MentionChannel(id)).JoinAsSentence(lastSeparator: " or ");
+            => _netflixAccountOptions.AllowedChannelsIDs.Select(id => MentionID.Channel(id)).JoinAsSentence(lastSeparator: " or ");
 
-        private void RemoveMessagesDelayed(TimeSpan delay, CancellationToken cancellationToken, params IMessage[] messages)
+        private void RemoveMessagesDelayed(TimeSpan delay, CancellationToken cancellationToken, params DiscordMessage[] messages)
         {
             if (messages.Length == 0)
                 return;
-            SocketTextChannel channel = messages[0].Channel as SocketTextChannel;
+            DiscordChannel channel = messages[0].Channel;
             _ = Task.Run(async () =>
             {
                 try
                 {
                     await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
-                    await channel.DeleteMessagesAsync(messages, new RequestOptions() { CancelToken = cancellationToken }).ConfigureAwait(false);
+                    await channel.DeleteMessagesAsync(messages).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) { _log.LogWarning("Auto-removal of Netflix account message canceled"); }
                 catch (Exception ex) when (ex.LogAsError(_log, "Exception occured when auto-removing Netflix account message")) { }

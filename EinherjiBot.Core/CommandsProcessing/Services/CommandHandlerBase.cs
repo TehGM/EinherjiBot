@@ -57,9 +57,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             if (requirePrefix && argPos == -1)
                 return Task.CompletedTask;
 
-            //string prefix = e.Message.Content.Remove(0, argPos);
-            //string content = e.Message.Content.Substring(argPos);
-
             // Create a WebSocket-based command context based on the message
             return HandleCommandAsync(e, argPos);
         }

@@ -1,4 +1,4 @@
-﻿using Discord;
+﻿using DSharpPlus.Entities;
 
 namespace TehGM.EinherjiBot.RandomStatus
 {
@@ -6,7 +6,7 @@ namespace TehGM.EinherjiBot.RandomStatus
     {
         public string Text { get; set; } = null;
         public string Link { get; set; } = null;
-        public ActivityType ActivityType { get; set; } = ActivityType.CustomStatus;
+        public ActivityType ActivityType { get; set; } = ActivityType.Custom;
 
         public override string ToString()
         {
@@ -18,9 +18,9 @@ namespace TehGM.EinherjiBot.RandomStatus
                     return $"Streaming {this.Text}";
                 case ActivityType.Watching:
                     return $"Watching {this.Text}";
-                case ActivityType.Listening:
+                case ActivityType.ListeningTo:
                     return $"Listening to {this.Text}";
-                case ActivityType.CustomStatus:
+                case ActivityType.Custom:
                     return this.Text;
                 default:
                     return $"{this.ActivityType} {this.Text}";
