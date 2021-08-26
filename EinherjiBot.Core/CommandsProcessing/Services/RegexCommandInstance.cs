@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandInstance
     {
-        public CommandDescriptor Descriptor { get; }
+        public CommandDescriptor Descriptor { get; private set; }
 
         public Regex Regex { get; }
         public int Priority { get; private set; }
@@ -48,7 +48,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._params = method.GetParameters();
 
             this._moduleProvider = moduleProvider;
-            this.Descriptor = new CommandDescriptor(this);
         }
 
         public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
@@ -77,6 +76,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             PersistentModuleAttribute persistent = method.DeclaringType.GetCustomAttribute<PersistentModuleAttribute>();
             if (persistent != null && persistent.PreInitialize)
                 result._moduleProvider.GetModuleInstance(result);
+
+            // build descriptor
+            result.Descriptor = new CommandDescriptor(result);
 
             return result;
         }

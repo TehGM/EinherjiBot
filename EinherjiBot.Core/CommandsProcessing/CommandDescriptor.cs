@@ -65,6 +65,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         private static T GetAttribute<T>(Command command) where T : Attribute
             => GetAttribute<T>(command.CustomAttributes);
         private static T GetAttribute<T>(IEnumerable<Attribute> attributes) where T : Attribute
-            => attributes.LastOrDefault(attr => attr is T) as T;
+            => attributes?.LastOrDefault(attr => attr is T) as T;
     }
 }
