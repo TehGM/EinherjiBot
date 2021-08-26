@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing.Checks;
 using ParameterInfo = System.Reflection.ParameterInfo;
 
@@ -26,7 +24,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private readonly IRegexCommandModuleProvider _moduleProvider;
         private ICollection<Attribute> _attributes;
 
-        public RegexCommandInstance(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
+        public RegexCommandInstance(MethodInfo method, RegexCommandAttribute regexAttribute, CommandsOptions options)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -38,7 +36,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._params = method.GetParameters();
 
             // build regex instance
-            CommandsOptions options = services.GetService<IOptions<CommandsOptions>>()?.Value;
             RegexOptions regexOptions = regexAttribute.RegexOptions;
             if (options?.CaseSensitive != true)
                 regexOptions |= RegexOptions.IgnoreCase;
@@ -51,12 +48,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // build descriptor
             this.Descriptor = new CommandDescriptor(this);
-
-            // pre-init if requested - this may be the case if module listens to some gateway events directly
-            this._moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
-            RegexCommandsModuleAttribute moduleAttribute = method.DeclaringType.GetCustomAttribute<RegexCommandsModuleAttribute>();
-            if (moduleAttribute != null && moduleAttribute.SingletonScoped)
-                this._moduleProvider.GetModuleInstance(this);
         }
 
         private void LoadCustomAttributes(ICustomAttributeProvider provider)
@@ -81,7 +72,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             return CommandCheckResult.Success;
         }
 
-        public async Task ExecuteAsync(CommandContext context, Match regexMatch, IServiceProvider services, CancellationToken cancellationToken = default)
+        public async Task ExecuteAsync(CommandContext context, Match regexMatch, object module, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             // build params
             cancellationToken.ThrowIfCancellationRequested();
@@ -119,12 +110,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 paramsValues[param.Position] = value;
             }
 
-            // create class instance, or use pre-initialized if command has that flag
-            cancellationToken.ThrowIfCancellationRequested();
-            object instance = _moduleProvider.GetModuleInstance(this);
-
             // execute
-            if (_method.Invoke(instance, paramsValues) is Task returnTask)
+            cancellationToken.ThrowIfCancellationRequested();
+            if (_method.Invoke(module, paramsValues) is Task returnTask)
                 await returnTask.ConfigureAwait(false);
         }
     }

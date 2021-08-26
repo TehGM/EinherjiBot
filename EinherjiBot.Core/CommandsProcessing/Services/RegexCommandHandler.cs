@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing.Checks;
@@ -17,10 +18,13 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     {
         public ICollection<RegexCommandInstance> Commands { get; private set; }
 
-        public RegexCommandHandler(IServiceProvider serviceProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
+        private readonly IRegexCommandModuleProvider _moduleProvider;
+
+        public RegexCommandHandler(IServiceProvider serviceProvider, IRegexCommandModuleProvider moduleProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
             : base(serviceProvider, client, commandOptions, log)
         {
             this.Commands = new List<RegexCommandInstance>();
+            this._moduleProvider = moduleProvider;
         }
 
         protected override async Task InitializeCommandsAsync()
@@ -79,7 +83,16 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
             }
             foreach (RegexCommandAttribute attribute in attributes)
-                Commands.Add(new RegexCommandInstance(method, attribute, ServiceProvider));
+            {
+                CommandsOptions options = this.ServiceProvider.GetRequiredService<IOptions<CommandsOptions>>().Value;
+                RegexCommandInstance instance = new RegexCommandInstance(method, attribute, options);
+                this.Commands.Add(instance);
+
+                // preinitialize singleton
+                RegexCommandsModuleAttribute moduleAttribute = method.DeclaringType.GetCustomAttribute<RegexCommandsModuleAttribute>();
+                if (moduleAttribute != null && moduleAttribute.SingletonScoped)
+                    this._moduleProvider.GetModuleInstance(instance);
+            }
         }
 
         protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
@@ -114,10 +127,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                                 break;
                         }
 
+                        // get module for the command
+                        object module = this._moduleProvider.GetModuleInstance(command);
+
                         // execute the command
                         await command.ExecuteAsync(
                             context: context,
                             regexMatch: regexMatch,
+                            module: module,
                             services: this.ServiceProvider,
                             cancellationToken: this.HostCancellationToken)
                             .ConfigureAwait(false);
