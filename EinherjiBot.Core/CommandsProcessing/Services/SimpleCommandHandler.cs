@@ -41,8 +41,13 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         {
             CommandsNextExtension commandsNext = base._client.GetCommandsNext();
 
-            string prefix = context.Message.Content.Remove(0, argPos);
-            string content = context.Message.Content.Substring(argPos);
+            string prefix = string.Empty;
+            string content = context.Message.Content;
+            if (argPos > 0)
+            {
+                prefix = context.Message.Content.Remove(0, argPos);
+                content = context.Message.Content.Substring(argPos);
+            }
 
             Command command = commandsNext.FindCommand(content, out string args);
             if (command == null) 

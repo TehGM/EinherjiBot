@@ -121,7 +121,9 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         public async Task<IResult> ExecuteAsync(CommandContext context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             // check regex
-            string msg = context.Message.Content.Substring(argPos);
+            string msg = context.Message.Content;
+            if (argPos > 0)
+                msg = context.Message.Content.Substring(argPos);
             Match regexMatch = this.Regex.Match(msg);
             if (regexMatch == null || !regexMatch.Success)
                 return ExecuteResult.FromError(CommandError.ParseFailed, "Regex did not match");
@@ -146,8 +148,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     value = context.Channel;
                 else if (param.ParameterType.IsAssignableFrom(context.User.GetType()))
                     value = context.User;
-                //else if (param.ParameterType.IsAssignableFrom(context.Client.GetType()))
-                //    value = context.Client;
+                else if (param.ParameterType.IsAssignableFrom(context.Client.GetType()))
+                    value = context.Client;
                 else if (param.ParameterType.IsAssignableFrom(typeof(CancellationToken)))
                     value = cancellationToken;
                 else
