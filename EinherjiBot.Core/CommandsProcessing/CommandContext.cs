@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 
@@ -9,6 +10,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
     public class CommandContext
     {
         public CommandDescriptor Descriptor { get; }
+        public DiscordClient Client { get; }
         private MessageCreateEventArgs MessageEventArgs { get; }
 
         public DiscordGuild Guild => this.MessageEventArgs.Guild;
@@ -20,10 +22,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         private DiscordMember _guildMember;
         private bool _guildMemberProcessed = false;
 
-        public CommandContext(CommandDescriptor descriptor, MessageCreateEventArgs eventArgs)
+        public CommandContext(CommandDescriptor descriptor, MessageCreateEventArgs eventArgs, DiscordClient client)
         {
             this.Descriptor = descriptor;
             this.MessageEventArgs = eventArgs;
+            this.Client = client;
         }
 
         public async ValueTask<DiscordMember> GetGuildMemberAsync()

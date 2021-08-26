@@ -93,7 +93,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 foreach (RegexCommandInstance command in Commands)
                 {
-                    CommandContext context = new CommandContext(command.Descriptor, e);
+                    CommandContext context = new CommandContext(command.Descriptor, e, _client);
 
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
