@@ -18,6 +18,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         public bool IsHidden { get; }
         public RestrictCommandAttribute Restrictions { get; }
         public int Priority { get; }
+        public IEnumerable<CommandCheckAttribute> CommandChecks { get; }
 
         public CommandDescriptor(RegexCommandInstance command)
         {
@@ -30,6 +31,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
             this.Priority = command.Priority;
+            this.CommandChecks = GetAllAttributes<CommandCheckAttribute>(command);
         }
 
         public CommandDescriptor(CommandInfo command)
@@ -43,6 +45,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
             this.Priority = command.Priority;
+            this.CommandChecks = GetAllAttributes<CommandCheckAttribute>(command);
         }
 
         public CommandDescriptor(Command command)
@@ -56,6 +59,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
             this.Priority = GetAttribute<DSharpPlus.CommandsNext.Attributes.PriorityAttribute>(command)?.Priority ?? 0;
+            this.CommandChecks = GetAllAttributes<CommandCheckAttribute>(command);
         }
 
         private static T GetAttribute<T>(RegexCommandInstance command) where T : Attribute
@@ -66,5 +70,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             => GetAttribute<T>(command.CustomAttributes);
         private static T GetAttribute<T>(IEnumerable<Attribute> attributes) where T : Attribute
             => attributes?.LastOrDefault(attr => attr is T) as T;
+
+        private static IEnumerable<T> GetAllAttributes<T>(RegexCommandInstance command) where T : Attribute
+            => GetAllAttributes<T>(command.Attributes);
+        private static IEnumerable<T> GetAllAttributes<T>(CommandInfo command) where T : Attribute
+            => GetAllAttributes<T>(command.Attributes);
+        private static IEnumerable<T> GetAllAttributes<T>(Command command) where T : Attribute
+            => GetAllAttributes<T>(command.CustomAttributes);
+        private static IEnumerable<T> GetAllAttributes<T>(IEnumerable<Attribute> attributes) where T : Attribute
+            => attributes?.Where(attr => attr is T).Cast<T>() ?? Enumerable.Empty<T>();
     }
 }

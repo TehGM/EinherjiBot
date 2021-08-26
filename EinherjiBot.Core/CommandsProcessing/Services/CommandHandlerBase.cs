@@ -7,6 +7,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TehGM.EinherjiBot.CommandsProcessing.Checks;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -77,6 +78,19 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         {
             this._client.MessageCreated -= HandleCommandInternalAsync;
             this._lock?.Dispose();
+        }
+
+        protected void LogCommandCheck(CommandCheckResult result, string commandName)
+        {
+            string resultText = string.Empty;
+            if (result.ResultType == CommandCheckResultType.Skip)
+                resultText = " skipping";
+            else if (result.ResultType == CommandCheckResultType.Abort)
+                resultText = " aborting";
+            string message = $"Command {{CommandName}}{resultText}";
+            if (!string.IsNullOrWhiteSpace(result.Message))
+                message += $": {result.Message}";
+            this._log.Log(result.Error != null ? LogLevel.Error : LogLevel.Trace, result.Error, message, commandName);
         }
     }
 }

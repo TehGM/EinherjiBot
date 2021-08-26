@@ -107,7 +107,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         CommandCheckResult result = await command.RunChecksAsync(context, this._serviceProvider, this._hostCancellationToken).ConfigureAwait(false);
                         if (result.ResultType != CommandCheckResultType.Continue)
                         {
-                            this.LogCommandCheck(result, context, command);
+                            base.LogCommandCheck(result, $"{command.ModuleType.Name}.{command.MethodName}");
                             if (result.ResultType == CommandCheckResultType.Skip)
                                 continue;
                             if (result.ResultType == CommandCheckResultType.Abort)
@@ -130,19 +130,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 _lock.Release();
             }
-        }
-
-        private void LogCommandCheck(CommandCheckResult result, CommandContext context, RegexCommandInstance command)
-        {
-            string resultText = string.Empty;
-            if (result.ResultType == CommandCheckResultType.Skip)
-                resultText = " skipping";
-            else if (result.ResultType == CommandCheckResultType.Abort)
-                resultText = " aborting";
-            string message = $"Command {{CommandType}}.{{CommandMethod}}{resultText}";
-            if (!string.IsNullOrWhiteSpace(result.Message))
-                message += $": {result.Message}";
-            base._log.Log(result.Error != null ? LogLevel.Error : LogLevel.Trace, result.Error, message, command.ModuleType.Name, command.MethodName);
         }
     }
 }

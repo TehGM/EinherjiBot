@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TehGM.EinherjiBot.CommandsProcessing.Checks;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -37,23 +38,36 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             return Task.CompletedTask;
         }
 
-        protected override Task HandleCommandAsync(MessageCreateEventArgs context, int argPos)
+        protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
         {
             CommandsNextExtension commandsNext = base._client.GetCommandsNext();
 
             string prefix = string.Empty;
-            string content = context.Message.Content;
+            string content = e.Message.Content;
             if (argPos > 0)
             {
-                prefix = context.Message.Content.Remove(0, argPos);
-                content = context.Message.Content.Substring(argPos);
+                prefix = e.Message.Content.Remove(0, argPos);
+                content = e.Message.Content.Substring(argPos);
             }
 
             Command command = commandsNext.FindCommand(content, out string args);
             if (command == null) 
-                return Task.CompletedTask;
-            DSharpPlus.CommandsNext.CommandContext ctx = commandsNext.CreateContext(context.Message, prefix, command, args);
-            return commandsNext.ExecuteCommandAsync(ctx);
+                return;
+
+            CommandDescriptor descriptor = new CommandDescriptor(command);
+            CommandContext context = new CommandContext(descriptor, e, base._client);
+            foreach (CommandCheckAttribute check in descriptor.CommandChecks)
+            {
+                CommandCheckResult result = await check.RunCheckAsync(context, base._serviceProvider, base._hostCancellationToken).ConfigureAwait(false);
+                if (result.ResultType != CommandCheckResultType.Continue)
+                {
+                    base.LogCommandCheck(result, command.QualifiedName);
+                    return;
+                }
+            }
+
+            DSharpPlus.CommandsNext.CommandContext ctx = commandsNext.CreateContext(e.Message, prefix, command, args);
+            await commandsNext.ExecuteCommandAsync(ctx).ConfigureAwait(false);
         }
     }
 }
