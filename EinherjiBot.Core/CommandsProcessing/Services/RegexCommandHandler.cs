@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Discord.WebSocket;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
@@ -82,7 +81,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 Commands.Add(RegexCommandInstance.Build(method, attribute, _serviceProvider));
         }
 
-        protected override async Task HandleCommandAsync(MessageCreateEventArgs context, int argPos)
+        protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
         {
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
@@ -94,7 +93,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 foreach (RegexCommandInstance command in Commands)
                 {
-                    // TODO: CommandDescriptor maybe?
+                    CommandContext context = new CommandContext(command.Descriptor, e);
+
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {

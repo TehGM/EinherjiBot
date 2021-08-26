@@ -47,7 +47,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             Command command = commandsNext.FindCommand(content, out string args);
             if (command == null) 
                 return Task.CompletedTask;
-            CommandContext ctx = commandsNext.CreateContext(context.Message, prefix, command, args);
+            DSharpPlus.CommandsNext.CommandContext ctx = commandsNext.CreateContext(context.Message, prefix, command, args);
             return commandsNext.ExecuteCommandAsync(ctx);
         }
     }

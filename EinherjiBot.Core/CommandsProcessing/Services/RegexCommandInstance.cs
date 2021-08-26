@@ -18,6 +18,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandInstance
     {
+        public CommandDescriptor Descriptor { get; }
+
         public Regex Regex { get; }
         public int Priority { get; private set; }
         public IEnumerable<CheckBaseAttribute> Preconditions { get; private set; }
@@ -46,6 +48,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             this._params = method.GetParameters();
 
             this._moduleProvider = moduleProvider;
+            this.Descriptor = new CommandDescriptor(this);
         }
 
         public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
@@ -113,7 +116,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             //return PreconditionResult.FromSuccess();
         }
 
-        public async Task<IResult> ExecuteAsync(MessageCreateEventArgs context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
+        public async Task<IResult> ExecuteAsync(CommandContext context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             // check regex
             string msg = context.Message.Content.Substring(argPos);
@@ -139,8 +142,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     value = context.Guild;
                 else if (param.ParameterType.IsAssignableFrom(context.Channel.GetType()))
                     value = context.Channel;
-                else if (param.ParameterType.IsAssignableFrom(context.Author.GetType()))
-                    value = context.Author;
+                else if (param.ParameterType.IsAssignableFrom(context.User.GetType()))
+                    value = context.User;
                 //else if (param.ParameterType.IsAssignableFrom(context.Client.GetType()))
                 //    value = context.Client;
                 else if (param.ParameterType.IsAssignableFrom(typeof(CancellationToken)))
