@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
     <Authors>TehGM</Authors>
     <AssemblyName>EinherjiBot</AssemblyName>
     <Description>A personal administration bot for Discord. Features may seem truly random!</Description>
@@ -14,13 +14,9 @@
     <RepositoryUrl>https://github.com/TehGM/EinherjiBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Discord, Bot</PackageTags>
-    <PackageReleaseNotes>- Separated help and commands list
-- Automatic commands list
-- Don't list commands that are not available in current guild
-- Added commands to muting/unmuting and deafening/undeafening users in voice channels
-- Separated voice admin and other admin commands
-- Removed delay for messages removal
-- Added support for inline replies</PackageReleaseNotes>
+    <PackageReleaseNotes>- Fix permission check never checking Bot's permissions.
+- Stellaris mods command is now restricted to main guild.
+- Mention in help that posting members leaving requires bot to have posting permissions.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
