@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,11 +14,10 @@ namespace TehGM.EinherjiBot.Client
 
         private readonly ILogger _log;
         private readonly ILoggerFactory _logFactory;
-        private readonly IServiceProvider _services;
         private readonly IOptionsMonitor<DiscordOptions> _discordOptions;
         private bool _started = false;
 
-        public HostedDiscordClient(IOptionsMonitor<DiscordOptions> discordOptions, ILogger<HostedDiscordClient> log, ILoggerFactory logFactory, IServiceProvider services)
+        public HostedDiscordClient(IOptionsMonitor<DiscordOptions> discordOptions, ILogger<HostedDiscordClient> log, ILoggerFactory logFactory)
         {
             this._discordOptions = discordOptions;
             this._log = log;
