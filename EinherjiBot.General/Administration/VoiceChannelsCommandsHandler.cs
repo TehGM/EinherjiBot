@@ -239,12 +239,12 @@ namespace TehGM.EinherjiBot.Administration
 
         private async Task<bool> VerifyUserPermissionsAsync(SocketCommandContext context, IVoiceChannel channel, ulong userID, ChannelPermission permission, CancellationToken cancellationToken)
         {
-            IGuildUser user = await channel.Guild.GetUserAsync(context.User.Id, CacheMode.AllowDownload, new RequestOptions { CancelToken = cancellationToken }).ConfigureAwait(false);
+            IGuildUser user = await channel.Guild.GetUserAsync(userID, CacheMode.AllowDownload, new RequestOptions { CancelToken = cancellationToken }).ConfigureAwait(false);
 
             if (user.GuildPermissions.Administrator)
                 return true;
 
-            bool isSelf = user.Id == context.User.Id;
+            bool isSelf = userID == context.User.Id;
             string memberName = isSelf ? "I" : "You";
             if (!user.GetPermissions(channel).Has(ChannelPermission.ViewChannel | ChannelPermission.Connect))
             {
