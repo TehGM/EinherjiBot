@@ -15,7 +15,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Administration
 {
-    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
+    [RegexCommandsModule(SingletonScoped = true)]
     [HelpCategory("Special", -99999)]
     public class AdminCommandsHandler : IDisposable
     {

@@ -12,7 +12,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.RandomStatus
 {
-    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
+    [RegexCommandsModule(SingletonScoped = true)]
     public class RandomStatusHandler : IDisposable
     {
         private readonly IOptionsMonitor<RandomStatusOptions> _options;
