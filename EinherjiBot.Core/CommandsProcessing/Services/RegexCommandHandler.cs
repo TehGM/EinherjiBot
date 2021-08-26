@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 foreach (Type t in options.Classes)
                     this.AddType(t.GetTypeInfo());
 
-                this.Commands = Commands.OrderByDescending(cmd => cmd.Priority).ToArray();
+                this.Commands = Commands.OrderByDescending(cmd => cmd.Descriptor.Priority).ToArray();
             }
             finally
             {

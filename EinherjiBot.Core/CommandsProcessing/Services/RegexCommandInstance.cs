@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing.Checks;
@@ -18,9 +17,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         public CommandDescriptor Descriptor { get; private set; }
 
         public Regex Regex { get; }
-        public int Priority { get; private set; }
-        private ICollection<CommandCheckAttribute> _commandChecks;
-        public IEnumerable<CommandCheckAttribute> CommandChecks => this._commandChecks;
         public IEnumerable<Attribute> Attributes => this._attributes?.AsEnumerable();
         public Type ModuleType => _method.DeclaringType;
         public string MethodName => _method.Name;
@@ -33,8 +29,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private RegexCommandInstance(Regex regex, MethodInfo method, IRegexCommandModuleProvider moduleProvider)
         {
             this.Regex = regex;
-            this.Priority = 0;
-            this._commandChecks = new List<CommandCheckAttribute>();
 
             this._method = method;
             this._params = method.GetParameters();
@@ -80,16 +74,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             foreach (object attr in attributes)
             {
-                switch (attr)
-                {
-                    case CommandCheckAttribute commandCheck:
-                        this._commandChecks.Add(commandCheck);
-                        break;
-                    case PriorityAttribute priority:
-                        this.Priority = priority.Priority;
-                        break;
-                }
-
                 if (attr is Attribute a)
                     this._attributes.Add(a);
             }
@@ -97,7 +81,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         public async Task<CommandCheckResult> RunChecksAsync(CommandContext context, IServiceProvider services, CancellationToken cancellationToken = default)
         {
-            foreach (CommandCheckAttribute commandCheck in this._commandChecks)
+            foreach (CommandCheckAttribute commandCheck in this.Descriptor.CommandChecks)
             {
                 CommandCheckResult result = await commandCheck.RunCheckAsync(context, services, cancellationToken).ConfigureAwait(false);
                 if (result.ResultType == CommandCheckResultType.Skip || result.ResultType == CommandCheckResultType.Abort)
