@@ -12,6 +12,8 @@ using TehGM.EinherjiBot.CommandsProcessing.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DSharpPlus.CommandsNext.Attributes;
+using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot
 {
@@ -118,7 +120,7 @@ namespace TehGM.EinherjiBot
             // get commands
             IEnumerable<CommandDescriptor> commands = new List<CommandDescriptor>();
             commands = commands.Union(this._regexCommands.Commands.Select(cmd => new CommandDescriptor(cmd)));
-            commands = commands.Union(this._simpleCommands.Commands.Commands.Select(cmd => new CommandDescriptor(cmd)));
+            commands = commands.Union(this._simpleCommands.Commands.Select(cmd => new CommandDescriptor(cmd)));
 
             // exclude hidden, unnamed, without summary, and ones that are restricted
             commands = commands.Where(cmd =>

@@ -28,10 +28,6 @@ namespace TehGM.EinherjiBot
             LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
 
             IHost host = Host.CreateDefaultBuilder(args)
-                //.ConfigureAppConfiguration((context, builder) =>
-                //{
-                //    context.
-                //})
                 .ConfigureSecretsFiles()
                 .ConfigureSerilog()
                 .ConfigureServices((context, services) =>

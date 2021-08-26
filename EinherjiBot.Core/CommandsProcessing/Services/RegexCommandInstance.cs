@@ -7,9 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ParameterInfo = System.Reflection.ParameterInfo;
+using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -17,7 +20,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     {
         public Regex Regex { get; }
         public int Priority { get; private set; }
-        public IEnumerable<PreconditionAttribute> Preconditions { get; private set; }
+        public IEnumerable<CheckBaseAttribute> Preconditions { get; private set; }
         public IEnumerable<Attribute> Attributes => this._attributes?.AsEnumerable();
         public Type ModuleType => _method.DeclaringType;
         public string MethodName => _method.Name;
@@ -37,7 +40,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         {
             this.Regex = regex;
             this.Priority = 0;
-            this.Preconditions = new List<PreconditionAttribute>();
+            this.Preconditions = new List<CheckBaseAttribute>();
 
             this._method = method;
             this._params = method.GetParameters();
@@ -83,8 +86,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 switch (attr)
                 {
-                    case PreconditionAttribute precondition:
-                        (this.Preconditions as ICollection<PreconditionAttribute>).Add(precondition);
+                    case CheckBaseAttribute precondition:
+                        (this.Preconditions as ICollection<CheckBaseAttribute>).Add(precondition);
                         break;
                     case PriorityAttribute priority:
                         this.Priority = priority.Priority;
@@ -96,20 +99,21 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             }
         }
 
-        public async Task<PreconditionResult> CheckPreconditionsAsync(ICommandContext context, IServiceProvider services)
+        public Task<PreconditionResult> CheckPreconditionsAsync(ICommandContext context, IServiceProvider services)
         {
-            foreach (PreconditionAttribute precondition in Preconditions)
-            {
-                // since we're piggy-backing on DNet's command's system that is really bad for extensibility, we have to improvise and pass null for command info
-                // luckily none of the built-in preconditions seem to use it at this time anyway
-                PreconditionResult result = await precondition.CheckPermissionsAsync(context, null, services).ConfigureAwait(false);
-                if (!result.IsSuccess)
-                    return result;
-            }
-            return PreconditionResult.FromSuccess();
+            // TODO: DsharpPlus contexts are not extensible, so will need own set of attributes
+            // for now, just don't check, to be implemented later
+            return Task.FromResult(PreconditionResult.FromSuccess());
+            //foreach (CheckBaseAttribute precondition in Preconditions)
+            //{
+            //    PreconditionResult result = await precondition.ExecuteCheckAsync(context, null, services).ConfigureAwait(false);
+            //    if (!result.IsSuccess)
+            //        return result;
+            //}
+            //return PreconditionResult.FromSuccess();
         }
 
-        public async Task<IResult> ExecuteAsync(ICommandContext context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
+        public async Task<IResult> ExecuteAsync(MessageCreateEventArgs context, int argPos, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             // check regex
             string msg = context.Message.Content.Substring(argPos);
@@ -135,10 +139,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     value = context.Guild;
                 else if (param.ParameterType.IsAssignableFrom(context.Channel.GetType()))
                     value = context.Channel;
-                else if (param.ParameterType.IsAssignableFrom(context.User.GetType()))
-                    value = context.User;
-                else if (param.ParameterType.IsAssignableFrom(context.Client.GetType()))
-                    value = context.Client;
+                else if (param.ParameterType.IsAssignableFrom(context.Author.GetType()))
+                    value = context.Author;
+                //else if (param.ParameterType.IsAssignableFrom(context.Client.GetType()))
+                //    value = context.Client;
                 else if (param.ParameterType.IsAssignableFrom(typeof(CancellationToken)))
                     value = cancellationToken;
                 else

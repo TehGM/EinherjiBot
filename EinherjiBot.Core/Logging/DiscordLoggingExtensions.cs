@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Discord;
 using Discord.Commands;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Serilog.Context;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -30,6 +31,25 @@ namespace TehGM.EinherjiBot
             => LogContext.PushProperty("Source", source);
         public static IDisposable UseSource(this ILogger log, string source)
             => LogContext.PushProperty("Source", source);
+
+        public static IDisposable BeginCommandScope(this ILogger log, MessageCreateEventArgs context, object handler = null, [CallerMemberName] string cmdName = null)
+            => BeginCommandScope(log, context, handler?.GetType(), cmdName);
+
+        public static IDisposable BeginCommandScope(this ILogger log, MessageCreateEventArgs context, Type handlerType = null, [CallerMemberName] string cmdName = null)
+        {
+            Dictionary<string, object> state = new Dictionary<string, object>
+            {
+                { "Command.UserID", context.Author?.Id },
+                { "Command.MessageID", context.Message?.Id },
+                { "Command.ChannelID", context.Channel?.Id },
+                { "Command.GuildID", context.Guild?.Id }
+            };
+            if (!string.IsNullOrWhiteSpace(cmdName))
+                state.Add("Command.Method", cmdName);
+            if (handlerType != null)
+                state.Add("Command.Handler", handlerType.Name);
+            return log.BeginScope(state);
+        }
 
         public static IDisposable BeginCommandScope(this ILogger log, SocketCommandContext context, object handler = null, [CallerMemberName] string cmdName = null)
             => BeginCommandScope(log, context, handler?.GetType(), cmdName);

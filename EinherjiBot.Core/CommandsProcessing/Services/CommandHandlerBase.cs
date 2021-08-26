@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord.Commands;
-using Discord.WebSocket;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,14 +12,14 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public abstract class CommandHandlerBase : IHostedService, IDisposable
     {
-        protected DiscordSocketClient _client { get; }
+        protected DiscordClient _client { get; }
         protected IOptionsMonitor<CommandsOptions> _commandOptions { get; }
         protected IServiceProvider _serviceProvider { get; }
         protected ILogger _log { get; }
         protected SemaphoreSlim _lock { get; }
         protected CancellationToken _hostCancellationToken { get; private set; }
 
-        public CommandHandlerBase(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger log)
+        public CommandHandlerBase(IServiceProvider serviceProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger log)
         {
             this._client = client;
             this._commandOptions = commandOptions;
@@ -28,42 +29,39 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             _commandOptions.OnChange(async _ => await InitializeCommandsAsync());
 
-            this._client.MessageReceived += HandleCommandInternalAsync;
+            this._client.MessageCreated += HandleCommandInternalAsync;
         }
 
         protected abstract Task InitializeCommandsAsync();
-        protected abstract Task HandleCommandAsync(SocketCommandContext context, int argPos);
+        protected abstract Task HandleCommandAsync(MessageCreateEventArgs context, int argPos);
 
-        private Task HandleCommandInternalAsync(SocketMessage msg)
+        private Task HandleCommandInternalAsync(DiscordClient sender, MessageCreateEventArgs e)
         {
-            // most of the implementation here taken from https://discord.foxbot.me/docs/guides/commands/intro.html
-            // with my own pinch of customizations - TehGM
-
-            // Don't process the command if it was a system message
-            if (!(msg is SocketUserMessage message))
-                return Task.CompletedTask;
-
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             CommandsOptions options = this._commandOptions.CurrentValue;
             // only execute if not a bot message
-            if (!options.AcceptBotMessages && message.Author.IsBot)
+            if (!options.AcceptBotMessages && e.Message.Author.IsBot)
                 return Task.CompletedTask;
+
+            // Don't process the command if it was a system message
+            if (e.Message.MessageType != MessageType.Default && e.Message.MessageType == MessageType.Reply)
+                return Task.CompletedTask;
+
             // get prefix and argPos
-            int argPos = 0;
-            bool requirePrefix = msg.Channel is SocketGuildChannel ? options.RequirePublicMessagePrefix : options.RequirePrivateMessagePrefix;
-            bool hasStringPrefix = message.HasStringPrefix(options.Prefix, ref argPos);
-            bool hasMentionPrefix = false;
-            if (!hasStringPrefix)
-                hasMentionPrefix = message.HasMentionPrefix(_client.CurrentUser, ref argPos);
+            bool requirePrefix = e.Guild != null ? options.RequirePublicMessagePrefix : options.RequirePrivateMessagePrefix;
+            int argPos = e.Message.GetStringPrefixLength(options.Prefix, StringComparison.OrdinalIgnoreCase);
+            if (argPos == -1 && options.AcceptMentionPrefix)
+                argPos = e.Message.GetMentionPrefixLength(sender.CurrentUser);
 
             // if prefix not found but is required, return
-            if (requirePrefix && (!string.IsNullOrWhiteSpace(options.Prefix) && !hasStringPrefix) && (options.AcceptMentionPrefix && !hasMentionPrefix))
+            if (requirePrefix && argPos == -1)
                 return Task.CompletedTask;
 
-            // Create a WebSocket-based command context based on the message
-            SocketCommandContext context = new SocketCommandContext(_client, message);
+            //string prefix = e.Message.Content.Remove(0, argPos);
+            //string content = e.Message.Content.Substring(argPos);
 
-            return HandleCommandAsync(context, argPos);
+            // Create a WebSocket-based command context based on the message
+            return HandleCommandAsync(e, argPos);
         }
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
@@ -80,8 +78,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         public void Dispose()
         {
-            this._client.MessageReceived -= HandleCommandInternalAsync;
-            this._lock.Dispose();
+            this._client.MessageCreated -= HandleCommandInternalAsync;
+            this._lock?.Dispose();
         }
     }
 }

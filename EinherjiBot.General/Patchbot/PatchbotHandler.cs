@@ -10,6 +10,8 @@ using System.Linq;
 using Discord.Commands;
 using System.Text.RegularExpressions;
 using System.Threading;
+using DSharpPlus.CommandsNext.Attributes;
+using PriorityAttribute = Discord.Commands.PriorityAttribute;
 
 namespace TehGM.EinherjiBot.Patchbot
 {

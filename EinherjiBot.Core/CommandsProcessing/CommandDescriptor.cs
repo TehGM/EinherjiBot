@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Discord.Commands;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using TehGM.EinherjiBot.CommandsProcessing.Services;
 
 namespace TehGM.EinherjiBot.CommandsProcessing
@@ -25,7 +27,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.DisplayName = GetAttribute<NameAttribute>(command)?.Text;
             this.Summary = GetAttribute<SummaryAttribute>(command)?.Text;
             this.HelpCategory = GetAttribute<HelpCategoryAttribute>(command);
-            this.IsHidden = GetAttribute<HiddenAttribute>(command)?.Hide ?? false;
+            this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
             this.Priority = command.Priority;
         }
@@ -38,15 +40,30 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.DisplayName = command.Name;
             this.Summary = command.Summary;
             this.HelpCategory = GetAttribute<HelpCategoryAttribute>(command);
-            this.IsHidden = GetAttribute<HiddenAttribute>(command)?.Hide ?? false;
+            this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
             this.Priority = command.Priority;
+        }
+
+        public CommandDescriptor(Command command)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+
+            this.DisplayName = command.Name;
+            this.Summary = GetAttribute<DescriptionAttribute>(command)?.Description;
+            this.HelpCategory = GetAttribute<HelpCategoryAttribute>(command);
+            this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
+            this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
+            this.Priority = GetAttribute<DSharpPlus.CommandsNext.Attributes.PriorityAttribute>(command)?.Priority ?? 0;
         }
 
         private static T GetAttribute<T>(RegexCommandInstance command) where T : Attribute
             => GetAttribute<T>(command.Attributes);
         private static T GetAttribute<T>(CommandInfo command) where T : Attribute
             => GetAttribute<T>(command.Attributes);
+        private static T GetAttribute<T>(Command command) where T : Attribute
+            => GetAttribute<T>(command.CustomAttributes);
         private static T GetAttribute<T>(IEnumerable<Attribute> attributes) where T : Attribute
             => attributes.LastOrDefault(attr => attr is T) as T;
     }

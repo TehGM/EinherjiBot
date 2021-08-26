@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using DSharpPlus;
+using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +17,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     {
         public ICollection<RegexCommandInstance> Commands { get; private set; }
 
-        public RegexCommandHandler(IServiceProvider serviceProvider, DiscordSocketClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
+        public RegexCommandHandler(IServiceProvider serviceProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<RegexCommandHandler> log)
             : base(serviceProvider, client, commandOptions, log)
         {
             this.Commands = new List<RegexCommandInstance>();
@@ -80,7 +82,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 Commands.Add(RegexCommandInstance.Build(method, attribute, _serviceProvider));
         }
 
-        protected override async Task HandleCommandAsync(SocketCommandContext context, int argPos)
+        protected override async Task HandleCommandAsync(MessageCreateEventArgs context, int argPos)
         {
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
@@ -92,12 +94,15 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             {
                 foreach (RegexCommandInstance command in Commands)
                 {
+                    // TODO: CommandDescriptor maybe?
                     using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
-                        IResult preconditionsResult = await command.CheckPreconditionsAsync(context, _serviceProvider);
-                        if (!preconditionsResult.IsSuccess)
-                            continue;
+                        // TODO: DsharpPlus contexts are not extensible, so will need own set of attributes
+                        // for now, just don't check, to be implemented later
+                        //IResult preconditionsResult = await command.CheckPreconditionsAsync(context, _serviceProvider);
+                        //if (!preconditionsResult.IsSuccess)
+                        //    continue;
                         ExecuteResult result = (ExecuteResult)await command.ExecuteAsync(
                             context: context,
                             argPos: argPos,

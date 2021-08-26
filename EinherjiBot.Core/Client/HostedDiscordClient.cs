@@ -55,14 +55,6 @@ namespace TehGM.EinherjiBot.Client
 
             this.Client?.Dispose();
             this.Client = new DiscordClient(clientConfig);
-            this.Client.UseCommandsNext(new CommandsNextConfiguration()
-            {
-                UseDefaultCommandHandler = false,
-                Services = this._services,
-                EnableDms = true,
-                CaseSensitive = false,
-                EnableDefaultHelp = false
-            });
         }
 
         public Task StartClientAsync()
