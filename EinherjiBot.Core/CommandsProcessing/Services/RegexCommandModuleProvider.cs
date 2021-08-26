@@ -9,20 +9,22 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     public class RegexComandModuleProvider : IRegexCommandModuleProvider
     {
         private readonly IServiceProvider _services;
-        private readonly IDictionary<Type, object> _sharedInstances;
-        private readonly IDictionary<RegexCommandInstance, object> _persistentInstances;
+        private readonly IDictionary<Type, object> _persistentInstances;
         private readonly IDictionary<RegexCommandInstance, RegexCommandModuleInfo> _knownModules;
 
         public RegexComandModuleProvider(IServiceProvider services)
         {
             this._services = services;
-            this._sharedInstances = new Dictionary<Type, object>();
-            this._persistentInstances = new Dictionary<RegexCommandInstance, object>();
+            this._persistentInstances = new Dictionary<Type, object>();
             this._knownModules = new Dictionary<RegexCommandInstance, RegexCommandModuleInfo>();
         }
 
         public object GetModuleInstance(RegexCommandInstance commandInstance)
         {
+            // check persistent ones to not recreate again
+            if (this._persistentInstances.TryGetValue(commandInstance.ModuleType, out object instance))
+                return instance;
+
             // init module info
             RegexCommandModuleInfo moduleInfo;
             if (!_knownModules.TryGetValue(commandInstance, out moduleInfo))
@@ -43,23 +45,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     throw new InvalidOperationException($"Cannot create {commandInstance.ModuleType.FullName} - none of the constructors can have its dependencies resolved");
             }
 
-            // check if there is already a persistent or shared instance
-            if (_persistentInstances.TryGetValue(commandInstance, out object instance))
-                return instance;
-            if (_sharedInstances.TryGetValue(moduleInfo.Type, out instance))
-            {
-                _persistentInstances.Add(commandInstance, instance);
-                return instance;
-            }
-
             // create a new instance, cache it if it's persistent
             instance = moduleInfo.CreateInstance();
             if (moduleInfo.IsPersistent)
-            {
-                _persistentInstances.Add(commandInstance, instance);
-                if (moduleInfo.IsShared)
-                    _sharedInstances.Add(moduleInfo.Type, instance);
-            }
+                _persistentInstances.Add(commandInstance.ModuleType, instance);
 
             return instance;
         }
@@ -88,7 +77,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private class RegexCommandModuleInfo
         {
             public Type Type { get; }
-            public bool IsShared { get; }
             public bool IsPersistent { get; }
             private readonly ConstructorInfo _ctor;
             private readonly object[] _params;
@@ -101,7 +89,6 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 this.Type = ctor.DeclaringType;
                 PersistentModuleAttribute persistent = this.Type.GetCustomAttribute<PersistentModuleAttribute>();
                 this.IsPersistent = persistent != null;
-                this.IsShared = this.IsPersistent && persistent.SharedInstance;
             }
 
             public object CreateInstance()
