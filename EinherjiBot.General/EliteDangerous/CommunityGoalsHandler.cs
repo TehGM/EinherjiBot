@@ -17,8 +17,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.EliteDangerous
 {
-    [LoadRegexCommands]
-    [PersistentModule(PreInitialize = true)]
+    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
     [HelpCategory("Games", 10)]
     public class CommunityGoalsHandler : IDisposable
     {

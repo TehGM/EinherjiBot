@@ -13,7 +13,7 @@ using System.Drawing;
 
 namespace TehGM.EinherjiBot.GameServers
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     [HelpCategory("Games", 10)]
     public class GameServersHandler
     {

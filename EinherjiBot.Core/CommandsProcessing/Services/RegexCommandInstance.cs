@@ -54,8 +54,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // pre-init if requested - this may be the case if module listens to some gateway events directly
             this._moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
-            PersistentModuleAttribute persistent = method.DeclaringType.GetCustomAttribute<PersistentModuleAttribute>();
-            if (persistent != null && persistent.PreInitialize)
+            RegexCommandsModuleAttribute moduleAttribute = method.DeclaringType.GetCustomAttribute<RegexCommandsModuleAttribute>();
+            if (moduleAttribute != null && moduleAttribute.PreInitialize)
                 this._moduleProvider.GetModuleInstance(this);
         }
 

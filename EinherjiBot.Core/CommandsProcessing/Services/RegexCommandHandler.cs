@@ -48,10 +48,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private void AddAssembly(Assembly assembly)
         {
             IEnumerable<TypeInfo> types = assembly.DefinedTypes.Where(t => !t.IsAbstract && !t.ContainsGenericParameters
-                && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(t, typeof(LoadRegexCommandsAttribute)));
+                && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(t, typeof(RegexCommandsModuleAttribute)));
             if (!types.Any())
             {
-                Log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(LoadRegexCommandsAttribute));
+                Log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(RegexCommandsModuleAttribute));
                 return;
             }
             foreach (TypeInfo type in types)

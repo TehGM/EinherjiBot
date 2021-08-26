@@ -15,9 +15,8 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Administration
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
     [HelpCategory("Special", -99999)]
-    [PersistentModule(PreInitialize = true)]
     public class AdminCommandsHandler : IDisposable
     {
         private readonly DiscordClient _client;

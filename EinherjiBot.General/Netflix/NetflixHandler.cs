@@ -11,7 +11,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Netflix
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     [HelpCategory("Special", -99999)]
     public class NetflixHandler
     {

@@ -15,7 +15,7 @@ using DSharpPlus;
 
 namespace TehGM.EinherjiBot
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     public class HelpHandler
     {
         private readonly CommandsOptions _commandsOptions;

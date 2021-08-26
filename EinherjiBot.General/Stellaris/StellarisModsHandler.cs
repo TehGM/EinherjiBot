@@ -12,7 +12,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Stellaris.Services
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     [HelpCategory("Games", 10)]
     public class StellarisModsHandler
     {

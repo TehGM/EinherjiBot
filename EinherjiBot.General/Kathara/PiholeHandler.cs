@@ -16,7 +16,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Kathara
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     [HelpCategory("Special", -99999)]
     public class PiholeHandler
     {

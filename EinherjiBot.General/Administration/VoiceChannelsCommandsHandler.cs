@@ -14,7 +14,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Administration
 {
-    [LoadRegexCommands]
+    [RegexCommandsModule]
     [HelpCategory("Voice Channels Admin", -900)]
     public class VoiceChannelsCommandsHandler
     {

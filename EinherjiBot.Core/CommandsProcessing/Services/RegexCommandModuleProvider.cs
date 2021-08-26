@@ -87,8 +87,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 this._params = parameters;
 
                 this.Type = ctor.DeclaringType;
-                PersistentModuleAttribute persistent = this.Type.GetCustomAttribute<PersistentModuleAttribute>();
-                this.IsPersistent = persistent != null;
+                RegexCommandsModuleAttribute moduleAttribute = this.Type.GetCustomAttribute<RegexCommandsModuleAttribute>();
+                this.IsPersistent = moduleAttribute.IsPersistent;
             }
 
             public object CreateInstance()

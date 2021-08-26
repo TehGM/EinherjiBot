@@ -13,8 +13,7 @@ using TehGM.EinherjiBot.CommandsProcessing;
 
 namespace TehGM.EinherjiBot.Intel
 {
-    [LoadRegexCommands]
-    [PersistentModule(PreInitialize = true)]
+    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
     [HelpCategory("General", 99999)]
     public class IntelHandler : IDisposable
     {

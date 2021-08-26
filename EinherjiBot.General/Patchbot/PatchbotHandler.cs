@@ -14,8 +14,7 @@ using DSharpPlus.Entities;
 
 namespace TehGM.EinherjiBot.Patchbot
 {
-    [LoadRegexCommands]
-    [PersistentModule(PreInitialize = true)]
+    [RegexCommandsModule(IsPersistent = true, PreInitialize = true)]
     [HelpCategory("Game Updates", 20)]
     public class PatchbotHandler : IDisposable
     {
