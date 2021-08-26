@@ -3,9 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
     <Authors>TehGM</Authors>
-    <PackageReleaseNotes>- Fix exception when Guild is null (in private).</PackageReleaseNotes>
+    <PackageReleaseNotes>- Fix permission check never checking Bot's permissions.
+- Stellaris mods command is now restricted to main guild.
+- Mention in help that posting members leaving requires bot to have posting permissions.</PackageReleaseNotes>
     <Product>EinherjiBot</Product>
     <Description>Core library for Einherji bot.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

@@ -85,7 +85,7 @@ namespace TehGM.EinherjiBot
             else
             {
                 embed.AddField("Additional features", 
-                    $"I'll post a message in {GetLeaveChannel(context)} when a user leaves the guild.\n" + 
+                    $"If I have permissions to post in {GetLeaveChannel(context)}, I'll post a message whenever a user leaves the guild.\n" + 
                     $"More additional features are provided in {GetAuthorText(context)}'s server.", inline: false);
             }
             embed.AddField("Support",

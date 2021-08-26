@@ -114,6 +114,7 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         [Name("stellaris mods")]
         [Summary("Shows list of Stellaris mods we use in multiplayer.")]
         [Priority(398)]
+        [RestrictCommand]
         private async Task CmdListModsAsync(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
