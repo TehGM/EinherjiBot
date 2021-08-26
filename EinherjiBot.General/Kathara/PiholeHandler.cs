@@ -43,7 +43,6 @@ namespace TehGM.EinherjiBot.Kathara
         [Priority(-105)]
         private Task CmdHelpAsync(CommandContext context, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions options = _piholeOptions.CurrentValue;
             IReadOnlyDictionary<string, PiholeInstanceOptions> instances = options.GetUserAuthorizedInstances(context.User);
 
@@ -72,7 +71,6 @@ namespace TehGM.EinherjiBot.Kathara
         [Priority(-103)]
         private async Task CmdInstanceInfoAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
             EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;
@@ -160,7 +158,6 @@ namespace TehGM.EinherjiBot.Kathara
         [Priority(-102)]
         private async Task CmdEnableAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
             EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;
@@ -215,7 +212,6 @@ namespace TehGM.EinherjiBot.Kathara
         [Priority(-101)]
         private async Task CmdDisableAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
             EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;

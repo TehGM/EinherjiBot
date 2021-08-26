@@ -178,7 +178,6 @@ namespace TehGM.EinherjiBot.EliteDangerous
         [Priority(-19)]
         private async Task CmdCommunityGoals(CommandContext context, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (!this._enabled)
             {
                 _log.LogDebug("Unable to handle Elite Dangerous Community Goals command - Inara credentials missing");

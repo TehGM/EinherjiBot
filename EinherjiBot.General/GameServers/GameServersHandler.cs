@@ -41,7 +41,6 @@ namespace TehGM.EinherjiBot.GameServers
         private async Task CmdGetAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             // check if command has game name
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
                 await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify game name.").ConfigureAwait(false);

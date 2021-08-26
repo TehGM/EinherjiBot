@@ -38,8 +38,6 @@ namespace TehGM.EinherjiBot.Administration
         [Priority(-25)]
         private async Task CmdMuteAllAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
-
             VoiceChannelMatch channelMatch = await this.MatchChannelAsync(context, match, 1).ConfigureAwait(false);
             VoiceChannelAction action = new VoiceChannelAction(user => user.Muted = true, Permissions.DeafenMembers, "Muting", "muted", "mute");
 
@@ -52,8 +50,6 @@ namespace TehGM.EinherjiBot.Administration
         [Priority(-26)]
         private async Task CmdUnmuteAllAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
-
             VoiceChannelMatch channelMatch = await this.MatchChannelAsync(context, match, 1).ConfigureAwait(false);
             VoiceChannelAction action = new VoiceChannelAction(user => user.Muted = false, Permissions.DeafenMembers, "Unmuting", "unmuted", "unmute");
 
@@ -66,8 +62,6 @@ namespace TehGM.EinherjiBot.Administration
         [Priority(-27)]
         private async Task CmdDeafenAllAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
-
             VoiceChannelMatch channelMatch = await this.MatchChannelAsync(context, match, 1).ConfigureAwait(false);
             VoiceChannelAction action = new VoiceChannelAction(user => user.Deafened = true, Permissions.DeafenMembers, "Deafening", "deafened", "deafen");
 
@@ -80,8 +74,6 @@ namespace TehGM.EinherjiBot.Administration
         [Priority(-28)]
         private async Task CmdUndeafenAllAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
-
             VoiceChannelMatch channelMatch = await this.MatchChannelAsync(context, match, 1).ConfigureAwait(false);
             VoiceChannelAction action = new VoiceChannelAction(user => user.Deafened = false, Permissions.DeafenMembers, "Undeafening", "undeafened", "undeafen");
 
@@ -137,7 +129,6 @@ namespace TehGM.EinherjiBot.Administration
         [Priority(-29)]
         private async Task CmdMoveAllAsync(CommandContext context, Match match)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             EinherjiOptions options = _einherjiOptions.CurrentValue;
 
             // verify it's a guild message

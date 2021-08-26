@@ -34,7 +34,6 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         [Priority(400)]
         private async Task CmdAddModAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             Task CreateInvalidUseResponse()
                 => context.ReplyAsync($"{_einherjiOptions.FailureSymbol} Please specify both name and URL of the mod.\nProper usage of this command:\n***{_commandsOptions.Prefix}stellaris mods add <name> | <url>***");
             if (context.User.Id != _einherjiOptions.AuthorID)
@@ -72,7 +71,6 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         [Priority(399)]
         private async Task CmdRemoveModAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (context.User.Id != _einherjiOptions.AuthorID)
             {
                 await context.ReplyAsync($"{_einherjiOptions.FailureSymbol} You can't order me to do that.").ConfigureAwait(false);
@@ -115,7 +113,6 @@ namespace TehGM.EinherjiBot.Stellaris.Services
         [RestrictCommand]
         private async Task CmdListModsAsync(CommandContext context, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             IOrderedEnumerable<StellarisMod> mods = (await _stellarisModsStore.GetAllAsync(cancellationToken).ConfigureAwait(false)).OrderBy(m => m.Name);
             if (!mods.Any())
             {

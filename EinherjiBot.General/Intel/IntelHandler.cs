@@ -53,7 +53,6 @@ namespace TehGM.EinherjiBot.Intel
         [Priority(199)]
         private async Task CmdIntelUserAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             string idString = match.Groups[1].Value;
             if (!ulong.TryParse(idString, out ulong id))
             {
@@ -74,7 +73,6 @@ namespace TehGM.EinherjiBot.Intel
         [Priority(198)]
         private Task CmdIntelGuildAsync(CommandContext context)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (context.Channel.IsPrivate)
                 return context.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} This command can only be used in a guild channel.");
 
@@ -89,7 +87,6 @@ namespace TehGM.EinherjiBot.Intel
         [Priority(197)]
         private Task CmdIntelHelpAsync(CommandContext context)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             string prefix = _commandsOptions.CurrentValue.Prefix;
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .AddField("Intel Commands",

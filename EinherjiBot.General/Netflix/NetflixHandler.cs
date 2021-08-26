@@ -37,7 +37,6 @@ namespace TehGM.EinherjiBot.Netflix
         [Priority(100)]
         private async Task CmdRetrieveAccountAsync(CommandContext context, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             _log.LogDebug("Retrieving Netlix account credentials");
             if (context.Channel.IsPrivate)
             {
@@ -80,7 +79,6 @@ namespace TehGM.EinherjiBot.Netflix
         [Priority(99)]
         private async Task CmdUpdateAccountAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             _log.LogDebug("Updating Netlix account credentials");
             if (context.Channel.IsPrivate)
             {

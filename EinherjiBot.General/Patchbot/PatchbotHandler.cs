@@ -126,7 +126,6 @@ namespace TehGM.EinherjiBot.Patchbot
         [RestrictCommand]
         private async Task CmdSubscribeAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
                 await SendNameRequiredAsync(context.Channel).ConfigureAwait(false);
@@ -153,7 +152,6 @@ namespace TehGM.EinherjiBot.Patchbot
         [RestrictCommand]
         private async Task CmdUnsubscribeAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (match.Groups.Count < 2 || match.Groups[1]?.Length < 1)
             {
                 await SendNameRequiredAsync(context.Channel).ConfigureAwait(false);
@@ -178,7 +176,6 @@ namespace TehGM.EinherjiBot.Patchbot
         [RestrictCommand]
         private async Task CmdAddGameAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (context.User.Id != _einherjiOptions.CurrentValue.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel).ConfigureAwait(false);
@@ -227,7 +224,6 @@ namespace TehGM.EinherjiBot.Patchbot
         [RestrictCommand]
         private async Task CmdRemoveGameAsync(CommandContext context, Match match, CancellationToken cancellationToken = default)
         {
-            using IDisposable logScope = _log.BeginCommandScope(context, this);
             if (context.User.Id != _einherjiOptions.CurrentValue.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel).ConfigureAwait(false);
