@@ -13,24 +13,24 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public abstract class CommandHandlerBase : IHostedService, IDisposable
     {
-        protected DiscordClient _client { get; }
-        protected IOptionsMonitor<CommandsOptions> _commandOptions { get; }
-        protected IServiceProvider _serviceProvider { get; }
-        protected ILogger _log { get; }
-        protected SemaphoreSlim _lock { get; }
-        protected CancellationToken _hostCancellationToken { get; private set; }
+        protected DiscordClient Client { get; }
+        protected IOptionsMonitor<CommandsOptions> CommandOptions { get; }
+        protected IServiceProvider ServiceProvider { get; }
+        protected ILogger Log { get; }
+        protected SemaphoreSlim Lock { get; }
+        protected CancellationToken HostCancellationToken { get; private set; }
 
         public CommandHandlerBase(IServiceProvider serviceProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger log)
         {
-            this._client = client;
-            this._commandOptions = commandOptions;
-            this._serviceProvider = serviceProvider;
-            this._log = log;
-            this._lock = new SemaphoreSlim(1, 1);
+            this.Client = client;
+            this.CommandOptions = commandOptions;
+            this.ServiceProvider = serviceProvider;
+            this.Log = log;
+            this.Lock = new SemaphoreSlim(1, 1);
 
-            _commandOptions.OnChange(async _ => await InitializeCommandsAsync());
+            CommandOptions.OnChange(async _ => await InitializeCommandsAsync());
 
-            this._client.MessageCreated += HandleCommandInternalAsync;
+            this.Client.MessageCreated += HandleCommandInternalAsync;
         }
 
         protected abstract Task InitializeCommandsAsync();
@@ -39,7 +39,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private Task HandleCommandInternalAsync(DiscordClient sender, MessageCreateEventArgs e)
         {
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            CommandsOptions options = this._commandOptions.CurrentValue;
+            CommandsOptions options = this.CommandOptions.CurrentValue;
             // only execute if not a bot message
             if (!options.AcceptBotMessages && e.Message.Author.IsBot)
                 return Task.CompletedTask;
@@ -64,7 +64,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
-            this._hostCancellationToken = cancellationToken;
+            this.HostCancellationToken = cancellationToken;
             return InitializeCommandsAsync();
         }
 
@@ -76,8 +76,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         public void Dispose()
         {
-            this._client.MessageCreated -= HandleCommandInternalAsync;
-            this._lock?.Dispose();
+            this.Client.MessageCreated -= HandleCommandInternalAsync;
+            this.Lock?.Dispose();
         }
 
         protected void LogCommandCheck(CommandCheckResult result, string commandName)
@@ -90,7 +90,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             string message = $"Command {{CommandName}}{resultText}";
             if (!string.IsNullOrWhiteSpace(result.Message))
                 message += $": {result.Message}";
-            this._log.Log(result.Error != null ? LogLevel.Error : LogLevel.Trace, result.Error, message, commandName);
+            this.Log.Log(result.Error != null ? LogLevel.Error : LogLevel.Trace, result.Error, message, commandName);
         }
     }
 }

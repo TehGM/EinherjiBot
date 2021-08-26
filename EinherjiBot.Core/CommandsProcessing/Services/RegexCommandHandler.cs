@@ -25,13 +25,13 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         protected override async Task InitializeCommandsAsync()
         {
-            await this._lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
+            await this.Lock.WaitAsync(HostCancellationToken).ConfigureAwait(false);
             try
             {
-                this._log.LogDebug("Initializing commands");
+                this.Log.LogDebug("Initializing commands");
 
                 this.Commands.Clear();
-                CommandsOptions options = this._commandOptions.CurrentValue;
+                CommandsOptions options = this.CommandOptions.CurrentValue;
                 foreach (Assembly asm in options.Assemblies)
                     this.AddAssembly(asm);
                 foreach (Type t in options.Classes)
@@ -41,7 +41,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             }
             finally
             {
-                this._lock.Release();
+                this.Lock.Release();
             }
         }
 
@@ -51,7 +51,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(t, typeof(LoadRegexCommandsAttribute)));
             if (!types.Any())
             {
-                _log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(LoadRegexCommandsAttribute));
+                Log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(LoadRegexCommandsAttribute));
                 return;
             }
             foreach (TypeInfo type in types)
@@ -63,7 +63,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             IEnumerable<MethodInfo> methods = type.DeclaredMethods.Where(m => !m.IsStatic && !Attribute.IsDefined(m, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(m, typeof(RegexCommandAttribute)));
             if (!methods.Any())
             {
-                _log.LogWarning("Cannot initialize Regex command from type {TypeName} - no method with {Attribute}", type.FullName, nameof(RegexCommandAttribute));
+                Log.LogWarning("Cannot initialize Regex command from type {TypeName} - no method with {Attribute}", type.FullName, nameof(RegexCommandAttribute));
                 return;
             }
             foreach (MethodInfo method in methods)
@@ -75,11 +75,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             IEnumerable<RegexCommandAttribute> attributes = method.GetCustomAttributes<RegexCommandAttribute>();
             if (!attributes.Any())
             {
-                _log.LogWarning("Cannot initialize Regex command from {TypeName}'s method {MethodName} - {Attribute} missing", method.DeclaringType.FullName, method.Name, nameof(RegexCommandAttribute));
+                Log.LogWarning("Cannot initialize Regex command from {TypeName}'s method {MethodName} - {Attribute} missing", method.DeclaringType.FullName, method.Name, nameof(RegexCommandAttribute));
                 return;
             }
             foreach (RegexCommandAttribute attribute in attributes)
-                Commands.Add(new RegexCommandInstance(method, attribute, _serviceProvider));
+                Commands.Add(new RegexCommandInstance(method, attribute, ServiceProvider));
         }
 
         protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
@@ -88,7 +88,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             if (argPos > 0)
                 msg = msg.Substring(argPos);
 
-            await _lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
+            await Lock.WaitAsync(HostCancellationToken).ConfigureAwait(false);
             try
             {
                 foreach (RegexCommandInstance command in Commands)
@@ -99,12 +99,12 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         continue;
 
                     // start context and log scope
-                    CommandContext context = new CommandContext(command.Descriptor, e, _client);
-                    using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
+                    CommandContext context = new CommandContext(command.Descriptor, e, Client);
+                    using IDisposable logScope = Log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
                         // run command checks
-                        CommandCheckResult result = await command.RunChecksAsync(context, this._serviceProvider, this._hostCancellationToken).ConfigureAwait(false);
+                        CommandCheckResult result = await command.RunChecksAsync(context, this.ServiceProvider, this.HostCancellationToken).ConfigureAwait(false);
                         if (result.ResultType != CommandCheckResultType.Continue)
                         {
                             base.LogCommandCheck(result, $"{command.ModuleType.Name}.{command.MethodName}");
@@ -118,18 +118,18 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         await command.ExecuteAsync(
                             context: context,
                             regexMatch: regexMatch,
-                            services: this._serviceProvider,
-                            cancellationToken: this._hostCancellationToken)
+                            services: this.ServiceProvider,
+                            cancellationToken: this.HostCancellationToken)
                             .ConfigureAwait(false);
                         return;
                     }
                     catch (OperationCanceledException) { return; }
-                    catch (Exception ex) when (ex.LogAsError(_log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
+                    catch (Exception ex) when (ex.LogAsError(Log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
                 }
             }
             finally
             {
-                _lock.Release();
+                Lock.Release();
             }
         }
     }

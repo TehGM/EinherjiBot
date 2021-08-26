@@ -13,20 +13,20 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
     /// <summary>Handler that allows use of DSharpPlus' default commands system.</summary>
     public class SimpleCommandHandler : CommandHandlerBase
     {
-        public IEnumerable<Command> Commands => base._client.GetCommandsNext().RegisteredCommands.Values;
+        public IEnumerable<Command> Commands => base.Client.GetCommandsNext().RegisteredCommands.Values;
 
         public SimpleCommandHandler(IServiceProvider serviceProvider, DiscordClient client, IOptionsMonitor<CommandsOptions> commandOptions, ILogger<SimpleCommandHandler> log)
             : base(serviceProvider, client, commandOptions, log) { }
 
         protected override Task InitializeCommandsAsync()
         {
-            _log.LogDebug("Initializing SimpleCommandHandler");
-            CommandsOptions options = base._commandOptions.CurrentValue;
+            Log.LogDebug("Initializing SimpleCommandHandler");
+            CommandsOptions options = base.CommandOptions.CurrentValue;
 
-            base._client.UseCommandsNext(new CommandsNextConfiguration()
+            base.Client.UseCommandsNext(new CommandsNextConfiguration()
             {
                 UseDefaultCommandHandler = false,
-                Services = base._serviceProvider,
+                Services = base.ServiceProvider,
                 EnableDms = true,
                 CaseSensitive = options.CaseSensitive,
                 EnableDefaultHelp = false,
@@ -40,7 +40,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
         protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)
         {
-            CommandsNextExtension commandsNext = base._client.GetCommandsNext();
+            CommandsNextExtension commandsNext = base.Client.GetCommandsNext();
 
             string prefix = string.Empty;
             string content = e.Message.Content;
@@ -55,10 +55,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
 
             CommandDescriptor descriptor = new CommandDescriptor(command);
-            CommandContext context = new CommandContext(descriptor, e, base._client);
+            CommandContext context = new CommandContext(descriptor, e, base.Client);
             foreach (CommandCheckAttribute check in descriptor.CommandChecks)
             {
-                CommandCheckResult result = await check.RunCheckAsync(context, base._serviceProvider, base._hostCancellationToken).ConfigureAwait(false);
+                CommandCheckResult result = await check.RunCheckAsync(context, base.ServiceProvider, base.HostCancellationToken).ConfigureAwait(false);
                 if (result.ResultType != CommandCheckResultType.Continue)
                 {
                     base.LogCommandCheck(result, command.QualifiedName);
