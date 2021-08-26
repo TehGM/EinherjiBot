@@ -79,7 +79,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 return;
             }
             foreach (RegexCommandAttribute attribute in attributes)
-                Commands.Add(RegexCommandInstance.Build(method, attribute, _serviceProvider));
+                Commands.Add(new RegexCommandInstance(method, attribute, _serviceProvider));
         }
 
         protected override async Task HandleCommandAsync(MessageCreateEventArgs e, int argPos)

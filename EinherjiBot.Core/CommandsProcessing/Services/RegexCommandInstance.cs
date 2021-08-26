@@ -14,7 +14,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
     public class RegexCommandInstance
     {
-        public CommandDescriptor Descriptor { get; private set; }
+        public CommandDescriptor Descriptor { get; }
 
         public Regex Regex { get; }
         public IEnumerable<Attribute> Attributes => this._attributes?.AsEnumerable();
@@ -26,46 +26,37 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
         private readonly IRegexCommandModuleProvider _moduleProvider;
         private ICollection<Attribute> _attributes;
 
-        private RegexCommandInstance(Regex regex, MethodInfo method, IRegexCommandModuleProvider moduleProvider)
-        {
-            this.Regex = regex;
-
-            this._method = method;
-            this._params = method.GetParameters();
-
-            this._moduleProvider = moduleProvider;
-        }
-
-        public static RegexCommandInstance Build(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
+        public RegexCommandInstance(MethodInfo method, RegexCommandAttribute regexAttribute, IServiceProvider services)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
             if (regexAttribute == null)
                 throw new ArgumentNullException(nameof(regexAttribute));
 
-            // init instance
+            // store method and params
+            this._method = method;
+            this._params = method.GetParameters();
+
+            // build regex instance
             CommandsOptions options = services.GetService<IOptions<CommandsOptions>>()?.Value;
             RegexOptions regexOptions = regexAttribute.RegexOptions;
             if (options?.CaseSensitive != true)
                 regexOptions |= RegexOptions.IgnoreCase;
-            IRegexCommandModuleProvider moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
-            RegexCommandInstance result = new RegexCommandInstance(new Regex(regexAttribute.Pattern, regexOptions), method, moduleProvider);
+            this.Regex = new Regex(regexAttribute.Pattern, regexOptions);
 
-            result._attributes = new List<Attribute>();
-            // first load base type attributes
-            result.LoadCustomAttributes(method.DeclaringType);
-            // then load method attributes (and let them overwrite class ones if necessary)
-            result.LoadCustomAttributes(method);
-
-            // pre-init if requested - this may be the case if module listens to some gateway events directly
-            PersistentModuleAttribute persistent = method.DeclaringType.GetCustomAttribute<PersistentModuleAttribute>();
-            if (persistent != null && persistent.PreInitialize)
-                result._moduleProvider.GetModuleInstance(result);
+            // load attributes
+            this._attributes = new List<Attribute>();
+            LoadCustomAttributes(method.DeclaringType); // first load base type attributes
+            LoadCustomAttributes(method);   // then load method attributes (and let them overwrite class ones if necessary)
 
             // build descriptor
-            result.Descriptor = new CommandDescriptor(result);
+            this.Descriptor = new CommandDescriptor(this);
 
-            return result;
+            // pre-init if requested - this may be the case if module listens to some gateway events directly
+            this._moduleProvider = services.GetRequiredService<IRegexCommandModuleProvider>();
+            PersistentModuleAttribute persistent = method.DeclaringType.GetCustomAttribute<PersistentModuleAttribute>();
+            if (persistent != null && persistent.PreInitialize)
+                this._moduleProvider.GetModuleInstance(this);
         }
 
         private void LoadCustomAttributes(ICustomAttributeProvider provider)
