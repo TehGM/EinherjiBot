@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot
 {
-    public static class EmbedBuilderExtensions
+    public static class DiscordEmbedBuilderExtensions
     {
         public static DiscordEmbedBuilder WithColor(this DiscordEmbedBuilder builder, System.Drawing.Color color)
             => builder.WithColor(color.ToDiscordColor());

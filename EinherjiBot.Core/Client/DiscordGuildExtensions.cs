@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace TehGM.EinherjiBot
 {
-    public static class GuildExtensions
+    public static class DiscordGuildExtensions
     {
         public static async Task<DiscordMember> GetMemberSafeAsync(this DiscordGuild guild, ulong id)
         {
