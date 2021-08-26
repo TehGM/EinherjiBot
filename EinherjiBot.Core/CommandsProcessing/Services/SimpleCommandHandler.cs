@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
-    /// <summary>Handler that allows use of Discord.NET's default commands system.</summary>
+    /// <summary>Handler that allows use of DSharpPlus' default commands system.</summary>
     public class SimpleCommandHandler : CommandHandlerBase
     {
         public IEnumerable<Command> Commands => base._client.GetCommandsNext().RegisteredCommands.Values;
