@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.HelpCategory = GetAttribute<HelpCategoryAttribute>(command);
             this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
-            this.Priority = GetAttribute<DSharpPlus.CommandsNext.Attributes.PriorityAttribute>(command)?.Priority ?? 0;
+            this.Priority = GetAttribute<PriorityAttribute>(command)?.Priority ?? 0;
             this.CommandChecks = GetAllAttributes<CommandCheckAttribute>(command);
         }
 
@@ -43,7 +43,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing
             this.HelpCategory = GetAttribute<HelpCategoryAttribute>(command);
             this.IsHidden = GetAttribute<HiddenAttribute>(command) != null;
             this.Restrictions = GetAttribute<RestrictCommandAttribute>(command);
-            this.Priority = GetAttribute<DSharpPlus.CommandsNext.Attributes.PriorityAttribute>(command)?.Priority ?? 0;
+            this.Priority = GetAttribute<PriorityAttribute>(command)?.Priority ?? 0;
             this.CommandChecks = GetAllAttributes<CommandCheckAttribute>(command);
         }
 
