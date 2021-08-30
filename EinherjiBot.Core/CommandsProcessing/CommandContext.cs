@@ -72,7 +72,8 @@ namespace TehGM.EinherjiBot.CommandsProcessing
         {
             DiscordMessageBuilder builder = new DiscordMessageBuilder();
             builder.Content = content;
-            builder.WithEmbed(embed);
+            if (embed != null)
+                builder.WithEmbed(embed);
             if (mentions?.Any() == true)
                 builder.WithAllowedMentions(mentions);
             return builder;
