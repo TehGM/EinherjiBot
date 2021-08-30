@@ -130,6 +130,9 @@ namespace TehGM.EinherjiBot.Administration
             if (e.Guild.SystemChannel == null)
                 return Task.CompletedTask;
 
+            if (!e.Guild.CurrentMember.HasChannelPermissions(e.Guild.SystemChannel, Permissions.AccessChannels | Permissions.SendMessages))
+                return Task.CompletedTask;
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**{e.Member.Mention}** *(`{e.Member.Username}#{e.Member.Discriminator}`)* **has left.**")
                 .WithColor(Color.Cyan);
