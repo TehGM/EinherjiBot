@@ -2,6 +2,6 @@
 {
     public interface IRegexCommandModuleProvider
     {
-        object GetModuleInstance(RegexCommandInstance commandInstance);
+        RegexCommandModule GetModuleInstance(RegexCommandInstance commandInstance);
     }
 }

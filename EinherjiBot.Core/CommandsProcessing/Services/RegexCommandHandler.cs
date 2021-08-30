@@ -55,11 +55,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(t, typeof(RegexCommandsModuleAttribute)));
             if (!types.Any())
             {
-                Log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(RegexCommandsModuleAttribute));
+                this.Log.LogWarning("Cannot initialize Regex commands from assembly {AssemblyName} - no non-static non-abstract classes with {Attribute}", assembly.FullName, nameof(RegexCommandsModuleAttribute));
                 return;
             }
             foreach (TypeInfo type in types)
-                AddType(type);
+                this.AddType(type);
         }
 
         private void AddType(TypeInfo type)
@@ -67,11 +67,11 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             IEnumerable<MethodInfo> methods = type.DeclaredMethods.Where(m => !m.IsStatic && !Attribute.IsDefined(m, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(m, typeof(RegexCommandAttribute)));
             if (!methods.Any())
             {
-                Log.LogWarning("Cannot initialize Regex command from type {TypeName} - no method with {Attribute}", type.FullName, nameof(RegexCommandAttribute));
+                this.Log.LogWarning("Cannot initialize Regex command from type {TypeName} - no method with {Attribute}", type.FullName, nameof(RegexCommandAttribute));
                 return;
             }
             foreach (MethodInfo method in methods)
-                AddMethod(method);
+                this.AddMethod(method);
         }
 
         private void AddMethod(MethodInfo method)
@@ -79,7 +79,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             IEnumerable<RegexCommandAttribute> attributes = method.GetCustomAttributes<RegexCommandAttribute>();
             if (!attributes.Any())
             {
-                Log.LogWarning("Cannot initialize Regex command from {TypeName}'s method {MethodName} - {Attribute} missing", method.DeclaringType.FullName, method.Name, nameof(RegexCommandAttribute));
+                this.Log.LogWarning("Cannot initialize Regex command from {TypeName}'s method {MethodName} - {Attribute} missing", method.DeclaringType.FullName, method.Name, nameof(RegexCommandAttribute));
                 return;
             }
             foreach (RegexCommandAttribute attribute in attributes)
@@ -101,10 +101,10 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             if (argPos > 0)
                 msg = msg.Substring(argPos);
 
-            await Lock.WaitAsync(HostCancellationToken).ConfigureAwait(false);
+            await this.Lock.WaitAsync(HostCancellationToken).ConfigureAwait(false);
             try
             {
-                foreach (RegexCommandInstance command in Commands)
+                foreach (RegexCommandInstance command in this.Commands)
                 {
                     // first check if command matches at all
                     Match regexMatch = command.Regex.Match(msg);
@@ -112,7 +112,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         continue;
 
                     // start context and log scope
-                    CommandContext context = new CommandContext(command.Descriptor, e, Client);
+                    CommandContext context = new CommandContext(command.Descriptor, e, this.Client);
                     using IDisposable logScope = Log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
@@ -128,25 +128,27 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                         }
 
                         // get module for the command
-                        object module = this._moduleProvider.GetModuleInstance(command);
+                        RegexCommandModule module = this._moduleProvider.GetModuleInstance(command);
 
                         // execute the command
                         await command.ExecuteAsync(
                             context: context,
                             regexMatch: regexMatch,
-                            module: module,
+                            module: module.Instance,
                             services: this.ServiceProvider,
                             cancellationToken: this.HostCancellationToken)
                             .ConfigureAwait(false);
+
+                        module.DisposeInstance();
                         return;
                     }
                     catch (OperationCanceledException) { return; }
-                    catch (Exception ex) when (ex.LogAsError(Log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
+                    catch (Exception ex) when (ex.LogAsError(this.Log, "Unhandled Exception when executing command {MethodName}", command.MethodName)) { return; }
                 }
             }
             finally
             {
-                Lock.Release();
+                this.Lock.Release();
             }
         }
     }

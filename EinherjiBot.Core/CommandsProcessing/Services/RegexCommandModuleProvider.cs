@@ -6,28 +6,28 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
-    public class RegexComandModuleProvider : IRegexCommandModuleProvider
+    public class RegexComandModuleProvider : IRegexCommandModuleProvider, IDisposable
     {
         private readonly IServiceProvider _services;
-        private readonly IDictionary<Type, object> _persistentInstances;
+        private readonly IDictionary<Type, RegexCommandModule> _persistentInstances;
         private readonly IDictionary<RegexCommandInstance, RegexCommandModuleInfo> _knownModules;
 
         public RegexComandModuleProvider(IServiceProvider services)
         {
             this._services = services;
-            this._persistentInstances = new Dictionary<Type, object>();
+            this._persistentInstances = new Dictionary<Type, RegexCommandModule>();
             this._knownModules = new Dictionary<RegexCommandInstance, RegexCommandModuleInfo>();
         }
 
-        public object GetModuleInstance(RegexCommandInstance commandInstance)
+        public RegexCommandModule GetModuleInstance(RegexCommandInstance commandInstance)
         {
             // check persistent ones to not recreate again
-            if (this._persistentInstances.TryGetValue(commandInstance.ModuleType, out object instance))
+            if (this._persistentInstances.TryGetValue(commandInstance.ModuleType, out RegexCommandModule instance))
                 return instance;
 
             // init module info
             RegexCommandModuleInfo moduleInfo;
-            if (!_knownModules.TryGetValue(commandInstance, out moduleInfo))
+            if (!this._knownModules.TryGetValue(commandInstance, out moduleInfo))
             {
                 IEnumerable<ConstructorInfo> constructors = commandInstance.ModuleType
                     .GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                     moduleInfo = InitializeModuleInfo(ctor);
                     if (moduleInfo != null)
                     {
-                        _knownModules.Add(commandInstance, moduleInfo);
+                        this._knownModules.Add(commandInstance, moduleInfo);
                         break;
                     }
                 }
@@ -48,9 +48,17 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             // create a new instance, cache it if it's persistent
             instance = moduleInfo.CreateInstance();
             if (moduleInfo.IsPersistent)
-                _persistentInstances.Add(commandInstance.ModuleType, instance);
+                this._persistentInstances.Add(commandInstance.ModuleType, instance);
 
             return instance;
+        }
+
+        public void Dispose()
+        {
+            foreach (RegexCommandModule module in this._persistentInstances.Values)
+                module.DisposeInstance(force: true);
+            this._persistentInstances.Clear();
+            this._knownModules.Clear();
         }
 
         private RegexCommandModuleInfo InitializeModuleInfo(ConstructorInfo constructor)
@@ -91,8 +99,12 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
                 this.IsPersistent = moduleAttribute.SingletonScoped;
             }
 
-            public object CreateInstance()
-                => _ctor.Invoke(_params);
+            public RegexCommandModule CreateInstance()
+            {
+                object instance = _ctor.Invoke(_params);
+                bool dispose = instance is IDisposable && !this.IsPersistent;
+                return new RegexCommandModule(instance, this.IsPersistent, dispose);
+            }
         }
     }
 }
