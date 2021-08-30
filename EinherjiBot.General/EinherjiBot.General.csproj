@@ -14,7 +14,8 @@
     <RepositoryUrl>https://github.com/TehGM/EinherjiBot</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Discord, Bot</PackageTags>
-    <PackageReleaseNotes>- Full transition from Discord.NET to DSharpPlus.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Full transition from Discord.NET to DSharpPlus.
+- Removed duplicate log scope starts.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

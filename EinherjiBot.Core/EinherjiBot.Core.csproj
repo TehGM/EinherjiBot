@@ -5,7 +5,8 @@
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
     <Version>3.0.0</Version>
     <Authors>TehGM</Authors>
-    <PackageReleaseNotes>- Full transition from Discord.NET to DSharpPlus.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Full transition from Discord.NET to DSharpPlus.
+- Simplified and cleaned up Regex Commands System.</PackageReleaseNotes>
     <Product>EinherjiBot</Product>
     <Description>Core library for Einherji bot.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
