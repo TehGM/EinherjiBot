@@ -102,8 +102,7 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
             public RegexCommandModule CreateInstance()
             {
                 object instance = _ctor.Invoke(_params);
-                bool dispose = instance is IDisposable && !this.IsPersistent;
-                return new RegexCommandModule(instance, this.IsPersistent, dispose);
+                return new RegexCommandModule(instance, this.IsPersistent);
             }
         }
     }
