@@ -6,6 +6,7 @@ namespace TehGM.EinherjiBot.RandomStatus
     {
         public string Text { get; set; } = null;
         public string Link { get; set; } = null;
+        public bool IsAdvanced { get; set; } = false;
         public ActivityType ActivityType { get; set; } = ActivityType.CustomStatus;
 
         public override string ToString()

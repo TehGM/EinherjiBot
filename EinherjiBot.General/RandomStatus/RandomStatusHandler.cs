@@ -20,18 +20,20 @@ namespace TehGM.EinherjiBot.RandomStatus
         private readonly ILogger _log;
         private readonly IDisposable _optionsChangeRegistration;
         private readonly Random _random;
+        private readonly IAdvancedStatusConverter _converter;
         private CancellationTokenSource _cts;
 
         private DateTime _lastChangeUtc;
 
         public RandomStatusHandler(IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<RandomStatusOptions> options, 
-            DiscordSocketClient client, ILogger<RandomStatusHandler> log)
+            DiscordSocketClient client, ILogger<RandomStatusHandler> log, IAdvancedStatusConverter converter)
         {
             this._options = options;
             this._einherjiOptions = einherjiOptions;
             this._client = client;
             this._log = log;
             this._random = new Random();
+            this._converter = converter;
 
             this._optionsChangeRegistration = this._options.OnChange(options =>
             {
@@ -89,7 +91,7 @@ namespace TehGM.EinherjiBot.RandomStatus
 
         private async Task<Status> RandomizeStatusAsync(DiscordSocketClient client, CancellationToken cancellationToken)
         {
-            Status status = PickStatus();
+            Status status = await this.PickStatusAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (client.ConnectionState != Discord.ConnectionState.Connected)
@@ -113,13 +115,23 @@ namespace TehGM.EinherjiBot.RandomStatus
             }
         }
 
-        private Status PickStatus()
+        private async Task<Status> PickStatusAsync(CancellationToken cancellationToken)
         {
             RandomStatusOptions options = this._options.CurrentValue;
             if (options.Statuses?.Any() != true)
                 return null;
             int statusIndex = this._random.Next(options.Statuses.Length);
-            return options.Statuses[statusIndex];
+            Status status = options.Statuses[statusIndex];
+            if (!status.IsAdvanced)
+                return status;
+
+            string text = await this._converter.ConvertAsync(status, cancellationToken).ConfigureAwait(false);
+            Status result = new Status();
+            result.ActivityType = status.ActivityType;
+            result.IsAdvanced = status.IsAdvanced;
+            result.Link = status.Link;
+            result.Text = text;
+            return result;
         }
 
         private void CancelBackgroundLoop()
