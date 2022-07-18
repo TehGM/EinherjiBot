@@ -12,11 +12,8 @@ namespace TehGM.EinherjiBot.GameServers.Services
     public class MongoGameServerStore : IGameServerStore
     {
         // caching
-        public const string CacheOptionName = "GameServers";
         private readonly IEntityCache<string, GameServer> _cache;
-        private readonly IOptionsMonitor<CachingOptions> _cachingOptions;
         // db
-        private readonly IMongoConnection _databaseConnection;
         private IMongoCollection<GameServer> _gameServersCollection;
         private readonly IOptionsMonitor<MongoOptions> _databaseOptions;
         // misc
@@ -25,13 +22,12 @@ namespace TehGM.EinherjiBot.GameServers.Services
 
 
         public MongoGameServerStore(IMongoConnection databaseConnection, ILogger<MongoGameServerStore> log, IEntityCache<string, GameServer> cache,
-            IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions)
+            IOptionsMonitor<MongoOptions> databaseOptions)
         {
-            this._databaseConnection = databaseConnection;
             this._databaseOptions = databaseOptions;
             this._cache = cache;
-            this._cachingOptions = cachingOptions;
             this._log = log;
+            this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
 
             this._gameServersCollection = databaseConnection
                 .GetCollection<GameServer>(this._databaseOptions.CurrentValue.GameServersCollectionName);
@@ -44,16 +40,11 @@ namespace TehGM.EinherjiBot.GameServers.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                GameServer result;
-                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled)
+                GameServer result = this._cache.Get(lowercaseName);
+                if (result != null)
                 {
-                    result = this._cache.Get(lowercaseName);
-                    if (result != null)
-                    {
-                        this._log.LogTrace("Server for game {Game} found in cache", trimmedName);
-                        return result;
-                    }
+                    this._log.LogTrace("Server for game {Game} found in cache", trimmedName);
+                    return result;
                 }
 
                 // get from DB
@@ -68,12 +59,12 @@ namespace TehGM.EinherjiBot.GameServers.Services
                     return null;
                 }
 
-                this._cache.AddOrReplace(result.Game, result, cachingOptions.Lifetime);
+                this._cache.AddOrReplace(result);
                 return result;
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
         }
     }

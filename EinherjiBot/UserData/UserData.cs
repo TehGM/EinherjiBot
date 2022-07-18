@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot
 {
-    public class UserData
+    public class UserData : ICacheableEntity<ulong>
     {
         [BsonId]
         public ulong ID { get; }
@@ -33,5 +33,8 @@ namespace TehGM.EinherjiBot
                 return this.ChangeStatus(false);
             else return this.ChangeStatus(true);
         }
+
+        public ulong GetCacheKey()
+            => this.ID;
     }
 }

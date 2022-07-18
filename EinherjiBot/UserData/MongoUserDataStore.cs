@@ -8,11 +8,8 @@ namespace TehGM.EinherjiBot.Services
 {
     public class MongoUserDataStore : MongoBatchingRepositoryBase<ulong, UserData>, IBatchingRepository, IUserDataStore
     {
-        public const string CacheOptionName = "UserData";
-        private readonly IEntityCache<ulong, UserData> _userDataCache;
+        private readonly IEntityCache<ulong, UserData> _cache;
         private readonly ILogger _log;
-        private readonly IOptionsMonitor<CachingOptions> _cachingOptions;
-        private IMongoCollection<UserData> _collection;
         private readonly ReplaceOptions _replaceOptions = new ReplaceOptions() { IsUpsert = true };
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
@@ -20,12 +17,11 @@ namespace TehGM.EinherjiBot.Services
         protected override IMongoCollection<UserData> Collection => base.MongoConnection
                 .GetCollection<UserData>(base.DatabaseOptions.CurrentValue.UsersDataCollectionName);
 
-        public MongoUserDataStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger<MongoUserDataStore> log, IEntityCache<ulong, UserData> userDataCache, IOptionsMonitor<CachingOptions> cachingOptions)
+        public MongoUserDataStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger<MongoUserDataStore> log, IEntityCache<ulong, UserData> cache)
             : base(databaseConnection, databaseOptions, hostLifetime, log)
         {
-            this._userDataCache = userDataCache;
+            this._cache = cache;
             this._log = log;
-            this._cachingOptions = cachingOptions;
         }
 
         public async Task<UserData> GetAsync(ulong userID, CancellationToken cancellationToken = default)
@@ -33,9 +29,8 @@ namespace TehGM.EinherjiBot.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                UserData result;
-                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled && (result = this._userDataCache.Get(userID)) != null)
+                UserData result = this._cache.Get(userID);
+                if (result != null)
                 {
                     this._log.LogTrace("User data for user {UserID} found in cache", userID);
                     return result;
@@ -43,7 +38,7 @@ namespace TehGM.EinherjiBot.Services
 
                 // get from DB
                 this._log.LogTrace("Retrieving user data for user {UserID} from database", userID);
-                result = await this._collection.Find(dbData => dbData.ID == userID).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                result = await this.Collection.Find(dbData => dbData.ID == userID).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
                 // if not found, return default data
                 if (result == null)
@@ -52,7 +47,7 @@ namespace TehGM.EinherjiBot.Services
                     result = new UserData(userID);
                 }
 
-                this._userDataCache.AddOrReplace(result.ID, result, cachingOptions.Lifetime);
+                this._cache.AddOrReplace(result);
                 return result;
             }
             finally
@@ -67,7 +62,7 @@ namespace TehGM.EinherjiBot.Services
             try
             {
                 this._log.LogTrace("Inserting user data for user {UserID} into next DB batch", data.ID);
-                this._userDataCache.AddOrReplace(data.ID, data, this._cachingOptions.Get(CacheOptionName).Lifetime);
+                this._cache.AddOrReplace(data);
                 await base.BatchInserter.BatchAsync(data.ID, new MongoDelayedInsert<UserData>(dbData => dbData.ID == data.ID, data, this._replaceOptions), cancellationToken).ConfigureAwait(false);
             }
             finally

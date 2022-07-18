@@ -13,11 +13,8 @@ namespace TehGM.EinherjiBot.EliteDangerous.Services
 {
     public class MongoCommunityGoalsHistoryStore : MongoBatchingRepositoryBase<int, CommunityGoal>, IBatchingRepository, ICommunityGoalsHistoryStore
     {
-        public const string CacheOptionName = "EliteCommunityGoals";
-        private readonly IEntityCache<int, CommunityGoal> _cgCache;
+        private readonly IEntityCache<int, CommunityGoal> _cache;
         private readonly ILogger _log;
-        private readonly IOptionsMonitor<CachingOptions> _cachingOptions;
-        private IMongoCollection<CommunityGoal> _collection;
         private readonly ReplaceOptions _replaceOptions = new ReplaceOptions() { IsUpsert = true };
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
@@ -25,12 +22,11 @@ namespace TehGM.EinherjiBot.EliteDangerous.Services
         protected override IMongoCollection<CommunityGoal> Collection => base.MongoConnection
             .GetCollection<CommunityGoal>(base.DatabaseOptions.CurrentValue.EliteCommunityGoalsCollectionName);
 
-        public MongoCommunityGoalsHistoryStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger<MongoCommunityGoalsHistoryStore> log, IEntityCache<int, CommunityGoal> cgCache, IOptionsMonitor<CachingOptions> cachingOptions)
+        public MongoCommunityGoalsHistoryStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger<MongoCommunityGoalsHistoryStore> log, IEntityCache<int, CommunityGoal> cache)
             : base(databaseConnection, databaseOptions, hostLifetime, log)
         {
-            this._cgCache = cgCache;
+            this._cache = cache;
             this._log = log;
-            this._cachingOptions = cachingOptions;
         }
 
         public async Task<CommunityGoal> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -38,20 +34,18 @@ namespace TehGM.EinherjiBot.EliteDangerous.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CommunityGoal result;
-                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled && (result = this._cgCache.Get(id)) != null)
+                CommunityGoal result = this._cache.Get(id);
+                if (result != null)
                 {
-                    _log.LogTrace("Community goal {ID} ({Name}) found in cache", id, result.Name);
+                    this._log.LogTrace("Community goal {ID} ({Name}) found in cache", id, result.Name);
                     return result;
                 }
 
                 // get from DB
                 this._log.LogTrace("Retrieving community goal {ID} from history database", id);
-                result = await this._collection.Find(dbData => dbData.ID == id).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-
+                result = await this.Collection.Find(dbData => dbData.ID == id).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 if (result != null)
-                    this._cgCache.AddOrReplace(result.ID, result, cachingOptions.Lifetime);
+                    this._cache.AddOrReplace(result);
                 return result;
             }
             finally
@@ -66,7 +60,7 @@ namespace TehGM.EinherjiBot.EliteDangerous.Services
             try
             {
                 this._log.LogTrace("Inserting community goal {ID} history entry into next DB batch", cg.ID);
-                this._cgCache.AddOrReplace(cg.ID, cg, _cachingOptions.Get(CacheOptionName).Lifetime);
+                this._cache.AddOrReplace(cg);
                 await base.BatchInserter.BatchAsync(cg.ID, new MongoDelayedInsert<CommunityGoal>(dbData => dbData.ID == cg.ID, cg, this._replaceOptions), cancellationToken).ConfigureAwait(false);
             }
             finally

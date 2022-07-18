@@ -1,9 +1,10 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using TehGM.EinherjiBot.Caching;
 
 namespace TehGM.EinherjiBot.Stellaris
 {
-    public class StellarisMod
+    public class StellarisMod : ICacheableEntity<ObjectId>
     {
         [BsonId]
         public ObjectId ID { get; }
@@ -22,5 +23,8 @@ namespace TehGM.EinherjiBot.Stellaris
 
         public StellarisMod(string name, string url)
             : this(ObjectId.GenerateNewId(), name, url) { }
+
+        public ObjectId GetCacheKey()
+            => this.ID;
     }
 }

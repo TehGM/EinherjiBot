@@ -15,25 +15,20 @@ namespace TehGM.EinherjiBot.Stellaris.Services
     public class MongoStellarisModsStore : IStellarisModsStore
     {
         // caching
-        public const string CacheOptionName = "StellarisMods";
-        private readonly IEntityCache<ObjectId, StellarisMod> _stellarisModsCache;
-        private readonly IOptionsMonitor<CachingOptions> _cachingOptions;
+        private readonly IEntityCache<ObjectId, StellarisMod> _cache;
+        private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(30);
         private DateTime _lastCacheTimeUtc;
         // db
-        private readonly IMongoConnection _databaseConnection;
         private IMongoCollection<StellarisMod> _collection;
-        private readonly IOptionsMonitor<MongoOptions> _databaseOptions;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         // misc
         private readonly ILogger _log;
 
-        public MongoStellarisModsStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions, ILogger<MongoStellarisModsStore> log, IEntityCache<ObjectId, StellarisMod> stellarisModsCache)
+        public MongoStellarisModsStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, ILogger<MongoStellarisModsStore> log, IEntityCache<ObjectId, StellarisMod> cache)
         {
-            this._databaseConnection = databaseConnection;
-            this._databaseOptions = databaseOptions;
-            this._cachingOptions = cachingOptions;
             this._log = log;
-            this._stellarisModsCache = stellarisModsCache;
+            this._cache = cache;
+            this._cache.DefaultExpiration = new TimeSpanEntityExpiration(_cacheExpiration);
 
             this._collection = databaseConnection
                 .GetCollection<StellarisMod>(databaseOptions.CurrentValue.StellarisModsCollectionName);
@@ -44,10 +39,9 @@ namespace TehGM.EinherjiBot.Stellaris.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                _log.LogDebug("Adding mod {Name} to database", mod.Name);
-                await _collection.InsertOneAsync(mod, null, cancellationToken).ConfigureAwait(false);
-                if (this._cachingOptions.CurrentValue.Enabled)
-                    this._stellarisModsCache.AddOrReplace(mod.ID, mod, this._cachingOptions.CurrentValue.Lifetime);
+                this._log.LogDebug("Adding mod {Name} to database", mod.Name);
+                await this._collection.InsertOneAsync(mod, null, cancellationToken).ConfigureAwait(false);
+                this._cache.AddOrReplace(mod);
             }
             finally
             {
@@ -60,11 +54,10 @@ namespace TehGM.EinherjiBot.Stellaris.Services
             await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled && this._lastCacheTimeUtc + cachingOptions.Lifetime < DateTime.UtcNow)
+                if (this._lastCacheTimeUtc + this._cacheExpiration < DateTime.UtcNow)
                 {
                     _log.LogTrace("Stellaris mods found in cache");
-                    return _stellarisModsCache.Find(_ => true).Select(e => e.Entity);
+                    return _cache.Find(_ => true);
                 }
 
                 this._log.LogDebug("Retrieving Stellaris mods from database");
@@ -75,12 +68,10 @@ namespace TehGM.EinherjiBot.Stellaris.Services
                     results = Enumerable.Empty<StellarisMod>();
                 }
 
-                if (cachingOptions.Enabled)
-                {
-                    this._stellarisModsCache.Clear();
-                    foreach (StellarisMod mod in results)
-                        this._stellarisModsCache.AddOrReplace(mod.ID, mod, cachingOptions.Lifetime);
-                }
+                this._cache.Clear();
+                foreach (StellarisMod mod in results)
+                    this._cache.AddOrReplace(mod);
+                this._lastCacheTimeUtc = DateTime.UtcNow;
                 return results;
             }
             finally
@@ -98,8 +89,7 @@ namespace TehGM.EinherjiBot.Stellaris.Services
                 IEnumerable<ObjectId> ids = mods.Select(e => e.ID);
                 FilterDefinition<StellarisMod> filter = Builders<StellarisMod>.Filter.In(e => e.ID, ids);
                 await this._collection.DeleteManyAsync(filter, cancellationToken).ConfigureAwait(false);
-                if (this._cachingOptions.CurrentValue.Enabled)
-                    this._stellarisModsCache.RemoveWhere(e => ids.Contains(e.Entity.ID));
+                this._cache.RemoveWhere(e => ids.Contains(e.ID));
             }
             finally
             {

@@ -4,7 +4,7 @@ using System;
 
 namespace TehGM.EinherjiBot.EliteDangerous
 {
-    public sealed class CommunityGoal : IEquatable<CommunityGoal>
+    public sealed class CommunityGoal : IEquatable<CommunityGoal>, ICacheableEntity<int>
     {
         [BsonId]
         [JsonProperty("communitygoalGameID")]
@@ -65,6 +65,9 @@ namespace TehGM.EinherjiBot.EliteDangerous
                 return Name == other.Name && ExpirationTime == other.ExpirationTime;
             return this.ID == other.ID;
         }
+
+        public int GetCacheKey()
+            => this.ID;
 
         public override int GetHashCode()
         {

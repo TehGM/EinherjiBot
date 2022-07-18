@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.GameServers
 {
-    public class GameServer
+    public class GameServer : ICacheableEntity<string>
     {
         [BsonId]
         public string Game { get; private set; }
@@ -21,5 +21,8 @@ namespace TehGM.EinherjiBot.GameServers
             this.AuthorizedUserIDs = new HashSet<ulong>();
             this.AuthorizedRoleIDs = new HashSet<ulong>();
         }
+
+        public string GetCacheKey()
+            => this.Game.ToLowerInvariant();
     }
 }

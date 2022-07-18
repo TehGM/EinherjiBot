@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using TehGM.EinherjiBot.Caching;
+using TehGM.EinherjiBot.Caching.Services;
 using TehGM.EinherjiBot.Database;
 
 namespace TehGM.EinherjiBot.Netflix.Services
@@ -12,13 +13,10 @@ namespace TehGM.EinherjiBot.Netflix.Services
     public class MongoNetflixAccountStore : INetflixAccountStore
     {
         // caching
-        public const string CacheOptionName = "NetflixAccount";
         private CachedEntity<string, NetflixAccount> _cachedAccount;
-        private readonly IOptionsMonitor<CachingOptions> _cachingOptions;
+        private readonly ICachedEntityExpiration _cacheExpiration = new TimeSpanEntityExpiration(TimeSpan.FromMinutes(30));
         // db
-        private readonly IMongoConnection _databaseConnection;
         private IMongoCollection<NetflixAccount> _netflixAccountsCollection;
-        private readonly IOptionsMonitor<MongoOptions> _databaseOptions;
         private readonly ReplaceOptions _replaceOptions = new ReplaceOptions() { IsUpsert = true };
         // misc
         private readonly IOptionsMonitor<NetflixAccountOptions> _netflixAccountOptions;
@@ -27,11 +25,8 @@ namespace TehGM.EinherjiBot.Netflix.Services
 
 
         public MongoNetflixAccountStore(IMongoConnection databaseConnection, ILogger<MongoNetflixAccountStore> log,
-            IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions, IOptionsMonitor<NetflixAccountOptions> netflixAccountOptions)
+            IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<NetflixAccountOptions> netflixAccountOptions)
         {
-            this._databaseConnection = databaseConnection;
-            this._databaseOptions = databaseOptions;
-            this._cachingOptions = cachingOptions;
             this._netflixAccountOptions = netflixAccountOptions;
             this._log = log;
 
@@ -44,8 +39,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CachingOptions cachingOptions = _cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled && this._cachedAccount != null && !this._cachedAccount.IsExpired)
+                if (this._cachedAccount != null && !this._cachedAccount.IsExpired)
                 {
                     this._log.LogTrace("Netflix account found in cache");
                     return this._cachedAccount;
@@ -59,8 +53,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
                     result = new NetflixAccount();
                 }
 
-                if (cachingOptions.Enabled)
-                    this._cachedAccount = new CachedEntity<string, NetflixAccount>(result.Login, result, cachingOptions.Lifetime);
+                this._cachedAccount = new CachedEntity<string, NetflixAccount>(result.Login, result, this._cacheExpiration);
                 return result;
             }
             finally
@@ -74,12 +67,8 @@ namespace TehGM.EinherjiBot.Netflix.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled)
-                {
-                    this._log.LogTrace("Updating cached Netflix account");
-                    this._cachedAccount = new CachedEntity<string, NetflixAccount>(account.Login, account, cachingOptions.Lifetime);
-                }
+                this._log.LogTrace("Updating cached Netflix account");
+                this._cachedAccount = new CachedEntity<string, NetflixAccount>(account.Login, account, this._cacheExpiration);
 
                 this._log.LogTrace("Saving Netflix account in the database");
                 await this._netflixAccountsCollection.ReplaceOneAsync(_ => true, account, this._replaceOptions, cancellationToken).ConfigureAwait(false);

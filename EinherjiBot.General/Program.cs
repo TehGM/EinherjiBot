@@ -40,12 +40,6 @@ namespace TehGM.EinherjiBot
                     services.Configure<EinherjiOptions>(context.Configuration);
                     services.Configure<Database.MongoOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
-                    services.Configure<CachingOptions>(MongoUserDataStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoUserDataStore.CacheOptionName));
-                    services.Configure<CachingOptions>(MongoNetflixAccountStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoNetflixAccountStore.CacheOptionName));
-                    services.Configure<CachingOptions>(MongoStellarisModsStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoStellarisModsStore.CacheOptionName));
-                    services.Configure<CachingOptions>(MongoCommunityGoalsHistoryStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoCommunityGoalsHistoryStore.CacheOptionName));
-                    services.Configure<CachingOptions>(MongoPatchbotGameStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoPatchbotGameStore.CacheOptionName));
-                    services.Configure<CachingOptions>(MongoGameServerStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoGameServerStore.CacheOptionName));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
                     services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
@@ -60,6 +54,7 @@ namespace TehGM.EinherjiBot
                     // add custom services
                     services.AddDiscordClient();
                     services.AddCommands();
+                    services.AddEntityCaching();
 
                     // add bot features
                     services.AddIntel();

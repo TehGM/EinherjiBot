@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.Patchbot
 {
-    public class PatchbotGame
+    public class PatchbotGame : ICacheableEntity<string>
     {
         [BsonId]
         public string Name { get; private set; }
@@ -34,5 +34,8 @@ namespace TehGM.EinherjiBot.Patchbot
             return this.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase)
                 || this.Aliases.Contains(trimmedName);
         }
+
+        public string GetCacheKey()
+            => this.Name.Trim().ToLowerInvariant();
     }
 }
