@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>TehGM.EinherjiBot</RootNamespace>
+	<Nullable>disable</Nullable>
+	<ImplicitUsings>disable</ImplicitUsings>
     <Version>2.3.1</Version>
     <Authors>TehGM</Authors>
     <PackageReleaseNotes>- Fix permission check never checking Bot's permissions.
