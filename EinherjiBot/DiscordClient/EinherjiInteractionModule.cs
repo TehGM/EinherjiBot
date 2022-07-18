@@ -19,6 +19,8 @@ namespace TehGM.EinherjiBot
 
     public class EinherjiInteractionModule : EinherjiInteractionModule<EinherjiInteractionContext>
     {
+        protected CancellationToken CancellationToken => base.Context.CancellationToken;
+
         public Task RespondAsync(string text, Embed embed)
             => base.RespondAsync(text, embed, base.Context.CancellationToken);
         public Task RespondAsync(string text)
