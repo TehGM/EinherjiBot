@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configureCaching != null)
                 services.Configure(MongoCommunityGoalsHistoryStore.CacheOptionName, configureCaching);
 
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.TryAddSingleton<IEntityCache<int, CommunityGoal>, EntityCache<int, CommunityGoal>>();
             services.TryAddSingleton<ICommunityGoalsHistoryStore, MongoCommunityGoalsHistoryStore>();
 

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using TehGM.EinherjiBot.Administration;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.CommandsProcessing;
-using TehGM.EinherjiBot.Database;
 using TehGM.EinherjiBot.EliteDangerous;
 using TehGM.EinherjiBot.EliteDangerous.Services;
 using TehGM.EinherjiBot.GameServers;
@@ -37,7 +36,7 @@ namespace TehGM.EinherjiBot
                 {
                     // configure options
                     services.Configure<EinherjiOptions>(context.Configuration);
-                    services.Configure<DatabaseOptions>(context.Configuration.GetSection("Database"));
+                    services.Configure<Database.MongoOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CachingOptions>(MongoUserDataStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoUserDataStore.CacheOptionName));
                     services.Configure<CachingOptions>(MongoNetflixAccountStore.CacheOptionName, context.Configuration.GetSection("Caching").GetSection(MongoNetflixAccountStore.CacheOptionName));

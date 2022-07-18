@@ -9,7 +9,7 @@ using TehGM.EinherjiBot.Database;
 
 namespace TehGM.EinherjiBot.GameServers.Services
 {
-    public class MongoGameServerStore : IGameServerStore, IDisposable
+    public class MongoGameServerStore : IGameServerStore
     {
         // caching
         public const string CacheOptionName = "GameServers";
@@ -18,14 +18,14 @@ namespace TehGM.EinherjiBot.GameServers.Services
         // db
         private readonly IMongoConnection _databaseConnection;
         private IMongoCollection<GameServer> _gameServersCollection;
-        private readonly IOptionsMonitor<DatabaseOptions> _databaseOptions;
+        private readonly IOptionsMonitor<MongoOptions> _databaseOptions;
         // misc
         private readonly ILogger _log;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
 
         public MongoGameServerStore(IMongoConnection databaseConnection, ILogger<MongoGameServerStore> log, IEntityCache<string, GameServer> cache,
-            IOptionsMonitor<DatabaseOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions)
+            IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions)
         {
             this._databaseConnection = databaseConnection;
             this._databaseOptions = databaseOptions;
@@ -33,14 +33,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
             this._cachingOptions = cachingOptions;
             this._log = log;
 
-            this._databaseConnection.ClientChanged += OnClientChanged;
-            this.OnClientChanged(this._databaseConnection.Client);
-        }
-
-        private void OnClientChanged(MongoClient client)
-        {
-            this._gameServersCollection = client
-                .GetDatabase(this._databaseOptions.CurrentValue.DatabaseName)
+            this._gameServersCollection = databaseConnection
                 .GetCollection<GameServer>(this._databaseOptions.CurrentValue.GameServersCollectionName);
         }
 
@@ -48,30 +41,30 @@ namespace TehGM.EinherjiBot.GameServers.Services
         {
             string trimmedName = name.Trim();
             string lowercaseName = trimmedName.ToLowerInvariant();
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 GameServer result;
-                CachingOptions cachingOptions = _cachingOptions.Get(CacheOptionName);
+                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
                 if (cachingOptions.Enabled)
                 {
                     result = this._cache.Get(lowercaseName);
                     if (result != null)
                     {
-                        _log.LogTrace("Server for game {Game} found in cache", trimmedName);
+                        this._log.LogTrace("Server for game {Game} found in cache", trimmedName);
                         return result;
                     }
                 }
 
                 // get from DB
-                _log.LogTrace("Retrieving server for game {Game} from database", trimmedName);
+                this._log.LogTrace("Retrieving server for game {Game} from database", trimmedName);
                 result = await this._gameServersCollection.Find(server => server.Game.ToLowerInvariant() == lowercaseName)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
                 // if not found, return null
                 if (result == null)
                 {
-                    _log.LogTrace("Server for {Game} not found", trimmedName);
+                    this._log.LogTrace("Server for {Game} not found", trimmedName);
                     return null;
                 }
 
@@ -82,11 +75,6 @@ namespace TehGM.EinherjiBot.GameServers.Services
             {
                 _lock.Release();
             }
-        }
-
-        public void Dispose()
-        {
-            this._databaseConnection.ClientChanged -= OnClientChanged;
         }
     }
 }

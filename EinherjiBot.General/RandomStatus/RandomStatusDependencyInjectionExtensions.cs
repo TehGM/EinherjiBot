@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(configure);
 
             services.AddDiscordClient();
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.TryAddSingleton<IAdvancedStatusConverter, AdvancedStatusConverter>();
 
             return services;

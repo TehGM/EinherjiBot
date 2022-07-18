@@ -122,7 +122,7 @@ namespace TehGM.EinherjiBot.Netflix
                 responseText = $"{_einherjiOptions.SuccessSymbol} You have set Netflix account password to `{value}`.";
             }
 
-            await _netflixAccountStore.SetAsync(account, cancellationToken).ConfigureAwait(false);
+            await _netflixAccountStore.UpdateAsync(account, cancellationToken).ConfigureAwait(false);
 
             // create message
             EmbedBuilder embed = CreateConfirmationEmbed(account, context.User);

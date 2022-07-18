@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configureCaching != null)
                 services.Configure(MongoUserDataStore.CacheOptionName, configureCaching);
 
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.TryAddSingleton<IEntityCache<ulong, UserData>, EntityCache<ulong, UserData>>();
             services.TryAddSingleton<IUserDataStore, MongoUserDataStore>();
 

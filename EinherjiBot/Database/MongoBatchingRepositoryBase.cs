@@ -1,44 +1,51 @@
 ﻿using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
+using TehGM.EinherjiBot.Database.Services;
 
-namespace TehGM.EinherjiBot.Database.Services
+namespace TehGM.EinherjiBot.Database
 {
     public abstract class MongoBatchingRepositoryBase<TKey, TValue> : IBatchingRepository, IDisposable
     {
-        // db stuff
         protected MongoDelayedBatchInserter<TKey, TValue> BatchInserter { get; private set; }
         protected IMongoConnection MongoConnection { get; }
-        protected IOptionsMonitor<DatabaseOptions> DatabaseOptions { get; }
-        // event registrations
+        protected IOptionsMonitor<MongoOptions> DatabaseOptions { get; }
+
         private readonly IDisposable _hostStoppingRegistration;
-        // misc
         private readonly ILogger _log;
 
-        public MongoBatchingRepositoryBase(IMongoConnection databaseConnection, IOptionsMonitor<DatabaseOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger log)
+        protected abstract IMongoCollection<TValue> Collection { get; }
+        protected abstract TimeSpan BatchDelay { get; }
+        protected virtual EqualityComparer<TKey> KeyEqualityComparer => EqualityComparer<TKey>.Default;
+
+        public MongoBatchingRepositoryBase(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger log)
         {
             this.DatabaseOptions = databaseOptions;
             this.MongoConnection = databaseConnection;
             this._log = log;
 
             this._hostStoppingRegistration = hostLifetime.ApplicationStopping.Register(this.FlushBatch);
+
+            this.InitializeBatchInserter();
         }
 
-        protected void RecreateBatchInserter(TimeSpan delay, IMongoCollection<TValue> collection)
+        protected void InitializeBatchInserter()
         {
+            TimeSpan delay = this.BatchDelay;
+
             // validate delay is valid
             if (delay <= TimeSpan.Zero)
-                throw new ArgumentException("Batching delay must be greater than 0", nameof(delay));
+                throw new ArgumentException("Batching delay must be greater than 0", nameof(BatchDelay));
 
             // flush existing inserter to not lose any changes
             if (this.BatchInserter != null)
                 this.BatchInserter.Flush();
-            _log?.LogDebug("Creating batch inserter for item type {ItemType} with delay of {Delay}", typeof(TValue).Name, delay);
-            this.BatchInserter = new MongoDelayedBatchInserter<TKey, TValue>(delay, _log);
-            this.BatchInserter.Collection = collection;
+
+            this._log?.LogDebug("Creating batch inserter for item type {ItemType} with delay of {Delay}", typeof(TValue).Name, delay);
+            this.BatchInserter = new MongoDelayedBatchInserter<TKey, TValue>(delay, this.Collection, this.KeyEqualityComparer, this._log);
         }
 
         public void FlushBatch()
-            => BatchInserter?.Flush();
+            => this.BatchInserter?.Flush();
 
         public virtual void Dispose()
         {

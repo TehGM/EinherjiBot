@@ -7,7 +7,6 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,7 +53,7 @@ namespace TehGM.EinherjiBot
 
         private static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<Database.DatabaseOptions>(configuration.GetSection("Database"));
+            services.Configure<Database.MongoOptions>(configuration.GetSection("Database"));
             services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
         }
 
@@ -63,7 +62,7 @@ namespace TehGM.EinherjiBot
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.AddDiscordClient();
         }
 

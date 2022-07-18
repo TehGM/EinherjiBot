@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(MongoPatchbotGameStore.CacheOptionName, configureCaching);
 
             services.AddDiscordClient();
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.TryAddSingleton<IPatchbotGamesStore, MongoPatchbotGameStore>();
             services.TryAddSingleton<IEntityCache<string, PatchbotGame>, EntityCache<string, PatchbotGame>>();
 

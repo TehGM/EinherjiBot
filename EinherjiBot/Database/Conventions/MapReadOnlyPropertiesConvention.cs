@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 
 namespace TehGM.EinherjiBot.Database.Conventions
@@ -37,14 +38,22 @@ namespace TehGM.EinherjiBot.Database.Conventions
 
         private static bool IsReadOnlyProperty(BsonClassMap classMap, PropertyInfo propertyInfo)
         {
-            if (!propertyInfo.CanRead) return false;
-            if (propertyInfo.CanWrite) return false; // already handled by default convention
-            if (propertyInfo.GetIndexParameters().Length != 0) return false; // skip indexers
+            if (!propertyInfo.CanRead)
+                return false;
+            if (propertyInfo.CanWrite) 
+                return false; // already handled by default convention
+            if (propertyInfo.GetIndexParameters().Length != 0)
+                return false; // skip indexers
 
             var getMethodInfo = propertyInfo.GetMethod;
 
             // skip overridden properties (they are already included by the base class)
-            if (getMethodInfo.IsVirtual && getMethodInfo.GetBaseDefinition().DeclaringType != classMap.ClassType) return false;
+            if (getMethodInfo.IsVirtual && getMethodInfo.GetBaseDefinition().DeclaringType != classMap.ClassType)
+                return false;
+
+            // skip properties that are [BsonIgnore]
+            if (propertyInfo.GetCustomAttribute<BsonIgnoreAttribute>() != null)
+                return false;
 
             return true;
         }

@@ -9,7 +9,7 @@ using TehGM.EinherjiBot.Database;
 
 namespace TehGM.EinherjiBot.Netflix.Services
 {
-    public class MongoNetflixAccountStore : INetflixAccountStore, IDisposable
+    public class MongoNetflixAccountStore : INetflixAccountStore
     {
         // caching
         public const string CacheOptionName = "NetflixAccount";
@@ -18,7 +18,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
         // db
         private readonly IMongoConnection _databaseConnection;
         private IMongoCollection<NetflixAccount> _netflixAccountsCollection;
-        private readonly IOptionsMonitor<DatabaseOptions> _databaseOptions;
+        private readonly IOptionsMonitor<MongoOptions> _databaseOptions;
         private readonly ReplaceOptions _replaceOptions = new ReplaceOptions() { IsUpsert = true };
         // misc
         private readonly IOptionsMonitor<NetflixAccountOptions> _netflixAccountOptions;
@@ -27,7 +27,7 @@ namespace TehGM.EinherjiBot.Netflix.Services
 
 
         public MongoNetflixAccountStore(IMongoConnection databaseConnection, ILogger<MongoNetflixAccountStore> log,
-            IOptionsMonitor<DatabaseOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions, IOptionsMonitor<NetflixAccountOptions> netflixAccountOptions)
+            IOptionsMonitor<MongoOptions> databaseOptions, IOptionsMonitor<CachingOptions> cachingOptions, IOptionsMonitor<NetflixAccountOptions> netflixAccountOptions)
         {
             this._databaseConnection = databaseConnection;
             this._databaseOptions = databaseOptions;
@@ -35,71 +35,59 @@ namespace TehGM.EinherjiBot.Netflix.Services
             this._netflixAccountOptions = netflixAccountOptions;
             this._log = log;
 
-            this._databaseConnection.ClientChanged += OnClientChanged;
-            this.OnClientChanged(this._databaseConnection.Client);
-        }
-
-        private void OnClientChanged(MongoClient client)
-        {
-            this._netflixAccountsCollection = client
-                .GetDatabase(this._databaseOptions.CurrentValue.DatabaseName)
+            this._netflixAccountsCollection = databaseConnection
                 .GetCollection<NetflixAccount>(this._netflixAccountOptions.CurrentValue.DatabaseCollectionName);
         }
 
         public async Task<NetflixAccount> GetAsync(CancellationToken cancellationToken = default)
         {
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 CachingOptions cachingOptions = _cachingOptions.Get(CacheOptionName);
-                if (cachingOptions.Enabled && _cachedAccount != null && !_cachedAccount.IsExpired)
+                if (cachingOptions.Enabled && this._cachedAccount != null && !this._cachedAccount.IsExpired)
                 {
-                    _log.LogTrace("Netflix account found in cache");
-                    return _cachedAccount;
+                    this._log.LogTrace("Netflix account found in cache");
+                    return this._cachedAccount;
                 }
 
-                _log.LogDebug("Retrieving Netflix account from database");
-                NetflixAccount result = await _netflixAccountsCollection.Find(_ => true).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                this._log.LogDebug("Retrieving Netflix account from database");
+                NetflixAccount result = await this._netflixAccountsCollection.Find(_ => true).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 if (result == null)
                 {
-                    _log.LogTrace("Netflix account not found, creating default");
+                    this._log.LogTrace("Netflix account not found, creating default");
                     result = new NetflixAccount();
                 }
 
                 if (cachingOptions.Enabled)
-                    _cachedAccount = new CachedEntity<string, NetflixAccount>(result.Login, result, cachingOptions.Lifetime);
+                    this._cachedAccount = new CachedEntity<string, NetflixAccount>(result.Login, result, cachingOptions.Lifetime);
                 return result;
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
         }
 
-        public async Task SetAsync(NetflixAccount account, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(NetflixAccount account, CancellationToken cancellationToken = default)
         {
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CachingOptions cachingOptions = _cachingOptions.Get(CacheOptionName);
+                CachingOptions cachingOptions = this._cachingOptions.Get(CacheOptionName);
                 if (cachingOptions.Enabled)
                 {
-                    _log.LogTrace("Updating cached Netflix account");
-                    _cachedAccount = new CachedEntity<string, NetflixAccount>(account.Login, account, cachingOptions.Lifetime);
+                    this._log.LogTrace("Updating cached Netflix account");
+                    this._cachedAccount = new CachedEntity<string, NetflixAccount>(account.Login, account, cachingOptions.Lifetime);
                 }
 
-                _log.LogTrace("Saving Netflix account in the database");
-                await _netflixAccountsCollection.ReplaceOneAsync(_ => true, account, _replaceOptions, cancellationToken).ConfigureAwait(false);
+                this._log.LogTrace("Saving Netflix account in the database");
+                await this._netflixAccountsCollection.ReplaceOneAsync(_ => true, account, this._replaceOptions, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
-        }
-
-        public void Dispose()
-        {
-            this._databaseConnection.ClientChanged -= OnClientChanged;
         }
     }
 }

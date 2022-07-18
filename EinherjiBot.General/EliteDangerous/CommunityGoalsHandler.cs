@@ -129,7 +129,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
                             if (historyCg == null || historyCg.IsCompleted != cg.IsCompleted)
                             {
                                 newOrJustFinishedCGs.Add(cg);
-                                await _cgHistoryStore.SetAsync(cg, cancellationToken).ConfigureAwait(false);
+                                await _cgHistoryStore.UpdateAsync(cg, cancellationToken).ConfigureAwait(false);
                             }
                         }
                         _log.LogTrace("New or just finished CGs count: {Count}", newOrJustFinishedCGs.Count);

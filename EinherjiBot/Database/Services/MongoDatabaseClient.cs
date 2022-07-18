@@ -1,41 +1,35 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+﻿using TehGM.EinherjiBot.Database.Conventions;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using TehGM.EinherjiBot.Database.Conventions;
 
 namespace TehGM.EinherjiBot.Database.Services
 {
-    public class MongoConnection : IMongoConnection
+    public class MongoDatabaseClient : IMongoConnection
     {
-        public MongoClient Client { get; private set; }
-        public event Action<MongoClient> ClientChanged;
+        private Lazy<MongoClient> _client;
+        public MongoClient Client => this._client.Value;
 
-        private readonly IOptionsMonitor<DatabaseOptions> _databaseOptions;
-        private readonly ILogger<MongoConnection> _log;
+        private readonly MongoOptions _options;
+        private readonly ILogger<MongoDatabaseClient> _log;
 
-        public MongoConnection(IOptionsMonitor<DatabaseOptions> databaseOptions, ILogger<MongoConnection> logger)
+        public MongoDatabaseClient(IOptions<MongoOptions> options, ILogger<MongoDatabaseClient> log)
         {
-            this._log = logger;
-            this._databaseOptions = databaseOptions;
+            this._options = options.Value;
+            this._log = log;
 
-            FixMongoMapping();
-
-            _databaseOptions.OnChange(_ =>
+            this._client = new Lazy<MongoClient>(() =>
             {
-                InitializeConnection();
-                this.ClientChanged?.Invoke(this.Client);
+                this._log.LogTrace("Establishing connection to MongoDB...");
+                FixMongoMapping();
+                return new MongoClient(this._options.ConnectionString);
             });
-            InitializeConnection();
         }
 
-        private void InitializeConnection()
-        {
-            _log.LogTrace("Establishing connection to MongoDB...");
-            this.Client = new MongoClient(_databaseOptions.CurrentValue.ConnectionString);
-        }
+        public IMongoCollection<TDocument> GetCollection<TDocument>(string name, MongoCollectionSettings settings = null)
+            => this.GetDatabase(this._options.DatabaseName).GetCollection<TDocument>(name, settings);
 
-        public static void FixMongoMapping()
+        private static void FixMongoMapping()
         {
             // because ImmutableTypeClassMapConvention messes up when there's an object that has only readonly props
             // we need to remove it. To do it, we need to... unregister default conventions and re-register them manually... sigh
@@ -55,20 +49,14 @@ namespace TehGM.EinherjiBot.Database.Services
             conventions.Add(new LookupIdGeneratorConvention());
             // custom conventions
             conventions.Add(new MapReadOnlyPropertiesConvention());
-            conventions.Add(new GuidAsStringRepresentationConvention());
+            conventions.Add(new GuidAsStandardRepresentationConvention());
             conventions.Add(new EnumRepresentationConvention(BsonType.String));
             ConventionRegistry.Register(packName, conventions, _ => true);
 
             // guid serialization
-#pragma warning disable CS0618 // Type or member is obsolete
+            #pragma warning disable CS0618 // Type or member is obsolete
             BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-#pragma warning restore CS0618 // Type or member is obsolete
-        }
-
-        public void RegisterClassMap<T>()
-        {
-            if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
-                BsonClassMap.RegisterClassMap<T>();
+            #pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

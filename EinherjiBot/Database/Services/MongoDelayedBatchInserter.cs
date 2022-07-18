@@ -5,7 +5,7 @@ namespace TehGM.EinherjiBot.Database.Services
 {
     public class MongoDelayedBatchInserter<TKey, TItem> : IDisposable
     {
-        public IMongoCollection<TItem> Collection { get; set; }
+        public IMongoCollection<TItem> Collection { get; }
         public ReplaceOptions DefaultReplaceOptions { get; }
 
         private readonly TimeSpan _delay;
@@ -15,7 +15,7 @@ namespace TehGM.EinherjiBot.Database.Services
 
         private readonly ILogger _log;
 
-        public MongoDelayedBatchInserter(TimeSpan delay, IEqualityComparer<TKey> comparer, ILogger log = null)
+        public MongoDelayedBatchInserter(TimeSpan delay, IMongoCollection<TItem> collection, IEqualityComparer<TKey> comparer, ILogger log = null)
         {
             this._delay = delay;
             this._log = log;
@@ -23,22 +23,22 @@ namespace TehGM.EinherjiBot.Database.Services
             this.DefaultReplaceOptions = new ReplaceOptions() { IsUpsert = true, BypassDocumentValidation = false };
         }
 
-        public MongoDelayedBatchInserter(TimeSpan delay, ILogger log = null)
-            : this(delay, EqualityComparer<TKey>.Default, log) { }
+        public MongoDelayedBatchInserter(TimeSpan delay, IMongoCollection<TItem> collection, ILogger log = null)
+            : this(delay, collection, EqualityComparer<TKey>.Default, log) { }
 
         public async Task BatchAsync(TKey key, MongoDelayedInsert<TItem> item, CancellationToken cancellationToken = default)
         {
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 this._batchedInserts[key] = item;
-                if (_batchTcs != null)
+                if (this._batchTcs != null)
                     return;
                 _ = BatchDelayAsync();
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
         }
 
@@ -48,12 +48,12 @@ namespace TehGM.EinherjiBot.Database.Services
             try
             {
                 this._batchedInserts.Remove(key);
-                if (_batchedInserts.Count == 0)
-                    _batchTcs?.TrySetCanceled();
+                if (this._batchedInserts.Count == 0)
+                    this._batchTcs?.TrySetCanceled(CancellationToken.None);
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
         }
 
@@ -64,45 +64,45 @@ namespace TehGM.EinherjiBot.Database.Services
 
         private async Task BatchDelayAsync()
         {
-            _batchTcs = new TaskCompletionSource<object>();
+            this._batchTcs = new TaskCompletionSource<object>();
             Task delayTask = Task.Delay(this._delay);
 
             try
             {
-                await Task.WhenAny(_batchTcs.Task, delayTask).ConfigureAwait(false);
+                await Task.WhenAny(this._batchTcs.Task, delayTask).ConfigureAwait(false);
 
-                await _lock.WaitAsync().ConfigureAwait(false);
+                await this._lock.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    int batchCount = _batchedInserts.Count;
-                    _log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
-                    foreach (KeyValuePair<TKey, MongoDelayedInsert<TItem>> inserts in _batchedInserts)
+                    int batchCount = this._batchedInserts.Count;
+                    this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
+                    foreach (KeyValuePair<TKey, MongoDelayedInsert<TItem>> inserts in this._batchedInserts)
                         await this.Collection.ReplaceOneAsync(inserts.Value.Filter, inserts.Value.Item, inserts.Value.ReplaceOptions ?? this.DefaultReplaceOptions).ConfigureAwait(false);
-                    _batchedInserts.Clear();
-                    _log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
+                    this._batchedInserts.Clear();
+                    this._log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception ex) when (ex.LogAsError(_log, "Error occured when flushing a batch"))
+                catch (Exception ex) when (ex.LogAsError(this._log, "Error occured when flushing a batch"))
                 {
                     throw;
                 }
                 finally
                 {
-                    _batchTcs = null;
-                    _lock.Release();
+                    this._batchTcs = null;
+                    this._lock.Release();
                 }
             }
             catch (OperationCanceledException) { }
             finally
             {
-                _batchTcs = null;
+                this._batchTcs = null;
             }
         }
 
         public void Dispose()
         {
-            _batchTcs?.TrySetCanceled();
-            _lock?.Dispose();
+            this._batchTcs?.TrySetCanceled();
+            this._lock?.Dispose();
         }
     }
 

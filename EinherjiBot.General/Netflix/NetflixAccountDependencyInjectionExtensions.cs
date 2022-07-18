@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.Configure(MongoNetflixAccountStore.CacheOptionName, configureCaching);
 
             services.AddDiscordClient();
-            services.AddMongoConnection();
+            services.AddMongoDB();
             services.TryAddSingleton<INetflixAccountStore, MongoNetflixAccountStore>();
 
             return services;

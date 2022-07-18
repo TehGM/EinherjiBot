@@ -9,7 +9,7 @@ namespace TehGM.EinherjiBot.Netflix
 {
     public class NetflixAccountOptions
     {
-        public string DatabaseCollectionName { get; set; } = DatabaseOptions.MiscellaneousCollectionName;
+        public string DatabaseCollectionName { get; set; } = MongoOptions.MiscellaneousCollectionName;
 
         public HashSet<ulong> RetrieveRoleIDs { get; set; } = new HashSet<ulong>();
         public HashSet<ulong> ModUsersIDs { get; set; } = new HashSet<ulong>();

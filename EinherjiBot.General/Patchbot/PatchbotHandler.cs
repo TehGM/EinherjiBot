@@ -141,7 +141,7 @@ namespace TehGM.EinherjiBot.Patchbot
                 return;
             }
             if (game.SubscriberIDs.Add(context.User.Id))
-                await _patchbotGamesStore.SetAsync(game, cancellationToken).ConfigureAwait(false);
+                await _patchbotGamesStore.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
             await context.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} You will now get pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
@@ -217,7 +217,7 @@ namespace TehGM.EinherjiBot.Patchbot
                 }
             }
 
-            await _patchbotGamesStore.SetAsync(game, cancellationToken).ConfigureAwait(false);
+            await _patchbotGamesStore.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
             await context.ReplyAsync($"{_einherjiOptions.CurrentValue.SuccessSymbol} Game `{game.Name}` updated.", cancellationToken).ConfigureAwait(false);
         }
 

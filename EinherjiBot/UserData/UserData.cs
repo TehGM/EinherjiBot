@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot
 
         public bool ChangeStatus(bool isOnline)
         {
-            if (this.IsOnline == isOnline && StatusChangeTimeUTC != null)
+            if (this.IsOnline == isOnline && this.StatusChangeTimeUTC != null)
                 return false;
             this.IsOnline = isOnline;
             this.StatusChangeTimeUTC = DateTime.UtcNow;
@@ -30,8 +30,8 @@ namespace TehGM.EinherjiBot
         public bool ChangeStatus(UserStatus status)
         {
             if (status == UserStatus.Offline)
-                return ChangeStatus(false);
-            else return ChangeStatus(true);
+                return this.ChangeStatus(false);
+            else return this.ChangeStatus(true);
         }
     }
 }
