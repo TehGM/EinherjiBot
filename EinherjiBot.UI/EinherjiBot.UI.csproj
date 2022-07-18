@@ -22,4 +22,18 @@
     <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
+	<!-- SASS BUILD -->
+	<!-- note: on first run, the file might not be up to date, cause MSBuild works myseterious ways -->
+	<!-- to work this around, use something like fsriev -->
+	<Target Name="CompileStaticFiles" BeforeTargets="Build">
+		<Message Text="Compiling Static Files: /wwwroot/css" Importance="high" />
+		<Exec Command="webcompiler -r wwwroot/css -c webcompiler.json" StandardOutputImportance="high" />
+		<Message Text="Compiling Static Files: /Layouts" Importance="high" />
+		<Exec Command="webcompiler -r Layouts -c webcompiler.json" StandardOutputImportance="high" />
+		<Message Text="Compiling Static Files: /Components" Importance="high" />
+		<Exec Command="webcompiler -r Components -c webcompiler.json" StandardOutputImportance="high" />
+		<Message Text="Compiling Static Files: /Pages" Importance="high" />
+		<Exec Command="webcompiler -r Pages -c webcompiler.json" StandardOutputImportance="high" />
+	</Target>
+
 </Project>
