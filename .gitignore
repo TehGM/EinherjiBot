@@ -359,3 +359,7 @@ data_intel.json
 
 # Don't remove debug pages
 !**/Pages/Debug/
+
+# log files
+**/logs/*.txt
+**/logs/*.log
