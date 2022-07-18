@@ -1,10 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using System.Threading.Tasks;
 using Discord.Rest;
-using System.Threading;
-using System;
 
 namespace TehGM.EinherjiBot
 {

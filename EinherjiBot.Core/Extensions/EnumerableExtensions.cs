@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace TehGM.EinherjiBot
+﻿namespace TehGM.EinherjiBot
 {
     public static class EnumerableExtensions
     {

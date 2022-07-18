@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Discord.Commands;
+﻿using Discord.Commands;
 using TehGM.EinherjiBot.CommandsProcessing.Services;
 
 namespace TehGM.EinherjiBot.CommandsProcessing

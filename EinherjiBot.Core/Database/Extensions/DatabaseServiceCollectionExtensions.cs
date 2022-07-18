@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.Database;
 using TehGM.EinherjiBot.Database.Services;
 

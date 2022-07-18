@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TehGM.EinherjiBot
+﻿namespace TehGM.EinherjiBot
 {
     public static class TimeSpanExtensions
     {

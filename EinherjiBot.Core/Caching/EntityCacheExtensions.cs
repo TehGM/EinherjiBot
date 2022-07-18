@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TehGM.EinherjiBot.Caching
+﻿namespace TehGM.EinherjiBot.Caching
 {
     public static class EntityCacheExtensions
     {

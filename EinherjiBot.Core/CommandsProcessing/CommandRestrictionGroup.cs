@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TehGM.EinherjiBot.CommandsProcessing
+﻿namespace TehGM.EinherjiBot.CommandsProcessing
 {
     public class CommandRestrictionGroup
     {

@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
-
-namespace TehGM.EinherjiBot
+﻿namespace TehGM.EinherjiBot
 {
     public static class ExceptionLoggingExtensions
     {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Database;

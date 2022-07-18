@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace TehGM.EinherjiBot
+﻿namespace TehGM.EinherjiBot
 {
     public interface IUserDataStore
     {

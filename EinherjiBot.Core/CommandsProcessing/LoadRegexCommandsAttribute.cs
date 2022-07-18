@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TehGM.EinherjiBot.CommandsProcessing
+﻿namespace TehGM.EinherjiBot.CommandsProcessing
 {
     public class LoadRegexCommandsAttribute : Attribute
     {

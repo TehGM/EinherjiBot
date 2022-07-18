@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Discord;
 using Discord.Commands;
-using Microsoft.Extensions.Logging;
 using Serilog.Context;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 

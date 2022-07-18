@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TehGM.EinherjiBot.Caching
+﻿namespace TehGM.EinherjiBot.Caching
 {
     public class CachedEntity<TKey, TEntity>
     {

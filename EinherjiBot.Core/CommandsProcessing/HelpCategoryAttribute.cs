@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TehGM.EinherjiBot.CommandsProcessing
+﻿namespace TehGM.EinherjiBot.CommandsProcessing
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class HelpCategoryAttribute : Attribute
