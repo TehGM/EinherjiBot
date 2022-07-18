@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>TehGM.EinherjiBot</RootNamespace>
+    <AssemblyName>EinherjiBot</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EinherjiBot.Core\EinherjiBot.Core.csproj" />
+    <ProjectReference Include="..\EinherjiBot.UI\EinherjiBot.UI.csproj" />
+  </ItemGroup>
+
+
+</Project>
