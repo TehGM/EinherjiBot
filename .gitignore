@@ -343,9 +343,19 @@ healthchecksdb
 # secrets
 appsecrets.json
 appsecrets.*.json
-auth.json
-appsecrets.json
-appsecrets.*.json
+!appsecrets.Example.json
+
 # Bot data
 data.json
 data_intel.json
+
+# Compiled CSS
+*.css
+!**/lib/**/*.css
+
+# Minified JS
+*.min.js
+!**/lib/**/*.js
+
+# Don't remove debug pages
+!**/Pages/Debug/
