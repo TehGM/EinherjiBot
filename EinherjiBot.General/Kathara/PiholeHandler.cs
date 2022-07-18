@@ -95,7 +95,7 @@ namespace TehGM.EinherjiBot.Kathara
             }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            IUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
 
             EmbedBuilder embed = new EmbedBuilder()
                 .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/en/thumb/1/15/Pi-hole_vector_logo.svg/1200px-Pi-hole_vector_logo.svg.png")
@@ -186,7 +186,7 @@ namespace TehGM.EinherjiBot.Kathara
             }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            IUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
 
             // communicate with pihole API
             _log.LogDebug("Enabling Pihole through API at {URL} (Instance: {Instance})", instance.PiholeURL, instanceName);
@@ -254,7 +254,7 @@ namespace TehGM.EinherjiBot.Kathara
             }
 
             // send notification to user that we're working on it
-            RestUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
+            IUserMessage workingNotification = await context.ReplyAsync("Querying pihole API, please wait...", cancellationToken).ConfigureAwait(false);
 
             // communicate with pihole API
             _log.LogDebug("Disabling Pihole through API at {URL} for {Duration} (Instance: {Instance})", instance.PiholeURL, instanceName, disableTime);

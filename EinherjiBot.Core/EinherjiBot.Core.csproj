@@ -21,14 +21,13 @@
 
   <ItemGroup>
     <None Remove="auth.json" />
-    <None Remove="Client\HostedDiscordClient.cs~RFdf8967.TMP" />
     <None Remove="CommandsProcessing\Services\RegexCommandModuleProvider.cs~RF14e9a5df.TMP" />
     <None Remove="config.json" />
     <None Remove="data.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.4.0" />
+    <PackageReference Include="Discord.Net" Version="3.7.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.16.1" />

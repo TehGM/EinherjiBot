@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using Discord;
 using Discord.Commands;
-using Serilog.Context;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace TehGM.EinherjiBot
+namespace TehGM.EinherjiBot.DiscordClient
 {
     public static class DiscordLoggingExtensions
     {
@@ -22,11 +21,6 @@ namespace TehGM.EinherjiBot
                 logger.Log(level, message.Exception, "[{Source}] " + message.Message);
             }
         }
-
-        public static IDisposable UseSource(string source)
-            => LogContext.PushProperty("Source", source);
-        public static IDisposable UseSource(this ILogger log, string source)
-            => LogContext.PushProperty("Source", source);
 
         public static IDisposable BeginCommandScope(this ILogger log, SocketCommandContext context, object handler = null, [CallerMemberName] string cmdName = null)
             => BeginCommandScope(log, context, handler?.GetType(), cmdName);

@@ -50,13 +50,13 @@ namespace TehGM.EinherjiBot.Administration
                 await message.ReplyAsync($"{options.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await message.Guild.GetGuildUserAsync(message.User).ConfigureAwait(false);
+            IGuildUser user = await message.Guild.GetGuildUserAsync(message.User).ConfigureAwait(false);
             if (!user.GetPermissions(channel).ManageMessages)
             {
                 await channel.SendMessageAsync($"{options.FailureSymbol} You can't order me to do that.", cancellationToken).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser botUser = await message.Guild.GetGuildUserAsync(message.Client.CurrentUser.Id).ConfigureAwait(false);
+            IGuildUser botUser = await message.Guild.GetGuildUserAsync(message.Client.CurrentUser.Id).ConfigureAwait(false);
             if (!botUser.GetPermissions(channel).ManageMessages)
             {
                 await channel.SendMessageAsync($"{options.FailureSymbol} I am missing *Manage Messages* permission in this channel.", cancellationToken).ConfigureAwait(false);
@@ -126,14 +126,14 @@ namespace TehGM.EinherjiBot.Administration
             }, cancellationToken).ConfigureAwait(false);
         }
 
-        protected Task OnUserLeftAsync(SocketGuildUser user)
+        protected Task OnUserLeftAsync(SocketGuild guild, SocketUser user)
         {
-            if (user.Guild.SystemChannel == null)
+            if (guild.SystemChannel == null)
                 return Task.CompletedTask;
             EmbedBuilder embed = new EmbedBuilder()
                 .WithDescription($"**{user.Mention}** *(`{user.Username}#{user.Discriminator}`)* **has left.**")
                 .WithColor((Color)System.Drawing.Color.Cyan);
-            return user.Guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), _hostCts.Token);
+            return guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), _hostCts.Token);
         }
 
         public void Dispose()

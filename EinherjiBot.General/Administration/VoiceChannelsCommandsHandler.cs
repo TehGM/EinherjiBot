@@ -112,7 +112,7 @@ namespace TehGM.EinherjiBot.Administration
             SocketGuildUser[] users = channelMatch.Channel.Users.ToArray();
             string channelMention = GetVoiceChannelMention(channelMatch.Channel);
             _log.LogDebug($"{action.ModeWord} {{Count}} users from channel {{ChannelName}} ({{ChannelID}})", users.Length, channelMatch.Channel.Name, channelMatch.Channel.Id);
-            RestUserMessage response = await context.ReplyAsync($"{action.ModeWord} {users.Length} user{(users.Length > 1 ? "s" : null)} in {channelMention}.", cancellationToken).ConfigureAwait(false);
+            IUserMessage response = await context.ReplyAsync($"{action.ModeWord} {users.Length} user{(users.Length > 1 ? "s" : null)} in {channelMention}.", cancellationToken).ConfigureAwait(false);
             int errorCount = 0;
             foreach (SocketGuildUser user in users)
             {
@@ -179,7 +179,7 @@ namespace TehGM.EinherjiBot.Administration
             string channelFromMention = GetVoiceChannelMention(channelFrom);
             string channelToMention = GetVoiceChannelMention(channelTo);
             _log.LogDebug("Moving {Count} users from channel {ChannelFromName} ({ChannelFromID}) to {ChannelToName} ({ChannelToID})", users.Length, channelFrom.Name, channelFrom.Id, channelTo.Name, channelTo.Id);
-            RestUserMessage response = await context.ReplyAsync($"Moving {users.Length} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.", cancellationToken).ConfigureAwait(false);
+            IUserMessage response = await context.ReplyAsync($"Moving {users.Length} user{(users.Length > 1 ? "s" : null)} from {channelFromMention} to {channelToMention}.", cancellationToken).ConfigureAwait(false);
             int errorCount = 0;
             foreach (SocketGuildUser user in users)
             {

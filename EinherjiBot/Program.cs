@@ -55,6 +55,7 @@ namespace TehGM.EinherjiBot
         private static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<Database.DatabaseOptions>(configuration.GetSection("Database"));
+            services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -63,6 +64,7 @@ namespace TehGM.EinherjiBot
             services.AddRazorPages();
 
             services.AddMongoConnection();
+            services.AddDiscordClient();
         }
 
         private static void ConfigureApplication(WebApplication app)

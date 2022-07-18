@@ -103,18 +103,18 @@ namespace TehGM.EinherjiBot.Intel
             AddUserInfo(embed, user, userData);
             if (!context.IsPrivate)
             {
-                SocketGuildUser guildUser = await context.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
+                IGuildUser guildUser = await context.Guild.GetGuildUserAsync(user.Id).ConfigureAwait(false);
                 if (guildUser != null)
                     AddGuildUserInfo(embed, guildUser);
             }
             await context.ReplyAsync(null, false, embed.Build(), cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task OnGuildMemberUpdatedAsync(SocketGuildUser userBefore, SocketGuildUser userAfter)
+        private async Task OnGuildMemberUpdatedAsync(Cacheable<SocketGuildUser, ulong> userBefore, SocketGuildUser userAfter)
         {
-            if (userBefore.Status == userAfter.Status)
+            if (userBefore.Value.Status == userAfter.Status)
                 return;
-            if (userAfter.Status != UserStatus.Offline && userBefore.Status != UserStatus.Offline)
+            if (userAfter.Status != UserStatus.Offline && userBefore.Value.Status != UserStatus.Offline)
                 return;
 
             _log.LogTrace("Updating intel on user {UserID}", userBefore.Id);
@@ -127,11 +127,14 @@ namespace TehGM.EinherjiBot.Intel
         #region Embed Builders
         protected static string GetUserActivity(IUser user)
         {
-            if (user.Activity == null)
+            if (!user.Activities.Any())
                 return "-";
-            if (user.Activity is CustomStatusGame customStatus)
-                return $"{customStatus.Emote} {customStatus.State}";
-            return $"*{ActivityTypeToString(user.Activity.Type)}* `{user.Activity.Name}`";
+            return string.Join('\n', user.Activities.Select(activity =>
+            {
+                if (activity is CustomStatusGame customStatus)
+                    return $"{customStatus.Emote} {customStatus.State}";
+                return $"*{ActivityTypeToString(activity.Type)}* `{activity.Name}`";
+            }));
         }
 
         private EmbedBuilder AddUserInfo(EmbedBuilder embed, IUser user, UserData userData)
@@ -144,7 +147,7 @@ namespace TehGM.EinherjiBot.Intel
                 .AddField("Status", (user is SocketUser) ? user.Status.ToString() : "???", true);
 
             // if user has some activity, add it as well
-            if (user.Activity != null)
+            if (user.Activities.Any())
                 embed.AddField("Activity", GetUserActivity(user), true);
 
             // if user was previously tracked, add data on visibility
@@ -161,7 +164,7 @@ namespace TehGM.EinherjiBot.Intel
             return embed;
         }
 
-        private EmbedBuilder AddGuildUserInfo(EmbedBuilder embed, SocketGuildUser user)
+        private EmbedBuilder AddGuildUserInfo(EmbedBuilder embed, IGuildUser user)
         {
             // add nickname if present
             if (user.Nickname != null)
@@ -169,7 +172,7 @@ namespace TehGM.EinherjiBot.Intel
                     .WithAuthor($"Intel on {user.Nickname}", _client.CurrentUser.GetSafeAvatarUrl());
 
             // get roles, respecting hierarchy
-            IOrderedEnumerable<SocketRole> roles = user.Roles.Where(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
+            IOrderedEnumerable<IRole> roles = user.GetRoles(r => r.Id != user.Guild.EveryoneRole.Id).OrderByDescending(r => r.Position);
             if (roles.Any())
                 embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
             else

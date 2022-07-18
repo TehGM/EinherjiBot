@@ -8,7 +8,7 @@
 	<ImplicitUsings>disable</ImplicitUsings>
     <Version>2.3.1</Version>
     <Authors>TehGM</Authors>
-    <AssemblyName>EinherjiBot</AssemblyName>
+    <AssemblyName>EinherjiBot.Legacy</AssemblyName>
     <Description>A personal administration bot for Discord. Features may seem truly random!</Description>
     <Copyright>Copyright (c) 2020 TehGM</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -50,6 +50,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EinherjiBot.Core\EinherjiBot.Core.csproj" />
+    <ProjectReference Include="..\EinherjiBot\EinherjiBot.csproj" />
   </ItemGroup>
 
 </Project>

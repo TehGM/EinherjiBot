@@ -37,6 +37,8 @@ namespace TehGM.EinherjiBot.Administration
             BotChannelsRedirectionOptions options = _redirectionOptions.CurrentValue;
 
             // allow if channel or user is on exceptions list
+            if (!(message is SocketUserMessage msg))
+                return;
             if (!(message.Channel is SocketTextChannel channel))
                 return;
             if (options.IgnoredChannelIDs?.Contains(message.Channel.Id) == true)
@@ -61,11 +63,11 @@ namespace TehGM.EinherjiBot.Administration
 
                     // if regex matched, means that the bot should not be used in this channel - tell the user off!
 
-                    SocketGuildUser user = await channel.Guild.GetGuildUserAsync(message.Author).ConfigureAwait(false);
+                    SocketGuildUser user = channel.Guild.GetUser(message.Author.Id);
                     string channelsText = GetChannelsMentionsText(redirection.AllowedChannelIDs, user);
                     if (channelsText == null)
                         return;
-                    await message.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
+                    await msg.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using TehGM.EinherjiBot.Database.Conventions;
@@ -36,12 +37,32 @@ namespace TehGM.EinherjiBot.Database.Services
 
         public static void FixMongoMapping()
         {
+            // because ImmutableTypeClassMapConvention messes up when there's an object that has only readonly props
+            // we need to remove it. To do it, we need to... unregister default conventions and re-register them manually... sigh
+            // ref: https://www.codewrecks.com/post/nosql/replace-immutable-serializer-in-mongodb/
+            // src of default conventions: https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/Serialization/Conventions/DefaultConventionPack.cs
+            const string packName = "__defaults__";
+            ConventionRegistry.Remove(packName);
+
             // init mongodb mapping conventions
-            ConventionPack conventionPack = new ConventionPack();
-            conventionPack.Add(new MapReadOnlyPropertiesConvention());
-            conventionPack.Add(new GuidAsStringRepresentationConvention());
-            //conventionPack.AddClassMapConvention("AlwaysApplyDiscriminator", map => map.SetDiscriminatorIsRequired(true));
-            ConventionRegistry.Register("Conventions", conventionPack, _ => true);
+            ConventionPack conventions = new ConventionPack();
+            conventions.Add(new ReadWriteMemberFinderConvention());
+            conventions.Add(new NamedIdMemberConvention(new[] { "Id", "id", "_id", "ID" }));    // adding "ID" as a bonus here
+            conventions.Add(new NamedExtraElementsMemberConvention(new[] { "ExtraElements" }));
+            conventions.Add(new IgnoreExtraElementsConvention(true));   // bonus - don't throw if not all properties match
+            conventions.Add(new NamedParameterCreatorMapConvention());
+            conventions.Add(new StringObjectIdIdGeneratorConvention());
+            conventions.Add(new LookupIdGeneratorConvention());
+            // custom conventions
+            conventions.Add(new MapReadOnlyPropertiesConvention());
+            conventions.Add(new GuidAsStringRepresentationConvention());
+            conventions.Add(new EnumRepresentationConvention(BsonType.String));
+            ConventionRegistry.Register(packName, conventions, _ => true);
+
+            // guid serialization
+#pragma warning disable CS0618 // Type or member is obsolete
+            BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public void RegisterClassMap<T>()

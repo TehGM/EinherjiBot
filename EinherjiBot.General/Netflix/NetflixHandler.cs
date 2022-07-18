@@ -47,7 +47,7 @@ namespace TehGM.EinherjiBot.Netflix
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
+            IGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanRetrieve(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: User not privileged");
@@ -70,7 +70,7 @@ namespace TehGM.EinherjiBot.Netflix
                 modifiedByUser = await context.Client.GetUserAsync(account.ModifiedByID.Value).ConfigureAwait(false);
             EmbedBuilder embed = CreateConfirmationEmbed(account, modifiedByUser);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            IUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);
@@ -90,7 +90,7 @@ namespace TehGM.EinherjiBot.Netflix
                 await SendErrorAsync($"{_einherjiOptions.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
-            SocketGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
+            IGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanModify(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: User not privileged");
@@ -128,7 +128,7 @@ namespace TehGM.EinherjiBot.Netflix
             EmbedBuilder embed = CreateConfirmationEmbed(account, context.User);
             embed.WithDescription(responseText);
             string text = this.IsAutoRemoving ? GetAutoremoveText() : null;
-            RestUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
+            IUserMessage sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             // auto remove
             if (this.IsAutoRemoving)
                 RemoveMessagesDelayed(_netflixAccountOptions.AutoRemoveDelay, cancellationToken, sentMsg, context.Message);

@@ -17,8 +17,8 @@ namespace TehGM.EinherjiBot.Netflix
         public TimeSpan AutoRemoveDelay { get; set; } = TimeSpan.FromSeconds(300);
         public string ThumbnailURL { get; set; } = "https://historia.org.pl/wp-content/uploads/2018/04/netflix-logo.jpg";
 
-        public bool CanRetrieve(SocketGuildUser user)
-            => RetrieveRoleIDs?.Intersect(user.Roles.Select(r => r.Id))?.Any() == true;
+        public bool CanRetrieve(IGuildUser user)
+            => RetrieveRoleIDs?.Intersect(user.RoleIds)?.Any() == true;
         public bool CanModify(IUser user)
             => ModUsersIDs?.Contains(user.Id) == true;
 

@@ -10,6 +10,7 @@ using Discord.Commands;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Text;
+using System.Collections.Generic;
 
 namespace TehGM.EinherjiBot.GameServers
 {
@@ -108,10 +109,11 @@ namespace TehGM.EinherjiBot.GameServers
                 SocketGuild guild = context.Client.GetGuild(guildID);
                 if (guild == null)
                     continue;
-                SocketGuildUser guildUser = await guild.GetGuildUserAsync(context.User.Id).ConfigureAwait(false);
+                IGuildUser guildUser = await guild.GetGuildUserAsync(context.User.Id).ConfigureAwait(false);
                 if (guildUser == null)
                     continue;
-                if (guildUser.Roles.Any(role => server.AuthorizedRoleIDs.Contains(role.Id)))
+                IEnumerable<IRole> roles = guildUser.GetRoles(role => server.AuthorizedRoleIDs.Contains(role.Id));
+                if (roles.Any())
                     return true;
             }
             return false;

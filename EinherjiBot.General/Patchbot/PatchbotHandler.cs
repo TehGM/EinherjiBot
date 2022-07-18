@@ -61,13 +61,15 @@ namespace TehGM.EinherjiBot.Patchbot
         {
             if (message.Embeds.Count == 0)
                 return Task.CompletedTask;
+            if (!(message is SocketUserMessage msg))
+                return Task.CompletedTask;
 
             // get game from embed author text
             Embed embed = message.Embeds.First();
             string gameName = embed.Author?.Name;
 
             _log.LogTrace("Received Patchbot webhook for game {GameName}", gameName);
-            return PingGameAsync(message, gameName, cancellationToken);
+            return PingGameAsync(msg, gameName, cancellationToken);
         }
 
         private async Task ProcessFollowedChannelMessageAsync(SocketMessage message, CancellationToken cancellationToken = default)
@@ -79,7 +81,7 @@ namespace TehGM.EinherjiBot.Patchbot
             SocketGuild guild = (msg.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                SocketGuildUser guildUser = await guild.GetGuildUserAsync(message.Author).ConfigureAwait(false);
+                IGuildUser guildUser = await guild.GetGuildUserAsync(message.Author).ConfigureAwait(false);
                 if (guildUser != null)
                     authorName = guildUser.Nickname ?? authorName;
             }
@@ -89,10 +91,10 @@ namespace TehGM.EinherjiBot.Patchbot
             string gameName = hashIndex < 0 ? authorName : authorName.Remove(hashIndex).TrimEnd();
 
             _log.LogTrace("Received followed channel webhook for game {GameName}", gameName);
-            await PingGameAsync(message, gameName, cancellationToken);
+            await PingGameAsync(msg, gameName, cancellationToken);
         }
 
-        private async Task PingGameAsync(SocketMessage message, string gameName, CancellationToken cancellationToken = default)
+        private async Task PingGameAsync(SocketUserMessage message, string gameName, CancellationToken cancellationToken = default)
         {
             PatchbotGame game = await _patchbotGamesStore.GetAsync(gameName, cancellationToken).ConfigureAwait(false);
             if (game == null)
