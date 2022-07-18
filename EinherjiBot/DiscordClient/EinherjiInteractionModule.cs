@@ -17,7 +17,7 @@ namespace TehGM.EinherjiBot
             => cancellationToken.ToRequestOptions();
     }
 
-    public class DevSubInteractionModule : EinherjiInteractionModule<EinherjiInteractionContext>
+    public class EinherjiInteractionModule : EinherjiInteractionModule<EinherjiInteractionContext>
     {
         public Task RespondAsync(string text, Embed embed)
             => base.RespondAsync(text, embed, base.Context.CancellationToken);
