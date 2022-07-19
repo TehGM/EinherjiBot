@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot
                         retainedFileCountLimit: 5,
                         rollingInterval: RollingInterval.Day)
                         .CreateLogger();
-            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
+            LoggingConfiguration.StartLoggingUnhandledExceptions();
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             ConfigureHost(builder.Host);

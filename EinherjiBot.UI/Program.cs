@@ -27,7 +27,7 @@ namespace TehGM.EinherjiBot.UI
                         .MinimumLevel.Error()
                         .WriteTo.BrowserConsole()
                         .CreateLogger();
-            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
+            LoggingConfiguration.StartLoggingUnhandledExceptions();
 
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
