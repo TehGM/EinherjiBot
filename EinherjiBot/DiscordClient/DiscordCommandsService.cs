@@ -4,6 +4,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.DiscordClient
 {
@@ -13,13 +14,16 @@ namespace TehGM.EinherjiBot.DiscordClient
         private readonly DiscordOptions _options;
         private readonly InteractionService _interactions;
         private readonly IServiceProvider _services;
+        private readonly IUserContextProvider _userContextProvider;
         private readonly ILogger _log;
         private CancellationTokenSource _cts;
 
-        public DiscordCommandsService(DiscordSocketClient client, IServiceProvider services, ILogger<DiscordCommandsService> log, IOptions<DiscordOptions> options)
+        public DiscordCommandsService(DiscordSocketClient client, IServiceProvider services, IUserContextProvider userContextProvider,
+            ILogger<DiscordCommandsService> log, IOptions<DiscordOptions> options)
         {
             this._client = client;
             this._services = services;
+            this._userContextProvider = userContextProvider;
             this._log = log;
             this._options = options.Value;
             this._interactions = new InteractionService(this._client, new InteractionServiceConfig()
@@ -28,13 +32,13 @@ namespace TehGM.EinherjiBot.DiscordClient
                 UseCompiledLambda = this._options.CompileCommands
             });
 
-            this._client.Ready += OnClientReady;
-            this._client.SlashCommandExecuted += OnSlashCommandAsync;
-            this._client.UserCommandExecuted += OnUserCommandAsync;
-            this._client.MessageCommandExecuted += OnMessageCommandAsync;
-            this._client.ButtonExecuted += OnButtonCommandAsync;
-            this._client.SelectMenuExecuted += OnMenuCommandAsync;
-            this._interactions.Log += OnLog;
+            this._client.Ready += this.OnClientReady;
+            this._client.SlashCommandExecuted += this.OnSlashCommandAsync;
+            this._client.UserCommandExecuted += this.OnUserCommandAsync;
+            this._client.MessageCommandExecuted += this.OnMessageCommandAsync;
+            this._client.ButtonExecuted += this.OnButtonCommandAsync;
+            this._client.SelectMenuExecuted += this.OnMenuCommandAsync;
+            this._interactions.Log += this.OnLog;
         }
 
         private async Task OnClientReady()
@@ -86,7 +90,8 @@ namespace TehGM.EinherjiBot.DiscordClient
 
         private async Task OnInteractionAsync(SocketInteraction interaction)
         {
-            EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, this._cts.Token);
+            IUserContext userContext = await this._userContextProvider.GetUserContextAsync(interaction.User.Id, this._cts.Token);
+            EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, userContext, this._cts.Token);
             using IDisposable logScope = this.BeginCommandScope(ctx, null, null);
             try
             {
@@ -145,13 +150,13 @@ namespace TehGM.EinherjiBot.DiscordClient
 
         public void Dispose()
         {
-            try { this._client.Ready -= OnClientReady; } catch { }
-            try { this._client.SlashCommandExecuted -= OnSlashCommandAsync; } catch { }
-            try { this._client.UserCommandExecuted -= OnUserCommandAsync; } catch { }
-            try { this._client.MessageCommandExecuted -= OnMessageCommandAsync; } catch { }
-            try { this._client.ButtonExecuted -= OnMenuCommandAsync; } catch { }
-            try { this._client.SelectMenuExecuted -= OnButtonCommandAsync; } catch { }
-            try { this._interactions.Log -= OnLog; } catch { }
+            try { this._client.Ready -= this.OnClientReady; } catch { }
+            try { this._client.SlashCommandExecuted -= this.OnSlashCommandAsync; } catch { }
+            try { this._client.UserCommandExecuted -= this.OnUserCommandAsync; } catch { }
+            try { this._client.MessageCommandExecuted -= this.OnMessageCommandAsync; } catch { }
+            try { this._client.ButtonExecuted -= this.OnMenuCommandAsync; } catch { }
+            try { this._client.SelectMenuExecuted -= this.OnButtonCommandAsync; } catch { }
+            try { this._interactions.Log -= this.OnLog; } catch { }
             try { this._interactions?.Dispose(); } catch { }
             try { this._cts?.Dispose(); } catch { }
         }

@@ -66,6 +66,7 @@ namespace TehGM.EinherjiBot
             services.AddMongoDB();
             services.AddDiscordClient();
             services.AddEntityCaching();
+            services.AddUserContext();
 
             services.AddUserIntel();
         }
