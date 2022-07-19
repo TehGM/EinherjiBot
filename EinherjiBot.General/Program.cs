@@ -58,7 +58,6 @@ namespace TehGM.EinherjiBot
                     // add bot features
                     services.AddUserIntel();
                     services.AddNetflixAccount();
-                    services.AddStellaris();
                     services.AddAdministration();
                     services.AddBotChannelsRedirection();
                     services.AddPihole();

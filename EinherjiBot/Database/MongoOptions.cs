@@ -14,7 +14,6 @@
         // collections
         public const string MiscellaneousCollectionName = "Miscellaneous";
         public string UserIntelCollectionName { get; set; } = "UserIntel";
-        public string StellarisModsCollectionName { get; set; } = "StellarisMods";
         public string PatchbotGamesCollectionName { get; set; } = "PatchbotGames";
         public string EliteCommunityGoalsCollectionName { get; set; } = "EliteCommunityGoals";
         public string GameServersCollectionName { get; set; } = "GameServers";
