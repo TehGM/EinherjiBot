@@ -16,7 +16,6 @@ using TehGM.EinherjiBot.Netflix.Services;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
 using TehGM.EinherjiBot.RandomStatus;
-using TehGM.EinherjiBot.Stellaris.Services;
 
 namespace TehGM.EinherjiBot
 {

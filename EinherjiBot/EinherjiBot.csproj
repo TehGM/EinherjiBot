@@ -14,9 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
+  	<None Remove="logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EinherjiBot.Core\EinherjiBot.Core.csproj" />
     <ProjectReference Include="..\EinherjiBot.UI\EinherjiBot.UI.csproj" />
   </ItemGroup>
-
 
 </Project>
