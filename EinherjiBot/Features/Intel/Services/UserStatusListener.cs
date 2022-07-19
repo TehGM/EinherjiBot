@@ -54,7 +54,7 @@ namespace TehGM.EinherjiBot.Intel.Services
         }
 
         private static bool HasCustomStatusChanged(IPresence oldPresence, IPresence newPresence)
-            => GetCustomStatus(oldPresence) != GetCustomStatus(newPresence);
+            => newPresence.Status.IsOnlineStatus() && GetCustomStatus(oldPresence) != GetCustomStatus(newPresence);
         private static bool HasSpotifyStatusChanged(IPresence oldPresence, IPresence newPresence)
         {
             SpotifyGame newStatus = GetSpotifyStatus(newPresence);
