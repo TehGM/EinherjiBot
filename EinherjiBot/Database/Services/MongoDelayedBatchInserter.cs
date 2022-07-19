@@ -19,6 +19,7 @@ namespace TehGM.EinherjiBot.Database.Services
         {
             this._delay = delay;
             this._log = log;
+            this.Collection = collection;
             this._batchedInserts = new Dictionary<TKey, MongoDelayedInsert<TItem>>(comparer);
             this.DefaultReplaceOptions = new ReplaceOptions() { IsUpsert = true, BypassDocumentValidation = false };
         }
