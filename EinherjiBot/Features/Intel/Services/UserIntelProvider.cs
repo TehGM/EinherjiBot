@@ -7,12 +7,12 @@ namespace TehGM.EinherjiBot.Intel.Services
     {
         private readonly IDiscordClient _client;
         private readonly IEntityCache<ulong, UserIntel> _historyCache;
-        private readonly IUserOnlineHistoryStore _historyStore;
+        private readonly IUserIntelStore _historyStore;
         private readonly ILogger _log;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public UserIntelProvider(IDiscordClient client, ILogger<UserIntelProvider> log, 
-            IEntityCache<ulong, UserIntel> historyCache, IUserOnlineHistoryStore historyStore)
+            IEntityCache<ulong, UserIntel> historyCache, IUserIntelStore historyStore)
         {
             this._client = client;
             this._historyCache = historyCache;

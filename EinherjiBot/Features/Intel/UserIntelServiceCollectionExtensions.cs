@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDiscordClient();
             services.AddMongoDB();
             services.AddEntityCaching();
-            services.TryAddSingleton<IUserOnlineHistoryStore, MongoUserOnlineHistoryStore>();
+            services.TryAddSingleton<IUserIntelStore, MongoUserIntelStore>();
             services.TryAddSingleton<IUserIntelProvider, UserIntelProvider>();
             services.AddHostedService<UserStatusListener>();
 
