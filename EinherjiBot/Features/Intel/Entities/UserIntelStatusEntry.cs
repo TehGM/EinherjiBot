@@ -3,15 +3,15 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.Intel
 {
-    public class UserOnlineHistoryEntry
+    public class UserIntelStatusEntry : IUserIntelHistoryEntry
     {
-        [BsonElement("onlineStatus")]
+        [BsonElement("isOnline")]
         public bool IsOnline { get; }
-        [BsonElement("onlineStatusChangeTimestamp")]
+        [BsonElement("timestamp")]
         public DateTime Timestamp { get; }
 
         [BsonConstructor(nameof(IsOnline), nameof(Timestamp))]
-        public UserOnlineHistoryEntry(bool online, DateTime timestamp)
+        public UserIntelStatusEntry(bool online, DateTime timestamp)
         {
             this.IsOnline = online;
             this.Timestamp = timestamp;

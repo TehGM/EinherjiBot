@@ -6,13 +6,13 @@ namespace TehGM.EinherjiBot.Intel.Services
     public class UserIntelProvider : IUserIntelProvider
     {
         private readonly IDiscordClient _client;
-        private readonly IEntityCache<ulong, UserOnlineHistory> _historyCache;
+        private readonly IEntityCache<ulong, UserIntel> _historyCache;
         private readonly IUserOnlineHistoryStore _historyStore;
         private readonly ILogger _log;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public UserIntelProvider(IDiscordClient client, ILogger<UserIntelProvider> log, 
-            IEntityCache<ulong, UserOnlineHistory> historyCache, IUserOnlineHistoryStore historyStore)
+            IEntityCache<ulong, UserIntel> historyCache, IUserOnlineHistoryStore historyStore)
         {
             this._client = client;
             this._historyCache = historyCache;
@@ -20,9 +20,9 @@ namespace TehGM.EinherjiBot.Intel.Services
             this._historyStore = historyStore;
         }
 
-        public async Task<UserIntel> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)
+        public async Task<UserIntelContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)
         {
-            Task<UserOnlineHistory> historyTask = this.GetOnlineHistoryAsync(userID, cancellationToken);
+            Task<UserIntel> intelTask = this.GetOnlineHistoryAsync(userID, cancellationToken);
             Task<IUser> userTask = this._client.GetUserAsync(userID, cancellationToken);
             Task<IGuildUser> guildUserTask = Task.Run(async () =>
             {
@@ -35,17 +35,17 @@ namespace TehGM.EinherjiBot.Intel.Services
                     return null;
             }, cancellationToken);
 
-            await Task.WhenAll(historyTask, userTask, guildUserTask).ConfigureAwait(false);
+            await Task.WhenAll(intelTask, userTask, guildUserTask).ConfigureAwait(false);
 
-            return new UserIntel(userTask.Result, guildUserTask.Result, historyTask.Result);
+            return new UserIntelContext(userTask.Result, guildUserTask.Result, intelTask.Result);
         }
 
-        private async Task<UserOnlineHistory> GetOnlineHistoryAsync(ulong userID, CancellationToken cancellationToken)
+        private async Task<UserIntel> GetOnlineHistoryAsync(ulong userID, CancellationToken cancellationToken)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                UserOnlineHistory result = this._historyCache.Get(userID);
+                UserIntel result = this._historyCache.Get(userID);
                 if (result != null)
                 {
                     this._log.LogTrace("User intel for user {UserID} found in cache", userID);
@@ -57,7 +57,7 @@ namespace TehGM.EinherjiBot.Intel.Services
                 if (result == null)
                 {
                     this._log.LogTrace("User intel for user {UserID} not found, creating new with defaults", userID);
-                    result = new UserOnlineHistory(userID);
+                    result = new UserIntel(userID);
                 }
 
                 this._historyCache.AddOrReplace(result);
@@ -69,7 +69,7 @@ namespace TehGM.EinherjiBot.Intel.Services
             }
         }
 
-        public async Task UpdateHistoryAsync(UserOnlineHistory intel, CancellationToken cancellationToken = default)
+        public async Task UpdateHistoryAsync(UserIntel intel, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

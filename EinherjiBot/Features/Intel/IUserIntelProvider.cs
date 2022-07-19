@@ -2,7 +2,7 @@
 {
     public interface IUserIntelProvider
     {
-        Task<UserIntel> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default);
-        Task UpdateHistoryAsync(UserOnlineHistory intel, CancellationToken cancellationToken = default);
+        Task<UserIntelContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default);
+        Task UpdateHistoryAsync(UserIntel intel, CancellationToken cancellationToken = default);
     }
 }

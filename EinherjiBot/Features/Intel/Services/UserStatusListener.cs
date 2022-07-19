@@ -20,13 +20,23 @@ namespace TehGM.EinherjiBot.Intel.Services
 
         private async Task PresenceUpdatedAsync(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
         {
-            if (!HasStatusChanged(oldPresence, newPresence))
+            bool hasStatusChanged = HasStatusChanged(oldPresence, newPresence);
+            bool hasCustomStatusChanged = HasCustomStatusChanged(oldPresence, newPresence);
+            if (!hasStatusChanged && !hasCustomStatusChanged)
                 return;
 
-            this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
-            UserIntel intel = await this._provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
-            intel.StatusHistory.ChangeStatus(newPresence.Status);
-            await this._provider.UpdateHistoryAsync(intel.StatusHistory, base.CancellationToken).ConfigureAwait(false);
+            UserIntelContext intel = await this._provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
+
+            if (hasStatusChanged)
+                hasStatusChanged = intel.Intel.ChangeStatus(newPresence.Status);
+            if (hasCustomStatusChanged)
+                hasCustomStatusChanged = intel.Intel.ChangeCustomStatus(GetCustomStatus(newPresence));
+
+            if (hasStatusChanged || hasCustomStatusChanged)
+            {
+                this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
+                await this._provider.UpdateHistoryAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
+            }
         }
 
         private static bool HasStatusChanged(IPresence oldPresence, IPresence newPresence)
@@ -37,6 +47,14 @@ namespace TehGM.EinherjiBot.Intel.Services
                 return false;
             return true;
         }
+
+        private static bool HasCustomStatusChanged(IPresence oldPresence, IPresence newPresence)
+            => GetCustomStatus(oldPresence) != GetCustomStatus(newPresence);
+
+        private static string GetCustomStatus(IPresence presence)
+            => presence?.Activities?.Where(activity => activity is CustomStatusGame)
+                .Cast<CustomStatusGame>()
+                .FirstOrDefault()?.ToString();
 
         public override void Dispose()
         {

@@ -6,14 +6,14 @@ using TehGM.EinherjiBot.Database.Services;
 
 namespace TehGM.EinherjiBot.Intel.Services
 {
-    public class MongoUserOnlineHistoryStore : MongoBatchingRepositoryBase<ulong, UserOnlineHistory>, IBatchingRepository, IUserOnlineHistoryStore
+    public class MongoUserOnlineHistoryStore : MongoBatchingRepositoryBase<ulong, UserIntel>, IBatchingRepository, IUserOnlineHistoryStore
     {
         private readonly ILogger _log;
         private readonly ReplaceOptions _replaceOptions = new ReplaceOptions() { IsUpsert = true };
 
         protected override TimeSpan BatchDelay => TimeSpan.FromMinutes(5);
-        protected override IMongoCollection<UserOnlineHistory> Collection => base.MongoConnection
-                .GetCollection<UserOnlineHistory>(base.DatabaseOptions.CurrentValue.UserIntelCollectionName);
+        protected override IMongoCollection<UserIntel> Collection => base.MongoConnection
+                .GetCollection<UserIntel>(base.DatabaseOptions.CurrentValue.UserIntelCollectionName);
 
         public MongoUserOnlineHistoryStore(IMongoConnection databaseConnection, IOptionsMonitor<MongoOptions> databaseOptions, IHostApplicationLifetime hostLifetime, ILogger<MongoUserOnlineHistoryStore> log)
             : base(databaseConnection, databaseOptions, hostLifetime, log)
@@ -21,18 +21,18 @@ namespace TehGM.EinherjiBot.Intel.Services
             this._log = log;
         }
 
-        public Task<UserOnlineHistory> GetAsync(ulong userID, CancellationToken cancellationToken = default)
+        public Task<UserIntel> GetAsync(ulong userID, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Retrieving user intel for user {UserID} from database", userID);
             return this.Collection.Find(dbData => dbData.ID == userID)
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task UpdateAsync(UserOnlineHistory intel, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(UserIntel intel, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Inserting user intel for user {UserID} into next DB batch", intel.ID);
             return base.BatchInserter.BatchAsync(intel.ID, 
-                new MongoDelayedInsert<UserOnlineHistory>(dbData => dbData.ID == intel.ID, intel, this._replaceOptions), 
+                new MongoDelayedInsert<UserIntel>(dbData => dbData.ID == intel.ID, intel, this._replaceOptions), 
                 cancellationToken);
         }
     }

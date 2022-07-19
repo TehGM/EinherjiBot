@@ -27,7 +27,7 @@ namespace TehGM.EinherjiBot.Intel.Commands
                 this._log.LogDebug("Building intel on user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
 
                 // global user info
-                UserIntel intel = await this._provider.GetAsync(user.Id, base.Context.Guild?.Id, base.CancellationToken).ConfigureAwait(false);
+                UserIntelContext intel = await this._provider.GetAsync(user.Id, base.Context.Guild?.Id, base.CancellationToken).ConfigureAwait(false);
                 EmbedBuilder embed = new EmbedBuilder()
                     .WithAuthor($"Intel on {intel.User.Username}", base.Context.Client.CurrentUser.GetSafeAvatarUrl())
                     .WithThumbnailUrl(intel.User.GetMaxAvatarUrl())
@@ -121,7 +121,7 @@ namespace TehGM.EinherjiBot.Intel.Commands
                 return string.Join('\n', user.Activities.Select(activity =>
                 {
                     if (activity is CustomStatusGame customStatus)
-                        return $"{customStatus.Emote} {customStatus.State}";
+                        return customStatus.ToString();
                     if (activity is SpotifyGame spotify)
                         return $"*Listening to* [{spotify.TrackTitle}]({spotify.TrackUrl}) *by* {string.Join(", ", spotify.Artists)}";
                     return $"*{ActivityTypeToString(activity.Type)}* `{activity.Name}`";
