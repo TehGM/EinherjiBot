@@ -17,6 +17,13 @@ namespace TehGM.EinherjiBot.Database.Services
 
         public MongoDelayedBatchInserter(TimeSpan delay, IMongoCollection<TItem> collection, IEqualityComparer<TKey> comparer, ILogger log = null)
         {
+            if (delay <= TimeSpan.Zero)
+                throw new ArgumentException("Batching delay needs to be non-zero positive value", nameof(delay));
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+            if (comparer == null)
+                throw new ArgumentNullException(nameof(comparer));
+
             this._delay = delay;
             this._log = log;
             this.Collection = collection;
@@ -35,7 +42,7 @@ namespace TehGM.EinherjiBot.Database.Services
                 this._batchedInserts[key] = item;
                 if (this._batchTcs != null)
                     return;
-                _ = BatchDelayAsync();
+                _ = this.BatchDelayAsync();
             }
             finally
             {
@@ -45,7 +52,7 @@ namespace TehGM.EinherjiBot.Database.Services
 
         public async Task UnbatchAsync(TKey key, CancellationToken cancellationToken = default)
         {
-            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 this._batchedInserts.Remove(key);
@@ -60,7 +67,7 @@ namespace TehGM.EinherjiBot.Database.Services
 
         public void Flush()
         {
-            _batchTcs?.TrySetResult(null);
+            this._batchTcs?.TrySetResult(null);
         }
 
         private async Task BatchDelayAsync()
