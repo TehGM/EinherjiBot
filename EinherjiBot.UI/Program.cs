@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.UI
 
             JsonConfiguration.InitializeDefaultSettings();
 
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
+            WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
             // create default http client for config loading
             HttpClient client = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
@@ -40,6 +40,8 @@ namespace TehGM.EinherjiBot.UI
             // load appsettings
             await builder.Configuration.AddJsonFileAsync(client, "appsettings.json", optional: false).ConfigureAwait(false);
             await builder.Configuration.AddJsonFileAsync(client, $"appsettings.{builder.HostEnvironment.Environment}.json", optional: true).ConfigureAwait(false);
+
+            ConfigureLogging(builder);
 
             await builder.Build().RunAsync();
         }
