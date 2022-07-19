@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <None Remove="auth.json" />
-    <None Remove="CommandsProcessing\Services\RegexCommandModuleProvider.cs~RF14e9a5df.TMP" />
     <None Remove="config.json" />
     <None Remove="data.json" />
   </ItemGroup>
