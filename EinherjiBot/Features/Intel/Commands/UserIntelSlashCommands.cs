@@ -35,14 +35,14 @@ namespace TehGM.EinherjiBot.Intel.Commands
                     .AddField("Account created", TimestampTag.FromDateTimeOffset(intel.User.CreatedAt, TimestampTagStyles.Relative))
                     .AddField("Status", (intel.User is SocketUser) ? intel.User.Status.ToString() : "???", true);
 
-                if (user.Activities.Any())
-                    embed.AddField("Activity", GetUserActivity(user), true);
-
                 if (intel.LatestStatus != null)
                 {
                     embed.AddField(user.Status == UserStatus.Offline ? "No visual since" : "Online since",
                         TimestampTag.FromDateTime(intel.LatestStatus.Timestamp, TimestampTagStyles.Relative), true);
                 }
+
+                if (user.Activities.Any())
+                    embed.AddField("Activity", GetUserActivity(user));
 
                 embed.AddField("User type", intel.User.IsWebhook ? "Webhook" : intel.User.IsBot ? "Bot" : "Normal user")
                     .WithTimestamp(intel.User.CreatedAt)
@@ -122,6 +122,8 @@ namespace TehGM.EinherjiBot.Intel.Commands
                 {
                     if (activity is CustomStatusGame customStatus)
                         return $"{customStatus.Emote} {customStatus.State}";
+                    if (activity is SpotifyGame spotify)
+                        return $"*Listening to* [{spotify.TrackTitle}]({spotify.TrackUrl}) *by* {string.Join(", ", spotify.Artists)}";
                     return $"*{ActivityTypeToString(activity.Type)}* `{activity.Name}`";
                 }));
             }
