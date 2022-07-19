@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.EliteDangerous
 {
@@ -88,7 +89,6 @@ namespace TehGM.EinherjiBot.EliteDangerous
             _autoModeCTS = new CancellationTokenSource();
             Task autoTask = Task.Run(async () =>
             {
-                using IDisposable context = _log.UseSource("Elite CGs");
                 CancellationToken cancellationToken = _autoModeCTS.Token;
                 // wait 5 seconds to let the client get connection state in check
                 await Task.Delay(5 * 1000, cancellationToken).ConfigureAwait(false);
