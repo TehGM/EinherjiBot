@@ -41,6 +41,8 @@
     <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.3.7" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="TehGM.Utilities.Logging" Version="0.1.0" />
+    <PackageReference Include="TehGM.Utilities.Time" Version="0.1.0" />
+    <PackageReference Include="TehGM.Utilities.Time.JsonNet" Version="0.1.0" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,24 @@
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using TehGM.EinherjiBot.Intel;
+using TehGM.EinherjiBot.Intel.Services;
+
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class UserIntelServiceCollectionExtensions
+    {
+        public static IServiceCollection AddUserIntel(this IServiceCollection services)
+        {
+            if (services == null)
+                throw new ArgumentNullException(nameof(services));
+
+            services.AddDiscordClient();
+            services.AddMongoDB();
+            services.AddEntityCaching();
+            services.TryAddSingleton<IUserOnlineHistoryStore, MongoUserOnlineHistoryStore>();
+            services.TryAddSingleton<IUserIntelProvider, UserIntelProvider>();
+            services.AddHostedService<UserStatusListener>();
+
+            return services;
+        }
+    }
+}

@@ -16,7 +16,6 @@ using TehGM.EinherjiBot.Netflix.Services;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
 using TehGM.EinherjiBot.RandomStatus;
-using TehGM.EinherjiBot.Services;
 using TehGM.EinherjiBot.Stellaris.Services;
 
 namespace TehGM.EinherjiBot
@@ -57,7 +56,7 @@ namespace TehGM.EinherjiBot
                     services.AddEntityCaching();
 
                     // add bot features
-                    services.AddIntel();
+                    services.AddUserIntel();
                     services.AddNetflixAccount();
                     services.AddStellaris();
                     services.AddAdministration();
