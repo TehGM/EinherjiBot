@@ -22,7 +22,7 @@ namespace TehGM.EinherjiBot.Intel.Services
 
         public async Task<UserIntelContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)
         {
-            Task<UserIntel> intelTask = this.GetOnlineHistoryAsync(userID, cancellationToken);
+            Task<UserIntel> intelTask = this.GetIntelAsync(userID, cancellationToken);
             Task<IUser> userTask = this._client.GetUserAsync(userID, cancellationToken);
             Task<IGuildUser> guildUserTask = Task.Run(async () =>
             {
@@ -40,7 +40,7 @@ namespace TehGM.EinherjiBot.Intel.Services
             return new UserIntelContext(userTask.Result, guildUserTask.Result, intelTask.Result);
         }
 
-        private async Task<UserIntel> GetOnlineHistoryAsync(ulong userID, CancellationToken cancellationToken)
+        private async Task<UserIntel> GetIntelAsync(ulong userID, CancellationToken cancellationToken)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -69,7 +69,7 @@ namespace TehGM.EinherjiBot.Intel.Services
             }
         }
 
-        public async Task UpdateHistoryAsync(UserIntel intel, CancellationToken cancellationToken = default)
+        public async Task UpdateIntelAsync(UserIntel intel, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

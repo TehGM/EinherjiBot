@@ -9,29 +9,37 @@ namespace TehGM.EinherjiBot.Intel
 
         [BsonId]
         public ulong ID { get; }
-        [BsonElement("statusHistory")]
+        [BsonElement("statusHistory"), BsonIgnoreIfDefault, BsonDefaultValue(null)]
         public ICollection<UserIntelStatusEntry> StatusHistory { get; private set; }
-        [BsonElement("customStatusHistory")]
+        [BsonElement("customStatusHistory"), BsonIgnoreIfDefault, BsonDefaultValue(null)]
         public ICollection<UserIntelCustomStatusEntry> CustomStatusHistory { get; private set; }
+        [BsonElement("listeningStatusHistory"), BsonIgnoreIfDefault, BsonDefaultValue(null)]
+        public ICollection<UserIntelListeningStatusEntry> ListeningStatusHistory { get; private set; }
 
-        [BsonConstructor(nameof(ID), nameof(StatusHistory), nameof(CustomStatusHistory))]
-        private UserIntel(ulong id, ICollection<UserIntelStatusEntry> statusHistory, ICollection<UserIntelCustomStatusEntry> customStatusHistory)
+        [BsonConstructor(nameof(ID), nameof(StatusHistory), nameof(CustomStatusHistory), nameof(ListeningStatusHistory))]
+        private UserIntel(ulong id, ICollection<UserIntelStatusEntry> statusHistory,
+            ICollection<UserIntelCustomStatusEntry> customStatusHistory, ICollection<UserIntelListeningStatusEntry> listeningStatusHistory)
         {
             this.ID = id;
-            this.StatusHistory = statusHistory;
-            this.CustomStatusHistory = customStatusHistory;
+            this.StatusHistory = statusHistory ?? new List<UserIntelStatusEntry>(MaxHistorySize);
+            this.CustomStatusHistory = customStatusHistory ?? new List<UserIntelCustomStatusEntry>(MaxHistorySize);
+            this.ListeningStatusHistory = listeningStatusHistory ?? new List<UserIntelListeningStatusEntry>(MaxHistorySize);
 
             this.TrimStatusHistory();
+            this.TrimCustomStatusHistory();
+            this.TrimListeningStatusHistory();
         }
 
         public UserIntel(ulong id)
-            : this(id, new List<UserIntelStatusEntry>(MaxHistorySize), new List<UserIntelCustomStatusEntry>(MaxHistorySize)) { }
+            : this(id, null, null, null) { }
 
 
         public UserIntelStatusEntry GetLatestStatus()
             => this.GetLatestHistoryEntry(this.StatusHistory);
         public UserIntelCustomStatusEntry GetLatestCustomStatus()
             => this.GetLatestHistoryEntry(this.CustomStatusHistory);
+        public UserIntelListeningStatusEntry GetLatestListeningStatus()
+            => this.GetLatestHistoryEntry(this.ListeningStatusHistory);
 
 
         public bool ChangeStatus(bool isOnline)
@@ -56,10 +64,22 @@ namespace TehGM.EinherjiBot.Intel
             return true;
         }
 
+        public bool ChangeListeningStatus(SpotifyGame status)
+        {
+            UserIntelListeningStatusEntry latest = this.GetLatestListeningStatus();
+            if (latest != null && latest.TrackID == status?.TrackId)
+                return false;
+            this.ListeningStatusHistory.Add(new UserIntelListeningStatusEntry(status));
+            this.TrimListeningStatusHistory();
+            return true;
+        }
+
         private void TrimStatusHistory()
             => this.StatusHistory = this.TrimHistory(this.StatusHistory);
         private void TrimCustomStatusHistory()
             => this.CustomStatusHistory = this.TrimHistory(this.CustomStatusHistory);
+        private void TrimListeningStatusHistory()
+            => this.ListeningStatusHistory = this.TrimHistory(this.ListeningStatusHistory);
 
         private T GetLatestHistoryEntry<T>(IEnumerable<T> history) where T : IUserIntelHistoryEntry
             => history.OrderByDescending(entry => entry.Timestamp).FirstOrDefault();

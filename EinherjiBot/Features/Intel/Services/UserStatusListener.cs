@@ -22,7 +22,8 @@ namespace TehGM.EinherjiBot.Intel.Services
         {
             bool hasStatusChanged = HasStatusChanged(oldPresence, newPresence);
             bool hasCustomStatusChanged = HasCustomStatusChanged(oldPresence, newPresence);
-            if (!hasStatusChanged && !hasCustomStatusChanged)
+            bool hasSpotifyStatusChanged = HasSpotifyStatusChanged(oldPresence, newPresence);
+            if (!HasAnythingChanged())
                 return;
 
             UserIntelContext intel = await this._provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
@@ -31,12 +32,16 @@ namespace TehGM.EinherjiBot.Intel.Services
                 hasStatusChanged = intel.Intel.ChangeStatus(newPresence.Status);
             if (hasCustomStatusChanged)
                 hasCustomStatusChanged = intel.Intel.ChangeCustomStatus(GetCustomStatus(newPresence));
-
-            if (hasStatusChanged || hasCustomStatusChanged)
+            if (hasSpotifyStatusChanged)
+                hasSpotifyStatusChanged = intel.Intel.ChangeListeningStatus(GetSpotifyStatus(newPresence));
+            if (HasAnythingChanged())
             {
                 this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
-                await this._provider.UpdateHistoryAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
+                await this._provider.UpdateIntelAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
             }
+
+            bool HasAnythingChanged()
+                => hasStatusChanged || hasCustomStatusChanged || hasSpotifyStatusChanged;
         }
 
         private static bool HasStatusChanged(IPresence oldPresence, IPresence newPresence)
@@ -50,11 +55,18 @@ namespace TehGM.EinherjiBot.Intel.Services
 
         private static bool HasCustomStatusChanged(IPresence oldPresence, IPresence newPresence)
             => GetCustomStatus(oldPresence) != GetCustomStatus(newPresence);
+        private static bool HasSpotifyStatusChanged(IPresence oldPresence, IPresence newPresence)
+            => GetSpotifyStatus(oldPresence) != GetSpotifyStatus(newPresence);
 
         private static string GetCustomStatus(IPresence presence)
             => presence?.Activities?.Where(activity => activity is CustomStatusGame)
                 .Cast<CustomStatusGame>()
                 .FirstOrDefault()?.ToString();
+
+        private static SpotifyGame GetSpotifyStatus(IPresence presence)
+            => presence?.Activities?.Where(activity => activity is SpotifyGame)
+                .Cast<SpotifyGame>()
+                .FirstOrDefault();
 
         public override void Dispose()
         {
