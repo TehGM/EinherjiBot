@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using TehGM.EinherjiBot.Logging;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot
 {
@@ -30,6 +31,8 @@ namespace TehGM.EinherjiBot
                         rollingInterval: RollingInterval.Day)
                         .CreateLogger();
             LoggingConfiguration.StartLoggingUnhandledExceptions();
+
+            JsonConfiguration.InitializeDefaultSettings();
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             ConfigureHost(builder.Host);

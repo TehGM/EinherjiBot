@@ -11,10 +11,10 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
-using TehGM.EinherjiBot.Logging;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Microsoft.Extensions.Configuration;
+using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.UI
 {
@@ -28,6 +28,8 @@ namespace TehGM.EinherjiBot.UI
                         .WriteTo.BrowserConsole()
                         .CreateLogger();
             LoggingConfiguration.StartLoggingUnhandledExceptions();
+
+            JsonConfiguration.InitializeDefaultSettings();
 
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
