@@ -10,6 +10,7 @@ using System.Linq;
 using Discord.Commands;
 using System.Text.RegularExpressions;
 using System.Threading;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.Patchbot
 {

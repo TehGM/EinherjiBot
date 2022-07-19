@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.Kathara
 {

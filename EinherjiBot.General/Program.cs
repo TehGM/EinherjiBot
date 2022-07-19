@@ -23,7 +23,7 @@ namespace TehGM.EinherjiBot
     {
         static async Task Main(string[] args)
         {
-            LoggingInitializationExtensions.EnableUnhandledExceptionLogging();
+            LoggingConfiguration.EnableUnhandledExceptionLogging();
 
             IHost host = Host.CreateDefaultBuilder(args)
                 //.ConfigureAppConfiguration((context, builder) =>

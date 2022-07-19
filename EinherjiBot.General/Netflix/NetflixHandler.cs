@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TehGM.EinherjiBot.CommandsProcessing;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.Netflix
 {

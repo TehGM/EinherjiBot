@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Text;
 using System.Collections.Generic;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.GameServers
 {

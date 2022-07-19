@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Discord.Commands;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.CommandsProcessing.Services
 {
@@ -81,12 +82,12 @@ namespace TehGM.EinherjiBot.CommandsProcessing.Services
 
             // Keep in mind that result does not indicate a return value
             // rather an object stating if the command executed successfully.
-            await _lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(_hostCancellationToken).ConfigureAwait(false);
             try
             {
                 foreach (RegexCommandInstance command in Commands)
                 {
-                    using IDisposable logScope = _log.BeginCommandScope(context, command.ModuleType, command.MethodName);
+                    using IDisposable logScope = this._log.BeginCommandScope(context, command.ModuleType, command.MethodName);
                     try
                     {
                         IResult preconditionsResult = await command.CheckPreconditionsAsync(context, _serviceProvider);
