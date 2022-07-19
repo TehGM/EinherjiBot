@@ -22,6 +22,7 @@ namespace TehGM.EinherjiBot.DiscordClient
             DiscordSocketConfig clientConfig = new DiscordSocketConfig();
             clientConfig.LogLevel = LogSeverity.Verbose;
             clientConfig.LogGatewayIntentWarnings = false;
+            clientConfig.GatewayIntents = GatewayIntents.All;
             this._client = new DiscordSocketClient(clientConfig);
             this._client.Log += this.OnClientLog;
 
