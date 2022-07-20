@@ -53,7 +53,7 @@ namespace TehGM.EinherjiBot.Database
         public virtual void Dispose()
         {
             try { this._hostStoppingRegistration?.Dispose(); } catch { }
-            try { this.FlushBatch(); } catch { }
+            try { this.FlushBatchAsync().GetAwaiter().GetResult(); } catch { }
             try { this.BatchInserter?.Dispose(); } catch { }
         }
     }
