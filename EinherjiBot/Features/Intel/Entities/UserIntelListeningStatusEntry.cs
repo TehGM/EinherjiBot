@@ -33,6 +33,6 @@ namespace TehGM.EinherjiBot.Intel
         }
 
         public UserIntelListeningStatusEntry(SpotifyGame status)
-            : this(status?.TrackId, status?.TrackTitle, status?.AlbumTitle, status?.TrackUrl, status?.AlbumArtUrl, status?.Artists, status?.StartedAt?.UtcDateTime ?? DateTime.UtcNow) { }
+            : this(status.TrackId, status.TrackTitle, status.AlbumTitle, status.TrackUrl, status.AlbumArtUrl, status.Artists, status.StartedAt?.UtcDateTime ?? DateTime.UtcNow) { }
     }
 }
