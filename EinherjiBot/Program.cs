@@ -72,6 +72,7 @@ namespace TehGM.EinherjiBot
             services.AddUserContext();
 
             services.AddUserIntel();
+            services.AddAdministration();
         }
 
         private static void ConfigureApplication(WebApplication app)
