@@ -73,7 +73,7 @@ namespace TehGM.EinherjiBot.Patchbot.Services
             {
                 this._log.LogTrace("Inserting patchbot game {Game} into next DB batch", game.Name);
                 this._cache.AddOrReplace(game);
-                await base.BatchInserter.BatchAsync(game.Name, new MongoDelayedInsert<PatchbotGame>(dbData => dbData.Name == game.Name, game, this._replaceOptions), cancellationToken).ConfigureAwait(false);
+                await base.BatchInserter.BatchAsync(game.Name, new MongoDelayedUpsert<PatchbotGame>(dbData => dbData.Name == game.Name, game, this._replaceOptions), cancellationToken).ConfigureAwait(false);
             }
             finally
             {

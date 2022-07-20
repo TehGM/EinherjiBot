@@ -32,7 +32,7 @@ namespace TehGM.EinherjiBot.Intel.Services
         {
             this._log.LogTrace("Inserting user intel for user {UserID} into next DB batch", intel.ID);
             return base.BatchInserter.BatchAsync(intel.ID, 
-                new MongoDelayedInsert<UserIntel>(dbData => dbData.ID == intel.ID, intel, this._replaceOptions), 
+                new MongoDelayedUpsert<UserIntel>(dbData => dbData.ID == intel.ID, intel, this._replaceOptions), 
                 cancellationToken);
         }
     }

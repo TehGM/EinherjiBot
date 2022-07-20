@@ -88,17 +88,8 @@ namespace TehGM.EinherjiBot.Database.Services
 
                     int batchCount = this._batchedInserts.Count;
                     this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
-                    IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i =>
-                    {
-                        ReplaceOptions options = i.ReplaceOptions ?? this.DefaultReplaceOptions;
-                        return new ReplaceOneModel<TItem>(i.Filter, i.Item)
-                        {
-                            IsUpsert = options.IsUpsert,
-                            Collation = options.Collation,
-                            Hint = options.Hint
-                        };
-                    });
-                    await this.Collection.BulkWriteAsync(batch, new BulkWriteOptions()).ConfigureAwait(false);
+                    IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i => this.ConvertToModel(i));
+                    await this.Collection.BulkWriteAsync(batch, new BulkWriteOptions() { IsOrdered = true }).ConfigureAwait(false);
                     this._batchedInserts.Clear();
                     this._log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
                 }
@@ -120,6 +111,22 @@ namespace TehGM.EinherjiBot.Database.Services
             }
         }
 
+        private WriteModel<TItem> ConvertToModel(MongoDelayedInsert<TItem> insert)
+        {
+            if (insert is MongoDelayedUpsert<TItem> upsert)
+            {
+                ReplaceOptions options = upsert.ReplaceOptions ?? this.DefaultReplaceOptions;
+                return new ReplaceOneModel<TItem>(upsert.Filter, upsert.Item)
+                {
+                    IsUpsert = options.IsUpsert,
+                    Collation = options.Collation,
+                    Hint = options.Hint
+                };
+            }
+            else
+                return new InsertOneModel<TItem>(insert.Item);
+        }
+
         public void Dispose()
         {
             this._batchTcs?.TrySetCanceled();
@@ -127,17 +134,26 @@ namespace TehGM.EinherjiBot.Database.Services
         }
     }
 
-    public class MongoDelayedInsert<T>
+    public class MongoDelayedUpsert<T> : MongoDelayedInsert<T>
     {
         public readonly Expression<Func<T, bool>> Filter;
-        public readonly T Item;
-        public ReplaceOptions ReplaceOptions;
+        public readonly ReplaceOptions ReplaceOptions;
 
-        public MongoDelayedInsert(Expression<Func<T, bool>> filter, T item, ReplaceOptions replaceOptions)
+        public MongoDelayedUpsert(Expression<Func<T, bool>> filter, T item, ReplaceOptions replaceOptions)
+            : base(item)
         {
             this.Filter = filter;
-            this.Item = item;
             this.ReplaceOptions = replaceOptions;
+        }
+    }
+
+    public class MongoDelayedInsert<T>
+    {
+        public readonly T Item;
+
+        public MongoDelayedInsert(T item)
+        {
+            this.Item = item;
         }
     }
 }

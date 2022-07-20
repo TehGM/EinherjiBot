@@ -61,7 +61,7 @@ namespace TehGM.EinherjiBot.EliteDangerous.Services
             {
                 this._log.LogTrace("Inserting community goal {ID} history entry into next DB batch", cg.ID);
                 this._cache.AddOrReplace(cg);
-                await base.BatchInserter.BatchAsync(cg.ID, new MongoDelayedInsert<CommunityGoal>(dbData => dbData.ID == cg.ID, cg, this._replaceOptions), cancellationToken).ConfigureAwait(false);
+                await base.BatchInserter.BatchAsync(cg.ID, new MongoDelayedUpsert<CommunityGoal>(dbData => dbData.ID == cg.ID, cg, this._replaceOptions), cancellationToken).ConfigureAwait(false);
             }
             finally
             {
