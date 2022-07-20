@@ -84,8 +84,17 @@ namespace TehGM.EinherjiBot.Database.Services
                 {
                     int batchCount = this._batchedInserts.Count;
                     this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
-                    foreach (KeyValuePair<TKey, MongoDelayedInsert<TItem>> inserts in this._batchedInserts)
-                        await this.Collection.ReplaceOneAsync(inserts.Value.Filter, inserts.Value.Item, inserts.Value.ReplaceOptions ?? this.DefaultReplaceOptions).ConfigureAwait(false);
+                    IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i =>
+                    {
+                        ReplaceOptions options = i.ReplaceOptions ?? this.DefaultReplaceOptions;
+                        return new ReplaceOneModel<TItem>(i.Filter, i.Item)
+                        {
+                            IsUpsert = options.IsUpsert,
+                            Collation = options.Collation,
+                            Hint = options.Hint
+                        };
+                    });
+                    await this.Collection.BulkWriteAsync(batch, new BulkWriteOptions()).ConfigureAwait(false);
                     this._batchedInserts.Clear();
                     this._log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
                 }
