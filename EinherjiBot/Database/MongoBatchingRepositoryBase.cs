@@ -47,6 +47,9 @@ namespace TehGM.EinherjiBot.Database
         public void FlushBatch()
             => this.BatchInserter?.Flush();
 
+        public Task FlushBatchAsync()
+            => this.BatchInserter?.FlushAsync();
+
         public virtual void Dispose()
         {
             try { this._hostStoppingRegistration?.Dispose(); } catch { }

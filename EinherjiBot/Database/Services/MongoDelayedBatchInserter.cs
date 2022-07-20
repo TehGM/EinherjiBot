@@ -58,7 +58,7 @@ namespace TehGM.EinherjiBot.Database.Services
             {
                 this._batchedInserts.Remove(key);
                 if (this._batchedInserts.Count == 0)
-                    this._batchTcs?.TrySetCanceled(CancellationToken.None);
+                    this.CancelDelay();
             }
             finally
             {
@@ -71,6 +71,39 @@ namespace TehGM.EinherjiBot.Database.Services
             this._batchTcs?.TrySetResult(null);
         }
 
+        public Task FlushAsync()
+        {
+            this.CancelDelay();
+            return this.FlushInternalAsync();
+        }
+
+        private async Task FlushInternalAsync()
+        {
+            await this._lock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                if (!this.HasPendingInserts)
+                    return;
+
+                int batchCount = this._batchedInserts.Count;
+                this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
+                IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i => this.ConvertToModel(i));
+                await this.Collection.BulkWriteAsync(batch, new BulkWriteOptions() { IsOrdered = true }).ConfigureAwait(false);
+                this._batchedInserts.Clear();
+                this._log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) when (ex.LogAsError(this._log, "Error occured when flushing a batch"))
+            {
+                throw;
+            }
+            finally
+            {
+                this._batchTcs = null;
+                this._lock.Release();
+            }
+        }
+
         private async Task BatchDelayAsync()
         {
             this._batchTcs = new TaskCompletionSource<object>();
@@ -79,36 +112,18 @@ namespace TehGM.EinherjiBot.Database.Services
             try
             {
                 await Task.WhenAny(this._batchTcs.Task, delayTask).ConfigureAwait(false);
-
-                await this._lock.WaitAsync().ConfigureAwait(false);
-                try
-                {
-                    if (!this.HasPendingInserts)
-                        return;
-
-                    int batchCount = this._batchedInserts.Count;
-                    this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
-                    IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i => this.ConvertToModel(i));
-                    await this.Collection.BulkWriteAsync(batch, new BulkWriteOptions() { IsOrdered = true }).ConfigureAwait(false);
-                    this._batchedInserts.Clear();
-                    this._log?.LogDebug("Batch flushed. {BatchedCount} items of type {ItemType} added to the database.", batchCount, typeof(TItem).Name);
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex) when (ex.LogAsError(this._log, "Error occured when flushing a batch"))
-                {
-                    throw;
-                }
-                finally
-                {
-                    this._batchTcs = null;
-                    this._lock.Release();
-                }
+                await this.FlushAsync().ConfigureAwait(false);
             }
             catch (OperationCanceledException) { }
             finally
             {
                 this._batchTcs = null;
             }
+        }
+
+        private void CancelDelay()
+        {
+            this._batchTcs?.TrySetCanceled(CancellationToken.None);
         }
 
         private WriteModel<TItem> ConvertToModel(MongoDelayedInsert<TItem> insert)
