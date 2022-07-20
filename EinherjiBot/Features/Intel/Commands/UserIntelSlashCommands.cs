@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.Auditing;
+using TehGM.EinherjiBot.Auditing.Intel;
 
 namespace TehGM.EinherjiBot.Intel.Commands
 {
@@ -12,12 +14,17 @@ namespace TehGM.EinherjiBot.Intel.Commands
         public class UserIntelOnCommands : EinherjiInteractionModule
         {
             private readonly IUserIntelProvider _provider;
+            private readonly IAuditStore<UserIntelAuditEntry> _userAudit;
+            private readonly IAuditStore<GuildIntelAuditEntry> _guildAudit;
             private readonly ILogger _log;
 
-            public UserIntelOnCommands(IUserIntelProvider provider, ILogger<UserIntelSlashCommands> log)
+            public UserIntelOnCommands(IUserIntelProvider provider, ILogger<UserIntelSlashCommands> log, 
+                IAuditStore<UserIntelAuditEntry> userAudit, IAuditStore<GuildIntelAuditEntry> guildAudit)
             {
                 this._provider = provider;
                 this._log = log;
+                this._userAudit = userAudit;
+                this._guildAudit = guildAudit;
             }
 
             [SlashCommand("user", "Gets intel on specific user")]
@@ -70,6 +77,7 @@ namespace TehGM.EinherjiBot.Intel.Commands
                         embed.AddField("Joined this guild", TimestampTag.FromDateTimeOffset(intel.GuildUser.JoinedAt.Value, TimestampTagStyles.Relative), true);
                 }
 
+                await this._userAudit.AddAuditAsync(new UserIntelAuditEntry(base.Context.User.Id, user.Id, base.Context.Interaction.CreatedAt.UtcDateTime));
                 await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
             }
 
@@ -111,6 +119,7 @@ namespace TehGM.EinherjiBot.Intel.Commands
                     .WithTimestamp(guild.CreatedAt)
                     .WithFooter($"Guild ID: {guild.Id}", guild.IconUrl);
 
+                await this._guildAudit.AddAuditAsync(new GuildIntelAuditEntry(base.Context.User.Id, base.Context.Guild.Id, base.Context.Interaction.CreatedAt.UtcDateTime));
                 await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
             }
 
