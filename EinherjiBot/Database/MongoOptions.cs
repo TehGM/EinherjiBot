@@ -13,6 +13,7 @@
 
         // collections
         public const string MiscellaneousCollectionName = "Miscellaneous";
+        public string AuditCollectionName { get; set; } = "BotAudit";
         public string UserIntelCollectionName { get; set; } = "UserIntel";
         public string UserDataCollectionName { get; set; } = "UserData";
         public string PatchbotGamesCollectionName { get; set; } = "PatchbotGames";

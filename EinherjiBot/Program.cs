@@ -66,10 +66,10 @@ namespace TehGM.EinherjiBot
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddMongoDB();
             services.AddDiscordClient();
             services.AddEntityCaching();
             services.AddUserContext();
+            services.AddBotAudits();
 
             services.AddUserIntel();
             services.AddAdministration();
