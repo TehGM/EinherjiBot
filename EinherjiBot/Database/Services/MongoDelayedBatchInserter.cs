@@ -12,8 +12,9 @@ namespace TehGM.EinherjiBot.Database.Services
         private readonly IDictionary<TKey, MongoDelayedInsert<TItem>> _batchedInserts;
         private TaskCompletionSource<object> _batchTcs;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-
         private readonly ILogger _log;
+
+        public bool HasPendingInserts => this._batchedInserts.Count != 0;
 
         public MongoDelayedBatchInserter(TimeSpan delay, IMongoCollection<TItem> collection, IEqualityComparer<TKey> comparer, ILogger log = null)
         {
@@ -82,6 +83,9 @@ namespace TehGM.EinherjiBot.Database.Services
                 await this._lock.WaitAsync().ConfigureAwait(false);
                 try
                 {
+                    if (!this.HasPendingInserts)
+                        return;
+
                     int batchCount = this._batchedInserts.Count;
                     this._log?.LogTrace("Beginning batch flush. {BatchedCount} items of type {ItemType} queued.", batchCount, typeof(TItem).Name);
                     IEnumerable<WriteModel<TItem>> batch = this._batchedInserts.Values.Select(i =>
