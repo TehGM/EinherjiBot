@@ -73,7 +73,7 @@ namespace TehGM.EinherjiBot.RandomStatus
             EinherjiOptions einherjiOptions = this._einherjiOptions.CurrentValue;
             if (context.User.Id != einherjiOptions.AuthorID)
             {
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!",
+                await context.ReplyAsync($"{ResponseEmote.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!",
                     cancellationToken).ConfigureAwait(false);
                 return;
             }
@@ -81,12 +81,12 @@ namespace TehGM.EinherjiBot.RandomStatus
             Status status = await RandomizeStatusAsync(context.Client, cancellationToken).ConfigureAwait(false);
             if (status != null)
             {
-                await context.ReplyAsync($"{einherjiOptions.SuccessSymbol} Status changed: `{status.Text.Replace("`", "\\`")}`", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{ResponseEmote.SuccessSymbol} Status changed: `{status.Text.Replace("`", "\\`")}`", cancellationToken).ConfigureAwait(false);
                 // restart loop
                 StartBackgroundLoop();
             }
             else if (this._options.CurrentValue.Statuses?.Any() != true)
-                await context.ReplyAsync($"{einherjiOptions.FailureSymbol} Status not changed - ensure status list is not empty.", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{ResponseEmote.FailureSymbol} Status not changed - ensure status list is not empty.", cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<Status> RandomizeStatusAsync(DiscordSocketClient client, CancellationToken cancellationToken)

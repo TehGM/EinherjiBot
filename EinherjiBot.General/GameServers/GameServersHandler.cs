@@ -20,17 +20,14 @@ namespace TehGM.EinherjiBot.GameServers
     public class GameServersHandler
     {
         private readonly IGameServerStore _gameServersStore;
-        private readonly EinherjiOptions _einherjiOptions;
         private readonly GameServersOptions _gameServersOptions;
         private readonly ILogger _log;
 
         private bool IsAutoRemoving => _gameServersOptions?.AutoRemoveDelay > TimeSpan.Zero;
 
-        public GameServersHandler(ILogger<GameServersHandler> log, IGameServerStore gameServersStore,
-            IOptionsSnapshot<EinherjiOptions> einherjiOptions, IOptionsSnapshot<GameServersOptions> gameServersOptions)
+        public GameServersHandler(ILogger<GameServersHandler> log, IGameServerStore gameServersStore, IOptionsSnapshot<GameServersOptions> gameServersOptions)
         {
             this._gameServersStore = gameServersStore;
-            this._einherjiOptions = einherjiOptions.Value;
             this._gameServersOptions = gameServersOptions.Value;
             this._log = log;
         }
@@ -87,7 +84,7 @@ namespace TehGM.EinherjiBot.GameServers
                 sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             else
             {
-                _ = context.InlineReplyAsync($"{_einherjiOptions.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
+                _ = context.InlineReplyAsync($"{ResponseEmote.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
                 Task<IUserMessage> pmTask = context.User.SendMessageAsync(text, false, embed.Build(), new RequestOptions { CancelToken = cancellationToken });
                 sentMsg = await pmTask.ConfigureAwait(false);
             }
@@ -145,10 +142,10 @@ namespace TehGM.EinherjiBot.GameServers
         }
 
         private Task SendNameRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} Please specify game name.", cancellationToken);
+            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Please specify game name.", cancellationToken);
         private Task SendServerNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} Server for game `{gameName}` not found!", cancellationToken);
+            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Server for game `{gameName}` not found!", cancellationToken);
         private Task SendUnatuthorizedAsync(ISocketMessageChannel channel, GameServer server, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{_einherjiOptions.FailureSymbol} You're not authorized to access {server.Game} server.", cancellationToken);
+            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} You're not authorized to access {server.Game} server.", cancellationToken);
     }
 }

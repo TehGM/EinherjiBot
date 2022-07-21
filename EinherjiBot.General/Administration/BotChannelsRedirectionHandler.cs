@@ -16,16 +16,14 @@ namespace TehGM.EinherjiBot.Administration
     {
         private readonly DiscordSocketClient _client;
         private readonly IOptionsMonitor<BotChannelsRedirectionOptions> _redirectionOptions;
-        private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly ILogger _log;
         private readonly CancellationTokenSource _hostCts;
 
         public BotChannelsRedirectionHandler(DiscordSocketClient client, ILogger<BotChannelsRedirectionHandler> log,
-            IOptionsMonitor<BotChannelsRedirectionOptions> redirectionOptions, IOptionsMonitor<EinherjiOptions> einherjiOptions)
+            IOptionsMonitor<BotChannelsRedirectionOptions> redirectionOptions)
         {
             this._client = client;
             this._redirectionOptions = redirectionOptions;
-            this._einherjiOptions = einherjiOptions;
             this._log = log;
             this._hostCts = new CancellationTokenSource();
 
@@ -67,7 +65,7 @@ namespace TehGM.EinherjiBot.Administration
                     string channelsText = GetChannelsMentionsText(redirection.AllowedChannelIDs, user);
                     if (channelsText == null)
                         return;
-                    await msg.ReplyAsync($"{_einherjiOptions.CurrentValue.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
+                    await msg.ReplyAsync($"{ResponseEmote.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
                 }
             }
         }
