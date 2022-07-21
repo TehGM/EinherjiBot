@@ -4,6 +4,7 @@ using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot
 {
+    #pragma warning disable EB011 // Slash commands class doesn't inherit from EinherjiInteractionModule
     public class EinherjiInteractionModule<TContext> : InteractionModuleBase<TContext> where TContext : class, IInteractionContext
     {
         protected Task RespondAsync(string text, Embed embed, CancellationToken cancellationToken)
@@ -31,4 +32,5 @@ namespace TehGM.EinherjiBot
         protected RequestOptions GetRequestOptions()
             => this.GetRequestOptions(base.Context.CancellationToken);
     }
+    #pragma warning restore EB011 // Slash commands class doesn't inherit from EinherjiInteractionModule
 }
