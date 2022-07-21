@@ -15,7 +15,6 @@ namespace TehGM.EinherjiBot.RandomStatus
     public class RandomStatusHandler : IDisposable
     {
         private readonly IOptionsMonitor<RandomStatusOptions> _options;
-        private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly DiscordSocketClient _client;
         private readonly ILogger _log;
         private readonly IDisposable _optionsChangeRegistration;
@@ -25,11 +24,9 @@ namespace TehGM.EinherjiBot.RandomStatus
 
         private DateTime _lastChangeUtc;
 
-        public RandomStatusHandler(IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<RandomStatusOptions> options, 
-            DiscordSocketClient client, ILogger<RandomStatusHandler> log, IAdvancedStatusConverter converter)
+        public RandomStatusHandler(IOptionsMonitor<RandomStatusOptions> options, DiscordSocketClient client, ILogger<RandomStatusHandler> log, IAdvancedStatusConverter converter)
         {
             this._options = options;
-            this._einherjiOptions = einherjiOptions;
             this._client = client;
             this._log = log;
             this._random = new Random();
@@ -70,8 +67,7 @@ namespace TehGM.EinherjiBot.RandomStatus
         [Hidden]
         private async Task CmdRandomizeStatus(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
-            EinherjiOptions einherjiOptions = this._einherjiOptions.CurrentValue;
-            if (context.User.Id != einherjiOptions.AuthorID)
+            if (context.User.Id != BotInfo.AuthorID)
             {
                 await context.ReplyAsync($"{ResponseEmote.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!",
                     cancellationToken).ConfigureAwait(false);

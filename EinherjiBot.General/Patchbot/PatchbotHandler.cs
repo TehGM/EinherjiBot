@@ -22,17 +22,14 @@ namespace TehGM.EinherjiBot.Patchbot
         private const char _namesSeparator = '|';
         private readonly DiscordSocketClient _client;
         private readonly IPatchbotGamesStore _patchbotGamesStore;
-        private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<PatchbotOptions> _patchbotOptions;
         private readonly CancellationTokenSource _hostCts;
         private readonly ILogger _log;
 
-        public PatchbotHandler(DiscordSocketClient client, ILogger<PatchbotHandler> log, IPatchbotGamesStore patchbotGameStore,
-            IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<PatchbotOptions> patchbotOptions)
+        public PatchbotHandler(DiscordSocketClient client, ILogger<PatchbotHandler> log, IPatchbotGamesStore patchbotGameStore, IOptionsMonitor<PatchbotOptions> patchbotOptions)
         {
             this._client = client;
             this._patchbotGamesStore = patchbotGameStore;
-            this._einherjiOptions = einherjiOptions;
             this._patchbotOptions = patchbotOptions;
             this._log = log;
             this._hostCts = new CancellationTokenSource();
@@ -179,7 +176,7 @@ namespace TehGM.EinherjiBot.Patchbot
         private async Task CmdAddGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
-            if (context.User.Id != _einherjiOptions.CurrentValue.AuthorID)
+            if (context.User.Id != BotInfo.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel, cancellationToken).ConfigureAwait(false);
                 return;
@@ -228,7 +225,7 @@ namespace TehGM.EinherjiBot.Patchbot
         private async Task CmdRemoveGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
-            if (context.User.Id != _einherjiOptions.CurrentValue.AuthorID)
+            if (context.User.Id != BotInfo.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel, cancellationToken).ConfigureAwait(false);
                 return;

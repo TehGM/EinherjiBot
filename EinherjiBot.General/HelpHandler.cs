@@ -100,7 +100,7 @@ namespace TehGM.EinherjiBot
             embed.Title = $"{context.Client.CurrentUser.Username} Bot";
             embed.Description = $"Personal administration bot developed by {GetAuthorText(context)}.";
             embed.ThumbnailUrl = context.Client.CurrentUser.GetMaxAvatarUrl();
-            embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfoUtility.GetVersion()}", context.Client.CurrentUser.GetSafeAvatarUrl());
+            embed.WithFooter($"{context.Client.CurrentUser.Username} Bot, v{BotInfo.BotVersion}", context.Client.CurrentUser.GetSafeAvatarUrl());
             return embed;
         }
 
@@ -156,14 +156,13 @@ namespace TehGM.EinherjiBot
 
         private string GetAuthorText(SocketCommandContext context)
         {
-            ulong id = _einherjiOptions.AuthorID;
             if (!context.IsPrivate)
             {
-                SocketGuildUser guildUser = context.Guild.GetUser(id);
+                SocketGuildUser guildUser = context.Guild.GetUser(BotInfo.AuthorID);
                 if (guildUser != null)
-                    return MentionUtils.MentionUser(id);
+                    return MentionUtils.MentionUser(BotInfo.AuthorID);
             }
-            SocketUser user = context.Client.GetUser(id);
+            SocketUser user = context.Client.GetUser(BotInfo.AuthorID);
             if (user != null)
                 return $"{user.Username}#{user.Discriminator}";
             return "TehGM";
