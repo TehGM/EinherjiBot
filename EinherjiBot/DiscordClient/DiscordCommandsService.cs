@@ -15,16 +15,14 @@ namespace TehGM.EinherjiBot.DiscordClient
         private readonly DiscordOptions _options;
         private readonly InteractionService _interactions;
         private readonly IServiceProvider _services;
-        private readonly IUserContextProvider _userContextProvider;
         private readonly ILogger _log;
         private CancellationTokenSource _cts;
 
-        public DiscordCommandsService(DiscordSocketClient client, IServiceProvider services, IUserContextProvider userContextProvider,
+        public DiscordCommandsService(DiscordSocketClient client, IServiceProvider services,
             ILogger<DiscordCommandsService> log, IOptions<DiscordOptions> options)
         {
             this._client = client;
             this._services = services;
-            this._userContextProvider = userContextProvider;
             this._log = log;
             this._options = options.Value;
             this._interactions = new InteractionService(this._client, new InteractionServiceConfig()
@@ -91,12 +89,16 @@ namespace TehGM.EinherjiBot.DiscordClient
 
         private async Task OnInteractionAsync(SocketInteraction interaction)
         {
-            IUserContext userContext = await this._userContextProvider.GetUserContextAsync(interaction.User.Id, this._cts.Token);
+            using IServiceScope scope = this._services.CreateScope();
+            IUserContextProvider userContextProvider = scope.ServiceProvider.GetRequiredService<IUserContextProvider>();
+            IUserContext userContext = await userContextProvider.GetUserContextAsync(interaction.User.Id, this._cts.Token);
+            userContextProvider.Current = userContext;
+
             EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, userContext, this._cts.Token);
             using IDisposable logScope = this.BeginCommandScope(ctx, null, null);
+
             try
             {
-                using IServiceScope scope = this._services.CreateScope();
                 await this._interactions.ExecuteCommandAsync(ctx, scope.ServiceProvider);
             }
             catch (HttpException ex) when (ex.IsMissingPermissions())

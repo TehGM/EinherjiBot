@@ -15,7 +15,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMongoDB();
             services.AddEntityCaching();
             services.TryAddSingleton<IUserSecurityDataStore, MongoUserSecurityDataStore>();
-            services.TryAddSingleton<IUserContextProvider, DiscordSocketUserContextProvider>();
+            services.TryAddScoped<IUserContextProvider, DiscordSocketUserContextProvider>();
+            services.TryAddScoped<IUserContext>(services => services.GetRequiredService<IUserContextProvider>().Current);
 
             return services;
         }

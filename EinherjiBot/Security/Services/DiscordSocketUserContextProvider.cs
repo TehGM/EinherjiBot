@@ -5,6 +5,8 @@ namespace TehGM.EinherjiBot.Security.Services
 {
     public class DiscordSocketUserContextProvider : IUserContextProvider, IDisposable
     {
+        public IUserContext Current { get; set; }
+
         private readonly IDiscordClient _client;
         private readonly IUserSecurityDataStore _store;
         private readonly IEntityCache<ulong, UserSecurityData> _userDataCache;
