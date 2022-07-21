@@ -2,6 +2,6 @@
 {
     public static class DiagnosticID
     {
-        public const string NotEinherjiBaseClass = "EB011";
+        public const string NotEinherjiBaseClass = "EB0101";
     }
 }
