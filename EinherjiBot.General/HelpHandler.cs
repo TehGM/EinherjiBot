@@ -19,17 +19,15 @@ namespace TehGM.EinherjiBot
     public class HelpHandler
     {
         private readonly CommandsOptions _commandsOptions;
-        private readonly EinherjiOptions _einherjiOptions;
         private readonly CommunityGoalsOptions _eliteOptions;
         private readonly ILogger _log;
         private readonly SimpleCommandHandler _simpleCommands;
         private readonly RegexCommandHandler _regexCommands;
 
-        public HelpHandler(ILogger<HelpHandler> log, IOptionsSnapshot<EinherjiOptions> einherjiOptions, IOptionsSnapshot<CommandsOptions> commandsOptions,
+        public HelpHandler(ILogger<HelpHandler> log, IOptionsSnapshot<CommandsOptions> commandsOptions,
             IOptionsSnapshot<CommunityGoalsOptions> eliteOptions, SimpleCommandHandler simpleCommands, RegexCommandHandler regexCommands)
         {
             this._commandsOptions = commandsOptions.Value;
-            this._einherjiOptions = einherjiOptions.Value;
             this._eliteOptions = eliteOptions.Value;
             this._log = log;
             this._simpleCommands = simpleCommands;

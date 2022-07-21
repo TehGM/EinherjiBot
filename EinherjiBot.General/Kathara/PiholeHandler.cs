@@ -27,15 +27,13 @@ namespace TehGM.EinherjiBot.Kathara
         private readonly ILogger _log;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IOptionsMonitor<PiholeOptions> _piholeOptions;
-        private readonly IOptionsMonitor<EinherjiOptions> _einherjiOptions;
         private readonly IOptionsMonitor<CommandsOptions> _commandsOptions;
 
         public PiholeHandler(ILogger<PiholeHandler> log, IHttpClientFactory httpClientFactory,
-            IOptionsMonitor<PiholeOptions> piholeOptions, IOptionsMonitor<EinherjiOptions> einherjiOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
+            IOptionsMonitor<PiholeOptions> piholeOptions, IOptionsMonitor<CommandsOptions> commandsOptions)
         {
             this._log = log;
             this._httpClientFactory = httpClientFactory;
-            this._einherjiOptions = einherjiOptions;
             this._piholeOptions = piholeOptions;
             this._commandsOptions = commandsOptions;
         }
@@ -78,7 +76,6 @@ namespace TehGM.EinherjiBot.Kathara
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
-            EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;
 
             // check instance exists
@@ -119,7 +116,7 @@ namespace TehGM.EinherjiBot.Kathara
             {
                 if (!response.IsSuccessStatusCode)
                 {
-                    embed.WithColor(einherjiOptions.EmbedErrorColor);
+                    embed.WithColor(EinherjiColor.ErrorColor);
                     await context.ReplyAsync($"{EinherjiEmote.FailureSymbol} Request to PiHole API failed: {response.ReasonPhrase} ({response.StatusCode})", false, embed.Build(), cancellationToken).ConfigureAwait(false);
                     await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
                     return;
@@ -127,7 +124,7 @@ namespace TehGM.EinherjiBot.Kathara
                 string responseContentRaw = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!TryParseJObject(responseContentRaw, out JObject responseContentJson))
                 {
-                    embed.WithColor(einherjiOptions.EmbedErrorColor);
+                    embed.WithColor(EinherjiColor.ErrorColor);
                     await context.ReplyAsync($"{EinherjiEmote.FailureSymbol} Failed to query PiHole. Please refer to bot logs.", false, embed.Build(), cancellationToken).ConfigureAwait(false);
                     await workingNotification.DeleteAsync(cancellationToken).ConfigureAwait(false);
                     _log.LogError("Failed querying PiHole instance {InstanceID}: {ResponseMessage}", instanceName, responseContentRaw);
@@ -141,7 +138,7 @@ namespace TehGM.EinherjiBot.Kathara
 
                 // put into embed
                 embed.AddField("Status", data.IsEnabled ? $"{EinherjiEmote.SuccessSymbol} Enabled" : $"{EinherjiEmote.FailureSymbol} Disabled", false);
-                embed.WithColor(data.IsEnabled ? einherjiOptions.EmbedSuccessColor : einherjiOptions.EmbedErrorColor);
+                embed.WithColor(data.IsEnabled ? EinherjiColor.SuccessColor : EinherjiColor.ErrorColor);
                 embed.AddField("Domains on block list", data.DomainsBeingBlocked.ToString("N0"), true);
                 embed.AddField("DNS queries today", data.DnsQueriesToday.ToString("N0"), true);
                 embed.AddField("Ads blocked today", $"{data.AdsBlockedToday:N0} ({data.AdsPercentageToday}%)", true);
@@ -169,7 +166,6 @@ namespace TehGM.EinherjiBot.Kathara
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
-            EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;
 
             // check instance exists
@@ -227,7 +223,6 @@ namespace TehGM.EinherjiBot.Kathara
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
             PiholeOptions piholeOptions = _piholeOptions.CurrentValue;
-            EinherjiOptions einherjiOptions = _einherjiOptions.CurrentValue;
             string instanceID = match.Groups[1].Value;
 
             // check instance exists

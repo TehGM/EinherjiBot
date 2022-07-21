@@ -19,17 +19,15 @@ namespace TehGM.EinherjiBot.Netflix
     {
         private readonly INetflixAccountStore _netflixAccountStore;
         private readonly NetflixAccountOptions _netflixAccountOptions;
-        private readonly EinherjiOptions _einherjiOptions;
         private readonly ILogger _log;
 
         private bool IsAutoRemoving => _netflixAccountOptions?.AutoRemoveDelay > TimeSpan.Zero;
 
-        public NetflixHandler(INetflixAccountStore netflixAccountStore, ILogger<NetflixHandler> log, IOptionsSnapshot<NetflixAccountOptions> netflixAccountOptions, IOptionsSnapshot<EinherjiOptions> einherjiOptions)
+        public NetflixHandler(INetflixAccountStore netflixAccountStore, ILogger<NetflixHandler> log, IOptionsSnapshot<NetflixAccountOptions> netflixAccountOptions)
         {
             this._netflixAccountStore = netflixAccountStore;
             this._log = log;
             this._netflixAccountOptions = netflixAccountOptions.Value;
-            this._einherjiOptions = einherjiOptions.Value;
         }
 
         [RegexCommand("^netflix (?:password|account|login)")]
@@ -142,7 +140,7 @@ namespace TehGM.EinherjiBot.Netflix
             EmbedBuilder embed = new EmbedBuilder()
                 .AddField("Login", account.Login)
                 .AddField("Password", account.Password)
-                .WithColor(_einherjiOptions.EmbedSuccessColor)
+                .WithColor(EinherjiColor.SuccessColor)
                 .WithThumbnailUrl("https://historia.org.pl/wp-content/uploads/2018/04/netflix-logo.jpg");
             if (modifiedBy != null)
             {
@@ -155,7 +153,7 @@ namespace TehGM.EinherjiBot.Netflix
         private Task SendErrorAsync(string text, ISocketMessageChannel channel, string mention = null, CancellationToken cancellationToken = default)
         {
             EmbedBuilder embed = new EmbedBuilder()
-                .WithColor(_einherjiOptions.EmbedErrorColor)
+                .WithColor(EinherjiColor.ErrorColor)
                 .WithTitle("Error")
                 .WithDescription(text);
             return channel.SendMessageAsync(mention, false, embed.Build(), cancellationToken);

@@ -45,7 +45,6 @@ namespace TehGM.EinherjiBot
                 .ConfigureServices((context, services) =>
                 {
                     // configure options
-                    services.Configure<EinherjiOptions>(context.Configuration);
                     services.Configure<Database.MongoOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
