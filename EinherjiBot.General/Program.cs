@@ -58,7 +58,6 @@ namespace TehGM.EinherjiBot
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
                     services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
-                    services.Configure<GameServersOptions>(context.Configuration.GetSection("GameServers"));
 
                     // add framework services
 

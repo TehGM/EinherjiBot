@@ -77,6 +77,7 @@ namespace TehGM.EinherjiBot
             services.AddUserIntel();
             services.AddAdministration();
             services.AddRandomStatus();
+            services.AddGameServers();
         }
 
         private static void ConfigureApplication(WebApplication app)
