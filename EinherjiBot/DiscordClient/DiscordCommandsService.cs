@@ -40,8 +40,10 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._client.MessageCommandExecuted += this.OnMessageCommandAsync;
             this._client.ButtonExecuted += this.OnButtonCommandAsync;
             this._client.SelectMenuExecuted += this.OnMenuCommandAsync;
+            this._client.AutocompleteExecuted += this.OnAutocompleteAsync;
             this._interactions.Log += this.OnLog;
         }
+
 
         private static void AddTypeConverters(InteractionService interactions)
         {
@@ -95,6 +97,8 @@ namespace TehGM.EinherjiBot.DiscordClient
         private Task OnMenuCommandAsync(SocketMessageComponent interaction)
             => this.OnInteractionAsync(interaction);
         private Task OnButtonCommandAsync(SocketMessageComponent interaction)
+            => this.OnInteractionAsync(interaction);
+        private Task OnAutocompleteAsync(SocketAutocompleteInteraction interaction)
             => this.OnInteractionAsync(interaction);
 
         private async Task OnInteractionAsync(SocketInteraction interaction)
