@@ -6,7 +6,7 @@ namespace TehGM.EinherjiBot.Caching.Services
     {
         public int CachedCount => _cachedEntities.Count;
         public ICachedEntityExpiration DefaultExpiration { get; set; } 
-            = new SlidingEntityExpiration(TimeSpan.FromMinutes(10));
+            = new TimeSpanEntityExpiration(TimeSpan.FromMinutes(10));
 
         private readonly IDictionary<TKey, CachedEntity<TKey, TEntity>> _cachedEntities;
 
