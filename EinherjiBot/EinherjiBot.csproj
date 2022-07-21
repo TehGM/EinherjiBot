@@ -23,4 +23,9 @@
     <ProjectReference Include="..\EinherjiBot.UI\EinherjiBot.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+  	<ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder\StatusPlaceholder.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  	<ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder.CodeFixes\StatusPlaceholder.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
+
 </Project>
