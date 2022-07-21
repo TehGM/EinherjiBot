@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
 using TehGM.EinherjiBot.Security;
@@ -95,7 +96,8 @@ namespace TehGM.EinherjiBot.DiscordClient
             using IDisposable logScope = this.BeginCommandScope(ctx, null, null);
             try
             {
-                await this._interactions.ExecuteCommandAsync(ctx, this._services);
+                using IServiceScope scope = this._services.CreateScope();
+                await this._interactions.ExecuteCommandAsync(ctx, scope.ServiceProvider);
             }
             catch (HttpException ex) when (ex.IsMissingPermissions())
             {
