@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
+using TehGM.EinherjiBot.DiscordClient.Converters;
 using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.DiscordClient
@@ -31,6 +32,8 @@ namespace TehGM.EinherjiBot.DiscordClient
                 UseCompiledLambda = this._options.CompileCommands
             });
 
+            AddTypeConverters(this._interactions);
+
             this._client.Ready += this.OnClientReady;
             this._client.SlashCommandExecuted += this.OnSlashCommandAsync;
             this._client.UserCommandExecuted += this.OnUserCommandAsync;
@@ -38,6 +41,11 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._client.ButtonExecuted += this.OnButtonCommandAsync;
             this._client.SelectMenuExecuted += this.OnMenuCommandAsync;
             this._interactions.Log += this.OnLog;
+        }
+
+        private static void AddTypeConverters(InteractionService interactions)
+        {
+            interactions.AddTypeConverter<Guid>(new GuidTypeConverter());
         }
 
         private async Task OnClientReady()
