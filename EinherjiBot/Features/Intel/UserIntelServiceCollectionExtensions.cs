@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMongoDB();
             services.AddEntityCaching();
             services.TryAddSingleton<IUserIntelStore, MongoUserIntelStore>();
-            services.TryAddSingleton<IUserIntelProvider, UserIntelProvider>();
+            services.TryAddTransient<IUserIntelProvider, UserIntelProvider>();
             services.AddHostedService<UserStatusListener>();
 
             return services;

@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configureOptions != null)
                 services.Configure(configureOptions);
 
-            services.AddSingleton<IStatusPlaceholderEngine, StatusPlaceholderEngine>(services =>
+            services.TryAddSingleton<IStatusPlaceholderEngine>(services =>
             {
                 StatusPlaceholderEngine engine = ActivatorUtilities.CreateInstance<StatusPlaceholderEngine>(services);
                 ILogger log = services.GetRequiredService<ILogger<StatusPlaceholderEngine>>();
