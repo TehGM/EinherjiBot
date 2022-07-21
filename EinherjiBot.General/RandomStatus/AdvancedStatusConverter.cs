@@ -13,7 +13,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
 
             StringBuilder result = new StringBuilder(status.Text);
 
-            result.Replace(AdvancedStatusVariables.BotVersion, $"v{BotInfo.BotVersion}");
+            result.Replace(AdvancedStatusVariables.BotVersion, $"v{EinherjiInfo.BotVersion}");
 
             return Task.FromResult(result.ToString());
         }

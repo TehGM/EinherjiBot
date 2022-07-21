@@ -176,7 +176,7 @@ namespace TehGM.EinherjiBot.Patchbot
         private async Task CmdAddGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
-            if (context.User.Id != BotInfo.AuthorID)
+            if (context.User.Id != EinherjiInfo.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel, cancellationToken).ConfigureAwait(false);
                 return;
@@ -225,7 +225,7 @@ namespace TehGM.EinherjiBot.Patchbot
         private async Task CmdRemoveGameAsync(SocketCommandContext context, Match match, CancellationToken cancellationToken = default)
         {
             using IDisposable logScope = _log.BeginCommandScope(context, this);
-            if (context.User.Id != BotInfo.AuthorID)
+            if (context.User.Id != EinherjiInfo.AuthorID)
             {
                 await SendInsufficientPermissionsAsync(context.Channel, cancellationToken).ConfigureAwait(false);
                 return;

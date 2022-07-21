@@ -67,7 +67,7 @@ namespace TehGM.EinherjiBot.RandomStatus
         [Hidden]
         private async Task CmdRandomizeStatus(SocketCommandContext context, CancellationToken cancellationToken = default)
         {
-            if (context.User.Id != BotInfo.AuthorID)
+            if (context.User.Id != EinherjiInfo.AuthorID)
             {
                 await context.ReplyAsync($"{EinherjiEmote.FailureSymbol} You have no rights to tell me ~~how to live my life~~ do this!",
                     cancellationToken).ConfigureAwait(false);

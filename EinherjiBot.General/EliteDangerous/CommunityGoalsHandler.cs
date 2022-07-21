@@ -199,7 +199,7 @@ namespace TehGM.EinherjiBot.EliteDangerous
             JObject query = new JObject();
             query.Add("header", new JObject(
                 new JProperty("appName", options.InaraAppName),
-                new JProperty("appVersion", options.InaraAppVersion ?? BotInfo.BotVersion),
+                new JProperty("appVersion", options.InaraAppVersion ?? EinherjiInfo.BotVersion),
                 new JProperty("isDeveloped", options.InaraAppInDevelopment),
                 new JProperty("APIkey", options.InaraApiKey)));
             JObject eventParams = new JObject(
