@@ -1,6 +1,7 @@
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
+global using System.Text.RegularExpressions;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Microsoft.Extensions.Logging;
@@ -59,6 +60,7 @@ namespace TehGM.EinherjiBot
         {
             services.Configure<Database.MongoOptions>(configuration.GetSection("Database"));
             services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
+            services.Configure<RandomStatus.RandomStatusOptions>(configuration.GetSection("RandomStatus"));
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -70,9 +72,11 @@ namespace TehGM.EinherjiBot
             services.AddEntityCaching();
             services.AddUserContext();
             services.AddBotAudits();
+            services.AddRandomizer();
 
             services.AddUserIntel();
             services.AddAdministration();
+            services.AddRandomStatus();
         }
 
         private static void ConfigureApplication(WebApplication app)

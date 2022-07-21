@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.7.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.7" />
+    <PackageReference Include="TehGM.Utilities.Randomization" Version="0.1.0" />
   </ItemGroup>
 
   <ItemGroup>
