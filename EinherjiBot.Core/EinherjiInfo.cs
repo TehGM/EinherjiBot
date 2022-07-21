@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot
 {
-    public class EinherjiInfo
+    public static class EinherjiInfo
     {
         public const string Name = "Einherji";
         public const ulong AuthorID = 247081094799687682;
