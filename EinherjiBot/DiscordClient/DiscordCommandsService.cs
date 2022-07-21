@@ -52,15 +52,17 @@ namespace TehGM.EinherjiBot.DiscordClient
         {
             this._log.LogTrace("Loading all command modules");
 
+            using IServiceScope scope = this._services.CreateScope();
+
             if (this._options.OverrideCommandsGuildID != null)
             {
                 this._log.LogDebug("Registering all commands for guild {GuildID}", this._options.OverrideCommandsGuildID.Value);
-                await this._interactions.AddModulesAsync(this.GetType().Assembly, this._services);
+                await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider);
                 await this._interactions.RegisterCommandsToGuildAsync(this._options.OverrideCommandsGuildID.Value).ConfigureAwait(false);
             }
             else
             {
-                IEnumerable<ModuleInfo> modules = await this._interactions.AddModulesAsync(this.GetType().Assembly, this._services).ConfigureAwait(false);
+                IEnumerable<ModuleInfo> modules = await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider).ConfigureAwait(false);
 
                 this._log.LogDebug("Registering global commands");
                 IEnumerable<ModuleInfo> globalCommands = modules
