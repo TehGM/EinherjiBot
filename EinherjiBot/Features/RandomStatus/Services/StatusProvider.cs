@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.RandomStatus.Services
 {
-    public class StatusProvider : IStatusProvider
+    public class StatusProvider : IStatusProvider, IDisposable
     {
         private readonly IStatusStore _store;
         private readonly IEntityCache<Guid, Status> _cache;
@@ -79,6 +79,11 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
         {
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
+        }
+
+        public void Dispose()
+        {
+            try { this._lock?.Dispose(); } catch { }
         }
     }
 }
