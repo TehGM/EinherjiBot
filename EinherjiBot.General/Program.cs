@@ -40,7 +40,11 @@ namespace TehGM.EinherjiBot
             LoggingConfiguration.StartLoggingUnhandledExceptions();
 
             IHost host = Host.CreateDefaultBuilder(args)
-                .ConfigureSecretsFiles()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config.AddJsonFile("appsecrets.json", optional: true);
+                    config.AddJsonFile($"appsecrets.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
+                })
                 .UseSerilog(ConfigureSerilog, true)
                 .ConfigureServices((context, services) =>
                 {
