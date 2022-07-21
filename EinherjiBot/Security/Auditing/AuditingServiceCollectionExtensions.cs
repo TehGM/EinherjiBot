@@ -38,6 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 string discriminator = type.GetCustomAttribute<BsonDiscriminatorAttribute>()?.Discriminator
                     ?? type.Name;
                 BsonClassMap map = new BsonClassMap(type);
+                map.AutoMap();
                 map.SetDiscriminatorIsRequired(true);
                 map.SetDiscriminator(discriminator);
                 BsonClassMap.RegisterClassMap(map);
