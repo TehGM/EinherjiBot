@@ -24,8 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-  	<ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder\StatusPlaceholder.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
-  	<ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder.CodeFixes\StatusPlaceholder.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	  <ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder\StatusPlaceholder.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	  <ProjectReference Include="..\Analyzers\StatusPlaceholder\StatusPlaceholder.CodeFixes\StatusPlaceholder.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	  <ProjectReference Include="..\Analyzers\SlashCommands\SlashCommands\SlashCommands.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+	  <ProjectReference Include="..\Analyzers\SlashCommands\SlashCommands.CodeFixes\SlashCommands.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
   </ItemGroup>
 
 </Project>
