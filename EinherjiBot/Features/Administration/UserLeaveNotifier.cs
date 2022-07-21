@@ -36,7 +36,7 @@ namespace TehGM.EinherjiBot.Features.Administration
             EmbedBuilder embed = new EmbedBuilder()
                 .WithDescription($"**{user.Mention}** *(`{user.GetUsernameWithDiscriminator()}`)* **has left.**")
                 .WithColor((Color)System.Drawing.Color.Cyan);
-            await guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), base.CancellationToken);
+            await guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), base.CancellationToken).ConfigureAwait(false);
         }
 
         public override void Dispose()
