@@ -84,7 +84,7 @@ namespace TehGM.EinherjiBot.GameServers
                 sentMsg = await context.ReplyAsync(text, false, embed.Build(), cancellationToken).ConfigureAwait(false);
             else
             {
-                _ = context.InlineReplyAsync($"{ResponseEmote.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
+                _ = context.InlineReplyAsync($"{EinherjiEmote.SuccessSymbol} I will send you a private message with info on how to connect to the server!");
                 Task<IUserMessage> pmTask = context.User.SendMessageAsync(text, false, embed.Build(), new RequestOptions { CancelToken = cancellationToken });
                 sentMsg = await pmTask.ConfigureAwait(false);
             }
@@ -142,10 +142,10 @@ namespace TehGM.EinherjiBot.GameServers
         }
 
         private Task SendNameRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Please specify game name.", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Please specify game name.", cancellationToken);
         private Task SendServerNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Server for game `{gameName}` not found!", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Server for game `{gameName}` not found!", cancellationToken);
         private Task SendUnatuthorizedAsync(ISocketMessageChannel channel, GameServer server, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} You're not authorized to access {server.Game} server.", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} You're not authorized to access {server.Game} server.", cancellationToken);
     }
 }

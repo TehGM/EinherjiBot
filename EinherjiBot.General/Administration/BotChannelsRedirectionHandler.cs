@@ -65,7 +65,7 @@ namespace TehGM.EinherjiBot.Administration
                     string channelsText = GetChannelsMentionsText(redirection.AllowedChannelIDs, user);
                     if (channelsText == null)
                         return;
-                    await msg.ReplyAsync($"{ResponseEmote.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
+                    await msg.ReplyAsync($"{EinherjiEmote.FailureSymbol} {user.Mention}, please go to {channelsText} to use {GetUsersMentionsText(redirection.BotIDs)}.", _hostCts.Token);
                 }
             }
         }

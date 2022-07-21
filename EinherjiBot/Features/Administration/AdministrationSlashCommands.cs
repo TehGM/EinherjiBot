@@ -34,7 +34,7 @@ namespace TehGM.EinherjiBot.Features.Administration
                 }
             }
 
-            await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{ResponseEmote.SuccessSymbol} {msgs.Count()} previous message{(msgs.Count() > 1 ? "s were" : " was")} taken down.",
+            await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{EinherjiEmote.SuccessSymbol} {msgs.Count()} previous message{(msgs.Count() > 1 ? "s were" : " was")} taken down.",
                 base.GetRequestOptions()).ConfigureAwait(false);
         }
     }

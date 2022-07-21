@@ -140,7 +140,7 @@ namespace TehGM.EinherjiBot.Patchbot
             }
             if (game.SubscriberIDs.Add(context.User.Id))
                 await _patchbotGamesStore.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-            await context.ReplyAsync($"{ResponseEmote.SuccessSymbol} You will now get pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{EinherjiEmote.SuccessSymbol} You will now get pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot\sunsub(?:scribe)?(?: (.+))?")]
@@ -167,7 +167,7 @@ namespace TehGM.EinherjiBot.Patchbot
             }
             if (game.SubscriberIDs.Remove(context.User.Id))
                 await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
-            await context.ReplyAsync($"{ResponseEmote.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{EinherjiEmote.SuccessSymbol} You will no longer be pinged about `{game.Name}` updates.", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot add(?:\s(.+))?")]
@@ -216,7 +216,7 @@ namespace TehGM.EinherjiBot.Patchbot
             }
 
             await _patchbotGamesStore.UpdateAsync(game, cancellationToken).ConfigureAwait(false);
-            await context.ReplyAsync($"{ResponseEmote.SuccessSymbol} Game `{game.Name}` updated.", cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{EinherjiEmote.SuccessSymbol} Game `{game.Name}` updated.", cancellationToken).ConfigureAwait(false);
         }
 
         [RegexCommand(@"^patchbot\s(?:remove|del|delete)(?:\s(.+))?")]
@@ -249,19 +249,19 @@ namespace TehGM.EinherjiBot.Patchbot
             }
 
             await _patchbotGamesStore.DeleteAsync(game, cancellationToken).ConfigureAwait(false);
-            await context.ReplyAsync($"{ResponseEmote.SuccessSymbol} Game `{game.Name}` removed.", cancellationToken).ConfigureAwait(false);
+            await context.ReplyAsync($"{EinherjiEmote.SuccessSymbol} Game `{game.Name}` removed.", cancellationToken).ConfigureAwait(false);
         }
 
         private Task SendInsufficientPermissionsAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Insufficient permissions.", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Insufficient permissions.", cancellationToken);
         private Task SendGameNotFoundAsync(ISocketMessageChannel channel, string gameName, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Game `{gameName}` not found!", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Game `{gameName}` not found!", cancellationToken);
         private Task SendIDNotValidAsync(ISocketMessageChannel channel, string value, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} `{value}` is not a valid webhook/bot ID!", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} `{value}` is not a valid webhook/bot ID!", cancellationToken);
         private Task SendNameAndAliasesRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Please specify game name and aliases (separated with `{_namesSeparator}`).", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Please specify game name and aliases (separated with `{_namesSeparator}`).", cancellationToken);
         private Task SendNameRequiredAsync(ISocketMessageChannel channel, CancellationToken cancellationToken = default)
-            => channel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Please specify game name.", cancellationToken);
+            => channel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Please specify game name.", cancellationToken);
 
         public void Dispose()
         {

@@ -60,7 +60,7 @@ namespace TehGM.EinherjiBot
                 return context.ReplyAsync(null, false, embed.Build(), cancellationToken);
             }
             else
-                return context.InlineReplyAsync($"{ResponseEmote.FailureSymbol} Ooops, I detected no commands... this obviously isn't right. Please let {GetAuthorText(context)} know!", cancellationToken);
+                return context.InlineReplyAsync($"{EinherjiEmote.FailureSymbol} Ooops, I detected no commands... this obviously isn't right. Please let {GetAuthorText(context)} know!", cancellationToken);
         }
 
         [RegexCommand(@"^help")]

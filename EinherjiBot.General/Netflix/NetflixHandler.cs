@@ -44,14 +44,14 @@ namespace TehGM.EinherjiBot.Netflix
             if (context.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: Group only");
-                await SendErrorAsync($"{ResponseEmote.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
+                await SendErrorAsync($"{EinherjiEmote.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
             IGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanRetrieve(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials retrieving: User not privileged");
-                await SendErrorAsync($"{ResponseEmote.FailureSymbol} You need {GetAllowedRolesMentionsText()} role to do this.", context.Channel).ConfigureAwait(false);
+                await SendErrorAsync($"{EinherjiEmote.FailureSymbol} You need {GetAllowedRolesMentionsText()} role to do this.", context.Channel).ConfigureAwait(false);
                 return;
             }
             if (!_netflixAccountOptions.IsChannelAllowed(context.Channel))
@@ -87,14 +87,14 @@ namespace TehGM.EinherjiBot.Netflix
             if (context.IsPrivate)
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: Group only");
-                await SendErrorAsync($"{ResponseEmote.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
+                await SendErrorAsync($"{EinherjiEmote.FailureSymbol} You can't do this in private message.\nGo to {GetAllowedChannelsMentionsText()}.", context.Channel).ConfigureAwait(false);
                 return;
             }
             IGuildUser user = await context.Guild.GetGuildUserAsync(context.User).ConfigureAwait(false);
             if (!_netflixAccountOptions.CanModify(user))
             {
                 _log.LogTrace("Aborting Netflix account credentials updating: User not privileged");
-                await SendErrorAsync($"{ResponseEmote.FailureSymbol} You need {GetAllowedRolesMentionsText()} role to do this.", context.Channel).ConfigureAwait(false);
+                await SendErrorAsync($"{EinherjiEmote.FailureSymbol} You need {GetAllowedRolesMentionsText()} role to do this.", context.Channel).ConfigureAwait(false);
                 return;
             }
             if (!_netflixAccountOptions.IsChannelAllowed(context.Channel))
@@ -114,12 +114,12 @@ namespace TehGM.EinherjiBot.Netflix
             if (mode == SetMode.Login)
             {
                 account.SetLogin(value, context.User.Id);
-                responseText = $"{ResponseEmote.SuccessSymbol} You have set Netflix account login to `{value}`.";
+                responseText = $"{EinherjiEmote.SuccessSymbol} You have set Netflix account login to `{value}`.";
             }
             if (mode == SetMode.Password)
             {
                 account.SetPassword(value, context.User.Id);
-                responseText = $"{ResponseEmote.SuccessSymbol} You have set Netflix account password to `{value}`.";
+                responseText = $"{EinherjiEmote.SuccessSymbol} You have set Netflix account password to `{value}`.";
             }
 
             await _netflixAccountStore.UpdateAsync(account, cancellationToken).ConfigureAwait(false);

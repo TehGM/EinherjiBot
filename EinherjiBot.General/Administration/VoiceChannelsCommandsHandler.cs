@@ -125,7 +125,7 @@ namespace TehGM.EinherjiBot.Administration
             int successCount = users.Length - errorCount;
             builder.AppendFormat("{0} user{1} {2} in {3}.", successCount.ToString(), successCount > 1 || successCount == 0 ? "s" : null, action.ActionCompletedWord, channelMention);
             if (errorCount > 0)
-                builder.AppendFormat("\nFailed to {3} {0} user{2}. {1}", errorCount.ToString(), ResponseEmote.FailureSymbol, errorCount > 1 ? "s" : null, action.ActionFailedWord);
+                builder.AppendFormat("\nFailed to {3} {0} user{2}. {1}", errorCount.ToString(), EinherjiEmote.FailureSymbol, errorCount > 1 ? "s" : null, action.ActionFailedWord);
             await response.ModifyAsync(props => props.Content = builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
@@ -146,7 +146,7 @@ namespace TehGM.EinherjiBot.Administration
             if (match.Groups.Count < 3)
             {
                 string prefix = _commandsOptions.CurrentValue.Prefix;
-                await context.ReplyAsync($"{ResponseEmote.FailureSymbol} Please specify __both__ channels IDs.\n***{_commandsOptions.CurrentValue.Prefix}move all from <original channel ID> to <target channel ID>***", cancellationToken).ConfigureAwait(false);
+                await context.ReplyAsync($"{EinherjiEmote.FailureSymbol} Please specify __both__ channels IDs.\n***{_commandsOptions.CurrentValue.Prefix}move all from <original channel ID> to <target channel ID>***", cancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -191,7 +191,7 @@ namespace TehGM.EinherjiBot.Administration
             int successCount = users.Length - errorCount;
             builder.AppendFormat("{0} user{3} moved from {1} to {2}.", successCount.ToString(), channelFromMention, channelToMention, successCount > 1 || successCount == 0 ? "s" : null);
             if (errorCount > 0)
-                builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errorCount.ToString(), ResponseEmote.FailureSymbol, errorCount > 1 ? "s" : null);
+                builder.AppendFormat("\nFailed to move {0} user{2}. {1}", errorCount.ToString(), EinherjiEmote.FailureSymbol, errorCount > 1 ? "s" : null);
             await response.ModifyAsync(props => props.Content = builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
@@ -203,7 +203,7 @@ namespace TehGM.EinherjiBot.Administration
 
             if (!ulong.TryParse(matchGroup.Value, out ulong id))
             {
-                await responseChannel.SendMessageAsync($"{ResponseEmote.FailureSymbol} `{matchGroup.Value}` is not a valid channel ID.`", cancellationToken).ConfigureAwait(false);
+                await responseChannel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} `{matchGroup.Value}` is not a valid channel ID.`", cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
@@ -212,21 +212,21 @@ namespace TehGM.EinherjiBot.Administration
             SocketChannel channel = _client.GetChannel(id);
             if (channel == null || !(channel is SocketGuildChannel guildChannel))
             {
-                await responseChannel.SendMessageAsync($"{ResponseEmote.FailureSymbol} I don't know any guild channel with ID `{id}`.", cancellationToken).ConfigureAwait(false);
+                await responseChannel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} I don't know any guild channel with ID `{id}`.", cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
             // verify channel is in guild
             if (guildChannel.Guild.Id != guild.Id)
             {
-                await responseChannel.SendMessageAsync($"{ResponseEmote.FailureSymbol} Channel **#{guildChannel.Name}** doesn't exist in **{guild.Name}** guild.", cancellationToken).ConfigureAwait(false);
+                await responseChannel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} Channel **#{guildChannel.Name}** doesn't exist in **{guild.Name}** guild.", cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
             // lastly make sure it is a voice channel
             if (!(guildChannel is SocketVoiceChannel voiceChannel))
             {
-                await responseChannel.SendMessageAsync($"{ResponseEmote.FailureSymbol} {MentionUtils.MentionChannel(id)} is not a voice channel.", cancellationToken).ConfigureAwait(false);
+                await responseChannel.SendMessageAsync($"{EinherjiEmote.FailureSymbol} {MentionUtils.MentionChannel(id)} is not a voice channel.", cancellationToken).ConfigureAwait(false);
                 return null;
             }
 
@@ -244,12 +244,12 @@ namespace TehGM.EinherjiBot.Administration
             string memberName = isSelf ? "I" : "You";
             if (!user.GetPermissions(channel).Has(ChannelPermission.ViewChannel | ChannelPermission.Connect))
             {
-                await context.InlineReplyAsync($"{ResponseEmote.FailureSymbol} {memberName} don't have access to {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{EinherjiEmote.FailureSymbol} {memberName} don't have access to {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
                 return false;
             }
             if (!user.GetPermissions(channel).Has(permission))
             {
-                await context.InlineReplyAsync($"{ResponseEmote.FailureSymbol} {memberName} don't have *{GetPermissionDisplayName(permission)}* permission in {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{EinherjiEmote.FailureSymbol} {memberName} don't have *{GetPermissionDisplayName(permission)}* permission in {GetVoiceChannelMention(channel)}.", cancellationToken).ConfigureAwait(false);
                 return false;
             }
             return true;
@@ -259,7 +259,7 @@ namespace TehGM.EinherjiBot.Administration
         {
             if (!(context.Channel is SocketTextChannel channel))
             {
-                await context.InlineReplyAsync($"{ResponseEmote.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{EinherjiEmote.FailureSymbol} Sir, this command is only applicable in guild channels.", cancellationToken).ConfigureAwait(false);
                 return null;
             }
             return channel;
@@ -278,7 +278,7 @@ namespace TehGM.EinherjiBot.Administration
                 targetChannel = user.VoiceChannel;
             if (targetChannel == null)
             {
-                await context.InlineReplyAsync($"{ResponseEmote.FailureSymbol} You need to either provide a voice channel ID, or be in a voice channel currently. Also ensure I have access to that voice channel.", cancellationToken).ConfigureAwait(false);
+                await context.InlineReplyAsync($"{EinherjiEmote.FailureSymbol} You need to either provide a voice channel ID, or be in a voice channel currently. Also ensure I have access to that voice channel.", cancellationToken).ConfigureAwait(false);
             }
             return new VoiceChannelMatch(targetChannel, user);
         }
