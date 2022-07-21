@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
 using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.RandomStatus.Services
@@ -14,7 +13,6 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
         private readonly IStatusProvider _provider;
         private readonly ILogger _log;
         private readonly IOptionsMonitor<RandomStatusOptions> _options;
-        private CancellationTokenSource _cts;
 
         private DateTime _lastChangeUtc;
 
