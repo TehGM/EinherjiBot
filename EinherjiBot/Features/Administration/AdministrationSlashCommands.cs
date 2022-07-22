@@ -8,6 +8,7 @@ namespace TehGM.EinherjiBot.Features.Administration
         [SlashCommand("purge", "Removes last X messages in current channel", true, RunMode.Async)]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [EnabledInDm(false)]
         public async Task PurgeAsync(
             [Summary("Count", "Count of messages to delete")] uint count)
         {
