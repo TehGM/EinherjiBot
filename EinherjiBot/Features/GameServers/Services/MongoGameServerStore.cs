@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
                 filters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedUserIDs, new[] { userID.Value }));
             if (roleIDs?.Any() == true)
                 filters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedRoleIDs, roleIDs));
-            return await this._collection.Find(Builders<GameServer>.Filter.Or(filters)).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await this._collection.Find(Builders<GameServer>.Filter.And(filters)).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public Task UpdateAsync(GameServer server, CancellationToken cancellationToken = default)
