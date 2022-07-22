@@ -13,9 +13,10 @@ namespace TehGM.EinherjiBot.GameServers.Commands
         private readonly IGameServerProvider _provider;
         private readonly IAuditStore<GameServerAuditEntry> _audit;
 
-        public GameServerSlashCommands(IGameServerProvider provider)
+        public GameServerSlashCommands(IGameServerProvider provider, IAuditStore<GameServerAuditEntry> audit)
         {
             this._provider = provider;
+            this._audit = audit;
         }
 
         [SlashCommand("info", "Retrieves info for our game servers that you have access to")]
