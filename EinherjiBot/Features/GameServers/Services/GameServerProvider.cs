@@ -1,5 +1,4 @@
 ﻿using TehGM.EinherjiBot.Caching;
-using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.GameServers.Services
 {
@@ -37,7 +36,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
 
                 if (result != null)
                     this._cache.AddOrReplace(result);
-                return result.IsAuthorized(this._auth) ? result : null;
+                return result.CanAccess(this._auth) ? result : null;
             }
             finally
             {
@@ -64,7 +63,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
                     foreach (GameServer result in results)
                         this._cache.AddOrReplace(result);
                 }
-                return results.Where(s => s.IsAuthorized(this._auth));
+                return results.Where(s => s.CanAccess(this._auth));
             }
             finally
             {

@@ -1,5 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
-using TehGM.EinherjiBot.Security;
+
 
 namespace TehGM.EinherjiBot.GameServers
 {
@@ -44,9 +44,12 @@ namespace TehGM.EinherjiBot.GameServers
         public Guid GetCacheKey()
             => this.ID;
 
-        public bool IsAuthorized(IAuthContext context)
+        public bool CanAccess(IAuthContext context)
             => context.IsAdmin() || this.IsPublic
             || this.AuthorizedUserIDs.Contains(context.UserID)
-            || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any(); 
+            || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any();
+
+        public bool CanEdit(IAuthContext context)
+            => context.IsAdmin();
     }
 }
