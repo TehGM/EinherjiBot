@@ -62,6 +62,7 @@ namespace TehGM.EinherjiBot
             services.Configure<Database.MongoOptions>(configuration.GetSection("Database"));
             services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
             services.Configure<RandomStatus.RandomStatusOptions>(configuration.GetSection("RandomStatus"));
+            services.Configure<SharedAccounts.SharedAccountOptions>(configuration.GetSection("SharedAccounts"));
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -79,6 +80,7 @@ namespace TehGM.EinherjiBot
             services.AddAdministration();
             services.AddRandomStatus();
             services.AddGameServers();
+            services.AddSharedAccounts();
         }
 
         private static void ConfigureApplication(WebApplication app)

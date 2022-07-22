@@ -17,9 +17,10 @@
         public string UserIntelCollectionName { get; set; } = "UserIntel";
         public string UserDataCollectionName { get; set; } = "UserData";
         public string RandomStatusCollectionName { get; set; } = "Statuses";
+        public string SharedAccountsCollectionName { get; set; } = "SharedAccounts";
+        public string GameServersCollectionName { get; set; } = "GameServers";
 
         public string PatchbotGamesCollectionName { get; set; } = "PatchbotGames";
         public string EliteCommunityGoalsCollectionName { get; set; } = "EliteCommunityGoals";
-        public string GameServersCollectionName { get; set; } = "GameServers";
     }
 }

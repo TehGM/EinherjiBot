@@ -15,8 +15,6 @@ using TehGM.EinherjiBot.GameServers;
 using TehGM.EinherjiBot.GameServers.Services;
 using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Logging;
-using TehGM.EinherjiBot.Netflix;
-using TehGM.EinherjiBot.Netflix.Services;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
 using TehGM.EinherjiBot.RandomStatus;
@@ -52,7 +50,6 @@ namespace TehGM.EinherjiBot
                     services.Configure<Database.MongoOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
-                    services.Configure<NetflixAccountOptions>(context.Configuration.GetSection("Netflix"));
                     services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
                     services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
@@ -68,7 +65,6 @@ namespace TehGM.EinherjiBot
 
                     // add bot features
                     services.AddUserIntel();
-                    services.AddNetflixAccount();
                     services.AddAdministration();
                     services.AddBotChannelsRedirection();
                     services.AddPihole();
