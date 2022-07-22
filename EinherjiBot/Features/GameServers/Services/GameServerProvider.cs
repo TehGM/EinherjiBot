@@ -75,12 +75,18 @@ namespace TehGM.EinherjiBot.GameServers.Services
 
         public async Task UpdateAsync(GameServer server, CancellationToken cancellationToken = default)
         {
+            GameServer existing = await this.GetAsync(server.ID, cancellationToken).ConfigureAwait(false);
+            if (existing != null && !existing.CanEdit(this._auth))
+                throw new InvalidOperationException($"No permissions to edit game server {server.ID}");
             await this._store.UpdateAsync(server, cancellationToken).ConfigureAwait(false);
             this._cache.AddOrReplace(server);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            GameServer existing = await this.GetAsync(id, cancellationToken).ConfigureAwait(false);
+            if (existing != null && !existing.CanEdit(this._auth))
+                throw new InvalidOperationException($"No permissions to delete game server {id}");
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
         }
