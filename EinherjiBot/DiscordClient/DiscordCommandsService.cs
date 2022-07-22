@@ -55,6 +55,8 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._log.LogTrace("Loading all command modules");
 
             using IServiceScope scope = this._services.CreateScope();
+            IAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IAuthProvider>();
+            authProvider.Current = DiscordSocketAuthContext.None;
 
             if (this._options.OverrideCommandsGuildID != null)
             {
