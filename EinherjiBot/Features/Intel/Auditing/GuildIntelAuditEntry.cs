@@ -9,7 +9,7 @@ namespace TehGM.EinherjiBot.Auditing.Intel
 
         [BsonConstructor(nameof(UserID), nameof(RequestedGuildID), nameof(Timestamp), nameof(ExpirationTimestamp))]
         private GuildIntelAuditEntry(ulong? userID, ulong requestedGuildID, DateTime timestamp, TimeSpan? expiration) 
-            : base(userID, timestamp, expiration)
+            : base(userID, RetrieveAction, timestamp, expiration)
         {
             this.RequestedGuildID = requestedGuildID;
         }
