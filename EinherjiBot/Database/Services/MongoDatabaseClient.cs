@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace TehGM.EinherjiBot.Database.Services
 {
@@ -56,7 +58,9 @@ namespace TehGM.EinherjiBot.Database.Services
             // guid serialization
             #pragma warning disable CS0618 // Type or member is obsolete
             BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
+            BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard)); 
+            BsonSerializer.RegisterSerializer(new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
         }
     }
 }
