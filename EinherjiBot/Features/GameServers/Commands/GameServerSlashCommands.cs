@@ -7,6 +7,7 @@ using TehGM.EinherjiBot.Auditing.GameServer;
 namespace TehGM.EinherjiBot.GameServers.Commands
 {
     [Group("game-server", "Retrieves info for our game servers that you have access to")]
+    [EnabledInDm(true)]
     public class GameServerSlashCommands : EinherjiInteractionModule
     {
         private readonly IGameServerProvider _provider;
@@ -18,6 +19,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
         }
 
         [SlashCommand("info", "Retrieves info for our game servers that you have access to")]
+        [EnabledInDm(true)]
         public async Task CmdInfoAsync(
             [Summary("Server", "Name of the server to pick"), Autocomplete(typeof(GameServerAutocompleteHandler))] Guid id)
         {
@@ -25,7 +27,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
 
             if (server == null)
             {
-                await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested game server not found.");
+                await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested game server not found.", ephemeral: true, options: base.GetRequestOptions());
                 return;
             }
 
@@ -42,8 +44,8 @@ namespace TehGM.EinherjiBot.GameServers.Commands
                 embed.WithThumbnailUrl(server.ImageURL);
             embed.Description = builder.ToString();
 
-            await this._audit.AddAuditAsync(new GameServerAuditEntry(base.Context.User.Id, server.ID, base.Context.Interaction.CreatedAt.UtcDateTime));
-            await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
+            await this._audit.AddAuditAsync(new GameServerAuditEntry(base.Context.User.Id, server.ID, base.Context.Interaction.CreatedAt.UtcDateTime), base.CancellationToken).ConfigureAwait(false);
+            await base.RespondAsync(embed: embed.Build(), ephemeral: true, options: base.GetRequestOptions()).ConfigureAwait(false);
         }
     }
 }
