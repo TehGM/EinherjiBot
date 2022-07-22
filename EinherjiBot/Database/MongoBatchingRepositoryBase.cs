@@ -23,7 +23,7 @@ namespace TehGM.EinherjiBot.Database
             this.MongoConnection = databaseConnection;
             this._log = log;
 
-            this._hostStoppingRegistration = hostLifetime.ApplicationStopping.Register(this.FlushBatch);
+            this._hostStoppingRegistration = hostLifetime.ApplicationStopping.Register(() => this.FlushBatchAsync().GetAwaiter().GetResult());
 
             this.InitializeBatchInserter();
         }
