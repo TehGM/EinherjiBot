@@ -1,10 +1,18 @@
 ﻿using Discord;
 using Discord.Interactions;
+using TehGM.EinherjiBot.Auditing;
 
 namespace TehGM.EinherjiBot.Administration.Commands
 {
     public class AdministrationSlashCommands : EinherjiInteractionModule
     {
+        private readonly IAuditStore<CommandAuditEntry> _audit;
+
+        public AdministrationSlashCommands(IAuditStore<CommandAuditEntry> audit)
+        {
+            this._audit = audit;
+        }
+
         [SlashCommand("purge", "Removes last X messages in current channel", true, RunMode.Async)]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
@@ -22,6 +30,7 @@ namespace TehGM.EinherjiBot.Administration.Commands
             int olderCount = olderMessages.Count();
 
             await (base.Context.Channel as ITextChannel).DeleteMessagesAsync(newerMessages, base.Context.CancellationToken).ConfigureAwait(false);
+            await this._audit.AddAuditAsync(new CommandAuditEntry(base.Context, "purge", new Dictionary<string, object>() { { "count", count } }), base.CancellationToken).ConfigureAwait(false);
 
             if (olderCount > 0)
             {
@@ -34,7 +43,6 @@ namespace TehGM.EinherjiBot.Administration.Commands
                     await base.Context.Channel.DeleteMessageAsync(msg, base.GetRequestOptions()).ConfigureAwait(false);
                 }
             }
-
             await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{EinherjiEmote.SuccessSymbol} {msgs.Count()} previous message{(msgs.Count() > 1 ? "s were" : " was")} taken down.",
                 base.GetRequestOptions()).ConfigureAwait(false);
         }

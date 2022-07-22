@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using TehGM.EinherjiBot.Auditing;
 
 namespace TehGM.EinherjiBot.Administration.Commands
 {
@@ -11,6 +12,13 @@ namespace TehGM.EinherjiBot.Administration.Commands
     [EnabledInDm(false)]
     public class VoiceAdministrationSlashCommands : EinherjiInteractionModule
     {
+        private readonly IAuditStore<CommandAuditEntry> _audit;
+
+        public VoiceAdministrationSlashCommands(IAuditStore<CommandAuditEntry> audit)
+        {
+            this._audit = audit;
+        }
+
         [SlashCommand("mute-all", "Mutes all users in a voice channel")]
         [DefaultMemberPermissions(GuildPermission.MuteMembers)]
         public Task CmdMuteAllAsync(
@@ -18,7 +26,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
             => this.PerformChannelActionAsync(u => u.Mute = true, 
                 channel, null, 
                 ChannelPermission.MuteMembers,
-                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Mute));
+                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Mute),
+                new CommandAuditEntry(base.Context, "voice mute-all", new Dictionary<string, object>() { { "channel", channel.Id } }));
 
         [SlashCommand("unmute-all", "Unmutes all users in a voice channel")]
         [DefaultMemberPermissions(GuildPermission.MuteMembers)]
@@ -27,7 +36,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
             => this.PerformChannelActionAsync(u => u.Mute = false, 
                 channel, null, 
                 ChannelPermission.MuteMembers,
-                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Unmute));
+                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Unmute),
+                new CommandAuditEntry(base.Context, "voice unmute-all", new Dictionary<string, object>() { { "channel", channel.Id } }));
 
         [SlashCommand("deafen-all", "Deafens all users in a voice channel")]
         [DefaultMemberPermissions(GuildPermission.DeafenMembers)]
@@ -36,7 +46,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
             => this.PerformChannelActionAsync(u => u.Deaf = true, 
                 channel, null, 
                 ChannelPermission.DeafenMembers,
-                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Deafen));
+                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Deafen),
+                new CommandAuditEntry(base.Context, "voice deafen-all", new Dictionary<string, object>() { { "channel", channel.Id } }));
 
         [SlashCommand("undeafen-all", "Undeafens all users in a voice channel")]
         [DefaultMemberPermissions(GuildPermission.DeafenMembers)]
@@ -45,7 +56,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
             => this.PerformChannelActionAsync(u => u.Deaf = false, 
                 channel, null, 
                 ChannelPermission.DeafenMembers,
-                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Undeafen));
+                new VoiceChannelOperationMessages(VoiceChannelOperationWords.Undeafen),
+                new CommandAuditEntry(base.Context, "voice undeafen-all", new Dictionary<string, object>() { { "channel", channel.Id } }));
 
         [SlashCommand("move-all", "Moves all users from one voice channel to another")]
         [DefaultMemberPermissions(GuildPermission.MoveMembers)]
@@ -63,7 +75,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
                     BotMissingTargetPermissions = "I don't have permissions to move users to channel {1}.",
                     Finished = "Moved {3} users from channel {0} to {1}.",
                     Failed = "Failed to move {4} users."
-                });
+                },
+                new CommandAuditEntry(base.Context, "voice move-all", new Dictionary<string, object>() { { "channelFrom", channelFrom.Id }, { "channelTo", channelTo.Id } }));
 
         [SlashCommand("disconnect-all", "Disconnects all users from a voice channel")]
         [DefaultMemberPermissions(GuildPermission.MoveMembers)]
@@ -77,9 +90,11 @@ namespace TehGM.EinherjiBot.Administration.Commands
                     CallerMissingSourcePermissions = "You don't have permissions to disconnect users from channel {0}.",
                     BotMissingSourcePermissions = "I don't have permissions to disconnect users from channel {0}.",
                     Finished = "Disconnected {3} users from channel {0}.",
-                });
+                },
+                new CommandAuditEntry(base.Context, "voice disconnect-all", new Dictionary<string, object>() { { "channel", channel.Id } }));
 
-        private async Task PerformChannelActionAsync(Action<GuildUserProperties> action, IVoiceChannel channel, IVoiceChannel targetChannel, ChannelPermission requiredPermission, VoiceChannelOperationMessages messages)
+        private async Task PerformChannelActionAsync(Action<GuildUserProperties> action, IVoiceChannel channel, IVoiceChannel targetChannel, ChannelPermission requiredPermission, 
+            VoiceChannelOperationMessages messages, CommandAuditEntry auditEntry)
         {
             int totalCount = 0;
             int failedCount = 0;
@@ -142,6 +157,8 @@ namespace TehGM.EinherjiBot.Administration.Commands
             string responseMessage = $"{EinherjiEmote.SuccessSymbol} {FormatOperationMessage(messages.Finished)}";
             if (failedCount != 0)
                 responseMessage += $"{EinherjiEmote.FailureSymbol} {FormatOperationMessage(messages.Failed)}";
+
+            await this._audit.AddAuditAsync(auditEntry, base.CancellationToken).ConfigureAwait(false);
             await base.ModifyOriginalResponseAsync(msg => msg.Content = responseMessage, base.GetRequestOptions()).ConfigureAwait(false);
 
             string FormatOperationMessage(string format)
