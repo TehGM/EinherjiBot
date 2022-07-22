@@ -151,8 +151,8 @@ namespace TehGM.EinherjiBot.Database.Services
 
     public class MongoDelayedUpsert<T> : MongoDelayedInsert<T>
     {
-        public readonly Expression<Func<T, bool>> Filter;
-        public readonly ReplaceOptions ReplaceOptions;
+        public Expression<Func<T, bool>> Filter { get; }
+        public ReplaceOptions ReplaceOptions { get; }
 
         public MongoDelayedUpsert(Expression<Func<T, bool>> filter, T item, ReplaceOptions replaceOptions)
             : base(item)
@@ -164,7 +164,7 @@ namespace TehGM.EinherjiBot.Database.Services
 
     public class MongoDelayedInsert<T>
     {
-        public readonly T Item;
+        public T Item { get; }
 
         public MongoDelayedInsert(T item)
         {
