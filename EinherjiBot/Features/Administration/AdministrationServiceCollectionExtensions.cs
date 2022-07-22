@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-using TehGM.EinherjiBot.Features.Administration;
+using TehGM.EinherjiBot.Administration.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

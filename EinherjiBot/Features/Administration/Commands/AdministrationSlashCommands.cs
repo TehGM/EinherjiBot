@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 
-namespace TehGM.EinherjiBot.Features.Administration
+namespace TehGM.EinherjiBot.Administration.Commands
 {
     public class AdministrationSlashCommands : EinherjiInteractionModule
     {

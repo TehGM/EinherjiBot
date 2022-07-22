@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 
-namespace TehGM.EinherjiBot.Features.Administration
+namespace TehGM.EinherjiBot.Administration.Services
 {
     public class UserLeaveNotifier : AutostartService
     {
