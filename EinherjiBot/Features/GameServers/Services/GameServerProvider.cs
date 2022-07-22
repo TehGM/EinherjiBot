@@ -49,26 +49,28 @@ namespace TehGM.EinherjiBot.GameServers.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                IEnumerable<GameServer> results = this._cache.Find(_ => true);
+                await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
+
+                IEnumerable<GameServer> results = this._cache.Find(s => s.CanAccess(this._auth));
                 if (results.Any())
-                {
                     this._log.LogTrace("{Count} game servers found in cache", results.Count());
-                    return results;
-                }
-
-                results = await this._store.FindAsync(null, null, null, cancellationToken).ConfigureAwait(false);
-
-                if (results.Any())
-                {
-                    foreach (GameServer result in results)
-                        this._cache.AddOrReplace(result);
-                }
-                return results.Where(s => s.CanAccess(this._auth));
+                return results;
             }
             finally
             {
                 this._lock.Release();
             }
+        }
+
+        private async Task PopulateCacheAsync(CancellationToken cancellationToken)
+        {
+            this._cache.ClearExpired();
+            if (this._cache.CachedCount != 0)
+                return;
+
+            IEnumerable<GameServer> results = await this._store.FindAsync(null, null, null, cancellationToken).ConfigureAwait(false);
+            foreach (GameServer result in results)
+                this._cache.AddOrReplace(result);
         }
 
         public async Task UpdateAsync(GameServer server, CancellationToken cancellationToken = default)
