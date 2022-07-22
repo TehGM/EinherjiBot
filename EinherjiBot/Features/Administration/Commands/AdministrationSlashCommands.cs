@@ -13,7 +13,7 @@ namespace TehGM.EinherjiBot.Administration.Commands
             this._audit = audit;
         }
 
-        [SlashCommand("purge", "Removes last X messages in current channel", true, RunMode.Async)]
+        [SlashCommand("purge", "Removes last X messages in current channel", true)]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         [EnabledInDm(false)]
@@ -32,19 +32,22 @@ namespace TehGM.EinherjiBot.Administration.Commands
             await (base.Context.Channel as ITextChannel).DeleteMessagesAsync(newerMessages, base.Context.CancellationToken).ConfigureAwait(false);
             await this._audit.AddAuditAsync(new CommandAuditEntry(base.Context, "purge", new Dictionary<string, object>() { { "count", count } }), base.CancellationToken).ConfigureAwait(false);
 
-            if (olderCount > 0)
+            _ = Task.Run(async () =>
             {
-                await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{olderCount} messages are older than 2 weeks, which makes it impossible to delete them quickly due to Discord limitations. This might take a while.",
-                    base.GetRequestOptions()).ConfigureAwait(false);
-
-                foreach (IMessage msg in olderMessages)
+                if (olderCount > 0)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
-                    await base.Context.Channel.DeleteMessageAsync(msg, base.GetRequestOptions()).ConfigureAwait(false);
+                    await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{olderCount} messages are older than 2 weeks, which makes it impossible to delete them quickly due to Discord limitations. This might take a while.",
+                        base.GetRequestOptions()).ConfigureAwait(false);
+
+                    foreach (IMessage msg in olderMessages)
+                    {
+                        await Task.Delay(1000).ConfigureAwait(false);
+                        await base.Context.Channel.DeleteMessageAsync(msg, base.GetRequestOptions()).ConfigureAwait(false);
+                    }
                 }
-            }
-            await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{EinherjiEmote.SuccessSymbol} {msgs.Count()} previous message{(msgs.Count() > 1 ? "s were" : " was")} taken down.",
-                base.GetRequestOptions()).ConfigureAwait(false);
+                await base.ModifyOriginalResponseAsync(msg => msg.Content = $"{EinherjiEmote.SuccessSymbol} {msgs.Count()} previous message{(msgs.Count() > 1 ? "s were" : " was")} taken down.",
+                    base.GetRequestOptions()).ConfigureAwait(false);
+            }, base.CancellationToken);
         }
     }
 }
