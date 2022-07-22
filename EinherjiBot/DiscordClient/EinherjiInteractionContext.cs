@@ -6,13 +6,13 @@ namespace TehGM.EinherjiBot.DiscordClient
 {
     public class EinherjiInteractionContext : SocketInteractionContext<SocketInteraction>
     {
-        public IUserContext UserSecurityContext { get; }
+        public IAuthContext AuthContext { get; }
         public CancellationToken CancellationToken { get; }
 
-        public EinherjiInteractionContext(DiscordSocketClient client, SocketInteraction interaction, IUserContext userContext, CancellationToken cancellationToken)
+        public EinherjiInteractionContext(DiscordSocketClient client, SocketInteraction interaction, IAuthContext authContext, CancellationToken cancellationToken)
              : base(client, interaction)
         {
-            this.UserSecurityContext = userContext;
+            this.AuthContext = authContext;
             this.CancellationToken = cancellationToken;
         }
     }

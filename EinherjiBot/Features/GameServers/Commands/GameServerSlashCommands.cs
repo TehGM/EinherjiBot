@@ -18,7 +18,6 @@ namespace TehGM.EinherjiBot.GameServers.Commands
         public async Task CmdInfoAsync(
             [Summary("Server", "Name of the server to pick"), Autocomplete(typeof(GameServerAutocompleteHandler))] Guid id)
         {
-            // TODO: authorization needs some streamlining
             GameServer server = await this._provider.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
 
             EmbedBuilder embed = new EmbedBuilder();

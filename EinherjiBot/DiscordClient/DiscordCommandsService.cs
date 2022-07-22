@@ -104,11 +104,11 @@ namespace TehGM.EinherjiBot.DiscordClient
         private async Task OnInteractionAsync(SocketInteraction interaction)
         {
             using IServiceScope scope = this._services.CreateScope();
-            IUserContextProvider userContextProvider = scope.ServiceProvider.GetRequiredService<IUserContextProvider>();
-            IUserContext userContext = await userContextProvider.GetUserContextAsync(interaction.User.Id, this._cts.Token);
-            userContextProvider.Current = userContext;
+            IAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IAuthProvider>();
+            IAuthContext authContext = await authProvider.FromInteractionAsync(interaction, this._cts.Token);
+            authProvider.Current = authContext;
 
-            EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, userContext, this._cts.Token);
+            EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, authContext, this._cts.Token);
             using IDisposable logScope = this.BeginCommandScope(ctx, null, null);
 
             try

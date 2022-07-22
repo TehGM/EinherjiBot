@@ -12,8 +12,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
             IGameServerProvider provider = services.GetRequiredService<IGameServerProvider>();
             EinherjiInteractionContext ctx = (EinherjiInteractionContext)context;
 
-            IGuildUser guildUser = await context.Guild.GetGuildUserAsync(context.User, ctx.CancellationToken).ConfigureAwait(false);
-            IEnumerable<GameServer> servers = await provider.GetForUserAsync(context.User.Id, guildUser?.RoleIds ?? Enumerable.Empty<ulong>(), ctx.CancellationToken).ConfigureAwait(false);
+            IEnumerable<GameServer> servers = await provider.GetAllAsync(ctx.CancellationToken).ConfigureAwait(false);
 
             string input = autocompleteInteraction.Data.Current.Value.ToString();
             if (!string.IsNullOrEmpty(input))

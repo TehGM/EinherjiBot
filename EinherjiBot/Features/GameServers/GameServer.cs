@@ -1,8 +1,9 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.GameServers
 {
-    public class GameServer : ICacheableEntity<Guid>
+    public class GameServer : ICacheableEntity<Guid>, IAuthRequiredEntity
     {
         [BsonId]
         public Guid ID { get; }
@@ -20,9 +21,9 @@ namespace TehGM.EinherjiBot.GameServers
         public string ImageURL { get; set; }
 
         [BsonElement("authorizedUserIDs")]
-        public HashSet<ulong> AuthorizedUserIDs { get; }
+        public ICollection<ulong> AuthorizedUserIDs { get; }
         [BsonElement("authorizedRoleIDs")]
-        public HashSet<ulong> AuthorizedRoleIDs { get; }
+        public ICollection<ulong> AuthorizedRoleIDs { get; }
 
         [BsonConstructor(nameof(ID), nameof(AuthorizedUserIDs), nameof(AuthorizedRoleIDs))]
         private GameServer(Guid id, IEnumerable<ulong> userIDs, IEnumerable<ulong> roleIDs)
@@ -42,5 +43,10 @@ namespace TehGM.EinherjiBot.GameServers
 
         public Guid GetCacheKey()
             => this.ID;
+
+        public bool IsAuthorized(IAuthContext context)
+            => context.IsAdmin() || this.IsPublic
+            || this.AuthorizedUserIDs.Contains(context.UserID)
+            || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any(); 
     }
 }
