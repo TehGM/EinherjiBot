@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
 using TehGM.EinherjiBot.DiscordClient.Converters;
-using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.DiscordClient
 {
@@ -29,7 +28,8 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._interactions = new InteractionService(this._client, new InteractionServiceConfig()
             {
                 DefaultRunMode = RunMode.Sync,
-                UseCompiledLambda = this._options.CompileCommands
+                UseCompiledLambda = this._options.CompileCommands,
+                AutoServiceScopes = false
             });
 
             AddTypeConverters(this._interactions);
