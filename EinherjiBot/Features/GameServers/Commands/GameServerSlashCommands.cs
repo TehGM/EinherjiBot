@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
 using System.Text;
+using TehGM.EinherjiBot.Auditing;
+using TehGM.EinherjiBot.Auditing.GameServer;
 
 namespace TehGM.EinherjiBot.GameServers.Commands
 {
@@ -8,6 +10,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
     public class GameServerSlashCommands : EinherjiInteractionModule
     {
         private readonly IGameServerProvider _provider;
+        private readonly IAuditStore<GameServerAuditEntry> _audit;
 
         public GameServerSlashCommands(IGameServerProvider provider)
         {
@@ -33,6 +36,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
                 embed.WithThumbnailUrl(server.ImageURL);
             embed.Description = builder.ToString();
 
+            await this._audit.AddAuditAsync(new GameServerAuditEntry(base.Context.User.Id, server.ID, base.Context.Interaction.CreatedAt.UtcDateTime));
             await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
         }
     }
