@@ -23,6 +23,12 @@ namespace TehGM.EinherjiBot.GameServers.Commands
         {
             GameServer server = await this._provider.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
 
+            if (server == null)
+            {
+                await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested game server not found.");
+                return;
+            }
+
             EmbedBuilder embed = new EmbedBuilder();
             embed.Title = $"{server.Name} Server Info";
             embed.Color = Color.Blue;
