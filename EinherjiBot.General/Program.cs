@@ -13,7 +13,6 @@ using TehGM.EinherjiBot.EliteDangerous;
 using TehGM.EinherjiBot.EliteDangerous.Services;
 using TehGM.EinherjiBot.GameServers;
 using TehGM.EinherjiBot.GameServers.Services;
-using TehGM.EinherjiBot.Kathara;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
@@ -51,7 +50,6 @@ namespace TehGM.EinherjiBot
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
-                    services.Configure<PiholeOptions>(context.Configuration.GetSection("Kathara").GetSection("Pihole"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
                     services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
@@ -67,7 +65,6 @@ namespace TehGM.EinherjiBot
                     services.AddUserIntel();
                     services.AddAdministration();
                     services.AddBotChannelsRedirection();
-                    services.AddPihole();
                     services.AddPatchbot();
                     services.AddEliteCommunityGoals();
                     services.AddGameServers();
