@@ -1,16 +1,20 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.Auditing;
+using TehGM.EinherjiBot.Auditing.Administration;
 
 namespace TehGM.EinherjiBot.Administration.Services
 {
     public class UserLeaveNotifier : AutostartService
     {
         private readonly DiscordSocketClient _client;
+        private readonly IAuditStore<JoinLeaveAuditEntry> _audit;
         private readonly ILogger _log;
 
-        public UserLeaveNotifier(DiscordSocketClient client, ILogger<UserLeaveNotifier> log)
+        public UserLeaveNotifier(DiscordSocketClient client, IAuditStore<JoinLeaveAuditEntry> audit, ILogger<UserLeaveNotifier> log)
         {
             this._client = client;
+            this._audit = audit;
             this._log = log;
 
             this._client.UserLeft += this.OnUserLeftAsync;
@@ -37,6 +41,7 @@ namespace TehGM.EinherjiBot.Administration.Services
                 .WithDescription($"**{user.Mention}** *(`{user.GetUsernameWithDiscriminator()}`)* **has left.**")
                 .WithColor((Color)System.Drawing.Color.Cyan);
             await guild.SystemChannel.SendMessageAsync(null, false, embed.Build(), base.CancellationToken).ConfigureAwait(false);
+            await this._audit.AddAuditAsync(JoinLeaveAuditEntry.UserLeft(user.Id, guild.Id, DateTime.UtcNow), base.CancellationToken).ConfigureAwait(false);
         }
 
         public override void Dispose()
