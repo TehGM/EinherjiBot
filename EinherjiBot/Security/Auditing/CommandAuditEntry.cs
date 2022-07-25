@@ -15,8 +15,8 @@ namespace TehGM.EinherjiBot.Auditing
         public IReadOnlyDictionary<string, object> Arguments { get; }
 
         [BsonConstructor(nameof(UserID), nameof(ChannelID), nameof(GuildID), nameof(Command), nameof(Arguments), nameof(Timestamp), nameof(ExpirationTimestamp))]
-        private CommandAuditEntry(ulong? userID, ulong? channelID, ulong? guildID, string command, IDictionary<string, object> arguments, DateTime timestamp, TimeSpan? expiration)
-            : base(userID, "Command", timestamp, expiration)
+        private CommandAuditEntry(ulong? userID, ulong? channelID, ulong? guildID, string command, IDictionary<string, object> arguments, DateTime timestamp, DateTime? expirationTimestamp)
+            : base(userID, "Command", timestamp, expirationTimestamp)
         {
             this.ChannelID = channelID;
             this.GuildID = guildID;
@@ -24,9 +24,8 @@ namespace TehGM.EinherjiBot.Auditing
             this.Arguments = new Dictionary<string, object>(arguments ?? Enumerable.Empty<KeyValuePair<string, object>>());
         }
 
-        public CommandAuditEntry(IInteractionContext interaction, string command, IDictionary<string, object> arguments = null) 
-            : this(interaction.User.Id, interaction.Channel?.Id, interaction.Guild?.Id, command, arguments, interaction.Interaction.CreatedAt.UtcDateTime, DefaultExpiration)
-        {
-        }
+        public CommandAuditEntry(IInteractionContext interaction, string command, IDictionary<string, object> arguments = null)
+            : this(interaction.User.Id, interaction.Channel?.Id, interaction.Guild?.Id, command, arguments,
+                  interaction.Interaction.CreatedAt.UtcDateTime, interaction.Interaction.CreatedAt.UtcDateTime + DefaultExpiration) { }
     }
 }

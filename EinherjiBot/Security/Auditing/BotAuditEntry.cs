@@ -21,13 +21,13 @@ namespace TehGM.EinherjiBot.Auditing
         [BsonElement("expirationTimestamp")]
         public DateTime? ExpirationTimestamp { get; }
 
-        public BotAuditEntry(ulong? userID, string action, DateTime timestamp, TimeSpan? expiration)
+        public BotAuditEntry(ulong? userID, string action, DateTime timestamp, DateTime? expirationTimestamp)
         {
             this.ID = Guid.NewGuid();
-            this.UserID = userID;
             this.Action = action;
+            this.UserID = userID;
             this.Timestamp = timestamp;
-            this.ExpirationTimestamp = timestamp + expiration;
+            this.ExpirationTimestamp = expirationTimestamp;
         }
     }
 }

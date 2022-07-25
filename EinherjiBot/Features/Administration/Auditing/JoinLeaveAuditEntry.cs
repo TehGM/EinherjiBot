@@ -11,15 +11,15 @@ namespace TehGM.EinherjiBot.Auditing.Administration
         public ulong GuildID { get; }
 
         [BsonConstructor(nameof(UserID), nameof(GuildID), nameof(Action), nameof(Timestamp), nameof(ExpirationTimestamp))]
-        private JoinLeaveAuditEntry(ulong? userID, ulong guildID, string action, DateTime timestamp, TimeSpan? expiration) 
-            : base(userID, action, timestamp, expiration)
+        private JoinLeaveAuditEntry(ulong? userID, ulong guildID, string action, DateTime timestamp, DateTime? expirationTimestamp) 
+            : base(userID, action, timestamp, expirationTimestamp)
         {
             this.GuildID = guildID;
         }
 
         public static JoinLeaveAuditEntry UserJoined(ulong userID, ulong guildID, DateTime timestamp)
-            => new JoinLeaveAuditEntry(userID, guildID, JoinAction, timestamp, TimeSpan.FromDays(100));
+            => new JoinLeaveAuditEntry(userID, guildID, JoinAction, timestamp, timestamp + TimeSpan.FromDays(100));
         public static JoinLeaveAuditEntry UserLeft(ulong userID, ulong guildID, DateTime timestamp)
-            => new JoinLeaveAuditEntry(userID, guildID, LeaveAction, timestamp, TimeSpan.FromDays(100));
+            => new JoinLeaveAuditEntry(userID, guildID, LeaveAction, timestamp, timestamp + TimeSpan.FromDays(100));
     }
 }

@@ -8,13 +8,13 @@ namespace TehGM.EinherjiBot.Auditing.GameServer
         public Guid ServerID { get; }
 
         [BsonConstructor(nameof(UserID), nameof(ServerID), nameof(Timestamp), nameof(ExpirationTimestamp))]
-        private GameServerAuditEntry(ulong? userID, Guid serverID, DateTime timestamp, TimeSpan? expiration) 
-            : base(userID, RetrieveAction, timestamp, expiration)
+        private GameServerAuditEntry(ulong? userID, Guid serverID, DateTime timestamp, DateTime? expirationTimestamp) 
+            : base(userID, RetrieveAction, timestamp, expirationTimestamp)
         {
             this.ServerID = serverID;
         }
 
         public GameServerAuditEntry(ulong userID, Guid serverID, DateTime timestamp)
-            : this(userID, serverID, timestamp, DefaultExpiration) { }
+            : this(userID, serverID, timestamp, timestamp + DefaultExpiration) { }
     }
 }
