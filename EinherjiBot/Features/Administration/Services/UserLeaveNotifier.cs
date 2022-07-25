@@ -17,7 +17,15 @@ namespace TehGM.EinherjiBot.Administration.Services
             this._audit = audit;
             this._log = log;
 
+            this._client.UserJoined += this.OnUserJoined;
             this._client.UserLeft += this.OnUserLeftAsync;
+        }
+
+        private Task OnUserJoined(SocketGuildUser user)
+        {
+            IGuild guild = user.Guild;
+            this._log.LogDebug("User {User} ({UserID}) joined guild {Guild} ({GuildID})", user.GetUsernameWithDiscriminator(), user.Id, guild.Name, guild.Id);
+            return this._audit.AddAuditAsync(JoinLeaveAuditEntry.UserJoined(user.Id, guild.Id, user.JoinedAt.Value.UtcDateTime), base.CancellationToken);
         }
 
         protected async Task OnUserLeftAsync(SocketGuild guild, SocketUser user)
@@ -49,6 +57,7 @@ namespace TehGM.EinherjiBot.Administration.Services
             base.Dispose();
 
             try { this._client.UserLeft -= this.OnUserLeftAsync; } catch { }
+            try { this._client.UserJoined -= this.OnUserJoined; } catch { }
         }
     }
 }
