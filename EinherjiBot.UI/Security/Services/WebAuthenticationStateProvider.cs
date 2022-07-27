@@ -43,7 +43,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             string token = await this._tokenProvider.GetAsync(cancellationToken).ConfigureAwait(false);
             if (token != null)
             {
-                await this._tokenProvider.SetAsync(null, cancellationToken).ConfigureAwait(false);
+                await this._tokenProvider.ClearAsync(cancellationToken).ConfigureAwait(false);
                 await this._authService.LogoutAsync(token, cancellationToken).ConfigureAwait(false);
             }
             base.NotifyAuthenticationStateChanged(Task.FromResult(this.GetState()));

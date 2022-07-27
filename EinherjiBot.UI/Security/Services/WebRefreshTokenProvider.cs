@@ -16,6 +16,13 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             => this._storage.GetItemAsync<string>(_refreshTokenStorageKey, cancellationToken);
 
         public ValueTask SetAsync(string token, CancellationToken cancellationToken = default)
-            => this._storage.SetItemAsync<string>(_refreshTokenStorageKey, token, cancellationToken);
+        {
+            if (token == null)
+                return this.ClearAsync(cancellationToken);
+            return this._storage.SetItemAsync<string>(_refreshTokenStorageKey, token, cancellationToken);
+        }
+
+        public ValueTask ClearAsync(CancellationToken cancellationToken = default)
+            => this._storage.RemoveItemAsync(_refreshTokenStorageKey, cancellationToken);
     }
 }
