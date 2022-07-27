@@ -7,7 +7,6 @@ namespace TehGM.EinherjiBot.UI.Security
     {
         public DateTime Expiration { get; }
         public string Token { get; }
-        public bool IsLoggedIn { get; }
 
         Task LoginAsync(LoginResponse response, CancellationToken cancellationToken = default);
         Task LogoutAsync(CancellationToken cancellationToken = default);

@@ -27,7 +27,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
 
         private void AttachToken(HttpRequestMessage request)
         {
-            if (this._provider.IsLoggedIn)
+            if (this._provider.User.IsLoggedIn())
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", this._provider.Token);
         }
     }

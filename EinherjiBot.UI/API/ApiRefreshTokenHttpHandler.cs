@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
 
         private async ValueTask RefreshAsync(CancellationToken cancellationToken)
         {
-            if (!this._authProvider.IsLoggedIn)
+            if (!this._authProvider.User.IsLoggedIn())
                 return;
             if (DateTime.UtcNow < this._authProvider.Expiration.AddSeconds(-5))
                 return;

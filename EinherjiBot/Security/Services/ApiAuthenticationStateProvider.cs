@@ -7,9 +7,6 @@ namespace TehGM.EinherjiBot.Security.Services
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider, IAuthProvider
     {
         public IAuthContext User { get; }
-        public bool IsLoggedIn => this.User != null && !this.User.Equals(DiscordSocketAuthContext.None);
-        public string Token => throw new NotImplementedException();
-        public DateTime Expiration => throw new NotImplementedException();
 
         public ApiAuthenticationStateProvider(IDiscordAuthContext context)
         {
@@ -18,7 +15,7 @@ namespace TehGM.EinherjiBot.Security.Services
 
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (this.IsLoggedIn)
+            if (!this.User.IsLoggedIn())
                 return Task.FromResult(new AuthenticationState(new ClaimsPrincipal()));
             return Task.FromResult(new AuthenticationState(this.User.ToClaimsPrincipal("jwt")));
         }

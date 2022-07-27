@@ -13,8 +13,6 @@ namespace TehGM.EinherjiBot.UI.Security.Services
         private ClaimsPrincipal _principal;
         private bool _loaded = false;
 
-        public bool IsLoggedIn => this.User != null && !this.User.Equals(WebAuthContext.None);
-
         private readonly IAuthService _authService;
         private readonly IRefreshTokenProvider _tokenProvider;
 
@@ -70,7 +68,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
 
         private AuthenticationState GetState()
         {
-            if (this.IsLoggedIn)
+            if (this.User.IsLoggedIn())
                 return new AuthenticationState(this._principal);
             else
                 return new AuthenticationState(new ClaimsPrincipal());
