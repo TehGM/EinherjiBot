@@ -46,5 +46,15 @@
             string jwt = this._jwt.Generate(securityData);
             return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, securityData.Roles);
         }
+
+        public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+        {
+            RefreshToken token = await this._refreshTokens.GetAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+            if (token == null)
+                return;
+
+            await this._refreshTokens.DeleteAsync(token.Token, cancellationToken).ConfigureAwait(false);
+            await this._client.RevokeAsync(token.DiscordRefreshToken, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

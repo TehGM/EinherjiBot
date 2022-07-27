@@ -23,5 +23,11 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             RefreshRequest request = new RefreshRequest(refreshToken);
             return base.Client.PostJsonAsync<LoginResponse>("auth/token/refresh", request, cancellationToken);
         }
+
+        public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+        {
+            RefreshRequest request = new RefreshRequest(refreshToken);
+            return base.Client.DeleteJsonAsync("auth/token", request, cancellationToken);
+        }
     }
 }

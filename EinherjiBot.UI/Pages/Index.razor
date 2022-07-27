@@ -14,11 +14,14 @@
         Logging in...
     </Authorizing>
     <Authorized>
-        Hello @this.AuthProvider.User.ToString()
+        Hello @this.AuthProvider.User.ToString()<br/>
+        <a @onclick="this.LogoutAsync">Logout</a>
     </Authorized>
 </AuthorizeView>
 
 @code {
     private Task RedirectToLoginAsync()
         => this.LoginRedirect.RedirectAsync();
+    private Task LogoutAsync()
+        => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
 }

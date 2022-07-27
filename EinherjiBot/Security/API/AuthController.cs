@@ -35,5 +35,13 @@ namespace TehGM.EinherjiBot.Security.API
 
             return base.Ok(response);
         }
+
+        [HttpDelete]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteAsync(RefreshRequest request, CancellationToken cancellationToken = default)
+        {
+            await this._service.LogoutAsync(request.RefreshToken, cancellationToken).ConfigureAwait(false);
+            return base.Ok();
+        }
     }
 }

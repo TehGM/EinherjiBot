@@ -23,6 +23,7 @@ namespace System.Net.Http
             return JsonConvert.DeserializeObject<TResponse>(json);
         }
 
+        // POST
         public static async Task<HttpResponseMessage> PostJsonAsync(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -40,5 +41,24 @@ namespace System.Net.Http
 
         public static Task<TResponse> PostJsonAsync<TResponse>(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
             => PostJsonAsync<TResponse>(client, url, data, "application/json", cancellationToken);
+
+        // DELETE
+        public static async Task<HttpResponseMessage> DeleteJsonAsync(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
+            return await SendJsonAsync<HttpResponseMessage>(client, request, data, contentType, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static Task<HttpResponseMessage> DeleteJsonAsync(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
+            => DeleteJsonAsync(client, url, data, "application/json", cancellationToken);
+
+        public static async Task<TResponse> DeleteJsonAsync<TResponse>(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
+            return await SendJsonAsync<TResponse>(client, request, data, contentType, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static Task<TResponse> DeleteJsonAsync<TResponse>(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
+            => DeleteJsonAsync<TResponse>(client, url, data, "application/json", cancellationToken);
     }
 }

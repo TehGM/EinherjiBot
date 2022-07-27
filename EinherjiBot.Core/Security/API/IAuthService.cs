@@ -4,5 +4,6 @@
     {
         Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default);
         Task<LoginResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken = default);
+        Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default);
     }
 }
