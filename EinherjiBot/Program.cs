@@ -16,6 +16,9 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using TehGM.EinherjiBot.Security.API.Services;
 
 namespace TehGM.EinherjiBot
 {
@@ -63,16 +66,20 @@ namespace TehGM.EinherjiBot
             services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
             services.Configure<RandomStatus.RandomStatusOptions>(configuration.GetSection("RandomStatus"));
             services.Configure<SharedAccounts.SharedAccountOptions>(configuration.GetSection("SharedAccounts"));
+            services.Configure<Security.API.JwtOptions>(configuration.GetSection("JWT"));
+            services.Configure<Security.API.DiscordAuthOptions>(configuration.GetSection("Discord"));
+
+            UI.Program.ConfigurePrerenderingOptions(services, configuration);
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            services.AddControllersWithViews().AddNewtonsoftJson();
+            services.AddRazorPages().AddNewtonsoftJson();
 
             services.AddDiscordClient();
             services.AddEntityCaching();
-            services.AddUserContext();
+            services.AddAuthBackend();
             services.AddBotAudits();
             services.AddRandomizer();
 
@@ -81,6 +88,8 @@ namespace TehGM.EinherjiBot
             services.AddRandomStatus();
             services.AddGameServers();
             services.AddSharedAccounts();
+
+            UI.Program.ConfigurePrerenderingServices(services);
         }
 
         private static void ConfigureApplication(WebApplication app)
@@ -98,7 +107,9 @@ namespace TehGM.EinherjiBot
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseMiddleware<AuthContextMiddleware>();
+            app.UseAuthorization();
 
             app.MapRazorPages();
             app.MapControllers();

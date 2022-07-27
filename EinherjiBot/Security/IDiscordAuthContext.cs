@@ -2,13 +2,11 @@
 
 namespace TehGM.EinherjiBot.Security
 {
-    public interface IAuthContext
+    public interface IDiscordAuthContext : IAuthContext
     {
-        ulong UserID { get; }
         IUser DiscordUser { get; }
         IGuild DiscordGuild { get; }
         IGuildUser DiscordGuildUser { get; }
-        IEnumerable<string> BotRoles { get; }
         bool IsBanned { get; }
 
         IEnumerable<ulong> KnownDiscordRoleIDs { get; }

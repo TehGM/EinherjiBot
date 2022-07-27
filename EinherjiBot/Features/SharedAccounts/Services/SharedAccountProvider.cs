@@ -6,11 +6,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
     {
         private readonly ISharedAccountStore _store;
         private readonly IEntityCache<Guid, SharedAccount> _cache;
-        private readonly IAuthContext _auth;
+        private readonly IDiscordAuthContext _auth;
         private readonly ILogger _log;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
-        public SharedAccountProvider(ISharedAccountStore store, IEntityCache<Guid, SharedAccount> cache, IAuthContext auth, ILogger<SharedAccountProvider> log)
+        public SharedAccountProvider(ISharedAccountStore store, IEntityCache<Guid, SharedAccount> cache, IDiscordAuthContext auth, ILogger<SharedAccountProvider> log)
         {
             this._store = store;
             this._cache = cache;

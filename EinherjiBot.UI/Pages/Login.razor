@@ -1,0 +1,25 @@
+﻿@page "/login/oauth"
+@using TehGM.EinherjiBot.Security.API
+@using TehGM.EinherjiBot.UI.Security
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Logging you in...</PageTitle>
+
+Logging you in
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "state")]
+    public string State { get; init; }
+    [Parameter, SupplyParameterFromQuery(Name = "code")]
+    public string AccessCode { get; init; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await this.AuthService.LoginAsync(this.AccessCode).ConfigureAwait(false);
+        this.Navigation.NavigateTo(OAuthState.Parse(this.State).ReturnURL, false, true);
+    }
+}

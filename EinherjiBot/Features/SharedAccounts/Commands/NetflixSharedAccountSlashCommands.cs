@@ -12,11 +12,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
         public class AccountCommands : EinherjiInteractionModule
         {
             private readonly ISharedAccountProvider _provider;
-            private readonly IAuthContext _auth;
+            private readonly IDiscordAuthContext _auth;
             private readonly IAuditStore<SharedAccountAuditEntry> _audit;
             private readonly SharedAccountOptions _options;
 
-            public AccountCommands(ISharedAccountProvider provider, IAuthContext auth,
+            public AccountCommands(ISharedAccountProvider provider, IDiscordAuthContext auth,
                 IAuditStore<SharedAccountAuditEntry> audit, IOptionsSnapshot<SharedAccountOptions> options)
             {
                 this._provider = provider;

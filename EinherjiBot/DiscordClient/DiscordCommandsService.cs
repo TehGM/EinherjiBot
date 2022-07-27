@@ -55,7 +55,7 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._log.LogTrace("Loading all command modules");
 
             using IServiceScope scope = this._services.CreateScope();
-            IAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IAuthProvider>();
+            IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
             authProvider.Current = DiscordSocketAuthContext.None;
 
             if (this._options.OverrideCommandsGuildID != null)
@@ -106,8 +106,8 @@ namespace TehGM.EinherjiBot.DiscordClient
         private async Task OnInteractionAsync(SocketInteraction interaction)
         {
             using IServiceScope scope = this._services.CreateScope();
-            IAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IAuthProvider>();
-            IAuthContext authContext = await authProvider.FromInteractionAsync(interaction, this._cts.Token);
+            IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+            IDiscordAuthContext authContext = await authProvider.FromInteractionAsync(interaction, this._cts.Token);
             authProvider.Current = authContext;
 
             EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, authContext, this._cts.Token);

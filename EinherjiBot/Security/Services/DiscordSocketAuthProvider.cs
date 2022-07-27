@@ -3,9 +3,9 @@ using TehGM.EinherjiBot.Caching;
 
 namespace TehGM.EinherjiBot.Security.Services
 {
-    public class DiscordSocketAuthProvider : IAuthProvider, IDisposable
+    public class DiscordSocketAuthProvider : IDiscordAuthProvider, IDisposable
     {
-        public IAuthContext Current { get; set; }
+        public IDiscordAuthContext Current { get; set; } = DiscordSocketAuthContext.None;
 
         private readonly IDiscordClient _client;
         private readonly IUserSecurityDataStore _store;
@@ -24,7 +24,7 @@ namespace TehGM.EinherjiBot.Security.Services
             this._userDataCache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5));
         }
 
-        public async Task<IAuthContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)
+        public async Task<IDiscordAuthContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)
         {
             Task<UserSecurityData> dataTask = this.GetUserSecurityDataAsync(userID, cancellationToken);
             Task<IUser> userTask = this._client.GetUserAsync(userID, cancellationToken);
@@ -53,7 +53,7 @@ namespace TehGM.EinherjiBot.Security.Services
             return results;
         }
 
-        private async Task<UserSecurityData> GetUserSecurityDataAsync(ulong userID, CancellationToken cancellationToken = default)
+        public async Task<UserSecurityData> GetUserSecurityDataAsync(ulong userID, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

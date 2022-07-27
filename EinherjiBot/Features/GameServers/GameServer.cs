@@ -44,12 +44,12 @@ namespace TehGM.EinherjiBot.GameServers
         public Guid GetCacheKey()
             => this.ID;
 
-        public bool CanAccess(IAuthContext context)
+        public bool CanAccess(IDiscordAuthContext context)
             => context.IsAdmin() || this.IsPublic
-            || this.AuthorizedUserIDs.Contains(context.UserID)
+            || this.AuthorizedUserIDs.Contains(context.ID)
             || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any();
 
-        public bool CanEdit(IAuthContext context)
+        public bool CanEdit(IDiscordAuthContext context)
             => context.IsAdmin();
     }
 }

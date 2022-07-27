@@ -15,6 +15,16 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Microsoft.Extensions.Configuration;
 using TehGM.EinherjiBot.Utilities;
+using Blazored.LocalStorage;
+using Blazored.LocalStorage.Serialization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Components.Authorization;
+using TehGM.EinherjiBot.UI.API.Services;
+using TehGM.EinherjiBot.UI.API;
+using TehGM.EinherjiBot.Security.API;
+using TehGM.EinherjiBot.Security;
+using TehGM.EinherjiBot.UI.Security;
+using TehGM.EinherjiBot.UI.Security.Services;
 
 namespace TehGM.EinherjiBot.UI
 {
@@ -41,9 +51,47 @@ namespace TehGM.EinherjiBot.UI
             await builder.Configuration.AddJsonFileAsync(client, "appsettings.json", optional: false).ConfigureAwait(false);
             await builder.Configuration.AddJsonFileAsync(client, $"appsettings.{builder.HostEnvironment.Environment}.json", optional: true).ConfigureAwait(false);
 
+            ConfigureOptions(builder.Services, builder.Configuration);
+            ConfigureServices(builder.Services);
             ConfigureLogging(builder);
 
             await builder.Build().RunAsync();
+        }
+
+        public static void ConfigurePrerenderingOptions(IServiceCollection services, IConfiguration configuration)
+        {
+        }
+
+        private static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
+        {
+            ConfigurePrerenderingOptions(services, configuration);
+
+            services.Configure<DiscordAuthOptions>(configuration.GetSection("Discord"));
+        }
+
+        public static void ConfigurePrerenderingServices(IServiceCollection services)
+        {
+            services.AddAuthorizationCore();
+
+            services.AddBlazoredLocalStorage();
+            services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
+            services.AddTransient<IDiscordLoginRedirect, DiscordLoginRedirect>();
+
+            services.AddSingleton<IWebAuthProvider, EinherjiAuthenticationStateProvider>();
+            services.AddSingleton<AuthenticationStateProvider>(provider => (AuthenticationStateProvider)provider.GetRequiredService<IWebAuthProvider>());
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            ConfigurePrerenderingServices(services);
+
+            services.AddTransient<IAuthContext>(provider => provider.GetRequiredService<IWebAuthProvider>().User);
+
+            services.AddTransient<ApiJwtHttpHandler>();
+            services.AddHttpClient<IApiClient, ApiHttpClient>()
+                .AddHttpMessageHandler<ApiJwtHttpHandler>();
+
+            services.AddTransient<IAuthService, WebAuthService>();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)

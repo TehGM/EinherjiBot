@@ -6,11 +6,11 @@ namespace TehGM.EinherjiBot.GameServers.Services
     {
         private readonly IGameServerStore _store;
         private readonly IEntityCache<Guid, GameServer> _cache;
-        private readonly IAuthContext _auth;
+        private readonly IDiscordAuthContext _auth;
         private readonly ILogger _log;
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
-        public GameServerProvider(IGameServerStore store, IEntityCache<Guid, GameServer> cache, IAuthContext auth, ILogger<GameServerProvider> log)
+        public GameServerProvider(IGameServerStore store, IEntityCache<Guid, GameServer> cache, IDiscordAuthContext auth, ILogger<GameServerProvider> log)
         {
             this._store = store;
             this._cache = cache;
