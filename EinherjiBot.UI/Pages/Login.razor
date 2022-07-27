@@ -19,7 +19,8 @@ Logging you in
         if (!firstRender)
             return;
 
-        await this.AuthService.LoginAsync(this.AccessCode).ConfigureAwait(false);
+        LoginResponse response = await this.AuthService.LoginAsync(this.AccessCode).ConfigureAwait(false);
+        await (this.AuthProvider as IWebAuthProvider).LoginAsync(response).ConfigureAwait(false);
         this.Navigation.NavigateTo(OAuthState.Parse(this.State).ReturnURL, false, true);
     }
 }

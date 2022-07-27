@@ -24,5 +24,16 @@ namespace TehGM.EinherjiBot.Security.API
 
             return base.Ok(response);
         }
+
+        [HttpPost("refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken = default)
+        {
+            LoginResponse response = await this._service.RefreshAsync(request.RefreshToken, cancellationToken).ConfigureAwait(false);
+            if (response == null)
+                return base.Unauthorized();
+
+            return base.Ok(response);
+        }
     }
 }

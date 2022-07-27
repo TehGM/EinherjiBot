@@ -76,22 +76,23 @@ namespace TehGM.EinherjiBot.UI
             services.AddBlazoredLocalStorage();
             services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
             services.AddTransient<IDiscordLoginRedirect, DiscordLoginRedirect>();
-
-            services.AddSingleton<IWebAuthProvider, EinherjiAuthenticationStateProvider>();
-            services.AddSingleton<AuthenticationStateProvider>(provider => (AuthenticationStateProvider)provider.GetRequiredService<IWebAuthProvider>());
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
             ConfigurePrerenderingServices(services);
 
-            services.AddTransient<IAuthContext>(provider => provider.GetRequiredService<IWebAuthProvider>().User);
+            services.AddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
+            services.AddScoped<IAuthProvider>(services => services.GetRequiredService<IWebAuthProvider>());
+            services.AddScoped<AuthenticationStateProvider>(services => (AuthenticationStateProvider)services.GetRequiredService<IWebAuthProvider>());
+            services.AddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
 
             services.AddTransient<ApiJwtHttpHandler>();
+            services.AddTransient<ApiRefreshTokenHttpHandler>();
             services.AddHttpClient<IApiClient, ApiHttpClient>()
+                .AddHttpMessageHandler<ApiRefreshTokenHttpHandler>()
                 .AddHttpMessageHandler<ApiJwtHttpHandler>();
-
-            services.AddTransient<IAuthService, WebAuthService>();
+            services.AddHttpClient<IAuthService, WebAuthService>();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)

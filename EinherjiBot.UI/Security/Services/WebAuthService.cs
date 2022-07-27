@@ -1,29 +1,27 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.AspNetCore.Components;
 using System.Net.Http;
 using TehGM.EinherjiBot.Security.API;
-using TehGM.EinherjiBot.UI.API;
+using TehGM.EinherjiBot.UI.API.Services;
 
 namespace TehGM.EinherjiBot.UI.Security.Services
 {
-    public class WebAuthService : IAuthService
+    public class WebAuthService : ApiHttpClient, IAuthService
     {
-        private readonly IApiClient _client;
-        private readonly IWebAuthProvider _provider;
-        private readonly ILocalStorageService _storage;
-
-        public WebAuthService(IApiClient client, IWebAuthProvider provider, ILocalStorageService localStorage)
+        public WebAuthService(HttpClient client, NavigationManager navigation)
+            : base(client, navigation)
         {
-            this._client = client;
-            this._provider = provider;
-            this._storage = localStorage;
         }
 
-        public async Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
+        public Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
         {
             LoginRequest request = new LoginRequest(accessCode);
-            LoginResponse response = await this._client.Client.PostJsonAsync<LoginResponse>("auth/token", request, cancellationToken).ConfigureAwait(false);
-            this._provider.Login(response);
-            return response;
+            return base.Client.PostJsonAsync<LoginResponse>("auth/token", request, cancellationToken);
+        }
+
+        public Task<LoginResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken = default)
+        {
+            RefreshRequest request = new RefreshRequest(refreshToken);
+            return base.Client.PostJsonAsync<LoginResponse>("auth/token/refresh", request, cancellationToken);
         }
     }
 }

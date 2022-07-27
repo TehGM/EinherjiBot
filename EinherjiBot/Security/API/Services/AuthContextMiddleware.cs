@@ -16,7 +16,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
             if (context.User?.Identity?.IsAuthenticated == true && ulong.TryParse(context.User?.Identity?.Name, out ulong id))
             {
                 IDiscordAuthContext auth = await this._provider.GetAsync(id, null, context.RequestAborted).ConfigureAwait(false);
-                this._provider.Current = auth;
+                this._provider.User = auth;
                 context.Features.Set(auth);
             }
             await next(context).ConfigureAwait(false);

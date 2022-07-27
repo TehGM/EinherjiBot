@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,7 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.TryAddSingleton<IUserSecurityDataStore, MongoUserSecurityDataStore>();
             services.TryAddScoped<IDiscordAuthProvider, DiscordSocketAuthProvider>();
-            services.TryAddScoped<IDiscordAuthContext>(services => services.GetRequiredService<IDiscordAuthProvider>().Current);
+            services.TryAddScoped<IAuthProvider>(services => services.GetRequiredService<IDiscordAuthProvider>());
+            services.TryAddScoped<IDiscordAuthContext>(services => services.GetRequiredService<IDiscordAuthProvider>().User);
             services.TryAddScoped<IAuthContext>(services => (IAuthContext)services.GetRequiredService<IDiscordAuthContext>());
 
             services.AddHttpClient<IDiscordAuthHttpClient, DiscordAuthHttpClient>();
@@ -31,6 +33,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, _ => { });
             services.TryAddTransient<IAuthService, ApiAuthService>();
+            services.TryAddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+
+            services.TryAddSingleton<IRefreshTokenStore, MongoRefreshTokenStore>();
 
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>());
             services.AddTransient<IConfigureOptions<JwtOptions>, ConfigureApiKeysOptions>();

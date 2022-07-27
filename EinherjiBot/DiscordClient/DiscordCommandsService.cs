@@ -56,7 +56,7 @@ namespace TehGM.EinherjiBot.DiscordClient
 
             using IServiceScope scope = this._services.CreateScope();
             IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-            authProvider.Current = DiscordSocketAuthContext.None;
+            authProvider.User = DiscordSocketAuthContext.None;
 
             if (this._options.OverrideCommandsGuildID != null)
             {
@@ -108,7 +108,7 @@ namespace TehGM.EinherjiBot.DiscordClient
             using IServiceScope scope = this._services.CreateScope();
             IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
             IDiscordAuthContext authContext = await authProvider.FromInteractionAsync(interaction, this._cts.Token);
-            authProvider.Current = authContext;
+            authProvider.User = authContext;
 
             EinherjiInteractionContext ctx = new EinherjiInteractionContext(this._client, interaction, authContext, this._cts.Token);
             using IDisposable logScope = this.BeginCommandScope(ctx, null, null);

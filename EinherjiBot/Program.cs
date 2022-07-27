@@ -16,8 +16,6 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Utilities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using TehGM.EinherjiBot.Security.API.Services;
 
 namespace TehGM.EinherjiBot

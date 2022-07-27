@@ -3,9 +3,10 @@ using TehGM.EinherjiBot.Caching;
 
 namespace TehGM.EinherjiBot.Security.Services
 {
-    public class DiscordSocketAuthProvider : IDiscordAuthProvider, IDisposable
+    public class DiscordSocketAuthProvider : IDiscordAuthProvider, IAuthProvider, IDisposable
     {
-        public IDiscordAuthContext Current { get; set; } = DiscordSocketAuthContext.None;
+        public IDiscordAuthContext User { get; set; } = DiscordSocketAuthContext.None;
+        IAuthContext IAuthProvider.User => this.User;
 
         private readonly IDiscordClient _client;
         private readonly IUserSecurityDataStore _store;
