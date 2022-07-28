@@ -24,12 +24,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddScoped<IDiscordAuthProvider, DiscordSocketAuthProvider>();
             services.TryAddScoped<IAuthProvider>(services => services.GetRequiredService<IDiscordAuthProvider>());
             services.TryAddScoped<IDiscordAuthContext>(services => services.GetRequiredService<IDiscordAuthProvider>().User);
-            services.TryAddScoped<IAuthContext>(services => (IAuthContext)services.GetRequiredService<IDiscordAuthContext>());
+            services.TryAddScoped<IAuthContext>(services => services.GetRequiredService<IDiscordAuthContext>());
 
             services.AddHttpClient<IDiscordAuthHttpClient, DiscordAuthHttpClient>();
             services.TryAddTransient<IDiscordHttpClient>(services => services.GetRequiredService<IDiscordAuthHttpClient>());
             services.TryAddTransient<AuthContextMiddleware>();
             services.TryAddTransient<IJwtGenerator, JwtGenerator>();
+            services.TryAddTransient<IRefreshTokenGenerator, RefreshTokenGenerator>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, _ => { });
             services.TryAddTransient<IAuthService, ApiAuthService>();

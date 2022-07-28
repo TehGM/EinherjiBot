@@ -65,6 +65,7 @@ namespace TehGM.EinherjiBot
             services.Configure<RandomStatus.RandomStatusOptions>(configuration.GetSection("RandomStatus"));
             services.Configure<SharedAccounts.SharedAccountOptions>(configuration.GetSection("SharedAccounts"));
             services.Configure<Security.API.JwtOptions>(configuration.GetSection("JWT"));
+            services.Configure<Security.API.RefreshTokenOptions>(configuration.GetSection("RefreshToken"));
             services.Configure<Security.API.DiscordAuthOptions>(configuration.GetSection("Discord"));
 
             UI.Program.ConfigurePrerenderingOptions(services, configuration);
