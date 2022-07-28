@@ -6,16 +6,19 @@ namespace TehGM.EinherjiBot.Security.API.Services
     {
         private readonly IDiscordAuthProvider _auth;
         private readonly IDiscordAuthHttpClient _client;
-        private readonly IJwtGenerator _jwt;
-        private readonly IRefreshTokenStore _refreshTokens;
+        private readonly IJwtGenerator _jwtGenerator;
+        private readonly IRefreshTokenGenerator _refreshTokenGenerator;
+        private readonly IRefreshTokenStore _refreshTokenStore;
         private readonly JwtOptions _options;
 
-        public ApiAuthService(IDiscordAuthProvider auth, IDiscordAuthHttpClient client, IJwtGenerator jwtGenerator, IRefreshTokenStore refreshTokens, IOptionsSnapshot<JwtOptions> options)
+        public ApiAuthService(IDiscordAuthProvider auth, IDiscordAuthHttpClient client, IJwtGenerator jwtGenerator, IRefreshTokenGenerator refreshTokenGenerator,
+            IRefreshTokenStore refreshTokenStore, IOptionsSnapshot<JwtOptions> options)
         {
             this._auth = auth;
             this._client = client;
-            this._jwt = jwtGenerator;
-            this._refreshTokens = refreshTokens;
+            this._jwtGenerator = jwtGenerator;
+            this._refreshTokenGenerator = refreshTokenGenerator;
+            this._refreshTokenStore = refreshTokenStore;
             this._options = options.Value;
         }
 
@@ -27,7 +30,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
 
         public async Task<LoginResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            RefreshToken token = await this._refreshTokens.GetAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+            RefreshToken token = await this._refreshTokenStore.GetAsync(refreshToken, cancellationToken).ConfigureAwait(false);
             if (token == null)
                 throw null;
 
@@ -42,20 +45,20 @@ namespace TehGM.EinherjiBot.Security.API.Services
             if (securityData.IsBanned)
                 return null;
 
-            RefreshToken refreshToken = RefreshToken.Create(securityData.ID, accessToken.RefreshToken, TimeSpan.FromDays(5));
-            await this._refreshTokens.AddAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+            RefreshToken refreshToken = this._refreshTokenGenerator.Generate(securityData.ID, accessToken.RefreshToken);
+            await this._refreshTokenStore.AddAsync(refreshToken, cancellationToken).ConfigureAwait(false);
 
-            string jwt = this._jwt.Generate(securityData);
+            string jwt = this._jwtGenerator.Generate(securityData);
             return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, securityData.Roles);
         }
 
         public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            RefreshToken token = await this._refreshTokens.GetAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+            RefreshToken token = await this._refreshTokenStore.GetAsync(refreshToken, cancellationToken).ConfigureAwait(false);
             if (token == null)
                 return;
 
-            await this._refreshTokens.DeleteAsync(token.Token, cancellationToken).ConfigureAwait(false);
+            await this._refreshTokenStore.DeleteAsync(token.Token, cancellationToken).ConfigureAwait(false);
             await this._client.RevokeAsync(token.DiscordRefreshToken, cancellationToken).ConfigureAwait(false);
         }
     }

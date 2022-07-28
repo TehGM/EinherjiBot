@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace TehGM.EinherjiBot.Security
 {
@@ -19,25 +18,13 @@ namespace TehGM.EinherjiBot.Security
         public string DiscordRefreshToken { get; }
 
         [BsonConstructor(nameof(Token), nameof(UserID), nameof(DiscordRefreshToken), nameof(Timestamp), nameof(ExpirationTimestamp))]
-        private RefreshToken(string token, ulong userID, string discordRefreshToken, DateTime timestamp, DateTime? expirationTimestamp)
+        public RefreshToken(string token, ulong userID, string discordRefreshToken, DateTime timestamp, DateTime? expirationTimestamp)
         {
             this.Token = token;
             this.UserID = userID;
             this.Timestamp = timestamp;
             this.ExpirationTimestamp = expirationTimestamp;
             this.DiscordRefreshToken = discordRefreshToken;
-        }
-
-        public static RefreshToken Create(ulong userID, string discordRefreshToken, TimeSpan? lifetime)
-        {
-            if (string.IsNullOrWhiteSpace(discordRefreshToken))
-                throw new ArgumentNullException(nameof(discordRefreshToken));
-
-            DateTime timestamp = DateTime.UtcNow;
-            DateTime? expirationTimestamp = lifetime != null ? timestamp + lifetime : null;
-            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)).TrimEnd('=');
-
-            return new RefreshToken(token, userID, discordRefreshToken, timestamp, expirationTimestamp);
         }
 
         public override string ToString()
