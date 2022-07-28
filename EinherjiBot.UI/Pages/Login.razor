@@ -2,6 +2,7 @@
 @using TehGM.EinherjiBot.Security.API
 @using TehGM.EinherjiBot.UI.Security
 @inject IAuthService AuthService
+@inject IDiscordLoginRedirect LoginRedirect
 @inject NavigationManager Navigation
 
 <PageTitle>Logging you in...</PageTitle>
@@ -18,9 +19,15 @@ Logging you in
     {
         if (!firstRender)
             return;
+        try
+        {
+            LoginResponse response = await this.AuthService.LoginAsync(this.AccessCode).ConfigureAwait(false);
+            if (!await this.LoginRedirect.ValidateStateAsync(this.State).ConfigureAwait(false))
+                return;
+            await (this.AuthProvider as IWebAuthProvider).LoginAsync(response).ConfigureAwait(false);
+            this.Navigation.NavigateTo(OAuthState.Parse(this.State).ReturnURL, false, true);
 
-        LoginResponse response = await this.AuthService.LoginAsync(this.AccessCode).ConfigureAwait(false);
-        await (this.AuthProvider as IWebAuthProvider).LoginAsync(response).ConfigureAwait(false);
-        this.Navigation.NavigateTo(OAuthState.Parse(this.State).ReturnURL, false, true);
+        }
+        catch { }
     }
 }
