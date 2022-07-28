@@ -17,7 +17,8 @@ namespace TehGM.EinherjiBot.Security.API.Services
             {
                 IDiscordAuthContext auth = await this._provider.GetAsync(id, null, context.RequestAborted).ConfigureAwait(false);
                 this._provider.User = auth;
-                context.Features.Set(auth);
+                context.Features.Set<IDiscordAuthContext>(auth);
+                context.Features.Set<IAuthContext>(auth);
             }
             await next(context).ConfigureAwait(false);
         }
