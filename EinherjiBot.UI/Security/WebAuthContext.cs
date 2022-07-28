@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 
 namespace TehGM.EinherjiBot.UI.Security
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class WebAuthContext : IAuthContext, IEquatable<WebAuthContext>, IEquatable<IAuthContext>
+    public class WebAuthContext : IAuthContext, IDiscordUserInfo, IEquatable<WebAuthContext>, IEquatable<IAuthContext>
     {
         public static WebAuthContext None { get; } = new WebAuthContext();
 
@@ -29,21 +30,8 @@ namespace TehGM.EinherjiBot.UI.Security
         public static WebAuthContext FromLoginResponse(LoginResponse response)
             => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles);
 
-        public string GetAvatarURL(ushort size = 1024)
-        {
-            const string baseUrl = "https://cdn.discordapp.com";
-            if (string.IsNullOrWhiteSpace(this.AvatarHash))
-            {
-                int value = int.Parse(this.Discriminator) % 5;
-                return $"{baseUrl}/embed/avatars/{value}.png";
-            }
-
-            string ext = this.AvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"{baseUrl}/avatars/{this.ID}/{this.AvatarHash}.{ext}?size={size}";
-        }
-
         public override string ToString()
-            => $"{this.Username}#{this.Discriminator}";
+            => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();
 
         public override bool Equals(object obj)
             => this.Equals(obj as IAuthContext);

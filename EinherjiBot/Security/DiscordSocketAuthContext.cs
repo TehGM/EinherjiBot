@@ -1,15 +1,13 @@
 ﻿using Discord;
 using System.Diagnostics;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class DiscordSocketAuthContext : IDiscordAuthContext, IAuthContext, IEquatable<DiscordSocketAuthContext>, IEquatable<IAuthContext>
+    public class DiscordSocketAuthContext : IDiscordAuthContext, IAuthContext, IDiscordUserInfo, IEquatable<DiscordSocketAuthContext>, IEquatable<IAuthContext>
     {
         public static DiscordSocketAuthContext None => new DiscordSocketAuthContext();
-
-        string IAuthContext.Username => this.DiscordUser?.Username;
-        string IAuthContext.Discriminator => this.DiscordUser?.Discriminator;
 
         public IUser DiscordUser { get; }
         public IGuild DiscordGuild { get; }
@@ -19,6 +17,12 @@ namespace TehGM.EinherjiBot.Security
         public ulong ID => this.DiscordUser?.Id ?? default;
         public IEnumerable<string> BotRoles => this._data?.Roles;
         public bool IsBanned => this._data?.IsBanned ?? false;
+
+        string IAuthContext.Username => this.DiscordUser?.Username;
+        string IAuthContext.Discriminator => this.DiscordUser?.Discriminator;
+        string IDiscordUserInfo.Username => this.DiscordUser?.Username;
+        string IDiscordUserInfo.Discriminator => this.DiscordUser?.Discriminator;
+        string IDiscordUserInfo.AvatarHash => this.DiscordUser?.AvatarId;
 
         private readonly UserSecurityData _data;
 
@@ -33,9 +37,10 @@ namespace TehGM.EinherjiBot.Security
 
         private DiscordSocketAuthContext() { }
 
-        string IAuthContext.GetAvatarURL(ushort size)
+        string IDiscordUserInfo.GetAvatarURL(ushort size)
             => this.DiscordUser.GetSafeAvatarUrl(ImageFormat.Auto, size);
-
+        string IDiscordUserInfo.GetUsernameWithDiscriminator()
+            => this.ToString();
         public override string ToString()
             => this.DiscordUser?.GetUsernameWithDiscriminator();
 

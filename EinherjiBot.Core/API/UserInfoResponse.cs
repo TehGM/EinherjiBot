@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace TehGM.EinherjiBot.API
 {
-    public class UserInfoResponse
+    [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
+    public class UserInfoResponse : IDiscordUserInfo
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -25,6 +27,6 @@ namespace TehGM.EinherjiBot.API
         }
 
         public override string ToString()
-            => $"{this.Username}#{this.Discriminator}";
+            => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();
     }
 }
