@@ -1,5 +1,5 @@
 ﻿using System.Net.Http;
-using TehGM.EinherjiBot.Security.API;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security.Services
 {
@@ -13,11 +13,11 @@ namespace TehGM.EinherjiBot.Security.Services
             this.Client.DefaultRequestHeaders.Add("User-Agent", $"EinherjiBot ({EinherjiInfo.RepositoryURL}, {EinherjiInfo.WebVersion})");
         }
 
-        public Task<CurrentUserResponse> GetCurrentUserAsync(string bearerToken, CancellationToken cancellationToken = default)
+        public Task<UserInfoResponse> GetCurrentUserAsync(string bearerToken, CancellationToken cancellationToken = default)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/users/@me");
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
-            return this.Client.SendJsonAsync<CurrentUserResponse>(request, null, null, cancellationToken);
+            return this.Client.SendJsonAsync<UserInfoResponse>(request, null, null, cancellationToken);
         }
     }
 }

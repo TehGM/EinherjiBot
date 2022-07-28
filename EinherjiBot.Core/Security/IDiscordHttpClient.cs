@@ -1,9 +1,9 @@
-﻿using TehGM.EinherjiBot.Security.API;
+﻿using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security
 {
     public interface IDiscordHttpClient
     {
-        Task<CurrentUserResponse> GetCurrentUserAsync(string bearerToken, CancellationToken cancellationToken = default);
+        Task<UserInfoResponse> GetCurrentUserAsync(string bearerToken, CancellationToken cancellationToken = default);
     }
 }

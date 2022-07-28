@@ -1,4 +1,6 @@
-﻿namespace TehGM.EinherjiBot.Security.API.Services
+﻿using TehGM.EinherjiBot.API;
+
+namespace TehGM.EinherjiBot.Security.API.Services
 {
     public class ApiAuthService : IAuthService
     {
@@ -35,7 +37,7 @@
 
         private async Task<LoginResponse> AuthenticateAsync(DiscordAccessTokenResponse accessToken, CancellationToken cancellationToken)
         {
-            CurrentUserResponse currentUser = await this._client.GetCurrentUserAsync(accessToken.AccessToken, cancellationToken).ConfigureAwait(false);
+            UserInfoResponse currentUser = await this._client.GetCurrentUserAsync(accessToken.AccessToken, cancellationToken).ConfigureAwait(false);
             UserSecurityData securityData = await this._auth.GetUserSecurityDataAsync(currentUser.ID, cancellationToken).ConfigureAwait(false);
             if (securityData.IsBanned)
                 return null;

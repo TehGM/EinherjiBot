@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security.API
 {
@@ -11,14 +12,14 @@ namespace TehGM.EinherjiBot.Security.API
         [JsonProperty("tokenExpiration")]
         public uint TokenExpirationSeconds { get; init; }
         [JsonProperty("user")]
-        public CurrentUserResponse User { get; init; }
+        public UserInfoResponse User { get; init; }
         [JsonProperty("roles")]
         public IEnumerable<string> Roles { get; init; }
 
         [JsonConstructor]
         private LoginResponse() { }
 
-        public LoginResponse(string token, string refreshToken, TimeSpan expiration, CurrentUserResponse user, IEnumerable<string> roles)
+        public LoginResponse(string token, string refreshToken, TimeSpan expiration, UserInfoResponse user, IEnumerable<string> roles)
         {
             this.Token = token;
             this.RefreshToken = refreshToken;

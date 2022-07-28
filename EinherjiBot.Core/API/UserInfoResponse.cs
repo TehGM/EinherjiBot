@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace TehGM.EinherjiBot.Security.API
+namespace TehGM.EinherjiBot.API
 {
-    public class CurrentUserResponse
+    public class UserInfoResponse
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -14,9 +14,9 @@ namespace TehGM.EinherjiBot.Security.API
         public string AvatarHash { get; init; }
 
         [JsonConstructor]
-        private CurrentUserResponse() { }
+        private UserInfoResponse() { }
 
-        public CurrentUserResponse(ulong id, string username, string discriminator, string avatarHash)
+        public UserInfoResponse(ulong id, string username, string discriminator, string avatarHash)
         {
             this.ID = id;
             this.Username = username;
