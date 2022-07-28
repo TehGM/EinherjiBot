@@ -23,6 +23,19 @@ namespace System.Net.Http
             return JsonConvert.DeserializeObject<TResponse>(json);
         }
 
+        // GET
+        public static async Task<HttpResponseMessage> GetJsonAsync(this HttpClient client, string url, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            return await SendJsonAsync<HttpResponseMessage>(client, request, null, null, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static async Task<TResponse> GetJsonAsync<TResponse>(this HttpClient client, string url, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            return await SendJsonAsync<TResponse>(client, request, null, null, cancellationToken).ConfigureAwait(false);
+        }
+
         // POST
         public static async Task<HttpResponseMessage> PostJsonAsync(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
         {

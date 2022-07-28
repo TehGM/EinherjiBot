@@ -73,6 +73,7 @@ namespace TehGM.EinherjiBot
 
         private static void ConfigureServices(IServiceCollection services)
         {
+            services.AddRouting(options => options.ConstraintMap.Add("ulong", typeof(API.Constraints.UlongRouteConstraint)));
             services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddRazorPages().AddNewtonsoftJson();
 
@@ -87,6 +88,7 @@ namespace TehGM.EinherjiBot
             services.AddRandomStatus();
             services.AddGameServers();
             services.AddSharedAccounts();
+            services.AddTransient<API.IUserInfoService, API.Services.ApiUserInfoService>();
 
             UI.Program.ConfigurePrerenderingServices(services);
         }

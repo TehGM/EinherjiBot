@@ -25,6 +25,7 @@ using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.UI.Security;
 using TehGM.EinherjiBot.UI.Security.Services;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.UI
 {
@@ -93,6 +94,8 @@ namespace TehGM.EinherjiBot.UI
                 .AddHttpMessageHandler<ApiRefreshTokenHttpHandler>()
                 .AddHttpMessageHandler<ApiJwtHttpHandler>();
             services.AddHttpClient<IAuthService, WebAuthService>();
+
+            services.AddTransient<IUserInfoService, WebUserInfoService>();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)
