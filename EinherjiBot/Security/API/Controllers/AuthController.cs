@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TehGM.EinherjiBot.Security.API
+namespace TehGM.EinherjiBot.Security.API.Controllers
 {
     [Route("api/auth/token")]
     [ApiController]
