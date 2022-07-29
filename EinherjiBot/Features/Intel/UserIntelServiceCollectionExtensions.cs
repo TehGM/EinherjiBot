@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.TryAddSingleton<IUserIntelStore, MongoUserIntelStore>();
             services.TryAddTransient<IUserIntelProvider, UserIntelProvider>();
+            services.TryAddTransient<IIntelEmbedBuilder, IntelEmbedBuilder>();
             services.AddHostedService<UserStatusListener>();
 
             return services;
