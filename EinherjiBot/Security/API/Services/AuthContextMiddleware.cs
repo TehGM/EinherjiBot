@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace TehGM.EinherjiBot.Security.API.Services
 {
@@ -16,6 +17,13 @@ namespace TehGM.EinherjiBot.Security.API.Services
             if (context.User?.Identity?.IsAuthenticated == true && ulong.TryParse(context.User?.Identity?.Name, out ulong id))
             {
                 IDiscordAuthContext auth = await this._provider.GetAsync(id, null, context.RequestAborted).ConfigureAwait(false);
+                if (auth.IsBanned)
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    await context.Response.WriteAsync("Banned", context.RequestAborted).ConfigureAwait(false);
+                    return;
+                }
+
                 this._provider.User = auth;
                 context.Features.Set<IDiscordAuthContext>(auth);
                 context.Features.Set<IAuthContext>(auth);
