@@ -37,6 +37,7 @@ namespace TehGM.EinherjiBot.Security.Services
                 ? guildsTask.Result.FirstOrDefault(g => g.Id == guildID)
                 : null;
             Task<IGuildUser> guildUserTask = guild?.GetGuildUserAsync(userID, cancellationToken) ?? Task.FromResult((IGuildUser)null);
+            await Task.WhenAll(knownRolesTask, guildUserTask).ConfigureAwait(false);
 
             return new DiscordSocketAuthContext(userTask.Result, guild, guildUserTask.Result, knownRolesTask.Result, dataTask.Result);
         }
