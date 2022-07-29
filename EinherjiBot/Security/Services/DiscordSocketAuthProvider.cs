@@ -32,28 +32,32 @@ namespace TehGM.EinherjiBot.Security.Services
             Task<IReadOnlyCollection<IGuild>> guildsTask = this._client.GetGuildsAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions());
             await Task.WhenAll(dataTask, userTask, guildsTask).ConfigureAwait(false);
 
-            Task<IEnumerable<ulong>> knownRolesTask = this.GetKnownRoleIDsAsync(userID, guildsTask.Result, cancellationToken);
+            Task<KnownIDs> knownIDsTask = this.GetKnownIDsAsync(userID, guildsTask.Result, cancellationToken);
             IGuild guild = guildID != null
                 ? guildsTask.Result.FirstOrDefault(g => g.Id == guildID)
                 : null;
             Task<IGuildUser> guildUserTask = guild?.GetGuildUserAsync(userID, cancellationToken) ?? Task.FromResult((IGuildUser)null);
-            await Task.WhenAll(knownRolesTask, guildUserTask).ConfigureAwait(false);
+            await Task.WhenAll(knownIDsTask, guildUserTask).ConfigureAwait(false);
 
-            return new DiscordSocketAuthContext(userTask.Result, guild, guildUserTask.Result, knownRolesTask.Result, dataTask.Result);
+            return new DiscordSocketAuthContext(userTask.Result, guild, guildUserTask.Result, knownIDsTask.Result.KnownGuildIDs, knownIDsTask.Result.KnownRoleIDs, dataTask.Result);
         }
 
-        private async Task<IEnumerable<ulong>> GetKnownRoleIDsAsync(ulong userID, IEnumerable<IGuild> guilds, CancellationToken cancellationToken)
+        private async Task<KnownIDs> GetKnownIDsAsync(ulong userID, IEnumerable<IGuild> guilds, CancellationToken cancellationToken)
         {
-            List<ulong> results = new List<ulong>();
+            List<ulong> guildIDs = new List<ulong>(guilds.Count());
+            List<ulong> roleIDs = new List<ulong>();
             foreach (IGuild guild in guilds)
             {
                 IGuildUser user = await guild.GetGuildUserAsync(userID, cancellationToken).ConfigureAwait(false);
                 if (user == null)
                     continue;
-                results.AddRange(user.RoleIds);
+                guildIDs.Add(guild.Id);
+                roleIDs.AddRange(user.RoleIds);
             }
-            return results;
+            return new KnownIDs(guildIDs, roleIDs);
         }
+
+        private record KnownIDs(IEnumerable<ulong> KnownGuildIDs, IEnumerable<ulong> KnownRoleIDs);
 
         public async Task<UserSecurityData> GetUserSecurityDataAsync(ulong userID, CancellationToken cancellationToken = default)
         {
