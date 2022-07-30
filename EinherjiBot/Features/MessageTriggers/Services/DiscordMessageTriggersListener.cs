@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
 {
@@ -6,12 +7,15 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IMessageTriggersProvider _provider;
+        private readonly IPlaceholdersEngine _placeholders;
         private readonly ILogger _log;
 
-        public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider, ILogger<DiscordMessageTriggersListener> log)
+        public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider, IPlaceholdersEngine placeholders,
+            ILogger<DiscordMessageTriggersListener> log)
         {
             this._client = client;
             this._provider = provider;
+            this._placeholders = placeholders;
             this._log = log;
 
             this._client.MessageReceived += this.OnMessageReceivedAsync;
@@ -38,9 +42,11 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                     return;
                 if (!trigger.IsMatch(message.Content))
                     continue;
+
+                string response = await this._placeholders.ConvertPlaceholdersAsync(trigger.Response, base.CancellationToken).ConfigureAwait(false);
                 try
                 {
-                    await guildChannel.SendMessageAsync(trigger.Response,
+                    await guildChannel.SendMessageAsync(response,
                         options: base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (ex.IsMissingPermissions())
