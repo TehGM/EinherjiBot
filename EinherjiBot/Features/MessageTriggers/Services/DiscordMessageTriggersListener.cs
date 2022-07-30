@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
@@ -8,14 +9,16 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
         private readonly DiscordSocketClient _client;
         private readonly IMessageTriggersProvider _provider;
         private readonly IPlaceholdersEngine _placeholders;
+        private readonly IServiceProvider _services;
         private readonly ILogger _log;
 
         public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider, IPlaceholdersEngine placeholders,
-            ILogger<DiscordMessageTriggersListener> log)
+            IServiceProvider services, ILogger<DiscordMessageTriggersListener> log)
         {
             this._client = client;
             this._provider = provider;
             this._placeholders = placeholders;
+            this._services = services;
             this._log = log;
 
             this._client.MessageReceived += this.OnMessageReceivedAsync;
@@ -36,6 +39,11 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             if (triggers?.Any() != true)
                 return;
 
+            using IServiceScope scope = this._services.CreateScope();
+            IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+            IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
+            authProvider.User = authContext;
+
             foreach (MessageTrigger trigger in triggers)
             {
                 if (trigger.ChannelIDs != null && !trigger.ChannelIDs.Contains(guildChannel.Id))
@@ -43,7 +51,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                 if (!trigger.IsMatch(message.Content))
                     continue;
 
-                string response = await this._placeholders.ConvertPlaceholdersAsync(trigger.Response, base.CancellationToken).ConfigureAwait(false);
+                string response = await this._placeholders.ConvertPlaceholdersAsync(trigger.Response, scope.ServiceProvider, base.CancellationToken).ConfigureAwait(false);
                 try
                 {
                     await guildChannel.SendMessageAsync(response,
