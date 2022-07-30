@@ -54,13 +54,6 @@ namespace TehGM.EinherjiBot.Database.Services
             conventions.Add(new GuidAsStandardRepresentationConvention());
             conventions.Add(new EnumRepresentationConvention(BsonType.String));
             ConventionRegistry.Register(packName, conventions, _ => true);
-
-            // guid serialization
-            #pragma warning disable CS0618 // Type or member is obsolete
-            BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-#pragma warning restore CS0618 // Type or member is obsolete
-            BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard)); 
-            BsonSerializer.RegisterSerializer(new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
         }
     }
 }
