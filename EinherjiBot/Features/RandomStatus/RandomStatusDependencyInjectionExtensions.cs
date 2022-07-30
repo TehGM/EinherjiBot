@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             services.TryAddSingleton<IStatusStore, MongoStatusStore>();
-            services.TryAddTransient<IStatusProvider, StatusProvider>();
+            services.TryAddSingleton<IStatusProvider, StatusProvider>();
             services.AddHostedService<RandomStatusService>();
 
             return services;
