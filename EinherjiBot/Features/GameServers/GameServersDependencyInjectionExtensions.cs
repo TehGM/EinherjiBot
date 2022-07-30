@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMongoDB();
             services.AddEntityCaching();
             services.TryAddSingleton<IGameServerStore, MongoGameServerStore>();
-            services.TryAddSingleton<IGameServerProvider, GameServerProvider>();
+            services.TryAddScoped<IGameServerProvider, GameServerProvider>();
 
             return services;
         }

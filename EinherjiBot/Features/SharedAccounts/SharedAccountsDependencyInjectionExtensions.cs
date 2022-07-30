@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.AddBotAudits();
             services.TryAddSingleton<ISharedAccountStore, MongoSharedAccountStore>();
-            services.TryAddSingleton<ISharedAccountProvider, SharedAccountProvider>();
+            services.TryAddScoped<ISharedAccountProvider, SharedAccountProvider>();
 
             return services;
         }
