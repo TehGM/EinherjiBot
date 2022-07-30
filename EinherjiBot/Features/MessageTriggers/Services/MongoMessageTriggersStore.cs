@@ -26,7 +26,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             return this._collection.Find(db => db.ID == id).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<MessageTrigger>> GetForGuild(ulong guildID, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MessageTrigger>> GetForGuildAsync(ulong guildID, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Getting message triggers for guild {ID} from DB", guildID);
             return await this._collection.Find(db => db.GuildID == guildID).ToListAsync(cancellationToken).ConfigureAwait(false);
