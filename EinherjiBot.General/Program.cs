@@ -49,7 +49,6 @@ namespace TehGM.EinherjiBot
                     services.Configure<Database.MongoOptions>(context.Configuration.GetSection("Database"));
                     services.Configure<DiscordClient.DiscordOptions>(context.Configuration.GetSection("Discord"));
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
-                    services.Configure<BotChannelsRedirectionOptions>(context.Configuration.GetSection("BotChannelsRedirection"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
                     services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
@@ -64,7 +63,6 @@ namespace TehGM.EinherjiBot
                     // add bot features
                     services.AddUserIntel();
                     services.AddAdministration();
-                    services.AddBotChannelsRedirection();
                     services.AddPatchbot();
                     services.AddEliteCommunityGoals();
                     services.AddGameServers();
