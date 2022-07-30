@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>StatusPlaceholder</PackageId>
+    <PackageId>PlaceholdersEngine</PackageId>
     <PackageVersion>1.0.0.0</PackageVersion>
     <Authors>GM</Authors>
     <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
@@ -16,21 +16,21 @@
     <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
     <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>StatusPlaceholder</Description>
+    <Description>PlaceholdersEngine</Description>
     <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
     <Copyright>Copyright</Copyright>
-    <PackageTags>StatusPlaceholder, analyzers</PackageTags>
+    <PackageTags>PlaceholdersEngine, analyzers</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
 
-    <RootNamespace>TehGM.Analyzers.StatusPlaceholder.Package</RootNamespace>
+    <RootNamespace>TehGM.Analyzers.PlaceholdersEngine.Package</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StatusPlaceholder.CodeFixes\StatusPlaceholder.CodeFixes.csproj" />
-    <ProjectReference Include="..\StatusPlaceholder\StatusPlaceholder.csproj" />
+    <ProjectReference Include="..\StatusPlaceholder.CodeFixes\PlaceholdersEngine.CodeFixes.csproj" />
+    <ProjectReference Include="..\StatusPlaceholder\PlaceholdersEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TehGM.Analyzers.StatusPlaceholder {
+namespace TehGM.Analyzers.PlaceholdersEngine {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TehGM.Analyzers.StatusPlaceholder.CodeFixResources", typeof(CodeFixResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TehGM.Analyzers.PlaceholdersEngine.CodeFixResources", typeof(CodeFixResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -70,7 +70,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove [StatusPlaceholder] attribute.
+        ///   Looks up a localized string similar to Remove [Placeholder] attribute.
         /// </summary>
         internal static string IsAbstract_RemoveAttributeTitle {
             get {
@@ -115,7 +115,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add [StatusPlaceholder] attribute.
+        ///   Looks up a localized string similar to Add [Placeholder] attribute.
         /// </summary>
         internal static string MissingAttribute_AddAttributeTitle {
             get {
@@ -124,7 +124,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add IStatusPlaceholder interface.
+        ///   Looks up a localized string similar to Add IPlaceholder interface.
         /// </summary>
         internal static string MissingInterface_AddInterfaceTitle {
             get {

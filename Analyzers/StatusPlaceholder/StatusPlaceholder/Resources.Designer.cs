@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TehGM.Analyzers.StatusPlaceholder {
+namespace TehGM.Analyzers.PlaceholdersEngine {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TehGM.Analyzers.StatusPlaceholder.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TehGM.Analyzers.PlaceholdersEngine.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder with [StatusPlaceholder] attribute cannot be abstract.
+        ///   Looks up a localized string similar to Placeholder with [Placeholder] attribute cannot be abstract.
         /// </summary>
         internal static string IsAbstract_AnalyzerDescription {
             get {
@@ -70,7 +70,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder &apos;{0}&apos; is abstract. If it&apos;s intended to be used as a base class, remove the [StatusPlaceholder] attribute..
+        ///   Looks up a localized string similar to Placeholder &apos;{0}&apos; is abstract. If it&apos;s intended to be used as a base class, remove the [Placeholder] attribute..
         /// </summary>
         internal static string IsAbstract_AnalyzerMessageFormat {
             get {
@@ -79,7 +79,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder cannot be abstract.
+        ///   Looks up a localized string similar to Placeholder cannot be abstract.
         /// </summary>
         internal static string IsAbstract_AnalyzerTitle {
             get {
@@ -88,7 +88,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder needs to be a class.
+        ///   Looks up a localized string similar to Placeholder needs to be a class.
         /// </summary>
         internal static string IsClass_AnalyzerDescription {
             get {
@@ -97,7 +97,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder needs to be a class. Struct and interface placeholders aren&apos;t supported..
+        ///   Looks up a localized string similar to Placeholder needs to be a class. Struct and interface placeholders aren&apos;t supported..
         /// </summary>
         internal static string IsClass_AnalyzerMessageFormat {
             get {
@@ -106,7 +106,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder needs to be a class.
+        ///   Looks up a localized string similar to Placeholder needs to be a class.
         /// </summary>
         internal static string IsClass_AnalyzerTitle {
             get {
@@ -115,7 +115,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generic placeholders with [StatusPlaceholder] attribute are not supported.
+        ///   Looks up a localized string similar to Generic placeholders with [Placeholder] attribute are not supported.
         /// </summary>
         internal static string IsGeneric_AnalyzerDescription {
             get {
@@ -142,7 +142,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-abstract status placeholder should be decorated with [StatusPlaceholder] attribute.
+        ///   Looks up a localized string similar to Non-abstract placeholder should be decorated with [Placeholder] attribute.
         /// </summary>
         internal static string MissingAttribute_AnalyzerDescription {
             get {
@@ -151,7 +151,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-abstract status placeholder &apos;{0}&apos; doesn&apos;t have [StatusPlaceholder] attribute. This attribute is required for placeholder to be picked up by the engine..
+        ///   Looks up a localized string similar to Non-abstract placeholder &apos;{0}&apos; doesn&apos;t have [Placeholder] attribute. This attribute is required for placeholder to be picked up by the engine..
         /// </summary>
         internal static string MissingAttribute_AnalyzerMessageFormat {
             get {
@@ -160,7 +160,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-abstract status placeholder should be decorated with [StatusPlaceholder] attribute.
+        ///   Looks up a localized string similar to Non-abstract placeholder should be decorated with [Placeholder] attribute.
         /// </summary>
         internal static string MissingAttribute_AnalyzerTitle {
             get {
@@ -169,7 +169,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder needs to implement IStatusPlaceholder interface.
+        ///   Looks up a localized string similar to Placeholder needs to implement IPlaceholder interface.
         /// </summary>
         internal static string MissingInterface_AnalyzerDescription {
             get {
@@ -178,7 +178,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder &apos;{0}&apos; doesn&apos;t implement IStatusPlaceholder. Implementation of this interface is required for placeholder to run..
+        ///   Looks up a localized string similar to Placeholder &apos;{0}&apos; doesn&apos;t implement IPlaceholder. Implementation of this interface is required for placeholder to run..
         /// </summary>
         internal static string MissingInterface_AnalyzerMessageFormat {
             get {
@@ -187,7 +187,7 @@ namespace TehGM.Analyzers.StatusPlaceholder {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Status placeholder needs to implement IStatusPlaceholder interface.
+        ///   Looks up a localized string similar to Placeholder needs to implement IPlaceholder interface.
         /// </summary>
         internal static string MissingInterface_AnalyzerTitle {
             get {

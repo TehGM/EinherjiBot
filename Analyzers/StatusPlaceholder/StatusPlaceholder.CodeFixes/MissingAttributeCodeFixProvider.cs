@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MissingAttributeCodeFixProvider)), Shared]
     public class MissingAttributeCodeFixProvider : CodeFixProvider
@@ -48,7 +48,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
 
         private async Task<Document> AddAttribute(Document document, TypeDeclarationSyntax declaration, CancellationToken cancellationToken)
         {
-            AttributeSyntax attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(RequiredTypeName.StatusPlaceholderAttribute))
+            AttributeSyntax attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(RequiredTypeName.PlaceholderAttribute))
                 .WithArgumentList(SyntaxFactory.AttributeArgumentList());
             SyntaxNode node = declaration.WithAttributeLists(declaration.AttributeLists.Add(
                 SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList<AttributeSyntax>(attribute))));

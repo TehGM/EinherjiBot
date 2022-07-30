@@ -1,4 +1,4 @@
-﻿namespace TehGM.Analyzers.StatusPlaceholder
+﻿namespace TehGM.Analyzers.PlaceholdersEngine
 {
     public static class DiagnosticID
     {

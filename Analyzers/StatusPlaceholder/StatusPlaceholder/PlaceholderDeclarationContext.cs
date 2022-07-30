@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using System.Linq;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
-    internal class StatusPlaceholderDeclarationContext
+    internal class PlaceholderDeclarationContext
     {
         public SyntaxNodeAnalysisContext NodeContext { get; }
         public TypeDeclarationSyntax Declaration { get; }
@@ -20,7 +20,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
         public bool IsAbstract => this.AbstractToken != default;
         public bool IsClass => this.Declaration is ClassDeclarationSyntax;
 
-        public StatusPlaceholderDeclarationContext(SyntaxNodeAnalysisContext context, TypeDeclarationSyntax declaration, INamedTypeSymbol symbol,
+        public PlaceholderDeclarationContext(SyntaxNodeAnalysisContext context, TypeDeclarationSyntax declaration, INamedTypeSymbol symbol,
             bool hasRequiredAttribute, bool hasRequiredInterface, SyntaxToken abstractToken)
         {
             this.NodeContext = context;
@@ -31,15 +31,15 @@ namespace TehGM.Analyzers.StatusPlaceholder
             this.AbstractToken = abstractToken;
         }
 
-        public static bool TryGetFromContext(SyntaxNodeAnalysisContext context, out StatusPlaceholderDeclarationContext result)
+        public static bool TryGetFromContext(SyntaxNodeAnalysisContext context, out PlaceholderDeclarationContext result)
         {
             result = null;
             if (!(context.Node is TypeDeclarationSyntax declaration))
                 return false;
 
             bool hasRequiredAttribute = declaration.AttributeLists.SelectMany(list => list.Attributes)
-                .Any(attr => attr.Name.ToString() == RequiredTypeName.StatusPlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.StatusPlaceholderAttribute + "Attribute");
-            bool hasRequiredInterface = declaration.BaseList?.Types.Any(t => t.Type.ToString() == RequiredTypeName.StatusPlaceholderInterface) == true;
+                .Any(attr => attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute + "Attribute");
+            bool hasRequiredInterface = declaration.BaseList?.Types.Any(t => t.Type.ToString() == RequiredTypeName.PlaceholderInterface) == true;
 
             if (!hasRequiredAttribute && !hasRequiredInterface)
                 return false;
@@ -47,7 +47,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
             SyntaxToken abstractToken = declaration.Modifiers.FirstOrDefault(modifier => modifier.IsKind(SyntaxKind.AbstractKeyword));
             INamedTypeSymbol symbol = context.SemanticModel.GetDeclaredSymbol(declaration);
 
-            result = new StatusPlaceholderDeclarationContext(context, declaration, symbol, hasRequiredAttribute, hasRequiredInterface, abstractToken);
+            result = new PlaceholderDeclarationContext(context, declaration, symbol, hasRequiredAttribute, hasRequiredInterface, abstractToken);
             return true;
         }
 

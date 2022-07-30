@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     internal static class DiagnosticRule
     {

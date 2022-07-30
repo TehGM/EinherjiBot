@@ -121,7 +121,7 @@
     <value>Remove abstract keyword</value>
   </data>
   <data name="IsAbstract_RemoveAttributeTitle" xml:space="preserve">
-    <value>Remove [StatusPlaceholder] attribute</value>
+    <value>Remove [Placeholder] attribute</value>
   </data>
   <data name="IsClass_ChangeToClassTitle" xml:space="preserve">
     <value>Convert to class</value>
@@ -136,10 +136,10 @@
     <value>Make class abstract</value>
   </data>
   <data name="MissingAttribute_AddAttributeTitle" xml:space="preserve">
-    <value>Add [StatusPlaceholder] attribute</value>
+    <value>Add [Placeholder] attribute</value>
   </data>
   <data name="MissingInterface_AddInterfaceTitle" xml:space="preserve">
-    <value>Add IStatusPlaceholder interface</value>
+    <value>Add IPlaceholder interface</value>
     <comment>The title of the code fix.</comment>
   </data>
 </root>

@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(IsClassCodeFixProvider)), Shared]
     public class IsClassCodeFixProvider : CodeFixProvider

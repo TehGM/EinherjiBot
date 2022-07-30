@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MissingInterfaceCodeFixProvider)), Shared]
     public class MissingInterfaceCodeFixProvider : CodeFixProvider
@@ -43,7 +43,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
         private async Task<Document> AddInterface(Document document, TypeDeclarationSyntax declaration, CancellationToken cancellationToken)
         {
             SyntaxGenerator generator = SyntaxGenerator.GetGenerator(document);
-            SyntaxNode node = generator.AddBaseType(declaration, SyntaxFactory.ParseTypeName(RequiredTypeName.StatusPlaceholderInterface));
+            SyntaxNode node = generator.AddBaseType(declaration, SyntaxFactory.ParseTypeName(RequiredTypeName.PlaceholderInterface));
             SyntaxNode root = await document.GetSyntaxRootAsync(cancellationToken);
             return document.WithSyntaxRoot(root.ReplaceNode(declaration, node));
         }

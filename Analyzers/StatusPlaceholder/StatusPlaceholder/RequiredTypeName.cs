@@ -1,8 +1,8 @@
-﻿namespace TehGM.Analyzers.StatusPlaceholder
+﻿namespace TehGM.Analyzers.PlaceholdersEngine
 {
     public static class RequiredTypeName
     {
-        public const string StatusPlaceholderAttribute = "Placeholder";
-        public const string StatusPlaceholderInterface = "IPlaceholder";
+        public const string PlaceholderAttribute = "Placeholder";
+        public const string PlaceholderInterface = "IPlaceholder";
     }
 }

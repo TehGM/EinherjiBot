@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(IsGenericCodeFixProvider)), Shared]
     public class IsGenericCodeFixProvider : CodeFixProvider
@@ -60,7 +60,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
                 .Select(list =>
                 {
                     AttributeSyntax attribute = list.Attributes.FirstOrDefault(attr
-                        => attr.Name.ToString() == RequiredTypeName.StatusPlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.StatusPlaceholderAttribute + "Attribute");
+                        => attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute + "Attribute");
                     SeparatedSyntaxList<AttributeSyntax> attributes = attribute != null ? list.Attributes.Remove(attribute) : list.Attributes;
                     return SyntaxFactory.AttributeList(attributes);
                 })

@@ -118,25 +118,25 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="IsAbstract_AnalyzerDescription" xml:space="preserve">
-    <value>Status placeholder with [StatusPlaceholder] attribute cannot be abstract</value>
+    <value>Placeholder with [Placeholder] attribute cannot be abstract</value>
   </data>
   <data name="IsAbstract_AnalyzerMessageFormat" xml:space="preserve">
-    <value>Status placeholder '{0}' is abstract. If it's intended to be used as a base class, remove the [StatusPlaceholder] attribute.</value>
+    <value>Placeholder '{0}' is abstract. If it's intended to be used as a base class, remove the [Placeholder] attribute.</value>
   </data>
   <data name="IsAbstract_AnalyzerTitle" xml:space="preserve">
-    <value>Status placeholder cannot be abstract</value>
+    <value>Placeholder cannot be abstract</value>
   </data>
   <data name="IsClass_AnalyzerDescription" xml:space="preserve">
-    <value>Status placeholder needs to be a class</value>
+    <value>Placeholder needs to be a class</value>
   </data>
   <data name="IsClass_AnalyzerMessageFormat" xml:space="preserve">
-    <value>Status placeholder needs to be a class. Struct and interface placeholders aren't supported.</value>
+    <value>Placeholder needs to be a class. Struct and interface placeholders aren't supported.</value>
   </data>
   <data name="IsClass_AnalyzerTitle" xml:space="preserve">
-    <value>Status placeholder needs to be a class</value>
+    <value>Placeholder needs to be a class</value>
   </data>
   <data name="IsGeneric_AnalyzerDescription" xml:space="preserve">
-    <value>Generic placeholders with [StatusPlaceholder] attribute are not supported</value>
+    <value>Generic placeholders with [Placeholder] attribute are not supported</value>
   </data>
   <data name="IsGeneric_AnalyzerMessageFormat" xml:space="preserve">
     <value>Placeholder '{0}' is generic which is not supported. Please note that abstract base classes can be generic.</value>
@@ -145,24 +145,24 @@
     <value>Generic placeholders are not supported</value>
   </data>
   <data name="MissingAttribute_AnalyzerDescription" xml:space="preserve">
-    <value>Non-abstract status placeholder should be decorated with [StatusPlaceholder] attribute</value>
+    <value>Non-abstract placeholder should be decorated with [Placeholder] attribute</value>
   </data>
   <data name="MissingAttribute_AnalyzerMessageFormat" xml:space="preserve">
-    <value>Non-abstract status placeholder '{0}' doesn't have [StatusPlaceholder] attribute. This attribute is required for placeholder to be picked up by the engine.</value>
+    <value>Non-abstract placeholder '{0}' doesn't have [Placeholder] attribute. This attribute is required for placeholder to be picked up by the engine.</value>
   </data>
   <data name="MissingAttribute_AnalyzerTitle" xml:space="preserve">
-    <value>Non-abstract status placeholder should be decorated with [StatusPlaceholder] attribute</value>
+    <value>Non-abstract placeholder should be decorated with [Placeholder] attribute</value>
   </data>
   <data name="MissingInterface_AnalyzerDescription" xml:space="preserve">
-    <value>Status placeholder needs to implement IStatusPlaceholder interface</value>
+    <value>Placeholder needs to implement IPlaceholder interface</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="MissingInterface_AnalyzerMessageFormat" xml:space="preserve">
-    <value>Status placeholder '{0}' doesn't implement IStatusPlaceholder. Implementation of this interface is required for placeholder to run.</value>
+    <value>Placeholder '{0}' doesn't implement IPlaceholder. Implementation of this interface is required for placeholder to run.</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="MissingInterface_AnalyzerTitle" xml:space="preserve">
-    <value>Status placeholder needs to implement IStatusPlaceholder interface</value>
+    <value>Placeholder needs to implement IPlaceholder interface</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>

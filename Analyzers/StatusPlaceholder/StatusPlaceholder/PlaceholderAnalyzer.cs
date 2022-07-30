@@ -9,10 +9,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace TehGM.Analyzers.StatusPlaceholder
+namespace TehGM.Analyzers.PlaceholdersEngine
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class StatusPlaceholderAnalyzer : DiagnosticAnalyzer
+    public class PlaceholderAnalyzer : DiagnosticAnalyzer
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => ImmutableArray.Create(DiagnosticRule.MissingInterface, DiagnosticRule.MissingAttribute, DiagnosticRule.IsAbstract, DiagnosticRule.IsClass, DiagnosticRule.IsGeneric);
@@ -28,7 +28,7 @@ namespace TehGM.Analyzers.StatusPlaceholder
 
         private static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext nodeContext)
         {
-            if (!StatusPlaceholderDeclarationContext.TryGetFromContext(nodeContext, out StatusPlaceholderDeclarationContext context))
+            if (!PlaceholderDeclarationContext.TryGetFromContext(nodeContext, out PlaceholderDeclarationContext context))
                 return;
 
             AnalyzeMissingInterface(context);
@@ -38,35 +38,35 @@ namespace TehGM.Analyzers.StatusPlaceholder
             AnalyzeIsGeneric(context);
         }
 
-        private static void AnalyzeMissingInterface(StatusPlaceholderDeclarationContext context)
+        private static void AnalyzeMissingInterface(PlaceholderDeclarationContext context)
         {
             if (context.HasRequiredInterface)
                 return;
             context.ReportDiagnostic(DiagnosticRule.MissingInterface);
         }
 
-        private static void AnalyzeMissingAttribute(StatusPlaceholderDeclarationContext context)
+        private static void AnalyzeMissingAttribute(PlaceholderDeclarationContext context)
         {
             if (context.HasRequiredAttribute || context.IsAbstract)
                 return;
             context.ReportDiagnostic(DiagnosticRule.MissingAttribute);
         }
 
-        private static void AnalyzeIsAbstract(StatusPlaceholderDeclarationContext context)
+        private static void AnalyzeIsAbstract(PlaceholderDeclarationContext context)
         {
             if (!context.IsAbstract || !context.HasRequiredAttribute)
                 return;
             context.ReportDiagnostic(DiagnosticRule.IsAbstract, context.AbstractToken);
         }
 
-        private static void AnalyzeIsClass(StatusPlaceholderDeclarationContext context)
+        private static void AnalyzeIsClass(PlaceholderDeclarationContext context)
         {
             if (context.IsClass)
                 return;
             context.ReportDiagnostic(DiagnosticRule.IsClass, context.Declaration.Keyword);
         }
 
-        private static void AnalyzeIsGeneric(StatusPlaceholderDeclarationContext context)
+        private static void AnalyzeIsGeneric(PlaceholderDeclarationContext context)
         {
             if (!context.IsGeneric || context.IsAbstract)
                 return;
