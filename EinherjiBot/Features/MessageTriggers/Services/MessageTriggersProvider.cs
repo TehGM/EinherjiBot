@@ -61,6 +61,27 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             }
         }
 
+        public async Task<IEnumerable<MessageTrigger>> GetGlobalsAsync(CancellationToken cancellationToken = default)
+        {
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (this._guildCache.TryGet(MessageTrigger.GlobalGuildID, out MessageTriggersCollection results))
+                {
+                    this._log.LogTrace("Global message triggers found in cache");
+                    return results;
+                }
+
+                results = new MessageTriggersCollection(MessageTrigger.GlobalGuildID, await this._store.GetGlobalsAsync(cancellationToken).ConfigureAwait(false));
+                this._guildCache.AddOrReplace(results);
+                return results;
+            }
+            finally
+            {
+                this._lock.Release();
+            }
+        }
+
         public async Task UpdateAsync(MessageTrigger trigger, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);

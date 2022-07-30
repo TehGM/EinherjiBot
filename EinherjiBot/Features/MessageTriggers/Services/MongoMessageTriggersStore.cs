@@ -32,6 +32,12 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             return await this._collection.Find(db => db.GuildID == guildID).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        public async Task<IEnumerable<MessageTrigger>> GetGlobalsAsync(CancellationToken cancellationToken = default)
+        {
+            this._log.LogTrace("Getting global message triggers from DB");
+            return await this._collection.Find(db => db.GuildID == MessageTrigger.GlobalGuildID).ToListAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         public Task UpdateAsync(MessageTrigger trigger, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Upserting message trigger {ID} to DB", trigger.ID);

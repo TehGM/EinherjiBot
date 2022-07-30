@@ -2,8 +2,10 @@
 
 namespace TehGM.EinherjiBot.MessageTriggers
 {
-    public class MessageTrigger : ICacheableEntity<Guid>
+    public class MessageTrigger : ICacheableEntity<Guid>, IEquatable<MessageTrigger>
     {
+        public const ulong GlobalGuildID = default;
+
         [BsonId]
         public Guid ID { get; }
         [BsonElement("guildID")]
@@ -24,6 +26,8 @@ namespace TehGM.EinherjiBot.MessageTriggers
 
         [BsonIgnore]
         private Lazy<Regex> PatternRegex { get; }
+        [BsonIgnore]
+        public bool IsGlobal => this.GuildID == GlobalGuildID;
 
         [BsonConstructor(nameof(ID), nameof(GuildID))]
         private MessageTrigger(Guid id, ulong guildID)
@@ -62,5 +66,14 @@ namespace TehGM.EinherjiBot.MessageTriggers
 
         public Guid GetCacheKey()
             => this.ID;
+
+        public override bool Equals(object obj)
+            => this.Equals(obj as MessageTrigger);
+
+        public bool Equals(MessageTrigger other)
+            => other is not null && this.ID.Equals(other.ID);
+
+        public override int GetHashCode()
+            => HashCode.Combine(this.ID);
     }
 }

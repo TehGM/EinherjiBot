@@ -35,7 +35,9 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             if (string.IsNullOrWhiteSpace(message.Content))
                 return;
 
-            IEnumerable<MessageTrigger> triggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
+            IEnumerable<MessageTrigger> globalTriggers = await this._provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
+            IEnumerable<MessageTrigger> guildTriggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
+            IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers);
             if (triggers?.Any() != true)
                 return;
 
