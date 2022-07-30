@@ -12,11 +12,11 @@ namespace TehGM.EinherjiBot.MessageTriggers
         public ulong GuildID { get; }
         [BsonElement("filters")]
         public MessageTriggerFilters Filters { get; }
+        [BsonElement("actions")]
+        public ICollection<IMessageTriggerAction> Actions { get; }
+
         [BsonElement("pattern")]
         public string Pattern { get; set; }
-        [BsonElement("response")]
-        public string Response { get; set; }
-
         [BsonElement("useRegex")]
         public bool IsRegex { get; set; }
         [BsonElement("ignoreCase")]
@@ -29,20 +29,20 @@ namespace TehGM.EinherjiBot.MessageTriggers
         [BsonIgnore]
         public bool IsGlobal => this.GuildID == GlobalGuildID;
 
-        [BsonConstructor(nameof(ID), nameof(GuildID), nameof(Filters))]
-        private MessageTrigger(Guid id, ulong guildID, MessageTriggerFilters filters)
+        [BsonConstructor(nameof(ID), nameof(GuildID), nameof(Filters), nameof(Actions))]
+        private MessageTrigger(Guid id, ulong guildID, MessageTriggerFilters filters, IEnumerable<IMessageTriggerAction> actions)
         {
             this.ID = id;
             this.GuildID = guildID;
             this.Filters = filters;
             this.PatternRegex = new Lazy<Regex>(() => this.BuildPatternRegex());
+            this.Actions = actions as ICollection<IMessageTriggerAction> ?? new List<IMessageTriggerAction>(actions ?? Enumerable.Empty<IMessageTriggerAction>());
         }
 
-        public MessageTrigger(ulong guildID, string pattern, string response)
-            : this(Guid.NewGuid(), guildID, new MessageTriggerFilters())
+        public MessageTrigger(ulong guildID, string pattern, IEnumerable<IMessageTriggerAction> actions)
+            : this(Guid.NewGuid(), guildID, new MessageTriggerFilters(), actions)
         {
             this.Pattern = pattern;
-            this.Response = response;
             this.IgnoreCase = true;
         }
 

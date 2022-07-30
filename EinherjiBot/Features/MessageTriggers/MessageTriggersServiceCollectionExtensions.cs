@@ -1,4 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using TehGM.EinherjiBot.MessageTriggers;
 using TehGM.EinherjiBot.MessageTriggers.Services;
 
@@ -18,7 +22,31 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IMessageTriggersProvider, MessageTriggersProvider>();
             services.AddHostedService<DiscordMessageTriggersListener>();
 
+            MapActions();
+
             return services;
+        }
+
+        private static void MapActions()
+        {
+            IEnumerable<Type> actionTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => typeof(IMessageTriggerAction).IsAssignableFrom(t)
+                    && !t.IsAbstract
+                    && !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)));
+            foreach (Type type in actionTypes)
+            {
+                if (BsonClassMap.IsClassMapRegistered(type))
+                    continue;
+
+                string discriminator = type.GetCustomAttribute<BsonDiscriminatorAttribute>()?.Discriminator
+                    ?? type.FullName;
+                BsonClassMap map = new BsonClassMap(type);
+                map.AutoMap();
+                map.SetDiscriminatorIsRequired(true);
+                map.SetDiscriminator(discriminator);
+                BsonClassMap.RegisterClassMap(map);
+            }
         }
     }
 }

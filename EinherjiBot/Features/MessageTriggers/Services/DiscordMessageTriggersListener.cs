@@ -37,7 +37,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
 
             IEnumerable<MessageTrigger> globalTriggers = await this._provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
             IEnumerable<MessageTrigger> guildTriggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
-            IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers);
+            IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers)
+                .Where(t => t.Actions?.Any() == true);
             if (triggers?.Any() != true)
                 return;
 
@@ -55,15 +56,17 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                 if (!trigger.IsMatch(message.Content))
                     continue;
 
-                string response = await this._placeholders.ConvertPlaceholdersAsync(trigger.Response, scope.ServiceProvider, base.CancellationToken).ConfigureAwait(false);
-                try
+                foreach (IMessageTriggerAction action in trigger.Actions)
                 {
-                    await guildChannel.SendMessageAsync(response,
-                        options: base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
-                }
-                catch (Exception ex) when (ex.IsMissingPermissions())
-                {
-                    this._log.LogDebug("Failed running message trigger {ID} due to missing permissions", trigger.ID);
+                    try
+                    {
+                        await action.ExecuteAsync(trigger, message, scope.ServiceProvider, base.CancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex) when (ex.IsMissingPermissions())
+                    {
+                        this._log.LogDebug("Failed executing message trigger {TriggerID} action {ActionID} due to missing permissions", trigger.ID, action.ID);
+                    }
+                    catch (Exception ex) when (ex.LogAsError(this._log, "Failed executing message trigger {TriggerID} action {ActionID}", trigger.ID, action.ID)) { }
                 }
             }
         }
