@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMongoDB();
             services.AddEntityCaching();
             services.TryAddSingleton<IMessageTriggersStore, MongoMessageTriggersStore>();
+            services.TryAddSingleton<IMessageTriggersProvider, MessageTriggersProvider>();
 
             return services;
         }
