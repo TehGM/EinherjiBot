@@ -53,12 +53,12 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         }
 
         /// <inheritdoc/>
-        public async Task<string> ConvertPlaceholdersAsync(string status, CancellationToken cancellationToken = default)
+        public async Task<string> ConvertPlaceholdersAsync(string text, CancellationToken cancellationToken = default)
         {
-            this._log.LogDebug("Running placeholders engine for status {Status}", status);
+            this._log.LogDebug("Running placeholders engine for status {Status}", text);
 
             using IServiceScope services = this._services.CreateScope();
-            StringBuilder builder = new StringBuilder(status);
+            StringBuilder builder = new StringBuilder(text);
             foreach (KeyValuePair<PlaceholderAttribute, Type> placeholderInfo in this._placeholders)
             {
                 IEnumerable<Match> matches = placeholderInfo.Key.PlaceholderRegex
