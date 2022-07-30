@@ -14,20 +14,21 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            services.TryAddSingleton<IPlaceholdersEngine>(services =>
+            services.TryAddSingleton<IPlaceholdersProvider>(services =>
             {
-                PlaceholdersEngineService engine = ActivatorUtilities.CreateInstance<PlaceholdersEngineService>(services);
-                ILogger log = services.GetRequiredService<ILogger<PlaceholdersEngineService>>();
+                PlaceholdersProvider provider = ActivatorUtilities.CreateInstance<PlaceholdersProvider>(services);
+                ILogger log = services.GetRequiredService<ILogger<PlaceholdersProvider>>();
 
-                log.LogDebug("Loading all status placeholders from current assembly");
+                log.LogDebug("Loading all placeholders from current assembly");
                 IEnumerable<Type> types = Assembly.GetExecutingAssembly().DefinedTypes.Where(t =>
                         typeof(IPlaceholder).IsAssignableFrom(t) &&
                         !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) &&
                         Attribute.IsDefined(t, typeof(PlaceholderAttribute), true));
-                int count = engine.AddPlaceholders(types);
-                log.LogInformation("Loaded {Count} status placeholders", count);
-                return engine;
+                int count = provider.AddPlaceholders(types);
+                log.LogInformation("Loaded {Count} placeholders", count);
+                return provider;
             });
+            services.TryAddTransient<IPlaceholdersEngine, PlaceholdersEngineService>();
 
             return services;
         }
