@@ -41,9 +41,9 @@ namespace TehGM.EinherjiBot.DiscordClient
             this._client.ButtonExecuted += this.OnButtonCommandAsync;
             this._client.SelectMenuExecuted += this.OnMenuCommandAsync;
             this._client.AutocompleteExecuted += this.OnAutocompleteAsync;
+            this._interactions.SlashCommandExecuted += this.OnSlashCommandExecutedAsync;
             this._interactions.Log += this.OnLog;
         }
-
 
         private static void AddTypeConverters(InteractionService interactions)
         {
@@ -149,6 +149,15 @@ namespace TehGM.EinherjiBot.DiscordClient
             return this._log.BeginScope(state);
         }
 
+        private Task OnSlashCommandExecutedAsync(SlashCommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (result.IsSuccess)
+                return Task.CompletedTask;
+            if (result.Error != InteractionCommandError.UnmetPrecondition)
+                return Task.CompletedTask;
+            return context.Interaction.RespondAsync($"{EinherjiEmote.FailureSymbol} {result.ErrorReason}", options: this._cts.Token.ToRequestOptions());
+        }
+
         private Task OnLog(LogMessage logMessage)
         {
             this._log.Log(logMessage);
@@ -176,6 +185,7 @@ namespace TehGM.EinherjiBot.DiscordClient
             try { this._client.MessageCommandExecuted -= this.OnMessageCommandAsync; } catch { }
             try { this._client.ButtonExecuted -= this.OnMenuCommandAsync; } catch { }
             try { this._client.SelectMenuExecuted -= this.OnButtonCommandAsync; } catch { }
+            try { this._interactions.SlashCommandExecuted -= this.OnSlashCommandExecutedAsync; } catch { }
             try { this._interactions.Log -= this.OnLog; } catch { }
             try { this._interactions?.Dispose(); } catch { }
             try { this._cts?.Dispose(); } catch { }
