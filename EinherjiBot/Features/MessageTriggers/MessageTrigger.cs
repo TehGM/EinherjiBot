@@ -48,7 +48,7 @@ namespace TehGM.EinherjiBot.MessageTriggers
                 options |= RegexOptions.IgnoreCase;
             string pattern = this.Pattern;
             if (!this.IsRegex)
-                pattern.Replace("*", ".*");
+                pattern = $"^{pattern.Replace("*", ".*")}$";
             return new Regex(pattern, options);
         }
 
