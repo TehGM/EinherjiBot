@@ -9,7 +9,7 @@ namespace TehGM.EinherjiBot.Caching
         int CachedCount { get; }
         ICachedEntityExpiration DefaultExpiration { get; set; }
 
-        TEntity Get(TKey key);
+        bool TryGet(TKey key, out TEntity result);
         void AddOrReplace(TKey key, TEntity entity, ICachedEntityExpiration expiration);
         IEnumerable<CachedEntity<TKey, TEntity>> Scan(Func<CachedEntity<TKey, TEntity>, bool> predicate);
         void Clear();

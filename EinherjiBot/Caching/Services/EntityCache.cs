@@ -16,9 +16,10 @@ namespace TehGM.EinherjiBot.Caching.Services
             this._cachedEntities = new Dictionary<TKey, CachedEntity<TKey, TEntity>>(comparer);
         }
 
-        public TEntity Get(TKey key)
+        public bool TryGet(TKey key, out TEntity result)
         {
-            TEntity result = default;
+            bool found = false;
+            result = default;
             lock (this._cachedEntities)
             {
                 if (this._cachedEntities.TryGetValue(key, out CachedEntity<TKey, TEntity> entity))
@@ -27,13 +28,14 @@ namespace TehGM.EinherjiBot.Caching.Services
                     {
                         result = entity.Entity;
                         entity.Touch();
+                        found = true;
                     }
                     else
                         this._cachedEntities.Remove(key);
                 }
                 this.ClearExpiredInternal();
             }
-            return result;
+            return found;
         }
 
         public void AddOrReplace(TKey key, TEntity entity, ICachedEntityExpiration expiration)

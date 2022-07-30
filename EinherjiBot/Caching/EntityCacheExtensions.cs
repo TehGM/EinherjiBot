@@ -4,6 +4,13 @@ namespace TehGM.EinherjiBot.Caching
 {
     public static class EntityCacheExtensions
     {
+        public static TEntity Get<TKey, TEntity>(this IEntityCache<TKey, TEntity> cache, TKey key)
+        {
+            if (cache.TryGet(key, out TEntity result))
+                return result;
+            return default;
+        }
+
         // keyed
         public static void AddOrReplace<TKey, TEntity>(this IEntityCache<TKey, TEntity> cache, TKey key, TEntity entity)
             => cache.AddOrReplace(key, entity, cache.DefaultExpiration);
