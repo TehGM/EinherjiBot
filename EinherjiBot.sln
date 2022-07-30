@@ -22,13 +22,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EinherjiBot.UI", "EinherjiB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{F25A3B96-E490-4FCB-AE26-75DF440A0D10}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine", "Analyzers\StatusPlaceholder\StatusPlaceholder\PlaceholdersEngine.csproj", "{43578D2F-E926-49E2-B118-BB0B3B23A227}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine", "Analyzers\PlaceholdersEngine\PlaceholdersEngine\PlaceholdersEngine.csproj", "{43578D2F-E926-49E2-B118-BB0B3B23A227}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.CodeFixes", "Analyzers\StatusPlaceholder\StatusPlaceholder.CodeFixes\PlaceholdersEngine.CodeFixes.csproj", "{A3B917AB-1D4C-4AF8-99F9-A332C67107DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.CodeFixes", "Analyzers\PlaceholdersEngine\PlaceholdersEngine.CodeFixes\PlaceholdersEngine.CodeFixes.csproj", "{A3B917AB-1D4C-4AF8-99F9-A332C67107DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.Package", "Analyzers\StatusPlaceholder\StatusPlaceholder.Package\PlaceholdersEngine.Package.csproj", "{BC7A6AD3-CF29-464F-9A2D-2216C01B5BA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.Package", "Analyzers\PlaceholdersEngine\PlaceholdersEngine.Package\PlaceholdersEngine.Package.csproj", "{BC7A6AD3-CF29-464F-9A2D-2216C01B5BA6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.Vsix", "Analyzers\StatusPlaceholder\StatusPlaceholder.Vsix\PlaceholdersEngine.Vsix.csproj", "{6E6261B8-135F-4CF8-9E4E-CBB6F947440E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceholdersEngine.Vsix", "Analyzers\PlaceholdersEngine\PlaceholdersEngine.Vsix\PlaceholdersEngine.Vsix.csproj", "{6E6261B8-135F-4CF8-9E4E-CBB6F947440E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlashCommands", "Analyzers\SlashCommands\SlashCommands\SlashCommands.csproj", "{517B7618-041C-4C48-8466-6F2ED42E43CA}"
 EndProject

@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StatusPlaceholder\PlaceholdersEngine.csproj" />
+    <ProjectReference Include="..\PlaceholdersEngine\PlaceholdersEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

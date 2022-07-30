@@ -29,8 +29,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StatusPlaceholder.CodeFixes\PlaceholdersEngine.CodeFixes.csproj" />
-    <ProjectReference Include="..\StatusPlaceholder\PlaceholdersEngine.csproj" />
+    <ProjectReference Include="..\PlaceholdersEngine.CodeFixes\PlaceholdersEngine.CodeFixes.csproj" />
+    <ProjectReference Include="..\PlaceholdersEngine\PlaceholdersEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,8 +39,8 @@
 
   <Target Name="_AddAnalyzersToOutput">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\StatusPlaceholder.dll" PackagePath="analyzers/dotnet/cs" />
-      <TfmSpecificPackageFile Include="$(OutputPath)\StatusPlaceholder.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\PlaceholdersEngine.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\PlaceholdersEngine.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
   </Target>
 
