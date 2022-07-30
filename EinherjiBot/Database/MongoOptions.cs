@@ -20,6 +20,7 @@
         public string SharedAccountsCollectionName { get; set; } = "SharedAccounts";
         public string GameServersCollectionName { get; set; } = "GameServers";
         public string RefreshTokensCollectionName { get; set; } = "RefreshTokens";
+        public string MessageTriggersCollectionName { get; set; } = "MessageTriggers";
 
         public string PatchbotGamesCollectionName { get; set; } = "PatchbotGames";
         public string EliteCommunityGoalsCollectionName { get; set; } = "EliteCommunityGoals";

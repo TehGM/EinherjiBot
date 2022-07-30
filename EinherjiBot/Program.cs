@@ -88,6 +88,7 @@ namespace TehGM.EinherjiBot
             services.AddRandomStatus();
             services.AddGameServers();
             services.AddSharedAccounts();
+            services.AddMessageTriggers();
             services.AddTransient<API.IUserInfoService, API.Services.ApiUserInfoService>();
 
             UI.Program.ConfigurePrerenderingServices(services);
