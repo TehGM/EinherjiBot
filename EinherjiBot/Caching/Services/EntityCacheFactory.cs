@@ -31,11 +31,6 @@
             this._cache.ClearExpired();
         }
 
-        public TEntity Get(TKey key)
-        {
-            return this._cache.Get(key);
-        }
-
         public void Remove(TKey key)
         {
             this._cache.Remove(key);
@@ -44,6 +39,11 @@
         public IEnumerable<CachedEntity<TKey, TEntity>> Scan(Func<CachedEntity<TKey, TEntity>, bool> predicate)
         {
             return this._cache.Scan(predicate);
+        }
+
+        public bool TryGet(TKey key, out TEntity result)
+        {
+            return this._cache.TryGet(key, out result);
         }
         #endregion
     }
