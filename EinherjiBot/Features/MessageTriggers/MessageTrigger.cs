@@ -10,8 +10,8 @@ namespace TehGM.EinherjiBot.MessageTriggers
         public Guid ID { get; }
         [BsonElement("guildID")]
         public ulong GuildID { get; }
-        [BsonElement("channelIDs")]
-        public ICollection<ulong> ChannelIDs { get; set; }
+        [BsonElement("filters")]
+        public MessageTriggerFilters Filters { get; }
         [BsonElement("pattern")]
         public string Pattern { get; set; }
         [BsonElement("response")]
@@ -29,16 +29,17 @@ namespace TehGM.EinherjiBot.MessageTriggers
         [BsonIgnore]
         public bool IsGlobal => this.GuildID == GlobalGuildID;
 
-        [BsonConstructor(nameof(ID), nameof(GuildID))]
-        private MessageTrigger(Guid id, ulong guildID)
+        [BsonConstructor(nameof(ID), nameof(GuildID), nameof(Filters))]
+        private MessageTrigger(Guid id, ulong guildID, MessageTriggerFilters filters)
         {
             this.ID = id;
             this.GuildID = guildID;
+            this.Filters = filters;
             this.PatternRegex = new Lazy<Regex>(() => this.BuildPatternRegex());
         }
 
         public MessageTrigger(ulong guildID, string pattern, string response)
-            : this(Guid.NewGuid(), guildID)
+            : this(Guid.NewGuid(), guildID, new MessageTriggerFilters())
         {
             this.Pattern = pattern;
             this.Response = response;

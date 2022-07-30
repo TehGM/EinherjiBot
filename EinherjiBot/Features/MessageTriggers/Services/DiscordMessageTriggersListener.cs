@@ -46,9 +46,11 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
             authProvider.User = authContext;
 
+            SocketGuildUser user = guildChannel.Guild.GetUser(message.Author.Id);
+
             foreach (MessageTrigger trigger in triggers)
             {
-                if (trigger.ChannelIDs != null && !trigger.ChannelIDs.Contains(guildChannel.Id))
+                if (!this.CheckFilters(trigger.Filters, guildChannel, user))
                     return;
                 if (!trigger.IsMatch(message.Content))
                     continue;
@@ -64,6 +66,32 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                     this._log.LogDebug("Failed running message trigger {ID} due to missing permissions", trigger.ID);
                 }
             }
+        }
+
+        private bool CheckFilters(MessageTriggerFilters filters, SocketTextChannel channel, SocketGuildUser author)
+        {
+            bool result =
+                CheckWhitelistFilter(filters.WhitelistedGuildIDs, channel.Guild.Id) && CheckBlacklistFilter(filters.BlacklistedGuildIDs, channel.Guild.Id) &&
+                CheckWhitelistFilter(filters.WhitelistedChannelIDs, channel.Id) && CheckBlacklistFilter(filters.BlacklistedChannelIDs, channel.Id) &&
+                CheckWhitelistFilter(filters.WhitelistedUserIDs, author.Id) && CheckBlacklistFilter(filters.BlacklistedUserIDs, author.Id);
+            if (!result)
+                return false;
+
+            // roles need special treatment as user might have a number of them
+            if (filters.WhitelistedRoleIDs == null && filters.BlacklistedRoleIDs == null)
+                return true;
+            foreach (SocketRole role in author.Roles)
+            {
+                if (!CheckWhitelistFilter(filters.WhitelistedRoleIDs, role.Id) || !CheckBlacklistFilter(filters.BlacklistedRoleIDs, role.Id))
+                    return false;
+            }
+
+            return true;
+
+            bool CheckWhitelistFilter(ICollection<ulong> filter, ulong id)
+                => filter == null || filter.Contains(id);
+            bool CheckBlacklistFilter(ICollection<ulong> filter, ulong id)
+                => filter == null || !filter.Contains(id);
         }
 
         public override void Dispose()
