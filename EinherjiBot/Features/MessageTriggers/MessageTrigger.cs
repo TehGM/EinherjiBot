@@ -38,6 +38,7 @@ namespace TehGM.EinherjiBot.MessageTriggers
         {
             this.Pattern = pattern;
             this.Response = response;
+            this.IgnoreCase = true;
         }
 
         private Regex BuildPatternRegex()
