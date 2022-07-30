@@ -1,15 +1,15 @@
 ﻿using Discord;
 
-namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder($"{{{{GuildName:(\\d{{1,20}})}}}}")]
-    internal class GuildName : IStatusPlaceholder
+    [Placeholder($"{{{{ChannelName:(\\d{{1,20}})}}}}")]
+    internal class ChannelName : IPlaceholder
     {
         private readonly IDiscordClient _client;
 
         private string _name;
 
-        public GuildName(IDiscordClient client)
+        public ChannelName(IDiscordClient client)
         {
             this._client = client;
         }
@@ -22,13 +22,13 @@ namespace TehGM.EinherjiBot.RandomStatus.Placeholders
             if (!placeholder.Groups[1].Success)
                 throw new ArgumentException($"Placeholder requires a valid channel ID to be provided");
             if (!ulong.TryParse(placeholder.Groups[1].Value, out ulong id))
-                throw new ArgumentException($"Placeholder: {placeholder.Groups[1].Value} is not a valid guild ID");
+                throw new ArgumentException($"Placeholder: {placeholder.Groups[1].Value} is not a valid channel ID");
 
-            IGuild guild = await this._client.GetGuildAsync(id, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
-            if (guild == null)
-                throw new InvalidOperationException($"Discord guild with ID {id} not found");
+            IChannel channel = await this._client.GetChannelAsync(id, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            if (channel == null)
+                throw new InvalidOperationException($"Discord channel with ID {id} not found");
 
-            this._name = guild.Name;
+            this._name = channel.Name;
             return this._name;
         }
     }

@@ -1,7 +1,7 @@
-﻿namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder("{{BotWebsite}}")]
-    public class BotWebsite : IStatusPlaceholder
+    [Placeholder("{{BotWebsite}}")]
+    public class BotWebsite : IPlaceholder
     {
         public Task<string> GetReplacementAsync(Match placeholder, CancellationToken cancellationToken = default)
             => Task.FromResult(EinherjiInfo.WebsiteURL);

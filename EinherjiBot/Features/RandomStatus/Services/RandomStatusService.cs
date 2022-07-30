@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.RandomStatus.Services
@@ -9,14 +10,14 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IRandomizer _randomizer;
-        private readonly IStatusPlaceholderEngine _placeholders;
+        private readonly IPlaceholdersEngine _placeholders;
         private readonly IStatusProvider _provider;
         private readonly ILogger _log;
         private readonly IOptionsMonitor<RandomStatusOptions> _options;
 
         private DateTime _lastChangeUtc;
 
-        public RandomStatusService(DiscordSocketClient client, IRandomizer randomizer, IStatusPlaceholderEngine placeholders, IStatusProvider provider,
+        public RandomStatusService(DiscordSocketClient client, IRandomizer randomizer, IPlaceholdersEngine placeholders, IStatusProvider provider,
             ILogger<RandomStatusService> log, IOptionsMonitor<RandomStatusOptions> options)
         {
             this._client = client;

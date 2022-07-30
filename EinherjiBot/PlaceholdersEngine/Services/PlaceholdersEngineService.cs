@@ -1,21 +1,21 @@
-﻿using TehGM.EinherjiBot.RandomStatus.Placeholders;
+﻿using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace TehGM.EinherjiBot.RandomStatus.Services
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     /// <inheritdoc/>
-    internal class StatusPlaceholderEngine : IStatusPlaceholderEngine
+    internal class PlaceholdersEngineService : IPlaceholdersEngine
     {
-        private readonly IDictionary<StatusPlaceholderAttribute, Type> _placeholders;
+        private readonly IDictionary<PlaceholderAttribute, Type> _placeholders;
         private readonly IServiceScopeFactory _services;
         private readonly ILogger _log;
 
-        public StatusPlaceholderEngine(IServiceScopeFactory services, ILogger<StatusPlaceholderEngine> log)
+        public PlaceholdersEngineService(IServiceScopeFactory services, ILogger<PlaceholdersEngineService> log)
         {
-            this._placeholders = new Dictionary<StatusPlaceholderAttribute, Type>();
+            this._placeholders = new Dictionary<PlaceholderAttribute, Type>();
             this._services = services;
             this._log = log;
         }
@@ -26,28 +26,28 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
             this._log.LogTrace("Adding status placeholder type {Type}", type);
 
             if (!type.IsClass)
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it's not a class.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's not a class.");
             if (type.IsAbstract)
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it's abstract.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's abstract.");
             if (type.IsGenericType)
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it's generic.");
-            if (!typeof(IStatusPlaceholder).IsAssignableFrom(type))
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it doesn't implement {nameof(IStatusPlaceholder)} interface.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's generic.");
+            if (!typeof(IPlaceholder).IsAssignableFrom(type))
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it doesn't implement {nameof(IPlaceholder)} interface.");
             if (Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute)))
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it's compiler-generated.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's compiler-generated.");
 
-            StatusPlaceholderAttribute placeholder = type.GetCustomAttribute<StatusPlaceholderAttribute>();
+            PlaceholderAttribute placeholder = type.GetCustomAttribute<PlaceholderAttribute>();
             if (placeholder == null)
-                throw new InvalidOperationException($"Cannot add status placeholder type {type.FullName} because it isn't decorated with {nameof(StatusPlaceholderAttribute)}.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it isn't decorated with {nameof(PlaceholderAttribute)}.");
 
             if (this._placeholders.TryAdd(placeholder, type))
             {
-                this._log.LogDebug("Added status placeholder {Placeholder}", placeholder.Placeholder);
+                this._log.LogDebug("Added placeholder {Placeholder}", placeholder.Placeholder);
                 return true;
             }
             else
             {
-                this._log.LogWarning("Cannot add status placeholder {Placeholder} as it was already added before", placeholder.Placeholder);
+                this._log.LogWarning("Cannot add placeholder {Placeholder} as it was already added before", placeholder.Placeholder);
                 return false;
             }
         }
@@ -59,7 +59,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
 
             using IServiceScope services = this._services.CreateScope();
             StringBuilder builder = new StringBuilder(status);
-            foreach (KeyValuePair<StatusPlaceholderAttribute, Type> placeholderInfo in this._placeholders)
+            foreach (KeyValuePair<PlaceholderAttribute, Type> placeholderInfo in this._placeholders)
             {
                 IEnumerable<Match> matches = placeholderInfo.Key.PlaceholderRegex
                     .Matches(builder.ToString())
@@ -68,7 +68,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
                 if (!matches.Any())
                     continue;
 
-                IStatusPlaceholder placeholder = (IStatusPlaceholder)ActivatorUtilities.CreateInstance(services.ServiceProvider, placeholderInfo.Value);
+                IPlaceholder placeholder = (IPlaceholder)ActivatorUtilities.CreateInstance(services.ServiceProvider, placeholderInfo.Value);
 
                 foreach (Match match in matches.OrderByDescending(m => m.Index))
                 {

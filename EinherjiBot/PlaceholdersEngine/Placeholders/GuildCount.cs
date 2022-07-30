@@ -1,9 +1,9 @@
 ﻿using Discord;
 
-namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder("{{GuildCount}}")]
-    public class GuildCount : IStatusPlaceholder
+    [Placeholder("{{GuildCount}}")]
+    public class GuildCount : IPlaceholder
     {
         private readonly IDiscordClient _client;
 

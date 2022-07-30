@@ -2,7 +2,7 @@
 {
     public static class RequiredTypeName
     {
-        public const string StatusPlaceholderAttribute = "StatusPlaceholder";
-        public const string StatusPlaceholderInterface = "IStatusPlaceholder";
+        public const string StatusPlaceholderAttribute = "Placeholder";
+        public const string StatusPlaceholderInterface = "IPlaceholder";
     }
 }

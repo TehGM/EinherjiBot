@@ -82,6 +82,7 @@ namespace TehGM.EinherjiBot
             services.AddAuthBackend();
             services.AddBotAudits();
             services.AddRandomizer();
+            services.AddPlaceholdersEngine();
 
             services.AddUserIntel();
             services.AddAdministration();

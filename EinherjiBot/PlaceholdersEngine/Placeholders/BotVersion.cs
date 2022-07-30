@@ -1,7 +1,7 @@
-﻿namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder("{{BotVersion}}")]
-    public class BotVersion : IStatusPlaceholder
+    [Placeholder("{{BotVersion}}")]
+    public class BotVersion : IPlaceholder
     {
         public Task<string> GetReplacementAsync(Match placeholder, CancellationToken cancellationToken = default)
             => Task.FromResult(EinherjiInfo.BotVersion);

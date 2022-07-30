@@ -1,7 +1,7 @@
-﻿namespace TehGM.EinherjiBot.RandomStatus
+﻿namespace TehGM.EinherjiBot.PlaceholdersEngine
 {
     /// <summary>Regex-based engine for replacing placeholders in text using strictly typed placeholder classes.</summary>
-    public interface IStatusPlaceholderEngine
+    public interface IPlaceholdersEngine
     {
         /// <summary>Adds placeholder to the engine.</summary>
         /// <param name="type">Type of the placeholder.</param>

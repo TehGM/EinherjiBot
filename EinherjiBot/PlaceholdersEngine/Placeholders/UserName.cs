@@ -1,9 +1,9 @@
 ﻿using Discord;
 
-namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder($"{{{{UserName:(\\d{{1,20}})}}}}")]
-    internal class UserName : IStatusPlaceholder
+    [Placeholder($"{{{{UserName:(\\d{{1,20}})}}}}")]
+    internal class UserName : IPlaceholder
     {
         private readonly IDiscordClient _client;
 

@@ -1,10 +1,10 @@
 ﻿using Discord;
 using TehGM.Utilities.Randomization;
 
-namespace TehGM.EinherjiBot.RandomStatus.Placeholders
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [StatusPlaceholder("{{RandomGuildName}}")]
-    public class RandomGuildName : IStatusPlaceholder
+    [Placeholder("{{RandomGuildName}}")]
+    public class RandomGuildName : IPlaceholder
     {
         private readonly IDiscordClient _client;
         private readonly IRandomizer _randomizer;
