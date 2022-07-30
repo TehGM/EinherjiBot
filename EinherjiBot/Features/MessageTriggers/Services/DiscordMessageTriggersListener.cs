@@ -1,6 +1,5 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
 {
@@ -8,16 +7,14 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IMessageTriggersProvider _provider;
-        private readonly IPlaceholdersEngine _placeholders;
         private readonly IServiceProvider _services;
         private readonly ILogger _log;
 
-        public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider, IPlaceholdersEngine placeholders,
+        public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider,
             IServiceProvider services, ILogger<DiscordMessageTriggersListener> log)
         {
             this._client = client;
             this._provider = provider;
-            this._placeholders = placeholders;
             this._services = services;
             this._log = log;
 
