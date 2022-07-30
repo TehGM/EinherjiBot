@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.TryAddSingleton<IMessageTriggersStore, MongoMessageTriggersStore>();
             services.TryAddSingleton<IMessageTriggersProvider, MessageTriggersProvider>();
+            services.AddHostedService<DiscordMessageTriggersListener>();
 
             return services;
         }
