@@ -6,6 +6,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.Security.API.Services;
+using TehGM.EinherjiBot.Security.Authorization;
+using TehGM.EinherjiBot.Security.Authorization.Services;
 using TehGM.EinherjiBot.Security.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,10 +28,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddScoped<IDiscordAuthContext>(services => services.GetRequiredService<IDiscordAuthProvider>().User);
             services.TryAddScoped<IAuthContext>(services => services.GetRequiredService<IDiscordAuthContext>());
 
+            services.TryAddTransient<IDiscordAuthorizationService, DiscordAuthorizationService>();
+            services.TryAddScoped<AuthContextMiddleware>();
+            services.TryAddScoped<DiscordAuthorizationMiddleware>();
+
             services.AddHttpClient<IDiscordAuthHttpClient, DiscordAuthHttpClient>();
             services.TryAddTransient<IDiscordHttpClient>(services => services.GetRequiredService<IDiscordAuthHttpClient>());
-            services.TryAddTransient<AuthContextMiddleware>();
-            services.TryAddTransient<IJwtGenerator, JwtGenerator>();
             services.TryAddTransient<IRefreshTokenGenerator, RefreshTokenGenerator>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, _ => { });
@@ -39,6 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IRefreshTokenStore, MongoRefreshTokenStore>();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            services.TryAddTransient<IJwtGenerator, JwtGenerator>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>());
             services.AddTransient<IConfigureOptions<JwtOptions>, ConfigureApiKeysOptions>();
 

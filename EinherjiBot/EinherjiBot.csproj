@@ -8,6 +8,14 @@
     <AssemblyName>EinherjiBot</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.7.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.7" />
@@ -30,6 +38,10 @@
 	  <ProjectReference Include="..\Analyzers\PlaceholdersEngine\PlaceholdersEngine.CodeFixes\PlaceholdersEngine.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 	  <ProjectReference Include="..\Analyzers\SlashCommands\SlashCommands\SlashCommands.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 	  <ProjectReference Include="..\Analyzers\SlashCommands\SlashCommands.CodeFixes\SlashCommands.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\SharedAccounts\Policies\" />
   </ItemGroup>
 
 </Project>

@@ -110,13 +110,16 @@ namespace TehGM.EinherjiBot
             app.UseStaticFiles();
 
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseMiddleware<AuthContextMiddleware>();
-            app.UseAuthorization();
-
-            app.MapRazorPages();
-            app.MapControllers();
-            app.MapFallbackToPage("/_Host");
+            app.UseMiddleware<Security.Authorization.Services.DiscordAuthorizationMiddleware>();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapControllers();
+                endpoints.MapFallbackToPage("/_Host");
+            });
         }
 
         private static void ConfigureSerilog(HostBuilderContext context, LoggerConfiguration logConfig)
