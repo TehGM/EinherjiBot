@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder($"{{{{User:(\\d{{1,20}})}}}}(?::({_modeMention}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?")]
+    [Placeholder($"{{{{User:(\\d{{1,20}})(?::({_modeMention}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?}}}}")]
     internal class User : IPlaceholder
     {
         private const string _modeMention = "Mention";
