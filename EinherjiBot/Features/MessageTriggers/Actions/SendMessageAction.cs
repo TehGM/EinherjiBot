@@ -41,7 +41,9 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             IPlaceholdersEngine placeholders = services.GetRequiredService<IPlaceholdersEngine>();
             string text = await placeholders.ConvertPlaceholdersAsync(this.Text, cancellationToken).ConfigureAwait(false);
 
-            Embed embed = await this.Embed?.BuildAsync(message.Author, placeholders, client, services, cancellationToken);
+            Embed embed = this.Embed != null
+                ? await this.Embed.BuildAsync(message.Author, placeholders, client, services, cancellationToken).ConfigureAwait(false)
+                : null;
 
             AllowedMentions allowedMentions = this.DisableMentions ? AllowedMentions.None : AllowedMentions.All;
             await messageChannel.SendMessageAsync(text,
