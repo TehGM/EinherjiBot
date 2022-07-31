@@ -3,7 +3,7 @@
 
 namespace TehGM.EinherjiBot.GameServers
 {
-    public class GameServer : ICacheableEntity<Guid>, IAuthRequiredEntity
+    public class GameServer : ICacheableEntity<Guid>
     {
         [BsonId]
         public Guid ID { get; }
@@ -43,13 +43,5 @@ namespace TehGM.EinherjiBot.GameServers
 
         public Guid GetCacheKey()
             => this.ID;
-
-        public bool CanAccess(IDiscordAuthContext context)
-            => context.IsAdmin() || this.IsPublic
-            || this.AuthorizedUserIDs.Contains(context.ID)
-            || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any();
-
-        public bool CanEdit(IDiscordAuthContext context)
-            => context.IsAdmin();
     }
 }
