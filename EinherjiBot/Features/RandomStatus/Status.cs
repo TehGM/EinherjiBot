@@ -15,6 +15,8 @@ namespace TehGM.EinherjiBot.RandomStatus
         public string Link { get; set; }
         [BsonElement("activity")]
         public ActivityType ActivityType { get; set; } = ActivityType.Playing;
+        [BsonElement("enabled")]
+        public bool IsEnabled { get; set; }
 
         [BsonConstructor]
         private Status(Guid id)
@@ -28,6 +30,7 @@ namespace TehGM.EinherjiBot.RandomStatus
             this.Text = text;
             this.Link = link;
             this.ActivityType = activityType;
+            this.IsEnabled = true;
         }
 
         public Status(string text, ActivityType activityType = ActivityType.Playing)

@@ -62,8 +62,11 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
                 return null;
 
             IEnumerable<Status> statuses = await this._provider.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            Status status = this._randomizer.GetRandomValue(statuses);
+            statuses = statuses.Where(s => s.IsEnabled);
+            if (!statuses.Any())
+                return null;
 
+            Status status = this._randomizer.GetRandomValue(statuses);
             if (status == null)
                 return null;
 
