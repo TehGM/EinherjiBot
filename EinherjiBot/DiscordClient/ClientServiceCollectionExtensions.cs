@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using TehGM.EinherjiBot;
 using TehGM.EinherjiBot.DiscordClient;
+using TehGM.EinherjiBot.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -23,8 +24,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IHostedService>(s => (IHostedService)s.GetRequiredService<IHostedDiscordClient>());
             services.TryAddSingleton<IDiscordClient>(s => s.GetRequiredService<IHostedDiscordClient>().Client);
             services.TryAddSingleton<DiscordSocketClient>(s => (DiscordSocketClient)s.GetRequiredService<IDiscordClient>());
-
             services.AddHostedService<DiscordCommandsService>();
+
+            services.TryAddScoped<IMessageContextProvider, DiscordMessageContextProvider>();
+            services.TryAddScoped<IMessage>(s => s.GetRequiredService<IMessageContextProvider>().Message);
 
             return services;
         }

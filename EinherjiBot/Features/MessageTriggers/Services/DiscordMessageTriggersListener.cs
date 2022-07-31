@@ -42,6 +42,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                     return;
 
                 using IServiceScope scope = this._services.CreateScope();
+                IMessageContextProvider messageContext = scope.ServiceProvider.GetRequiredService<IMessageContextProvider>();
+                messageContext.Message = message;
                 IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
                 IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
                 authProvider.User = authContext;
