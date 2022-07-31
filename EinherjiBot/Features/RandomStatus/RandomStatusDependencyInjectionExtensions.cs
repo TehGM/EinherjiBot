@@ -17,7 +17,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddPlaceholdersEngine();
             services.TryAddSingleton<IStatusStore, MongoStatusStore>();
             services.TryAddSingleton<IStatusProvider, StatusProvider>();
-            services.AddHostedService<RandomStatusService>();
+            services.TryAddSingleton<IStatusService, RandomStatusService>();
+            services.AddHostedService<RandomStatusService>(s => (RandomStatusService)s.GetRequiredService<IStatusService>());
 
             return services;
         }

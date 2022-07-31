@@ -6,7 +6,7 @@ using TehGM.Utilities.Randomization;
 namespace TehGM.EinherjiBot.RandomStatus.Services
 {
     /// <summary>Background service that periodically scans blog channels for last activity and activates or deactivates them.</summary>
-    internal class RandomStatusService : AutostartService, IDisposable
+    internal class RandomStatusService : AutostartService, IStatusService, IDisposable
     {
         private readonly DiscordSocketClient _client;
         private readonly IRandomizer _randomizer;
@@ -61,7 +61,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
             }
         }
 
-        private async Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken)
+        public async Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -79,21 +79,26 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
 
             try
             {
-                string text = status.Text;
-                if (!string.IsNullOrWhiteSpace(status.Text))
-                {
-                    text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, cancellationToken).ConfigureAwait(false);
-                    this._log.LogDebug("Changing status to `{Status}`", text);
-                }
-                else
-                    this._log.LogDebug("Clearing status");
-                await this._client.SetGameAsync(text, status.Link, status.ActivityType).ConfigureAwait(false);
+                await this.SetStatusAsync(status, cancellationToken).ConfigureAwait(false);
                 return status;
             }
             catch (Exception ex) when (ex.LogAsError(this._log, "Failed changing status to {Status}", status))
             {
                 return null;
             }
+        }
+
+        public async Task SetStatusAsync(Status status, CancellationToken cancellationToken = default)
+        {
+            string text = status.Text;
+            if (!string.IsNullOrWhiteSpace(status.Text))
+            {
+                text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, cancellationToken).ConfigureAwait(false);
+                this._log.LogDebug("Changing status to `{Status}`", text);
+            }
+            else
+                this._log.LogDebug("Clearing status");
+            await this._client.SetGameAsync(text, status.Link, status.ActivityType).ConfigureAwait(false);
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
