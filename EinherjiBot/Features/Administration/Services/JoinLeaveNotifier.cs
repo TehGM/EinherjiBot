@@ -5,13 +5,13 @@ using TehGM.EinherjiBot.Auditing.Administration;
 
 namespace TehGM.EinherjiBot.Administration.Services
 {
-    public class UserLeaveNotifier : AutostartService
+    public class JoinLeaveNotifier : AutostartService
     {
         private readonly DiscordSocketClient _client;
         private readonly IAuditStore<JoinLeaveAuditEntry> _audit;
         private readonly ILogger _log;
 
-        public UserLeaveNotifier(DiscordSocketClient client, IAuditStore<JoinLeaveAuditEntry> audit, ILogger<UserLeaveNotifier> log)
+        public JoinLeaveNotifier(DiscordSocketClient client, IAuditStore<JoinLeaveAuditEntry> audit, ILogger<JoinLeaveNotifier> log)
         {
             this._client = client;
             this._audit = audit;

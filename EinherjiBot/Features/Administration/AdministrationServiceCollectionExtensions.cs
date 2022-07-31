@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
 
             services.AddDiscordClient();
-            services.AddHostedService<UserLeaveNotifier>();
+            services.AddHostedService<JoinLeaveNotifier>();
 
             return services;
         }
