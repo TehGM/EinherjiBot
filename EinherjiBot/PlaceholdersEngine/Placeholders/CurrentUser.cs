@@ -1,8 +1,9 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder($"{{{{CurrentUserName(?::({_modeNickname}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?(?::({_modeNickname}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?}}}}")]
-    public class CurrentUserName : IPlaceholder
+    [Placeholder($"{{{{CurrentUser(?::({_modeMention}|{_modeNickname}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?(?::({_modeMention}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?}}}}")]
+    public class CurrentUser : IPlaceholder
     {
+        private const string _modeMention = "Mention";
         private const string _modeNickname = "Nickname";
         private const string _modeUsername = "Username";
         private const string _modeUsernameWithDiscriminator = "UsernameWithDiscriminator";
@@ -11,7 +12,7 @@
 
         private readonly IDiscordAuthContext _auth;
 
-        public CurrentUserName(IDiscordAuthContext authContext)
+        public CurrentUser(IDiscordAuthContext authContext)
         {
             this._auth = authContext;
         }
@@ -21,6 +22,9 @@
             string mode = _defaultMode;
             if (placeholder.Groups[1].Success)
                 mode = placeholder.Groups[1].Value;
+
+            if (mode == _modeMention)
+                return Task.FromResult(this._auth.DiscordUser.Mention);
 
             if (mode == _modeNickname)
             {
