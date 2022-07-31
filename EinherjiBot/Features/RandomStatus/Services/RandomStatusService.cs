@@ -48,9 +48,16 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
                 TimeSpan remainingWait = nextChangeUtc - DateTime.UtcNow;
                 if (remainingWait > TimeSpan.Zero)
                     await Task.Delay(remainingWait, cancellationToken).ConfigureAwait(false);
-                await this.RandomizeStatusAsync(cancellationToken).ConfigureAwait(false);
-                this._log.LogTrace("Next status change: {ChangeTime}", this._lastChangeUtc + options.ChangeRate);
-                await Task.Delay(options.ChangeRate, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await this.RandomizeStatusAsync(cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    this._lastChangeUtc = DateTime.UtcNow;
+                    this._log.LogTrace("Next status change: {ChangeTime}", this._lastChangeUtc + options.ChangeRate);
+                    await Task.Delay(options.ChangeRate, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
@@ -86,10 +93,6 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
             catch (Exception ex) when (ex.LogAsError(this._log, "Failed changing status to {Status}", status))
             {
                 return null;
-            }
-            finally
-            {
-                this._lastChangeUtc = DateTime.UtcNow;
             }
         }
 
