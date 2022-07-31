@@ -73,6 +73,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             public ulong? AuthorID { get; set; }
             [BsonElement("currentUserAuthor"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
             public bool UseCurrentUserAsAuthor { get; set; }
+            [BsonElement("botUserAuthor"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
+            public bool UserBotUserAsAuthor { get; set; }
 
             [BsonElement("footer")]
             public FooterInfo Footer { get; set; }
@@ -81,6 +83,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             public string ThumbnailURL { get; set; }
             [BsonElement("currentUserThumbnail"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
             public bool UseCurrentUserAsThumbnail { get; set; }
+            [BsonElement("botUserThumbnail"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
+            public bool UseBotUserAsThumbnail { get; set; }
 
             [BsonElement("timestamp")]
             public DateTime? Timestamp { get; set; }
@@ -115,17 +119,26 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
 
                 if (this.UseCurrentUserAsAuthor)
                     result.WithAuthor(currentUser);
+                else if (this.UserBotUserAsAuthor)
+                    result.WithAuthor(client.CurrentUser);
                 else if (this.AuthorID != null)
                     result.WithAuthor(await client.GetUserAsync(this.AuthorID.Value, cancellationToken).ConfigureAwait(false));
                 else if (this.Author != null)
                     result.WithAuthor(this.Author.Name, this.Author.ImageURL, this.Author.URL);
 
                 if (this.Footer != null)
-                    result.WithFooter(await placeholders.ConvertPlaceholdersAsync(this.Footer.Text, services, cancellationToken).ConfigureAwait(false), 
-                        this.Footer.UseCurrentUserAsImage ? currentUser.GetSafeAvatarUrl() : this.Footer.ImageURL);
+                {
+                    string imageUrl = this.Footer.UseCurrentUserAsImage ? currentUser.GetSafeAvatarUrl()
+                        : this.Footer.UseBotUserAsImage ? client.CurrentUser.GetSafeAvatarUrl()
+                        : this.Footer.ImageURL;
+                    result.WithFooter(await placeholders.ConvertPlaceholdersAsync(this.Footer.Text, services, cancellationToken).ConfigureAwait(false),
+                        imageUrl);
+                }
 
                 if (this.UseCurrentUserAsThumbnail)
                     result.WithThumbnailUrl(currentUser.GetMaxAvatarUrl());
+                else if (this.UseBotUserAsThumbnail)
+                    result.WithThumbnailUrl(client.CurrentUser.GetMaxAvatarUrl());
                 else if (!string.IsNullOrWhiteSpace(this.ThumbnailURL))
                     result.WithThumbnailUrl(this.ThumbnailURL);
 
@@ -165,6 +178,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                 public string ImageURL { get; set; }
                 [BsonElement("currentUserImage"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
                 public bool UseCurrentUserAsImage { get; set; }
+                [BsonElement("botUserImage"), BsonIgnoreIfDefault, BsonDefaultValue(false)]
+                public bool UseBotUserAsImage { get; set; }
             }
         }
     }
