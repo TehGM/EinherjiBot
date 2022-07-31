@@ -21,51 +21,55 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             this._client.MessageReceived += this.OnMessageReceivedAsync;
         }
 
-        private async Task OnMessageReceivedAsync(SocketMessage message)
+        private Task OnMessageReceivedAsync(SocketMessage message)
         {
-            if (message.Channel is not SocketTextChannel guildChannel)
-                return;
-            if (message.Source != Discord.MessageSource.User)
-                return;
-            if (message.Type != Discord.MessageType.Default)
-                return;
-            if (string.IsNullOrWhiteSpace(message.Content))
-                return;
-
-            IEnumerable<MessageTrigger> globalTriggers = await this._provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
-            IEnumerable<MessageTrigger> guildTriggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
-            IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers)
-                .Where(t => t.Actions?.Any() == true);
-            if (triggers?.Any() != true)
-                return;
-
-            using IServiceScope scope = this._services.CreateScope();
-            IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-            IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
-            authProvider.User = authContext;
-
-            SocketGuildUser user = guildChannel.Guild.GetUser(message.Author.Id);
-
-            foreach (MessageTrigger trigger in triggers)
+            _ = Task.Run(async () =>
             {
-                if (!this.CheckFilters(trigger.Filters, guildChannel, user))
+                if (message.Channel is not SocketTextChannel guildChannel)
                     return;
-                if (!trigger.IsMatch(message.Content))
-                    continue;
+                if (message.Source != Discord.MessageSource.User)
+                    return;
+                if (message.Type != Discord.MessageType.Default)
+                    return;
+                if (string.IsNullOrWhiteSpace(message.Content))
+                    return;
 
-                foreach (IMessageTriggerAction action in trigger.Actions)
+                IEnumerable<MessageTrigger> globalTriggers = await this._provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
+                IEnumerable<MessageTrigger> guildTriggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
+                IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers)
+                    .Where(t => t.Actions?.Any() == true);
+                if (triggers?.Any() != true)
+                    return;
+
+                using IServiceScope scope = this._services.CreateScope();
+                IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+                IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
+                authProvider.User = authContext;
+
+                SocketGuildUser user = guildChannel.Guild.GetUser(message.Author.Id);
+
+                foreach (MessageTrigger trigger in triggers)
                 {
-                    try
+                    if (!this.CheckFilters(trigger.Filters, guildChannel, user))
+                        return;
+                    if (!trigger.IsMatch(message.Content))
+                        continue;
+
+                    foreach (IMessageTriggerAction action in trigger.Actions)
                     {
-                        await action.ExecuteAsync(trigger, message, scope.ServiceProvider, base.CancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            await action.ExecuteAsync(trigger, message, scope.ServiceProvider, base.CancellationToken).ConfigureAwait(false);
+                        }
+                        catch (Exception ex) when (ex.IsMissingPermissions())
+                        {
+                            this._log.LogDebug("Failed executing message trigger {TriggerID} action {ActionID} due to missing permissions", trigger.ID, action.ID);
+                        }
+                        catch (Exception ex) when (ex.LogAsError(this._log, "Failed executing message trigger {TriggerID} action {ActionID}", trigger.ID, action.ID)) { }
                     }
-                    catch (Exception ex) when (ex.IsMissingPermissions())
-                    {
-                        this._log.LogDebug("Failed executing message trigger {TriggerID} action {ActionID} due to missing permissions", trigger.ID, action.ID);
-                    }
-                    catch (Exception ex) when (ex.LogAsError(this._log, "Failed executing message trigger {TriggerID} action {ActionID}", trigger.ID, action.ID)) { }
                 }
-            }
+            }, base.CancellationToken);
+            return Task.CompletedTask;
         }
 
         private bool CheckFilters(MessageTriggerFilters filters, SocketTextChannel channel, SocketGuildUser author)
