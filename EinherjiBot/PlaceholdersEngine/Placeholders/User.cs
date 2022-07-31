@@ -34,8 +34,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
             if (mode == _modeMention)
                 return user.Mention;
-
-            if (mode == _modeUsername)
+            else if (mode == _modeUsername)
                 return user.Username;
             else
                 return user.GetUsernameWithDiscriminator();
