@@ -50,41 +50,46 @@ namespace TehGM.EinherjiBot.DiscordClient
             interactions.AddTypeConverter<Guid>(new GuidTypeConverter());
         }
 
-        private async Task OnClientReady()
+        private Task OnClientReady()
         {
-            this._log.LogTrace("Loading all command modules");
-
-            using IServiceScope scope = this._services.CreateScope();
-            IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-            authProvider.User = DiscordSocketAuthContext.None;
-
-            if (this._options.OverrideCommandsGuildID != null)
+            _ = Task.Run(async () =>
             {
-                this._log.LogDebug("Registering all commands for guild {GuildID}", this._options.OverrideCommandsGuildID.Value);
-                await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider);
-                await this._interactions.RegisterCommandsToGuildAsync(this._options.OverrideCommandsGuildID.Value).ConfigureAwait(false);
-            }
-            else
-            {
-                IEnumerable<ModuleInfo> modules = await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider).ConfigureAwait(false);
+                this._log.LogTrace("Loading all command modules");
 
-                this._log.LogDebug("Registering global commands");
-                IEnumerable<ModuleInfo> globalCommands = modules
-                    .Where(module => !module.Attributes.Any(attr => attr is GuildCommandAttribute));
-                await this._interactions.AddModulesGloballyAsync(true, modules.ToArray()).ConfigureAwait(false);
+                using IServiceScope scope = this._services.CreateScope();
+                IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+                authProvider.User = DiscordSocketAuthContext.None;
 
-                this._log.LogDebug("Registering guild commands");
-                ILookup<ulong, ModuleInfo> guildCommands = modules
-                    .Except(globalCommands)
-                    .SelectMany(module => (module.Attributes.First(attr => attr is GuildCommandAttribute) as GuildCommandAttribute).GuildIDs
-                        .Select(id => new KeyValuePair<ulong, ModuleInfo>(id, module)))
-                    .ToLookup(kvp => kvp.Key, kvp => kvp.Value);
-                foreach (IGrouping<ulong, ModuleInfo> group in guildCommands)
+                if (this._options.OverrideCommandsGuildID != null)
                 {
-                    this._log.LogDebug("Registering commands for guild {ID}", group.Key);
-                    await this._interactions.AddModulesToGuildAsync(group.Key, true, group.ToArray());
+                    this._log.LogDebug("Registering all commands for guild {GuildID}", this._options.OverrideCommandsGuildID.Value);
+                    await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider);
+                    await this._interactions.RegisterCommandsToGuildAsync(this._options.OverrideCommandsGuildID.Value).ConfigureAwait(false);
                 }
-            }
+                else
+                {
+                    IEnumerable<ModuleInfo> modules = await this._interactions.AddModulesAsync(this.GetType().Assembly, scope.ServiceProvider).ConfigureAwait(false);
+
+                    this._log.LogDebug("Registering global commands");
+                    IEnumerable<ModuleInfo> globalCommands = modules
+                        .Where(module => !module.Attributes.Any(attr => attr is GuildCommandAttribute));
+                    await this._interactions.AddModulesGloballyAsync(true, modules.ToArray()).ConfigureAwait(false);
+
+                    this._log.LogDebug("Registering guild commands");
+                    ILookup<ulong, ModuleInfo> guildCommands = modules
+                        .Except(globalCommands)
+                        .SelectMany(module => (module.Attributes.First(attr => attr is GuildCommandAttribute) as GuildCommandAttribute).GuildIDs
+                            .Select(id => new KeyValuePair<ulong, ModuleInfo>(id, module)))
+                        .ToLookup(kvp => kvp.Key, kvp => kvp.Value);
+                    foreach (IGrouping<ulong, ModuleInfo> group in guildCommands)
+                    {
+                        this._log.LogDebug("Registering commands for guild {ID}", group.Key);
+                        await this._interactions.AddModulesToGuildAsync(group.Key, true, group.ToArray());
+                    }
+                }
+            }, this._cts.Token);
+
+            return Task.CompletedTask;
         }
 
 
