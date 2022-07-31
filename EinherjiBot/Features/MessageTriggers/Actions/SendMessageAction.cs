@@ -14,6 +14,8 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
         public string Text { get; set; }
         [BsonElement("channel"), BsonIgnoreIfNull, BsonDefaultValue(null)]
         public ulong? ChannelID { get; set; }
+        [BsonElement("disableMentions"), BsonDefaultValue(false), BsonIgnoreIfDefault]
+        public bool DisableMentions { get; set; }
 
         [BsonConstructor(nameof(ID))]
         private SendMessageAction(Guid id)
@@ -33,11 +35,15 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             ulong channelID = this.ChannelID ?? message.Channel.Id;
             string text = await placeholders.ConvertPlaceholdersAsync(this.Text, cancellationToken).ConfigureAwait(false);
 
+            AllowedMentions allowedMentions = this.DisableMentions ? AllowedMentions.None : AllowedMentions.All;
+
             IDiscordClient client = services.GetRequiredService<IDiscordClient>();
             IChannel channel = await client.GetChannelAsync(channelID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
             if (channel is not IMessageChannel messageChannel)
                 return;
-            await messageChannel.SendMessageAsync(text, options: cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            await messageChannel.SendMessageAsync(text,
+                allowedMentions: allowedMentions,
+                options: cancellationToken.ToRequestOptions()).ConfigureAwait(false);
         }
     }
 }
