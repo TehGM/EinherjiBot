@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization.Attributes;
 using TehGM.EinherjiBot.PlaceholdersEngine;
+using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Actions
 {
@@ -58,12 +59,15 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             public string Description { get; set; }
             [BsonElement("title")]
             public string Title { get; set; }
-            [BsonElement("color")]
-            public uint? Color { get; set; }
             [BsonElement("url"), BsonIgnoreIfNull]
             public string URL { get; set; }
             [BsonElement("image"), BsonIgnoreIfNull]
             public string ImageURL { get; set; }
+
+            [BsonElement("color")]
+            public uint? Color { get; set; }
+            [BsonElement("randomColor")]
+            public bool RandomColor { get; set; }
 
             [BsonElement("fields"), BsonIgnoreIfDefault, BsonIgnoreIfNull, BsonDefaultValue(null)]
             public ICollection<FieldInfo> Fields { get; }
@@ -108,12 +112,18 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                     result.WithDescription(await placeholders.ConvertPlaceholdersAsync(this.Description, services, cancellationToken).ConfigureAwait(false));
                 if (!string.IsNullOrWhiteSpace(this.Title))
                     result.WithTitle(await placeholders.ConvertPlaceholdersAsync(this.Title, services, cancellationToken).ConfigureAwait(false));
-                if (this.Color != null)
-                    result.WithColor(this.Color.Value);
                 if (!string.IsNullOrWhiteSpace(this.URL))
                     result.WithUrl(this.URL);
                 if (!string.IsNullOrWhiteSpace(this.ImageURL))
                     result.WithImageUrl(this.ImageURL);
+
+                if (this.RandomColor)
+                {
+                    IRandomizer randomizer = services.GetRequiredService<IRandomizer>();
+                    result.WithColor(randomizer.GetRandomDiscordColor());
+                }
+                else if (this.Color != null)
+                    result.WithColor(this.Color.Value);
 
                 foreach (FieldInfo field in this.Fields)
                     result.AddField(field.Name, await placeholders.ConvertPlaceholdersAsync(field.Value, services, cancellationToken).ConfigureAwait(false), field.IsInline);
