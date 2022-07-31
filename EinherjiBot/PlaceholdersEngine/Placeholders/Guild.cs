@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder($"{{{{Guild:(\\d{{1,20}})}}}}")]
+    [Placeholder($"{{{{Guild:(\\d{{1,20}})}}}}", DisplayName = "{{Guild}}")]
     internal class Guild : IPlaceholder
     {
         private readonly IDiscordClient _client;

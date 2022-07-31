@@ -1,6 +1,7 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder($"{{{{CurrentUser(?::({_modeMention}|{_modeNickname}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?(?::({_modeMention}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?}}}}")]
+    [Placeholder($"{{{{CurrentUser(?::({_modeMention}|{_modeNickname}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?(?::({_modeMention}|{_modeUsername}|{_modeUsernameWithDiscriminator}))?}}}}",
+        DisplayName = "{{CurrentUser}}")]
     public class CurrentUser : IPlaceholder
     {
         private const string _modeMention = "Mention";

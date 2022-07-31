@@ -3,7 +3,7 @@
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     // this placeholder will break when not in message context (like message trigger)
-    [Placeholder($"{{{{CurrentChannel(?::({_modeMention}|{_modeName}))?}}}}")]
+    [Placeholder($"{{{{CurrentChannel(?::({_modeMention}|{_modeName}))?}}}}", DisplayName = "{{CurrentChannel}}")]
     public class CurrentChannel : IPlaceholder
     {
         private const string _modeMention = "Mention";

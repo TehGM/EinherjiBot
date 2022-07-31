@@ -38,12 +38,12 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 
             if (this._placeholders.TryAdd(placeholder, type))
             {
-                this._log.LogDebug("Added placeholder {Placeholder}", placeholder.Placeholder);
+                this._log.LogDebug("Added placeholder {Placeholder}", placeholder.GetDisplayText());
                 return true;
             }
             else
             {
-                this._log.LogWarning("Cannot add placeholder {Placeholder} as it was already added before", placeholder.Placeholder);
+                this._log.LogWarning("Cannot add placeholder {Placeholder} as it was already added before", placeholder.GetDisplayText());
                 return false;
             }
         }

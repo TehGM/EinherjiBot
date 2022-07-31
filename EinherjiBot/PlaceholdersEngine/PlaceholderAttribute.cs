@@ -7,6 +7,7 @@
 
         public string Placeholder { get; }
         public RegexOptions RegexOptions { get; }
+        public string DisplayName { get; init; }
 
         public Regex PlaceholderRegex { get; }
 
@@ -35,6 +36,9 @@
             => other is not null && string.Equals(this.Placeholder, other.Placeholder, StringComparison.OrdinalIgnoreCase);
         public bool Equals(string other)
             => string.Equals(this.Placeholder, other, StringComparison.OrdinalIgnoreCase);
+
+        public string GetDisplayText()
+            => this.DisplayName ?? this.Placeholder;
 
         public override int GetHashCode()
             => this.Placeholder.GetHashCode(StringComparison.OrdinalIgnoreCase);
