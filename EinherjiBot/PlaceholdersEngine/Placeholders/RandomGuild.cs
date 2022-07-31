@@ -3,13 +3,13 @@ using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("{{RandomGuildName}}")]
-    public class RandomGuildName : IPlaceholder
+    [Placeholder("{{RandomGuild}}")]
+    public class RandomGuild : IPlaceholder
     {
         private readonly IDiscordClient _client;
         private readonly IRandomizer _randomizer;
 
-        public RandomGuildName(IDiscordClient client, IRandomizer randomizer)
+        public RandomGuild(IDiscordClient client, IRandomizer randomizer)
         {
             this._client = client;
             this._randomizer = randomizer;
