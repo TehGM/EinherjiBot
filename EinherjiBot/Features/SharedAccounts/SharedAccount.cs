@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.SharedAccounts
 {
-    public class SharedAccount : IAuthRequiredEntity, ICacheableEntity<Guid>
+    public class SharedAccount : ICacheableEntity<Guid>
     {
         [BsonId]
         public Guid ID { get; }
@@ -40,15 +40,6 @@ namespace TehGM.EinherjiBot.SharedAccounts
             this.Login = login;
             this.Password = password;
         }
-
-        public bool CanAccess(IDiscordAuthContext context)
-            => context.IsAdmin()
-            || this.AuthorizedUserIDs.Contains(context.ID)
-            || this.AuthorizedRoleIDs.Intersect(context.KnownDiscordRoleIDs).Any();
-
-        public bool CanEdit(IDiscordAuthContext context)
-            => this.CanAccess(context)
-             && this.ModUserIDs.Contains(context.ID);
 
         public Guid GetCacheKey()
             => this.ID;

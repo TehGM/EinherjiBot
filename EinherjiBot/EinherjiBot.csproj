@@ -40,8 +40,4 @@
 	  <ProjectReference Include="..\Analyzers\SlashCommands\SlashCommands.CodeFixes\SlashCommands.CodeFixes.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\SharedAccounts\Policies\" />
-  </ItemGroup>
-
 </Project>

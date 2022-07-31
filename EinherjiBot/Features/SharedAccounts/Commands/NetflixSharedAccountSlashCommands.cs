@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using TehGM.EinherjiBot.Auditing;
 using TehGM.EinherjiBot.Auditing.SharedAccounts;
+using TehGM.EinherjiBot.Security.Authorization;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Commands
 {
@@ -12,11 +13,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
         public class AccountCommands : EinherjiInteractionModule
         {
             private readonly ISharedAccountProvider _provider;
-            private readonly IDiscordAuthContext _auth;
+            private readonly IDiscordAuthorizationService _auth;
             private readonly IAuditStore<SharedAccountAuditEntry> _audit;
             private readonly SharedAccountOptions _options;
 
-            public AccountCommands(ISharedAccountProvider provider, IDiscordAuthContext auth,
+            public AccountCommands(ISharedAccountProvider provider, IDiscordAuthorizationService auth,
                 IAuditStore<SharedAccountAuditEntry> audit, IOptionsSnapshot<SharedAccountOptions> options)
             {
                 this._provider = provider;
@@ -61,9 +62,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                     await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested shared account not found.", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
-                if (!account.CanEdit(this._auth))
+                DiscordAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, 
+                    new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) }, base.CancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
                 {
-                    await base.RespondAsync($"{EinherjiEmote.FailureSymbol} You have no permissions to edit this account.", ephemeral: true, options: base.GetRequestOptions());
+                    await base.RespondAsync($"{EinherjiEmote.FailureSymbol} {authorization.Reason}", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
 
