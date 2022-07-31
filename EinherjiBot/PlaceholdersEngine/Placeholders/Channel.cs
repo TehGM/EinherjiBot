@@ -27,10 +27,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
             if (channel == null)
                 throw new InvalidOperationException($"Discord channel with ID {id} not found");
 
-
             string mode = _defaultMode;
-            if (placeholder.Groups[1].Success)
-                mode = placeholder.Groups[1].Value;
+            if (placeholder.Groups[2].Success)
+                mode = placeholder.Groups[2].Value;
 
             if (mode == _modeMention)
                 return MentionUtils.MentionChannel(channel.Id);
