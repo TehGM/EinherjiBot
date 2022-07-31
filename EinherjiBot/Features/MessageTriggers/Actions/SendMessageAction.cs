@@ -5,7 +5,6 @@ using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Actions
 {
-    [BsonDiscriminator("MessageTriggers.Actions.SendMessage", Required = true)]
     public class SendMessageAction : IMessageTriggerAction
     {
         [BsonId]

@@ -4,7 +4,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Actions
 {
-    [BsonDiscriminator("MessageTriggers.Actions.BanUser", Required = true)]
     public class BanUserAction : IMessageTriggerAction
     {
         [BsonId]

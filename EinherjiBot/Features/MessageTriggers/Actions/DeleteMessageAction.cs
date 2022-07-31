@@ -3,7 +3,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Actions
 {
-    [BsonDiscriminator("MessageTriggers.Actions.DeleteMessage", Required = true)]
     public class DeleteMessageAction : IMessageTriggerAction
     {
         [BsonId]

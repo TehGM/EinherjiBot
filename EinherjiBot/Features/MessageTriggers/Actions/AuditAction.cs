@@ -7,7 +7,6 @@ using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Actions
 {
-    [BsonDiscriminator("MessageTriggers.Actions.Audit", Required = true)]
     public class AuditAction : IMessageTriggerAction
     {
         [BsonId]

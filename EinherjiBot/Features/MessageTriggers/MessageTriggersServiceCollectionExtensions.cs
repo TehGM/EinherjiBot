@@ -39,13 +39,23 @@ namespace Microsoft.Extensions.DependencyInjection
                 if (BsonClassMap.IsClassMapRegistered(type))
                     continue;
 
-                string discriminator = type.GetCustomAttribute<BsonDiscriminatorAttribute>()?.Discriminator
-                    ?? type.FullName;
                 BsonClassMap map = new BsonClassMap(type);
                 map.AutoMap();
                 map.SetDiscriminatorIsRequired(true);
-                map.SetDiscriminator(discriminator);
+                map.SetDiscriminator(GetDiscriminator(type));
                 BsonClassMap.RegisterClassMap(map);
+            }
+
+            string GetDiscriminator(Type type)
+            {
+                string result = type.GetCustomAttribute<BsonDiscriminatorAttribute>()?.Discriminator;
+                if (!string.IsNullOrWhiteSpace(result))
+                    return result;
+
+                string name = type.Name;
+                if (name.EndsWith("Action", StringComparison.Ordinal))
+                    name = name[0..^6];
+                return $"MessageTriggers.Actions.{name}";
             }
         }
     }
