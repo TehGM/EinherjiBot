@@ -4,33 +4,35 @@
 <div class="user-panel @this.ExpandedClass">
     <AuthorizeView>
         <Authorized>
-            <div class="expander">
-                <div class="expander-bar" @onclick=@this.ToggleExpanded>
-                @if (this.IsExpanded)
-                {
-                    <span class="oi oi-chevron-bottom"></span>
-                }
-                else
-                {
-                    <span class="oi oi-chevron-top"></span>
-                }
-                </div>
-                <div class="user-info">
-                    <img src="@this.AuthProvider.User?.GetAvatarURL(256)" />
-                    <div class="username-bar">
-                        <span class="username">@this.AuthProvider.User.Username</span>
-                        <span class="discriminator">#@this.AuthProvider.User.Discriminator</span>
+                <div class="expander">
+                    <div class="expander-bar" @onclick=@this.ToggleExpanded>
+                    @if (this.IsExpanded)
+                    {
+                        <span class="oi oi-chevron-bottom"></span>
+                    }
+                    else
+                    {
+                        <span class="oi oi-chevron-top"></span>
+                    }
+                    </div>
+                    <div class="user-info">
+                        <img src="@this.AuthProvider.User?.GetAvatarURL(256)" />
+                        <div class="username-bar">
+                            <span class="username">@this.AuthProvider.User.Username</span>
+                            <span class="discriminator">#@this.AuthProvider.User.Discriminator</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <a class="btn btn-lg btn-primary oauth-button logout" @onclick=this.LogoutAsync>
-                <span class="text">Logout</span>
-            </a>
+                <a class="btn btn-lg btn-primary oauth-button logout" @onclick=this.LogoutAsync>
+                    <span class="text">Logout</span>
+                </a>
         </Authorized>
         <Authorizing>
-            Attempting to login...
+            Logging you in...
         </Authorizing>
         <NotAuthorized>
+        @if (this.RenderLocation.IsClient)
+        {
             <a class="btn btn-lg btn-primary oauth-button login" @onclick=this.RedirectToLoginAsync>
             <span class="discord-logo">
                 <svg width="25" height="25" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -46,6 +48,11 @@
             </span>
             <span class="text">Login</span>
         </a>
+        }
+        else
+        {
+            <text>Refreshing login...</text>
+        }
         </NotAuthorized>
     </AuthorizeView>
 </div>

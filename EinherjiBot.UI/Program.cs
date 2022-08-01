@@ -77,11 +77,15 @@ namespace TehGM.EinherjiBot.UI
             services.AddBlazoredLocalStorage();
             services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
             services.AddTransient<IDiscordLoginRedirect, DiscordLoginRedirect>();
+
+            // this will be overriden in ConfigureServices on client-side only
+            services.TryAddSingleton<IRenderLocation>(s => new Services.RenderLocationProvider(RenderLocation.Server));
         }
 
         private static void ConfigureServices(IServiceCollection services)
         {
             ConfigurePrerenderingServices(services);
+            services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client)));
 
             services.AddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
             services.AddScoped<IAuthProvider>(services => services.GetRequiredService<IWebAuthProvider>());
