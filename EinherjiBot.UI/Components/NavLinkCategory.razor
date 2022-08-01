@@ -2,11 +2,11 @@
     <div class="header" @onclick="this.OnClickAsync">
         @if (this.IsOpen)
         {
-            <span class="oi oi-chevron-bottom arrow"></span>
+            <div class="oi oi-chevron-bottom arrow"></div>
         }
         else
         {
-            <span class="oi oi-chevron-right arrow"></span>
+            <div class="oi oi-chevron-right arrow"></div>
         }
 
         @if (!string.IsNullOrWhiteSpace(this.ImageURL))
@@ -14,7 +14,7 @@
             <img class="image" src="@this.ImageURL" />
         }
 
-        <span class="text">@this.Text</span>
+        <div class="text">@this.Text</div>
     </div>
     @if (this.IsOpen)
     {

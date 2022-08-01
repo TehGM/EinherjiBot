@@ -12,11 +12,14 @@
 
 .header {
     padding-left: 5px;
-    font-size: 17px;
+    font-size: 16px;
     cursor: pointer;
     color: var(--menu-text-inactive-color);
     background-color: var(--menu-item-background-inactive-color);
     user-select: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
     .arrow {
         max-width: 10px;
@@ -38,6 +41,9 @@
     .text {
         transition: color 0.3s;
         vertical-align: text-top;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
     &:hover {
