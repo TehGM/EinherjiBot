@@ -1,4 +1,5 @@
 ﻿@using TehGM.EinherjiBot.UI.Security
+@inherits PrerenderingComponent
 @inject IDiscordLoginRedirect LoginRedirect
 
 <div class="sidebar">
@@ -77,8 +78,13 @@
     {
         if (this._botAvatarUrl == null)
         {
-            IDiscordUserInfo info = await this.UserInfoProvider.GetBotInfoAsync();
-            this._botAvatarUrl = info?.GetAvatarURL(_avatarSize);
+            if (base.PrerenderingState.TryTakeFromJson(nameof(_botAvatarUrl), out string botAvatarUrl))
+                this._botAvatarUrl = botAvatarUrl;
+            else
+            {
+                IDiscordUserInfo info = await this.UserInfoProvider.GetBotInfoAsync();
+                this._botAvatarUrl = info?.GetAvatarURL(_avatarSize);
+            }
         }
         await base.OnParametersSetAsync();
     }
@@ -95,7 +101,13 @@
         else
             this._currentCategory = category;
     }
-    
+
+    protected override Task PersistAsync()
+    {
+        base.PrerenderingState.PersistAsJson(nameof(_botAvatarUrl), this._botAvatarUrl);
+        return Task.CompletedTask;
+    }
+
     private Task LogoutAsync()
-        => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
+    => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
 }
