@@ -100,6 +100,7 @@ namespace TehGM.EinherjiBot.UI
             services.AddHttpClient<IAuthService, WebAuthService>();
 
             services.AddTransient<IUserInfoService, WebUserInfoService>();
+            services.AddEntityCaching();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)
