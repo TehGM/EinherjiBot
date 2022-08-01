@@ -1,5 +1,33 @@
 .sidebar {
     background-color: var(--menu-background-color);
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+
+    .nav-menu-items {
+        flex: 1 0 auto;
+    }
+
+    ::deep .user-panel {
+        margin-top: 10px;
+        font-size: 15px;
+        //max-height: 55px;
+        flex-shrink: 0;
+        text-align: center;
+        color: var(--menu-copyright-color);
+        margin-bottom: 5px;
+
+        p {
+            margin-top: 0;
+            margin-bottom: unset;
+            font-weight: bold;
+        }
+
+        a, a:hover, a:focus {
+            text-decoration: none;
+        }
+    }
 }
 
 .navbar-toggler {
@@ -19,10 +47,10 @@
     background-color: var(--menu-item-background-inactive-color);
 
     &:first-of-type {
-        padding-top: 1rem;
+        padding-top: 0.7rem;
     }
 
-    &:last-of-type {
+    &:not(:last-of-type) {
         padding-bottom: 1rem;
     }
 

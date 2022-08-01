@@ -1,0 +1,132 @@
+$height-expander: 23.5px;
+$height-info: 45px;
+$height-info-expanded: 70px;
+
+.user-panel {
+    background-color: var(--user-panel-background-color);
+    height: auto;
+    width: 100%;
+    clear: both;
+
+    .expander-bar {
+        cursor: pointer;
+        margin-bottom: 6px;
+        transition: background-color 0.3s;
+        background-color: var(--background-color-darkest);
+        border-top: 1px solid var(--background-color-default);
+
+        &:hover {
+            background-color: var(--background-color-default);
+        }
+
+        span {
+            text-align: center;
+            width: auto;
+        }
+    }
+
+    .user-info {
+        img {
+            transition: height 0.1s;
+            border-radius: 45%;
+            margin-left: 10px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        .username-bar {
+            display: inline-block;
+
+            .username {
+                font-weight: bold;
+                font-size: 20px;
+                color: var(--user-panel-username-color);
+            }
+
+            .discriminator {
+                font-weight: normal;
+                font-size: 15px;
+                color: var(--user-panel-discriminator-color);
+            }
+        }
+    }
+
+    .oauth-button {
+        $text-color: var(--text-color-default);
+        transition: opacity 1s;
+        opacity: 1;
+        border-color: var(--background-color-dark);
+        margin-top: 3px;
+        margin-bottom: 3px;
+        margin-left: 5px;
+        margin-right: 5px;
+        width: 90%;
+        background-color: var(--background-color-default);
+        color: $text-color;
+        line-height: 20px;
+
+        &:hover {
+            background-color: var(--background-color-lighter);
+        }
+
+        .discord-logo {
+            display: inline-block;
+            vertical-align: middle;
+
+            &.discord-logo svg {
+
+                * {
+                    stroke: $text-color;
+                    fill: $text-color;
+                }
+            }
+        }
+
+        & > i, & > span.text {
+            color: $text-color;
+            vertical-align: middle;
+        }
+
+        & > span.text {
+            font-size: 19px;
+            margin-left: 5px;
+        }
+    }
+
+    &.expanded {
+        .user-info {
+            img {
+                height: 65px;
+            }
+
+            .username-bar, .username {
+                vertical-align: top;
+            }
+
+            .discriminator {
+                vertical-align: middle;
+            }
+        }
+    }
+
+    &:not(.expanded) {
+        .user-info {
+            img {
+                height: 40px;
+            }
+
+            .username-bar {
+                vertical-align: middle;
+            }
+
+            .discriminator {
+                vertical-align: text-bottom;
+            }
+        }
+
+        .oauth-button.logout {
+            display: none;
+            opacity: 0;
+        }
+    }
+}

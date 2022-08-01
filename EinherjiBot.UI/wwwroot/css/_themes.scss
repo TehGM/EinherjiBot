@@ -21,4 +21,8 @@
     --menu-item-background-active-color: var(--background-color-lighter);
     --menu-item-background-hover-color: var(--background-color-light);
     --menu-item-background-inactive-color: rgba(0, 0, 0, 0);
+    // user panel
+    --user-panel-background-color: var(--background-color-darker);
+    --user-panel-username-color: var(--text-color-highlight);
+    --user-panel-discriminator-color: var(--text-color-dim);
 }

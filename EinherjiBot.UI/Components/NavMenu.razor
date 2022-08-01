@@ -1,4 +1,7 @@
-﻿<div class="sidebar">
+﻿@using TehGM.EinherjiBot.UI.Security
+@inject IDiscordLoginRedirect LoginRedirect
+
+<div class="sidebar">
     <div class="top-row ps-3 navbar navbar-dark">
         <div class="container-fluid">
             <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -7,7 +10,7 @@
         </div>
     </div>
     
-    <div class="@NavMenuCssClass">
+    <div class="nav-menu-items @NavMenuCssClass">
         <nav class="flex-column">
             
             <NavLinkCategory @ref=this._botCategory Text="Einherji" ImageURL="@this._botAvatarUrl" 
@@ -43,12 +46,19 @@
                 <Authorized>
                     <NavLinkCategory @ref=this._userCategory Text="@this.AuthProvider.User.GetUsernameWithDiscriminator()" ImageURL="@this.AuthProvider.User?.GetAvatarURL(_avatarSize)" 
                         OnClick=@this.OnCategoryClick IsOpen="@(this._userCategory == this._currentCategory)">
-                        To be populated
+                        <div class="nav-item">
+                            <NavLink class="nav-link" @onclick=this.LogoutAsync>
+                                <span class="oi oi-account-logout" aria-hidden="true"></span>
+                                <span class="text">Logout</span>
+                            </NavLink>
+                        </div>
                     </NavLinkCategory>
                 </Authorized>
             </AuthorizeView>
         </nav>
     </div>
+
+    <CurrentUserPanel />
 </div>
 
 @code {
@@ -85,4 +95,7 @@
         else
             this._currentCategory = category;
     }
+    
+    private Task LogoutAsync()
+        => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
 }

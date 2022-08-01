@@ -1,5 +1,13 @@
 .nav-link-category {
     margin-left: 5px;
+
+    &:not(:first-of-type) {
+        padding-top: 1rem;
+    }
+
+    &:last-of-type {
+        padding-bottom: 1rem;
+    }
 }
 
 .header {
