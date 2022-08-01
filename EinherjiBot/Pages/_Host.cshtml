@@ -1,8 +1,10 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Web
 @using TehGM.EinherjiBot.UI
 @namespace TehGM.EinherjiBot.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@attribute [AllowAnonymous]
 
 <!DOCTYPE html>
 <html lang="en">
