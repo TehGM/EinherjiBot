@@ -1,7 +1,11 @@
-﻿@using TehGM.EinherjiBot.UI.Security
+﻿@using System.Text.RegularExpressions
+@using TehGM.EinherjiBot.UI.Security
 @using TehGM.EinherjiBot.API
 @inherits PrerenderingComponent
+@implements IDisposable
 @inject IDiscordLoginRedirect LoginRedirect
+@inject NavigationManager Navigation
+@inject ILogger<NavMenu> Log
 
 <div class="sidebar">
     <div class="top-row ps-3 navbar navbar-dark">
@@ -119,8 +123,16 @@
     private string _userAvatarUrl;
     private string NavMenuCssClass => this._collapseNavMenu ? "collapse" : null;
 
+
     protected override async Task OnParametersSetAsync()
     {
+        if (this._currentCategoryIdentifier == null)
+        {
+            if (base.PrerenderingState.TryTakeFromJson(nameof(_currentCategoryIdentifier), out ulong? currentCategory))
+                this._currentCategoryIdentifier = currentCategory;
+            else
+                this.UpdateLinkCategory();
+        }
         if (this._botAvatarUrl == null)
         {
             if (base.PrerenderingState.TryTakeFromJson(nameof(_botAvatarUrl), out string botAvatarUrl))
@@ -131,6 +143,9 @@
                 this._botAvatarUrl = info?.GetAvatarURL(_avatarSize);
             }
         }
+
+        this.Navigation.LocationChanged += this.OnLocationChanged;
+
         await base.OnParametersSetAsync();
     }
 
@@ -147,12 +162,40 @@
             this._currentCategoryIdentifier = category.Identifier;
     }
 
+    private void OnLocationChanged(object sender, LocationChangedEventArgs args)
+        => this.UpdateLinkCategory();
+
+    private void UpdateLinkCategory()
+    {
+        this._currentCategoryIdentifier = this.FindLinkCategory();
+        this.Log.LogTrace("Menu category identifier updated to {ID}", this._currentCategoryIdentifier);
+    }
+
+    private ulong FindLinkCategory()
+    {
+        string path = this.Navigation.ToBaseRelativePath(this.Navigation.Uri);
+        if (path.StartsWith("guild/", StringComparison.OrdinalIgnoreCase))
+        {
+            Match match = Regex.Match(path, @"^guild/(\d{17,20})", RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (match.Success && match.Groups[1].Success)
+                return ulong.Parse(match.Groups[1].Value);
+        }
+        return  0;
+    }
+
     protected override Task PersistAsync()
     {
         base.PrerenderingState.PersistAsJson(nameof(_botAvatarUrl), this._botAvatarUrl);
+        base.PrerenderingState.PersistAsJson(nameof(_currentCategoryIdentifier), this._currentCategoryIdentifier);
         return Task.CompletedTask;
     }
 
     private Task LogoutAsync()
         => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        try { this.Navigation.LocationChanged -= this.OnLocationChanged; } catch { }
+    }
 }
