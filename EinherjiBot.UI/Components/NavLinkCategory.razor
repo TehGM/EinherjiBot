@@ -1,0 +1,33 @@
+﻿<div class="nav-link-category">
+    <div class="header" @onclick="this.OnClickAsync">
+        @if (this.IsOpen)
+        {
+            <span class="oi oi-chevron-bottom arrow"></span>
+        }
+        else
+        {
+            <span class="oi oi-chevron-right arrow"></span>
+        }
+        <span class="text">@this.Text</span>
+    </div>
+    @if (this.IsOpen)
+    {
+        <div class="children">
+            @this.ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; }
+    [Parameter]
+    public bool IsOpen { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public EventCallback<NavLinkCategory> OnClick { get; set; }
+
+    private Task OnClickAsync()
+        => this.OnClick.InvokeAsync(this);
+}

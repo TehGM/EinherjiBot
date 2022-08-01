@@ -7,24 +7,66 @@
         </div>
     </div>
     
-    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <div class="@NavMenuCssClass">
         <nav class="flex-column">
-            <div class="nav-item">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="oi oi-home" aria-hidden="true"></span> Home
-                </NavLink>
-            </div>
+            
+            <NavLinkCategory @ref=this._botCategory Text="Einherji" OnClick=@this.OnCategoryClick IsOpen="@(this._botCategory == this._currentCategory)">
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span>
+                        <span class="text">Home</span>
+                    </NavLink>
+                </div>
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="/intel" Match="NavLinkMatch.Prefix">
+                                <span class="oi oi-people" aria-hidden="true"></span>
+                                <span class="text">Intel</span>
+                            </NavLink>
+                        </div>
+                        @if (this.AuthProvider.User.IsAdmin())
+                        {
+                            <div class="nav-item">
+                                <NavLink class="nav-link" href="/audit" Match="NavLinkMatch.All">
+                                    <span class="oi oi-excerpt" aria-hidden="true"></span>
+                                    <span class="text">Audits</span>
+                                </NavLink>
+                            </div>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+            </NavLinkCategory>
+
+            <AuthorizeView>
+                <Authorized>
+                    <NavLinkCategory @ref=this._userCategory Text="@($"{this.AuthProvider.User.Username}#{this.AuthProvider.User.Discriminator}")" OnClick=@this.OnCategoryClick IsOpen="@(this._userCategory == this._currentCategory)">
+                        To be populated
+                    </NavLinkCategory>
+                </Authorized>
+            </AuthorizeView>
         </nav>
     </div>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+    private NavLinkCategory _botCategory;
+    private NavLinkCategory _userCategory;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private NavLinkCategory _currentCategory;
+    private bool _collapseNavMenu = true;
+    private string NavMenuCssClass => this._collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        this._collapseNavMenu = !this._collapseNavMenu;
+    }
+
+    private void OnCategoryClick(NavLinkCategory category)
+    {
+        if (category == this._currentCategory)
+            this._currentCategory = null;
+        else
+            this._currentCategory = category;
     }
 }
