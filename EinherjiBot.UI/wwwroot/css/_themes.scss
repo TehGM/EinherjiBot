@@ -1,0 +1,24 @@
+:root {
+    // shared vars
+    --text-color-default: rgb(222, 222, 222);
+    --text-color-dim: rgb(140, 140, 140);
+    --text-color-highlight: white;
+    --background-color-lightest: #2E2E2E;
+    --background-color-lighter: #262626;
+    --background-color-light: #1D1D1D;
+    --background-color-default: #1E1E1E;
+    --background-color-dark: #141414;
+    --background-color-darker: #0F0F0F;
+    --background-color-darkest: #0A0A0A;
+    // page
+    --page-background-color: var(--background-color-default);
+    --page-text-color: var(--text-color-default);
+    // menu
+    --menu-background-color: var(--background-color-dark);
+    --menu-text-active-color: var(--text-color-highlight);
+    --menu-text-hover-color: var(--text-color-default);
+    --menu-text-inactive-color: var(--text-color-dim);
+    --menu-item-background-active-color: var(--background-color-lighter);
+    --menu-item-background-hover-color: var(--background-color-light);
+    --menu-item-background-inactive-color: rgba(0, 0, 0, 0);
+}

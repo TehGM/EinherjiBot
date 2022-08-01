@@ -1,0 +1,33 @@
+﻿@import "_themes.scss";
+
+/*** GENERAL DEFAULTS ***/
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 99.999%;
+
+    @media (min-width: 768px) {
+        font-size: 16px;
+    }
+}
+
+body {
+    background-color: var(--page-background-color);
+    color: var(--page-text-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 9px;
+}
+
+
+/*** UTILS ***/
+.click-select {
+    $select-mode: all;
+    -moz-user-select: $select-mode;
+    -ms-user-select: $select-mode;
+    -webkit-user-select: $select-mode;
+    user-select: $select-mode;
+    cursor: pointer;
+    text-decoration: underline dotted gray;
+}

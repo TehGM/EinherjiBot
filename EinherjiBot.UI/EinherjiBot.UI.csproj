@@ -29,10 +29,6 @@
     <ProjectReference Include="..\EinherjiBot.Core\EinherjiBot.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\css\" />
-  </ItemGroup>
-
 	<!-- SASS BUILD -->
 	<!-- note: on first run, the file might not be up to date, cause MSBuild works myseterious ways -->
 	<!-- to work this around, use something like fsriev -->
