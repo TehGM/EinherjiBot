@@ -40,7 +40,7 @@
 
             <AuthorizeView>
                 <Authorized>
-                    <NavLinkCategory @ref=this._userCategory Text="@($"{this.AuthProvider.User.Username}#{this.AuthProvider.User.Discriminator}")" OnClick=@this.OnCategoryClick IsOpen="@(this._userCategory == this._currentCategory)">
+                    <NavLinkCategory @ref=this._userCategory Text="@this.AuthProvider.User.GetUsernameWithDiscriminator()" OnClick=@this.OnCategoryClick IsOpen="@(this._userCategory == this._currentCategory)">
                         To be populated
                     </NavLinkCategory>
                 </Authorized>

@@ -1,4 +1,4 @@
-﻿namespace TehGM.EinherjiBot.API
+﻿namespace TehGM.EinherjiBot
 {
     public interface IDiscordUserInfo
     {

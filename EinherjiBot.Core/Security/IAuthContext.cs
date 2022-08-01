@@ -7,5 +7,8 @@
         string Discriminator { get; }
         IEnumerable<string> BotRoles { get; }
         bool IsBanned { get; }
+
+        string GetUsernameWithDiscriminator()
+            => $"{this.Username}#{this.Discriminator}";
     }
 }
