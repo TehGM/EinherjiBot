@@ -1,7 +1,7 @@
 ﻿@using TehGM.EinherjiBot.UI.Security
 @inject IDiscordLoginRedirect LoginRedirect
 
-<div class="user-panel @this.ExpandedClass">
+<div class="user-panel @this.ExpandedClass @this.CssClass">
     <AuthorizeView>
         <Authorized>
                 <div class="expander">
@@ -60,6 +60,8 @@
 @code {
     [Parameter]
     public bool IsExpanded { get; set; }
+    [Parameter]
+    public string CssClass { get; set; }
 
     private string ExpandedClass => this.IsExpanded && this.AuthProvider.User.IsLoggedIn() ? "expanded" : null;
 
