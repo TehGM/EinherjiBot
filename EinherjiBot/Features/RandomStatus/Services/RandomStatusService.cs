@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.DiscordClient;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.Utilities.Randomization;
 
@@ -9,6 +10,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
     internal class RandomStatusService : AutostartService, IStatusService, IDisposable
     {
         private readonly DiscordSocketClient _client;
+        private readonly IDiscordConnection _connection;
         private readonly IRandomizer _randomizer;
         private readonly IPlaceholdersEngine _placeholders;
         private readonly IStatusProvider _provider;
@@ -17,10 +19,11 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
 
         private DateTime _lastChangeUtc;
 
-        public RandomStatusService(DiscordSocketClient client, IRandomizer randomizer, IPlaceholdersEngine placeholders, IStatusProvider provider,
+        public RandomStatusService(DiscordSocketClient client, IDiscordConnection connection, IRandomizer randomizer, IPlaceholdersEngine placeholders, IStatusProvider provider,
             ILogger<RandomStatusService> log, IOptionsMonitor<RandomStatusOptions> options)
         {
             this._client = client;
+            this._connection = connection;
             this._randomizer = randomizer;
             this._placeholders = placeholders;
             this._provider = provider;
@@ -38,11 +41,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
             {
                 RandomStatusOptions options = this._options.CurrentValue;
 
-                while (this._client.ConnectionState != ConnectionState.Connected)
-                {
-                    this._log.LogTrace("Client not connected, waiting");
-                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
-                }
+                await this._connection.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 DateTime nextChangeUtc = this._lastChangeUtc + this._options.CurrentValue.ChangeRate;
                 TimeSpan remainingWait = nextChangeUtc - DateTime.UtcNow;
