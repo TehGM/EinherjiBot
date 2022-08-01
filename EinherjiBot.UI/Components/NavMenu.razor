@@ -1,4 +1,5 @@
 ﻿@using TehGM.EinherjiBot.UI.Security
+@using TehGM.EinherjiBot.API
 @inherits PrerenderingComponent
 @inject IDiscordLoginRedirect LoginRedirect
 
@@ -14,8 +15,8 @@
     <div class="nav-menu-items @NavMenuCssClass">
         <nav class="flex-column">
             
-            <NavLinkCategory @ref=this._botCategory Text="Einherji" ImageURL="@this._botAvatarUrl" 
-                OnClick=@this.OnCategoryClick IsOpen="@(this._botCategory == this._currentCategory)">
+            <NavLinkCategory Identifier="0" Text="Einherji" ImageURL="@this._botAvatarUrl" 
+                OnClick=@this.OnCategoryClick IsOpen="@(this._currentCategoryIdentifier?.Equals(0) == true)">
                 <div class="nav-item">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                         <span class="oi oi-home" aria-hidden="true"></span>
@@ -42,11 +43,11 @@
                     </Authorized>
                 </AuthorizeView>
             </NavLinkCategory>
-
+            
             <AuthorizeView>
                 <Authorized>
-                    <NavLinkCategory @ref=this._userCategory Text="@this.AuthProvider.User.GetUsernameWithDiscriminator()" ImageURL="@this.AuthProvider.User?.GetAvatarURL(_avatarSize)" 
-                        OnClick=@this.OnCategoryClick IsOpen="@(this._userCategory == this._currentCategory)">
+                    <NavLinkCategory Identifier="this.AuthProvider.User.ID" Text="@this.AuthProvider.User.GetUsernameWithDiscriminator()" ImageURL="@this.AuthProvider.User?.GetAvatarURL(_avatarSize)" 
+                        OnClick=@this.OnCategoryClick IsOpen="@(this._currentCategoryIdentifier?.Equals(this.AuthProvider.User.ID) == true)">
                         <div class="nav-item">
                             <NavLink class="nav-link" @onclick=this.LogoutAsync>
                                 <span class="oi oi-account-logout" aria-hidden="true"></span>
@@ -54,6 +55,53 @@
                             </NavLink>
                         </div>
                     </NavLinkCategory>
+
+                    @{
+                        IEnumerable<UserGuildInfoResponse> validGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
+                            .Where(g => g.CanManage)
+                            .OrderBy(g => g.Name);
+                        if (validGuilds?.Any() == true)
+                        {
+                            <hr/>
+                        }
+                    }
+                    @foreach (UserGuildInfoResponse guild in validGuilds)
+                    {
+                        <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
+                            OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier?.Equals(guild.ID) == true)>
+                            <div class="nav-item">
+                                <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
+                                    <span class="oi oi-bolt" aria-hidden="true"></span>
+                                    <span class="text">Message Triggers</span>
+                                </NavLink>
+                            </div>
+                        </NavLinkCategory>
+                    }
+                    
+                    @*for administration purposes, admin can view all guilds*@
+                    @*TODO: even more valuably, should see bot's guilds*@
+                    @if (this.AuthProvider.User.IsAdmin())
+                    {
+                        IEnumerable<UserGuildInfoResponse> additionalGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
+                            .Where(g => !g.CanManage)
+                            .OrderBy(g => g.Name);
+                        if (additionalGuilds?.Any() == true)
+                        {
+                            <hr/>
+                        }
+                        foreach (UserGuildInfoResponse guild in additionalGuilds)
+                        {
+                            <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
+                                OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier?.Equals(guild.ID) == true)>
+                                <div class="nav-item">
+                                    <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
+                                        <span class="oi oi-bolt" aria-hidden="true"></span>
+                                        <span class="text">Message Triggers</span>
+                                    </NavLink>
+                                </div>
+                            </NavLinkCategory>
+                        }
+                    }
                 </Authorized>
             </AuthorizeView>
         </nav>
@@ -65,10 +113,7 @@
 @code {
     private const int _avatarSize = 32;
 
-    private NavLinkCategory _botCategory;
-    private NavLinkCategory _userCategory;
-
-    private NavLinkCategory _currentCategory;
+    private object _currentCategoryIdentifier;
     private bool _collapseNavMenu = true;
     private string _botAvatarUrl;
     private string _userAvatarUrl;
@@ -96,10 +141,10 @@
 
     private void OnCategoryClick(NavLinkCategory category)
     {
-        if (category == this._currentCategory)
-            this._currentCategory = null;
+        if (category.Identifier == this._currentCategoryIdentifier)
+            this._currentCategoryIdentifier = null;
         else
-            this._currentCategory = category;
+            this._currentCategoryIdentifier = category.Identifier;
     }
 
     protected override Task PersistAsync()
@@ -109,5 +154,5 @@
     }
 
     private Task LogoutAsync()
-    => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
+        => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
 }

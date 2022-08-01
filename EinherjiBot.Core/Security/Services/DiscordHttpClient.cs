@@ -3,7 +3,7 @@ using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security.Services
 {
-    public class DiscordHttpClient
+    public class DiscordHttpClient : IDiscordHttpClient
     {
         public HttpClient Client { get; }
 
@@ -18,6 +18,13 @@ namespace TehGM.EinherjiBot.Security.Services
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/users/@me");
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
             return this.Client.SendJsonAsync<UserInfoResponse>(request, null, null, cancellationToken);
+        }
+
+        public Task<IEnumerable<UserGuildInfoResponse>> GetCurrentUserGuildsAsync(string bearerToken, CancellationToken cancellationToken = default)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/users/@me/guilds");
+            request.Headers.Add("Authorization", $"Bearer {bearerToken}");
+            return this.Client.SendJsonAsync<IEnumerable<UserGuildInfoResponse>>(request, null, null, cancellationToken);
         }
     }
 }

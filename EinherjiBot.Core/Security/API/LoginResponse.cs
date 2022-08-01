@@ -15,6 +15,8 @@ namespace TehGM.EinherjiBot.Security.API
         public UserInfoResponse User { get; init; }
         [JsonProperty("roles")]
         public IEnumerable<string> Roles { get; init; }
+        [JsonProperty("guilds", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<UserGuildInfoResponse> Guilds { get; init; }
 
         [JsonConstructor]
         private LoginResponse() { }

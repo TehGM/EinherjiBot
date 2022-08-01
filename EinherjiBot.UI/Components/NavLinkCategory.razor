@@ -25,6 +25,8 @@
 </div>
 
 @code {
+    [Parameter]
+    public object Identifier { get; set; }
     [Parameter, EditorRequired]
     public string Text { get; set; }
     [Parameter]

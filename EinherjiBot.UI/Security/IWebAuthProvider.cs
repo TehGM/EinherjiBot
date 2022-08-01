@@ -1,4 +1,5 @@
-﻿using TehGM.EinherjiBot.Security;
+﻿using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 
 namespace TehGM.EinherjiBot.UI.Security
@@ -7,6 +8,7 @@ namespace TehGM.EinherjiBot.UI.Security
     {
         public DateTime Expiration { get; }
         public string Token { get; }
+        public IEnumerable<UserGuildInfoResponse> Guilds { get; }
 
         Task LoginAsync(LoginResponse response, CancellationToken cancellationToken = default);
         Task LogoutAsync(CancellationToken cancellationToken = default);

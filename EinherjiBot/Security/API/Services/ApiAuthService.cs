@@ -45,11 +45,16 @@ namespace TehGM.EinherjiBot.Security.API.Services
             if (securityData.IsBanned)
                 return null;
 
+            Task<IEnumerable<UserGuildInfoResponse>> guildsTask = this._client.GetCurrentUserGuildsAsync(accessToken.AccessToken, cancellationToken);
             RefreshToken refreshToken = this._refreshTokenGenerator.Generate(securityData.ID, accessToken.RefreshToken);
-            await this._refreshTokenStore.AddAsync(refreshToken, cancellationToken).ConfigureAwait(false);
+            Task persistTokenTask = this._refreshTokenStore.AddAsync(refreshToken, cancellationToken);
 
             string jwt = this._jwtGenerator.Generate(securityData);
-            return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, securityData.Roles);
+            await Task.WhenAll(guildsTask, persistTokenTask).ConfigureAwait(false);
+            return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, securityData.Roles)
+            {
+                Guilds = guildsTask.Result
+            };
         }
 
         public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)

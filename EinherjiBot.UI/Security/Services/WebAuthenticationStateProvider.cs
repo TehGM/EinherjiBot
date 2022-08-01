@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 
@@ -9,6 +10,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
     {
         public DateTime Expiration { get; private set; }
         public IAuthContext User { get; private set; } = WebAuthContext.None;
+        public IEnumerable<UserGuildInfoResponse> Guilds { get; private set; }
         public string Token { get; private set; }
         private ClaimsPrincipal _principal;
         private bool _loaded = false;
@@ -27,6 +29,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             this.User = WebAuthContext.FromLoginResponse(response);
             this.Token = response.Token;
             this.Expiration = DateTime.UtcNow.AddSeconds(response.TokenExpirationSeconds);
+            this.Guilds = response.Guilds;
             this._principal = this.User.ToClaimsPrincipal("jwt");
             await this._tokenProvider.SetAsync(response.RefreshToken, cancellationToken).ConfigureAwait(false);
             base.NotifyAuthenticationStateChanged(Task.FromResult(this.GetState()));
@@ -37,6 +40,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             this.User = WebAuthContext.None;
             this.Token = null;
             this.Expiration = DateTime.UtcNow;
+            this.Guilds = null;
             this._principal = new ClaimsPrincipal();
             string token = await this._tokenProvider.GetAsync(cancellationToken).ConfigureAwait(false);
             if (token != null)
