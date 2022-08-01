@@ -53,7 +53,7 @@
         padding-bottom: 0.5rem;
     }
 
-    .oi, .icon {
+    .oi, .bi, .icon {
         $icon-size: 20px;
         display: block;
         max-width: $icon-size;
@@ -62,6 +62,13 @@
         top: -1px;
         font-size: unset;
         color: var(--menu-text-inactive-color);
+    }
+
+    .bi {
+        top: 1px;
+        position: relative;
+        font-size: 18px;
+        max-height: unset;
     }
 
     ::deep a {
