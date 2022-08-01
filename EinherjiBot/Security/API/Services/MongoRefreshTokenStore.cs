@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
 using TehGM.EinherjiBot.Database;
 
-namespace TehGM.EinherjiBot.Security.Services
+namespace TehGM.EinherjiBot.Security.API.Services
 {
     public class MongoRefreshTokenStore : IRefreshTokenStore
     {

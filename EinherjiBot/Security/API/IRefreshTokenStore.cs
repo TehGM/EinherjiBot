@@ -1,4 +1,4 @@
-﻿namespace TehGM.EinherjiBot.Security
+﻿namespace TehGM.EinherjiBot.Security.API
 {
     public interface IRefreshTokenStore
     {
