@@ -8,6 +8,12 @@
         {
             <span class="oi oi-chevron-right arrow"></span>
         }
+
+        @if (!string.IsNullOrWhiteSpace(this.ImageURL))
+        {
+            <img class="image" src="@this.ImageURL" />
+        }
+
         <span class="text">@this.Text</span>
     </div>
     @if (this.IsOpen)
@@ -21,6 +27,8 @@
 @code {
     [Parameter, EditorRequired]
     public string Text { get; set; }
+    [Parameter]
+    public string ImageURL { get; set; }
     [Parameter]
     public bool IsOpen { get; set; }
     [Parameter]

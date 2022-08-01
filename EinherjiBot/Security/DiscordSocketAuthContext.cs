@@ -21,9 +21,11 @@ namespace TehGM.EinherjiBot.Security
 
         string IAuthContext.Username => this.DiscordUser?.Username;
         string IAuthContext.Discriminator => this.DiscordUser?.Discriminator;
+        string IAuthContext.AvatarHash => this.DiscordUser?.AvatarId;
         string IDiscordUserInfo.Username => this.DiscordUser?.Username;
         string IDiscordUserInfo.Discriminator => this.DiscordUser?.Discriminator;
         string IDiscordUserInfo.AvatarHash => this.DiscordUser?.AvatarId;
+
 
         private readonly UserSecurityData _data;
 
