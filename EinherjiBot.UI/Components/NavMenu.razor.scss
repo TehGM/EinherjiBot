@@ -6,13 +6,6 @@
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.oi {
-    width: 2rem;
-    font-size: 1.1rem;
-    vertical-align: text-top;
-    top: -2px;
-}
-
 .nav-item {
     $nav-item-height: 34px;
     max-height: $nav-item-height;
@@ -34,9 +27,13 @@
     }
 
     .oi, .icon {
+        $icon-size: 20px;
         display: block;
-        max-width: 20px;
+        max-width: $icon-size;
+        max-height: $icon-size;
         margin-right: 6px;
+        top: -1px;
+        font-size: unset;
         color: var(--menu-text-inactive-color);
     }
 
