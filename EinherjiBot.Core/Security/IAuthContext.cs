@@ -6,5 +6,6 @@
         string Username { get; }
         string Discriminator { get; }
         IEnumerable<string> BotRoles { get; }
+        bool IsBanned { get; }
     }
 }

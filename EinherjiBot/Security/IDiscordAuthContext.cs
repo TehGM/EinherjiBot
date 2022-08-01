@@ -7,7 +7,6 @@ namespace TehGM.EinherjiBot.Security
         IUser DiscordUser { get; }
         IGuild DiscordGuild { get; }
         IGuildUser DiscordGuildUser { get; }
-        bool IsBanned { get; }
 
         IEnumerable<ulong> KnownDiscordGuildIDs { get; }
         IEnumerable<ulong> KnownDiscordRoleIDs { get; }

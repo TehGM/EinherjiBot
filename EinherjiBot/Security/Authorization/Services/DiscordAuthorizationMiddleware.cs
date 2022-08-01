@@ -7,10 +7,10 @@ namespace TehGM.EinherjiBot.Security.Authorization.Services
 {
     public class DiscordAuthorizationMiddleware : IMiddleware
     {
-        private readonly IDiscordAuthContext _auth;
+        private readonly IAuthContext _auth;
         private readonly IDiscordAuthorizationService _service;
 
-        public DiscordAuthorizationMiddleware(IDiscordAuthContext auth, IDiscordAuthorizationService service)
+        public DiscordAuthorizationMiddleware(IAuthContext auth, IDiscordAuthorizationService service)
         {
             this._auth = auth;
             this._service = service;

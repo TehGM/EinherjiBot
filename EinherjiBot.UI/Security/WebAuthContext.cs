@@ -15,6 +15,8 @@ namespace TehGM.EinherjiBot.UI.Security
         public string Discriminator { get; }
         public string AvatarHash { get; }
         public IEnumerable<string> BotRoles { get; }
+        // web auth context will never have banned flag, as they'll simply not get authed by backend
+        bool IAuthContext.IsBanned => false;
 
         public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, IEnumerable<string> roles)
         {

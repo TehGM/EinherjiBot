@@ -21,7 +21,7 @@ namespace TehGM.EinherjiBot.Security.Authorization
 
         public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
         {
-            IDiscordAuthContext auth = services.GetRequiredService<IDiscordAuthContext>();
+            IAuthContext auth = services.GetRequiredService<IAuthContext>();
             if (auth.IsBanned)
                 return PreconditionResult.FromError($"You're banned in {EinherjiInfo.Name} system.");
 
@@ -48,7 +48,7 @@ namespace TehGM.EinherjiBot.Security.Authorization
             if (value is not TResource resource)
                 throw new InvalidOperationException($"Value {parameterInfo.Name} is not a {typeof(TResource).Name}.");
 
-            IDiscordAuthContext auth = services.GetRequiredService<IDiscordAuthContext>();
+            IAuthContext auth = services.GetRequiredService<IAuthContext>();
             if (auth.IsBanned)
                 return PreconditionResult.FromError($"You're banned in {EinherjiInfo.Name} system.");
 

@@ -2,9 +2,9 @@
 {
     public class Authorize : IDiscordAuthorizationPolicy
     {
-        protected IDiscordAuthContext Auth { get; }
+        protected IAuthContext Auth { get; }
 
-        public Authorize(IDiscordAuthContext auth)
+        public Authorize(IAuthContext auth)
         {
             this.Auth = auth;
         }
