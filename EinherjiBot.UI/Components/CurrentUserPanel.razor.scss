@@ -26,6 +26,10 @@ $height-info-expanded: 70px;
     }
 
     .user-info {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
         img {
             transition: height 0.1s;
             border-radius: 45%;
@@ -36,6 +40,9 @@ $height-info-expanded: 70px;
 
         .username-bar {
             display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
 
             .username {
                 font-weight: bold;
