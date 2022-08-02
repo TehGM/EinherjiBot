@@ -18,6 +18,8 @@ using Blazored.LocalStorage;
 using Blazored.LocalStorage.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.Security.API;
+using Microsoft.AspNetCore.Components.WebAssembly.Services;
+using MudBlazor.Services;
 
 namespace TehGM.EinherjiBot.UI
 {
@@ -45,7 +47,7 @@ namespace TehGM.EinherjiBot.UI
             await builder.Configuration.AddJsonFileAsync(client, $"appsettings.{builder.HostEnvironment.Environment}.json", optional: true).ConfigureAwait(false);
 
             ConfigureOptions(builder.Services, builder.Configuration);
-            ConfigureServices(builder.Services);
+            ConfigureServices(builder.Services, builder.HostEnvironment.Environment);
             ConfigureLogging(builder);
 
             await builder.Build().RunAsync();
@@ -62,22 +64,25 @@ namespace TehGM.EinherjiBot.UI
             services.Configure<DiscordAuthOptions>(configuration.GetSection("Discord"));
         }
 
-        public static void ConfigureSharedServices(IServiceCollection services)
+        public static void ConfigureSharedServices(IServiceCollection services, string environment)
         {
+            services.AddMudServices();
             services.AddAuthorizationCore();
             services.AddAuthShared();
+
+            services.AddScoped<LazyAssemblyLoader>();
 
             services.AddBlazoredLocalStorage();
             services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
 
             // this will be overriden in ConfigureServices on client-side only
-            services.TryAddSingleton<IRenderLocation>(s => new Services.RenderLocationProvider(RenderLocation.Server));
+            services.TryAddSingleton<IRenderLocation>(s => new Services.RenderLocationProvider(RenderLocation.Server, environment));
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services, string environment)
         {
-            ConfigureSharedServices(services);
-            services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client)));
+            ConfigureSharedServices(services, environment);
+            services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client, environment)));
 
             services.AddAuthFrontend();
             services.AddEntityCaching();

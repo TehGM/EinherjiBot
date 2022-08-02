@@ -1,10 +1,49 @@
-﻿@inherits LayoutComponentBase
+﻿@using MudBlazor.ThemeManager
+@inherits LayoutComponentBase
 
-<div class="page">
-    <NavMenu />
-    <main>
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+<MudThemeProvider Theme="this._theme" />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<div>
+    <MudLayout Class="page">
+        @if (this.RenderLocation.IsDevelopment)
+        {
+            <MudBlazor.ThemeManager.MudThemeManagerButton OnClick="@((e) => this.OpenThemeManager(true))" />
+            <MudBlazor.ThemeManager.MudThemeManager Open="this._themeManagerOpen" OpenChanged="this.OpenThemeManager" Theme="this._themeManager" ThemeChanged="this.UpdateTheme" />
+        }
+    
+        <NavMenu />
+    
+        <main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </MudLayout>
 </div>
+
+@code{
+    private MudTheme _theme = new MudTheme();
+    public bool _themeManagerOpen = false;    
+
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    public bool _isOpen = false;
+
+    private void OpenThemeManager(bool value)
+    {
+        this._themeManagerOpen = value;
+    }
+
+    private void UpdateTheme(ThemeManagerTheme value)
+    {
+        this._themeManager = value;
+        this._theme = value.Theme;
+        this.StateHasChanged();
+    }
+    
+    protected override void OnInitialized()
+    {
+        this.StateHasChanged();
+    }
+}

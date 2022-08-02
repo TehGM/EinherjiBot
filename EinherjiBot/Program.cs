@@ -41,7 +41,7 @@ namespace TehGM.EinherjiBot
             ConfigureHost(builder.Host);
 
             ConfigureOptions(builder.Services, builder.Configuration);
-            ConfigureServices(builder.Services);
+            ConfigureServices(builder.Services, builder.Environment.EnvironmentName);
 
             WebApplication app = builder.Build();
             ConfigureApplication(app);
@@ -71,7 +71,7 @@ namespace TehGM.EinherjiBot
             UI.Program.ConfigurePrerenderingOptions(services, configuration);
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services, string environment)
         {
             services.AddRouting(options => options.ConstraintMap.Add("ulong", typeof(API.Constraints.UlongRouteConstraint)));
             services.AddControllersWithViews().AddNewtonsoftJson();
@@ -92,7 +92,7 @@ namespace TehGM.EinherjiBot
             services.AddMessageTriggers();
             services.AddTransient<API.IUserInfoService, API.Services.ApiUserInfoService>();
 
-            UI.Program.ConfigureSharedServices(services);
+            UI.Program.ConfigureSharedServices(services, environment);
         }
 
         private static void ConfigureApplication(WebApplication app)

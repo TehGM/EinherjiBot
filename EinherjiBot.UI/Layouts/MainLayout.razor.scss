@@ -1,4 +1,4 @@
-.page {
+::deep .page {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -9,7 +9,7 @@ main {
 }
 
 @media (min-width: 641px) {
-    .page {
+    ::deep .page {
         flex-direction: row;
     }
 
