@@ -2,7 +2,7 @@
 {
     public class AuthorizeAdmin : Authorize, IDiscordAuthorizationPolicy
     {
-        public AuthorizeAdmin(IAuthContext auth) : base(auth) { }
+        public AuthorizeAdmin(IAuthProvider authProvider) : base(authProvider) { }
 
         public override async Task<DiscordAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
         {

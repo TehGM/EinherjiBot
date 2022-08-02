@@ -2,11 +2,12 @@
 {
     public class Authorize : IDiscordAuthorizationPolicy
     {
-        protected IAuthContext Auth { get; }
+        protected IAuthProvider AuthProvider { get; }
+        protected IAuthContext Auth => this.AuthProvider.User;
 
-        public Authorize(IAuthContext auth)
+        public Authorize(IAuthProvider authProvider)
         {
-            this.Auth = auth;
+            this.AuthProvider = authProvider;
         }
 
         public virtual Task<DiscordAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)

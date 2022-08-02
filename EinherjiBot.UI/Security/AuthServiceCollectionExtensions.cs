@@ -21,8 +21,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddTransient<IDiscordAuthorizationService, DiscordAuthorizationService>();
             services.TryAddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
-            services.TryAddScoped<IAuthProvider>(services => services.GetRequiredService<IWebAuthProvider>());
-            services.TryAddScoped<AuthenticationStateProvider>(services => (AuthenticationStateProvider)services.GetRequiredService<IWebAuthProvider>());
+            services.TryAddScoped<IAuthProvider>(s => s.GetRequiredService<IWebAuthProvider>());
+            services.TryAddScoped<AuthenticationStateProvider>(s => (AuthenticationStateProvider)s.GetRequiredService<IWebAuthProvider>());
             services.TryAddTransient<IUserInfoService, WebUserInfoService>();
 
             services.TryAddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
