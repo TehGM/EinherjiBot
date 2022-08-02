@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
 using TehGM.EinherjiBot.Database;
 
-namespace TehGM.EinherjiBot.RandomStatus.Services
+namespace TehGM.EinherjiBot.BotStatus.Services
 {
     public class MongoStatusStore : IStatusStore
     {

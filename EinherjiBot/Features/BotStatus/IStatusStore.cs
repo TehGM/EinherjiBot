@@ -1,4 +1,4 @@
-﻿namespace TehGM.EinherjiBot.RandomStatus
+﻿namespace TehGM.EinherjiBot.BotStatus
 {
     public interface IStatusStore
     {

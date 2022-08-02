@@ -62,7 +62,7 @@ namespace TehGM.EinherjiBot
         {
             services.Configure<Database.MongoOptions>(configuration.GetSection("Database"));
             services.Configure<DiscordClient.DiscordOptions>(configuration.GetSection("Discord"));
-            services.Configure<RandomStatus.RandomStatusOptions>(configuration.GetSection("RandomStatus"));
+            services.Configure<BotStatus.BotStatusOptions>(configuration.GetSection("RandomStatus"));
             services.Configure<SharedAccounts.SharedAccountOptions>(configuration.GetSection("SharedAccounts"));
             services.Configure<Security.API.JwtOptions>(configuration.GetSection("JWT"));
             services.Configure<Security.API.RefreshTokenOptions>(configuration.GetSection("RefreshToken"));
@@ -86,7 +86,7 @@ namespace TehGM.EinherjiBot
 
             services.AddUserIntel();
             services.AddAdministration();
-            services.AddRandomStatus();
+            services.AddBotStatus();
             services.AddGameServers();
             services.AddSharedAccounts();
             services.AddMessageTriggers();

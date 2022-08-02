@@ -16,7 +16,7 @@ using TehGM.EinherjiBot.GameServers.Services;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Patchbot;
 using TehGM.EinherjiBot.Patchbot.Services;
-using TehGM.EinherjiBot.RandomStatus;
+using TehGM.EinherjiBot.BotStatus;
 
 namespace TehGM.EinherjiBot
 {
@@ -51,7 +51,7 @@ namespace TehGM.EinherjiBot
                     services.Configure<CommandsOptions>(context.Configuration.GetSection("Discord").GetSection("Commands"));
                     services.Configure<PatchbotOptions>(context.Configuration.GetSection("Patchbot"));
                     services.Configure<CommunityGoalsOptions>(context.Configuration.GetSection("EliteCommunityGoals"));
-                    services.Configure<RandomStatusOptions>(context.Configuration.GetSection("RandomStatus"));
+                    services.Configure<BotStatusOptions>(context.Configuration.GetSection("RandomStatus"));
 
                     // add framework services
 
@@ -66,7 +66,7 @@ namespace TehGM.EinherjiBot
                     services.AddPatchbot();
                     services.AddEliteCommunityGoals();
                     services.AddGameServers();
-                    services.AddRandomStatus();
+                    services.AddBotStatus();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);

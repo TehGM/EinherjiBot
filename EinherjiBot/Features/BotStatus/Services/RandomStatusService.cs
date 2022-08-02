@@ -4,7 +4,7 @@ using TehGM.EinherjiBot.DiscordClient;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.Utilities.Randomization;
 
-namespace TehGM.EinherjiBot.RandomStatus.Services
+namespace TehGM.EinherjiBot.BotStatus.Services
 {
     /// <summary>Background service that periodically scans blog channels for last activity and activates or deactivates them.</summary>
     internal class RandomStatusService : AutostartService, IStatusService, IDisposable
@@ -15,12 +15,12 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
         private readonly IPlaceholdersEngine _placeholders;
         private readonly IStatusProvider _provider;
         private readonly ILogger _log;
-        private readonly IOptionsMonitor<RandomStatusOptions> _options;
+        private readonly IOptionsMonitor<BotStatusOptions> _options;
 
         private DateTime _lastChangeUtc;
 
         public RandomStatusService(DiscordSocketClient client, IDiscordConnection connection, IRandomizer randomizer, IPlaceholdersEngine placeholders, IStatusProvider provider,
-            ILogger<RandomStatusService> log, IOptionsMonitor<RandomStatusOptions> options)
+            ILogger<RandomStatusService> log, IOptionsMonitor<BotStatusOptions> options)
         {
             this._client = client;
             this._connection = connection;
@@ -39,7 +39,7 @@ namespace TehGM.EinherjiBot.RandomStatus.Services
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                RandomStatusOptions options = this._options.CurrentValue;
+                BotStatusOptions options = this._options.CurrentValue;
 
                 await this._connection.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 

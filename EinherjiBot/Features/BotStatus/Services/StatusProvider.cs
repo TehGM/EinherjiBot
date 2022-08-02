@@ -1,6 +1,6 @@
 ﻿using TehGM.EinherjiBot.Caching;
 
-namespace TehGM.EinherjiBot.RandomStatus.Services
+namespace TehGM.EinherjiBot.BotStatus.Services
 {
     public class StatusProvider : IStatusProvider, IDisposable
     {

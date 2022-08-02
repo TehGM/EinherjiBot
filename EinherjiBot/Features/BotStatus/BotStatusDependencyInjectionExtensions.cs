@@ -1,12 +1,12 @@
-﻿using TehGM.EinherjiBot.RandomStatus;
-using TehGM.EinherjiBot.RandomStatus.Services;
+﻿using TehGM.EinherjiBot.BotStatus;
+using TehGM.EinherjiBot.BotStatus.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class RandomStatusDependencyInjectionExtensions
+    public static class BotStatusDependencyInjectionExtensions
     {
-        public static IServiceCollection AddRandomStatus(this IServiceCollection services, Action<RandomStatusOptions> configureOptions = null)
+        public static IServiceCollection AddBotStatus(this IServiceCollection services, Action<BotStatusOptions> configureOptions = null)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));

@@ -2,7 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics;
 
-namespace TehGM.EinherjiBot.RandomStatus
+namespace TehGM.EinherjiBot.BotStatus
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
     public class Status : ICacheableEntity<Guid>
