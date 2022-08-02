@@ -1,4 +1,6 @@
-﻿namespace TehGM.EinherjiBot.Security.Authorization.Policies
+﻿using TehGM.EinherjiBot.Security.Authorization;
+
+namespace TehGM.EinherjiBot.Security.Policies
 {
     public class Authorize : IDiscordAuthorizationPolicy
     {

@@ -1,4 +1,6 @@
-﻿namespace TehGM.EinherjiBot.Security.Authorization.Policies
+﻿using TehGM.EinherjiBot.Security.Authorization;
+
+namespace TehGM.EinherjiBot.Security.Policies
 {
     public class AuthorizeAdmin : Authorize, IDiscordAuthorizationPolicy
     {
@@ -10,7 +12,7 @@
             if (!result.Succeeded)
                 return result;
 
-            if (!base.Auth.IsAdmin())
+            if (!Auth.IsAdmin())
                 return DiscordAuthorizationResult.Fail($"You're not a {EinherjiInfo.Name} admin.");
 
             return DiscordAuthorizationResult.Success;

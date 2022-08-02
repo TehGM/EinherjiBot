@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TehGM.EinherjiBot.Security.Authorization.Policies;
+using TehGM.EinherjiBot.Security.Policies;
 
 namespace TehGM.EinherjiBot.BotStatus.API.Controllers
 {
