@@ -22,7 +22,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
 
         private IEnumerable<Type> GetPolicies()
         {
-            if (this.Policy == null)
+            if (this.PolicyType == null)
                 return this.PolicyTypes;
             return new[] { this.PolicyType }.Union(this.PolicyTypes);
         }
