@@ -47,21 +47,23 @@
                                 <span class="text">Game Servers</span>
                             </NavLink>
                         </div>
-                        @if (this.AuthProvider.User.IsAdmin())
-                        {
-                            <div class="nav-item">
-                                <NavLink class="nav-link" href="/bot/status" Match="NavLinkMatch.Prefix">
-                                    <span class="bi bi-chat-right-heart-fill" aria-hidden="true"></span>
-                                    <span class="text">Bot Status</span>
-                                </NavLink>
-                            </div>
-                            <div class="nav-item">
-                                <NavLink class="nav-link" href="/bot/audit" Match="NavLinkMatch.Prefix">
-                                    <span class="oi oi-excerpt" aria-hidden="true"></span>
-                                    <span class="text">Audits</span>
-                                </NavLink>
-                            </div>
-                        }
+
+                        <PolicyAuthorizeView PolicyType="typeof(AuthorizeAdmin)">
+                            <Authorized Context="AuthorizeAdmin">
+                                <div class="nav-item">
+                                    <NavLink class="nav-link" href="/bot/status" Match="NavLinkMatch.Prefix">
+                                        <span class="bi bi-chat-right-heart-fill" aria-hidden="true"></span>
+                                        <span class="text">Bot Status</span>
+                                    </NavLink>
+                                </div>
+                                <div class="nav-item">
+                                    <NavLink class="nav-link" href="/bot/audit" Match="NavLinkMatch.Prefix">
+                                        <span class="oi oi-excerpt" aria-hidden="true"></span>
+                                        <span class="text">Audits</span>
+                                    </NavLink>
+                                </div>
+                            </Authorized>
+                        </PolicyAuthorizeView>
                     </Authorized>
                 </AuthorizeView>
             </NavLinkCategory>
@@ -102,16 +104,18 @@
                     
                     @*for administration purposes, admin can view all guilds*@
                     @*TODO: even more valuably, should see bot's guilds*@
-                    @if (this.AuthProvider.User.IsAdmin())
-                    {
+                    <PolicyAuthorizeView PolicyType="typeof(AuthorizeAdmin)">
+                        <Authorized Context="AuthorizeAdmin">
+                        @{
                         IEnumerable<UserGuildInfoResponse> additionalGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
                             .Where(g => !g.CanManage)
                             .OrderBy(g => g.Name);
-                        if (additionalGuilds?.Any() == true)
+                        }
+                        @if (additionalGuilds?.Any() == true)
                         {
                             <hr/>
                         }
-                        foreach (UserGuildInfoResponse guild in additionalGuilds)
+                        @foreach (UserGuildInfoResponse guild in additionalGuilds)
                         {
                             <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
                                 OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
@@ -123,7 +127,8 @@
                                 </div>
                             </NavLinkCategory>
                         }
-                    }
+                        </Authorized>
+                    </PolicyAuthorizeView>
                 </Authorized>
             </AuthorizeView>
         </nav>

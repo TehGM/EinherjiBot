@@ -87,6 +87,7 @@ namespace TehGM.EinherjiBot.UI
             ConfigurePrerenderingServices(services);
             services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client)));
 
+            services.AddTransient<EinherjiBot.Security.Authorization.IDiscordAuthorizationService, EinherjiBot.Security.Authorization.Services.DiscordAuthorizationService>();
             services.AddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
             services.AddScoped<IAuthProvider>(services => services.GetRequiredService<IWebAuthProvider>());
             services.AddScoped<AuthenticationStateProvider>(services => (AuthenticationStateProvider)services.GetRequiredService<IWebAuthProvider>());

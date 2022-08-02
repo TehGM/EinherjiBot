@@ -2,7 +2,7 @@
 {
     public class AuthorizeAdmin : Authorize, IDiscordAuthorizationPolicy
     {
-        public AuthorizeAdmin(IDiscordAuthContext auth) : base(auth) { }
+        public AuthorizeAdmin(IAuthContext auth) : base(auth) { }
 
         public override async Task<DiscordAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
         {
@@ -15,10 +15,5 @@
 
             return DiscordAuthorizationResult.Success;
         }
-    }
-
-    public class AuthorizeAdminAttribute : DiscordAuthorizationAttribute
-    {
-        public AuthorizeAdminAttribute() : base(typeof(AuthorizeAdmin)) { }
     }
 }

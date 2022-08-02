@@ -18,9 +18,4 @@
             return Task.FromResult(DiscordAuthorizationResult.Success);
         }
     }
-
-    public class AuthorizeAttribute : DiscordAuthorizationAttribute
-    {
-        public AuthorizeAttribute() : base(typeof(Authorize)) { }
-    }
 }
