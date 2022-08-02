@@ -10,7 +10,10 @@ namespace TehGM.EinherjiBot
             => context != null && context.ID != default;
 
         public static bool IsAdmin(this IAuthContext context)
-            => context.BotRoles.Contains(UserRole.Admin);
+            => HasRole(context, UserRole.Admin);
+
+        public static bool HasRole(this IAuthContext context, string role)
+            => context.BotRoles.Contains(role);
 
         public static ClaimsPrincipal ToClaimsPrincipal(this IAuthContext context, string scheme)
         {
