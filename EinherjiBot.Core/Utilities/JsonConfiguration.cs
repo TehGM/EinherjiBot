@@ -7,14 +7,20 @@ namespace TehGM.EinherjiBot.Utilities
     {
         public static void InitializeDefaultSettings()
         {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                Converters = new List<JsonConverter>()
-                {
-                    new UnixTimestampConverter(),
-                    new StringEnumConverter()
-                }
-            };
+            JsonConvert.DefaultSettings = GetDefaultSettings;
+        }
+
+        public static JsonSerializerSettings GetDefaultSettings()
+        {
+            JsonSerializerSettings result = new JsonSerializerSettings();
+            ApplyDefaultSettings(result);
+            return result;
+        }
+
+        public static void ApplyDefaultSettings(JsonSerializerSettings settings)
+        {
+            settings.Converters.Add(new UnixTimestampConverter());
+            settings.Converters.Add(new StringEnumConverter());
         }
     }
 }

@@ -66,7 +66,7 @@ namespace TehGM.EinherjiBot
                     services.AddPatchbot();
                     services.AddEliteCommunityGoals();
                     services.AddGameServers();
-                    services.AddBotStatus();
+                    services.AddBotStatusBackend();
                 })
                 .Build();
             await host.RunAsync().ConfigureAwait(false);

@@ -26,7 +26,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             return this._collection.Find(db => db.ID == id, null).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task UpdateAsync(Status status, CancellationToken cancellationToken = default)
+        public Task UpsertAsync(Status status, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Saving status {StatusID} in database", status.ID);
             ReplaceOptions options = new ReplaceOptions() { IsUpsert = true };

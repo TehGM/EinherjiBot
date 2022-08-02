@@ -74,8 +74,8 @@ namespace TehGM.EinherjiBot
         private static void ConfigureServices(IServiceCollection services, string environment)
         {
             services.AddRouting(options => options.ConstraintMap.Add("ulong", typeof(API.Constraints.UlongRouteConstraint)));
-            services.AddControllersWithViews().AddNewtonsoftJson();
-            services.AddRazorPages().AddNewtonsoftJson();
+            services.AddControllersWithViews().AddNewtonsoftJson(options => JsonConfiguration.ApplyDefaultSettings(options.SerializerSettings));
+            services.AddRazorPages().AddNewtonsoftJson(options => JsonConfiguration.ApplyDefaultSettings(options.SerializerSettings));
 
             services.AddDiscordClient();
             services.AddEntityCaching();
@@ -86,7 +86,7 @@ namespace TehGM.EinherjiBot
 
             services.AddUserIntel();
             services.AddAdministration();
-            services.AddBotStatus();
+            services.AddBotStatusBackend();
             services.AddGameServers();
             services.AddSharedAccounts();
             services.AddMessageTriggers();

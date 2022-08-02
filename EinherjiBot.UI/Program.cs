@@ -86,6 +86,8 @@ namespace TehGM.EinherjiBot.UI
 
             services.AddAuthFrontend();
             services.AddEntityCaching();
+
+            services.AddBotStatusFrontend();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)

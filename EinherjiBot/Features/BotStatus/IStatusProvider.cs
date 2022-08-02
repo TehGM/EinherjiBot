@@ -7,6 +7,6 @@
 
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
-        Task UpdateAsync(Status status, CancellationToken cancellationToken = default);
+        Task AddOrUpdateAsync(Status status, CancellationToken cancellationToken = default);
     }
 }

@@ -69,9 +69,9 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             }
         }
 
-        public async Task UpdateAsync(Status status, CancellationToken cancellationToken = default)
+        public async Task AddOrUpdateAsync(Status status, CancellationToken cancellationToken = default)
         {
-            await this._store.UpdateAsync(status, cancellationToken).ConfigureAwait(false);
+            await this._store.UpsertAsync(status, cancellationToken).ConfigureAwait(false);
             this._cache.AddOrReplace(status);
         }
 

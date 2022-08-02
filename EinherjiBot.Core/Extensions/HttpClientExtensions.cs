@@ -55,6 +55,25 @@ namespace System.Net.Http
         public static Task<TResponse> PostJsonAsync<TResponse>(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
             => PostJsonAsync<TResponse>(client, url, data, "application/json", cancellationToken);
 
+        // PUT
+        public static async Task<HttpResponseMessage> PutJsonAsync(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
+            return await SendJsonAsync<HttpResponseMessage>(client, request, data, contentType, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static Task<HttpResponseMessage> PutJsonAsync(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
+            => PutJsonAsync(client, url, data, "application/json", cancellationToken);
+
+        public static async Task<TResponse> PutJsonAsync<TResponse>(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
+            return await SendJsonAsync<TResponse>(client, request, data, contentType, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static Task<TResponse> PutJsonAsync<TResponse>(this HttpClient client, string url, object data, CancellationToken cancellationToken = default)
+            => PutJsonAsync<TResponse>(client, url, data, "application/json", cancellationToken);
+
         // DELETE
         public static async Task<HttpResponseMessage> DeleteJsonAsync(this HttpClient client, string url, object data, string contentType, CancellationToken cancellationToken = default)
         {
