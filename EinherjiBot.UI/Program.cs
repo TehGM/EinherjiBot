@@ -5,7 +5,6 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-global using TehGM.Utilities;
 
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -18,14 +17,7 @@ using TehGM.EinherjiBot.Utilities;
 using Blazored.LocalStorage;
 using Blazored.LocalStorage.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.Components.Authorization;
-using TehGM.EinherjiBot.UI.API.Services;
-using TehGM.EinherjiBot.UI.API;
 using TehGM.EinherjiBot.Security.API;
-using TehGM.EinherjiBot.Security;
-using TehGM.EinherjiBot.UI.Security;
-using TehGM.EinherjiBot.UI.Security.Services;
-using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.UI
 {
@@ -70,13 +62,13 @@ namespace TehGM.EinherjiBot.UI
             services.Configure<DiscordAuthOptions>(configuration.GetSection("Discord"));
         }
 
-        public static void ConfigurePrerenderingServices(IServiceCollection services)
+        public static void ConfigureSharedServices(IServiceCollection services)
         {
             services.AddAuthorizationCore();
+            services.AddAuthShared();
 
             services.AddBlazoredLocalStorage();
             services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
-            services.AddTransient<IDiscordLoginRedirect, DiscordLoginRedirect>();
 
             // this will be overriden in ConfigureServices on client-side only
             services.TryAddSingleton<IRenderLocation>(s => new Services.RenderLocationProvider(RenderLocation.Server));
@@ -84,23 +76,10 @@ namespace TehGM.EinherjiBot.UI
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            ConfigurePrerenderingServices(services);
+            ConfigureSharedServices(services);
             services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client)));
 
-            services.AddTransient<EinherjiBot.Security.Authorization.IDiscordAuthorizationService, EinherjiBot.Security.Authorization.Services.DiscordAuthorizationService>();
-            services.AddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
-            services.AddScoped<IAuthProvider>(services => services.GetRequiredService<IWebAuthProvider>());
-            services.AddScoped<AuthenticationStateProvider>(services => (AuthenticationStateProvider)services.GetRequiredService<IWebAuthProvider>());
-            services.AddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
-
-            services.AddTransient<ApiJwtHttpHandler>();
-            services.AddTransient<ApiRefreshTokenHttpHandler>();
-            services.AddHttpClient<IApiClient, ApiHttpClient>()
-                .AddHttpMessageHandler<ApiRefreshTokenHttpHandler>()
-                .AddHttpMessageHandler<ApiJwtHttpHandler>();
-            services.AddHttpClient<IAuthService, WebAuthService>();
-
-            services.AddTransient<IUserInfoService, WebUserInfoService>();
+            services.AddAuthFrontend();
             services.AddEntityCaching();
         }
 

@@ -92,7 +92,7 @@ namespace TehGM.EinherjiBot
             services.AddMessageTriggers();
             services.AddTransient<API.IUserInfoService, API.Services.ApiUserInfoService>();
 
-            UI.Program.ConfigurePrerenderingServices(services);
+            UI.Program.ConfigureSharedServices(services);
         }
 
         private static void ConfigureApplication(WebApplication app)
