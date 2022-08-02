@@ -24,7 +24,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
         {
             if (this.PolicyType == null)
                 return this.PolicyTypes;
-            return new[] { this.PolicyType }.Union(this.PolicyTypes);
+            return new[] { this.PolicyType }.Union(this.PolicyTypes ?? Enumerable.Empty<Type>());
         }
 
         protected override async Task OnParametersSetAsync()
