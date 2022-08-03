@@ -6,19 +6,16 @@
             <Found Context="routeData">
                 <PolicyAuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                     <NotAuthorized>
-                    @if (this.RenderLocation.IsClient)
-                    {
-                         <text>Not authorized!</text>
-                    }
-                    else
-                    {
-                        <text>Logging you in...</text>
-                    }
+                        <ClientOnly>
+                            Not authorized!
+                        </ClientOnly>
+                        <ServerOnly>
+                            Refreshing login..
+                        </ServerOnly>
                     </NotAuthorized>
                     <Authorizing>
                         Logging you in...
                     </Authorizing>
-                    @*<RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />*@
                 </PolicyAuthorizeRouteView>
             </Found>
             <NotFound>

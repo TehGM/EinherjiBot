@@ -8,11 +8,10 @@
 
 <div>
     <MudLayout Class="page">
-        @if (this.RenderLocation.IsDevelopment)
-        {
-            <MudBlazor.ThemeManager.MudThemeManagerButton OnClick="@((e) => this.OpenThemeManager(true))" />
-            <MudBlazor.ThemeManager.MudThemeManager Open="this._themeManagerOpen" OpenChanged="this.OpenThemeManager" Theme="this._themeManager" ThemeChanged="this.UpdateTheme" />
-        }
+        <DevelopmentOnly>
+            <MudThemeManagerButton OnClick="@((e) => this.OpenThemeManager(true))" />
+            <MudThemeManager Open="this._themeManagerOpen" OpenChanged="this.OpenThemeManager" Theme="this._themeManager" ThemeChanged="this.UpdateTheme" />
+        </DevelopmentOnly>
     
         <NavMenu />
     

@@ -32,8 +32,7 @@
             <div class="login-progress-text">Logging you in...</div>
         </Authorizing>
         <NotAuthorized>
-        @if (this.RenderLocation.IsClient)
-        {
+        <ClientOnly>
             <a class="btn btn-lg btn-primary oauth-button login" @onclick=this.RedirectToLoginAsync>
             <span class="discord-logo">
                 <svg width="25" height="25" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,12 +48,11 @@
             </span>
             <span class="text">Login</span>
         </a>
-        }
-        else
-        {
+        </ClientOnly>
+        <ServerOnly>
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
             <div class="login-progress-text">Refreshing login...</div>
-        }
+        </ServerOnly>
         </NotAuthorized>
     </AuthorizeView>
 </div>
