@@ -18,7 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
-
             services.TryAddTransient<IDiscordAuthorizationService, DiscordAuthorizationService>();
             services.TryAddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
             services.TryAddScoped<IAuthProvider>(s => s.GetRequiredService<IWebAuthProvider>());
@@ -26,12 +25,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IUserInfoService, WebUserInfoService>();
 
             services.TryAddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
-            services.TryAddTransient<ApiJwtHttpHandler>();
-            services.TryAddTransient<ApiRefreshTokenHttpHandler>();
 
-            services.AddHttpClient<IApiClient, ApiHttpClient>()
-                .AddHttpMessageHandler<ApiRefreshTokenHttpHandler>()
-                .AddHttpMessageHandler<ApiJwtHttpHandler>();
+            services.AddHttpClient<IApiClient, ApiHttpClient>();
             services.AddHttpClient<IAuthService, WebAuthService>();
 
             return services;

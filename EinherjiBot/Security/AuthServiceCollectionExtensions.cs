@@ -43,6 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IRefreshTokenStore, MongoRefreshTokenStore>();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             services.TryAddTransient<IJwtGenerator, JwtGenerator>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>());
             services.AddTransient<IConfigureOptions<JwtOptions>, ConfigureApiKeysOptions>();

@@ -4,6 +4,6 @@ namespace TehGM.EinherjiBot.UI.API
 {
     public interface IApiClient
     {
-        HttpClient Client { get; }
+        Task<TResponse> SendJsonAsync<TResponse>(HttpRequestMessage request, object data, CancellationToken cancellationToken = default);
     }
 }

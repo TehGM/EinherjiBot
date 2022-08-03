@@ -13,9 +13,9 @@ namespace TehGM.EinherjiBot.UI.API.Services
         }
 
         public Task<UserInfoResponse> GetBotInfoAsync(CancellationToken cancellationToken = default)
-            => this._client.Client.GetJsonAsync<UserInfoResponse>("user/info/bot", cancellationToken);
+            => this._client.GetJsonAsync<UserInfoResponse>("user/info/bot", cancellationToken);
 
         public Task<UserInfoResponse> GetUserInfoAsync(ulong userID, CancellationToken cancellationToken = default)
-            => this._client.Client.GetJsonAsync<UserInfoResponse>($"user/info/{userID}", cancellationToken);
+            => this._client.GetJsonAsync<UserInfoResponse>($"user/info/{userID}", cancellationToken);
     }
 }
