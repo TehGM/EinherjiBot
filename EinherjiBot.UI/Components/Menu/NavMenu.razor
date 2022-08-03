@@ -161,14 +161,14 @@
     {
         if (this._currentCategoryIdentifier == null)
         {
-            if (base.PrerenderingState.TryTakeFromJson(nameof(_currentCategoryIdentifier), out ulong? currentCategory))
+            if (base.TryGetItem(nameof(_currentCategoryIdentifier), out ulong? currentCategory))
                 this._currentCategoryIdentifier = currentCategory;
             else
                 this.UpdateLinkCategory();
         }
         if (this._botAvatarUrl == null)
         {
-            if (base.PrerenderingState.TryTakeFromJson(nameof(_botAvatarUrl), out string botAvatarUrl))
+            if (base.TryGetItem(nameof(_botAvatarUrl), out string botAvatarUrl))
                 this._botAvatarUrl = botAvatarUrl;
             else
             {
@@ -218,8 +218,8 @@
 
     protected override Task PersistAsync()
     {
-        base.PrerenderingState.PersistAsJson(nameof(_botAvatarUrl), this._botAvatarUrl);
-        base.PrerenderingState.PersistAsJson(nameof(_currentCategoryIdentifier), this._currentCategoryIdentifier);
+        base.PersistItem(nameof(_botAvatarUrl), this._botAvatarUrl);
+        base.PersistItem(nameof(_currentCategoryIdentifier), this._currentCategoryIdentifier);
         return Task.CompletedTask;
     }
 

@@ -16,6 +16,19 @@ namespace TehGM.EinherjiBot.UI
 
         protected abstract Task PersistAsync();
 
+        protected void PersistItem<T>(Type componentType, string itemName, T value)
+            => this.PrerenderingState.PersistAsJson(this.BuildKey(componentType, itemName), value);
+        protected void PersistItem<T>(string itemName, T value)
+            => this.PersistItem(this.GetType(), itemName, value);
+
+        protected bool TryGetItem<T>(Type componentType, string itemName, out T value)
+            => this.PrerenderingState.TryTakeFromJson(this.BuildKey(componentType, itemName), out value);
+        protected bool TryGetItem<T>(string itemName, out T value)
+            => this.TryGetItem(this.GetType(), itemName, out value);
+
+        private string BuildKey(Type type, string name)
+            => $"{type.FullName}+{name}";
+
         public virtual void Dispose()
         {
             try { this._prerenderingSubscription.Dispose(); } catch { }
