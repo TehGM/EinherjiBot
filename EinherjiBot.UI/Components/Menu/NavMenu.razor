@@ -130,6 +130,16 @@
                         </Authorized>
                     </PolicyAuthorizeView>
                 </Authorized>
+                <Authorizing>
+                    @this.RenderItemLoading()
+                    @this.RenderGuildsLoading()
+                </Authorizing>
+                <NotAuthorized>
+                    <ServerOnly>
+                        @this.RenderItemLoading()
+                        @this.RenderGuildsLoading()
+                    </ServerOnly>
+                </NotAuthorized>
             </AuthorizeView>
         </nav>
     </div>
@@ -211,6 +221,29 @@
         base.PrerenderingState.PersistAsJson(nameof(_botAvatarUrl), this._botAvatarUrl);
         base.PrerenderingState.PersistAsJson(nameof(_currentCategoryIdentifier), this._currentCategoryIdentifier);
         return Task.CompletedTask;
+    }
+
+    private RenderFragment RenderItemLoading()
+    {
+        return __builder =>
+        {
+            <div class="loading-placeholder">
+                <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Circle" Width="25px" Height="25px" />
+                <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Text" Height="22px" Class="" />
+            </div>
+        };
+    }
+
+    private RenderFragment RenderGuildsLoading()
+    {
+        return __builder =>
+        {
+            <hr/>
+            @for (int i = 0; i < 3; i++)
+            {
+                @this.RenderItemLoading()
+            }
+        };
     }
 
     private Task LogoutAsync()
