@@ -1,7 +1,7 @@
 ﻿@using TehGM.EinherjiBot.UI.Components.Menu
 @inherits LayoutComponentBase
 
-<MudThemeProvider Theme="this._theme" IsDarkMode="true" />
+<MudThemeProvider Theme="this._theme" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -19,26 +19,46 @@
 </div>
 
 @code{
-    private MudTheme _theme = new MudTheme()
-    {
-        PaletteDark = new Palette()
-        {
-            //Primary = "#d64402ff",
-            Primary = Colors.DeepOrange.Darken1,
-            PrimaryLighten = Colors.DeepOrange.Lighten1,
-            PrimaryDarken = Colors.DeepOrange.Darken4
-        },
-        Typography = new Typography()
-        {
-            H1 = new H1()
-            {
-                FontSize = "2.25rem"
-            }
-        }
-    };
-    
+    private MudTheme _theme;
+
     protected override void OnInitialized()
     {
+        this.InitDefaultTheme();
         this.StateHasChanged();
+    }
+
+    private void InitDefaultTheme()
+    {
+        this._theme = new MudTheme()
+        {
+            Palette = BuildDefaultPalette(),
+            PaletteDark = BuildDefaultPalette(),
+            Typography = new Typography()
+            {
+                H1 = new H1()
+                {
+                    FontSize = "2.35rem"
+                },
+                H2 = new H2()
+                {
+                    FontSize = "2.15rem"
+                },
+                H3 = new H3()
+                {
+                    FontSize = "1.85rem"
+                }
+            }
+        };
+
+        Palette BuildDefaultPalette()
+        {
+            Palette palette = new MudTheme().PaletteDark;
+            //palette.Primary = "#d64402ff";
+            palette.Primary = Colors.DeepOrange.Darken1;
+            palette.PrimaryLighten = Colors.DeepOrange.Lighten1;
+            palette.PrimaryDarken = Colors.DeepOrange.Darken4;
+            palette.Surface = "#1D1D1D";
+            return palette;
+        }
     }
 }
