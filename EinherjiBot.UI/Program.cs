@@ -93,6 +93,7 @@ namespace TehGM.EinherjiBot.UI
 
             services.AddAuthFrontend();
             services.AddEntityCaching();
+            services.AddPlaceholdersEngineFrontend();
 
             services.AddBotStatusFrontend();
         }

@@ -4,12 +4,14 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.PlaceholdersEngine.Services;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
+using TehGM.EinherjiBot.PlaceholdersEngine.API.Services;
+using TehGM.EinherjiBot.PlaceholdersEngine.API;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class PlaceholdersEngineDependencyInjectionExtensions
     {
-        public static IServiceCollection AddPlaceholdersEngine(this IServiceCollection services)
+        public static IServiceCollection AddPlaceholdersEngineBackend(this IServiceCollection services)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
@@ -29,6 +31,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 return provider;
             });
             services.TryAddTransient<IPlaceholdersEngine, PlaceholdersEngineService>();
+
+            services.TryAddTransient<IPlaceholdersService, ApiPlaceholdersService>();
 
             return services;
         }

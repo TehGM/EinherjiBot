@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configureOptions != null)
                 services.Configure(configureOptions);
 
-            services.AddPlaceholdersEngine();
+            services.AddPlaceholdersEngineBackend();
             services.TryAddSingleton<IStatusStore, MongoStatusStore>();
             services.TryAddSingleton<IStatusProvider, StatusProvider>();
             services.TryAddSingleton<IStatusService, RandomStatusService>();
