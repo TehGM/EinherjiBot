@@ -44,13 +44,13 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="8" sm="12" md="9" lg="10" xxl="11">
-                    <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" />
+                    <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
                 @if (this.IsStreamingActivity)
                 {
                     <MudItem xs="12">
                         <MudTextField @bind-Value="this._link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
-                            Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" />
+                            Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" DebounceInterval="350" />
                     </MudItem>
                 }
             </MudGrid>
