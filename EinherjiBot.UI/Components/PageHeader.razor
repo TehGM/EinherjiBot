@@ -1,0 +1,21 @@
+﻿<div class="page-header">
+    @if (this.Text != null)
+    {
+        <div>
+            <MudText Typo="Typo.h1">@this.Text</MudText>
+        </div>
+    }
+    @if (this.ChildContent != null)
+    {
+        <div>
+            @this.ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Text { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}

@@ -1,9 +1,35 @@
 ﻿@page "/"
+@inherits PrerenderingComponent
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<PageHeader Text="Einherji Discord Bot">
+    <MudAvatar Image="@this._botAvatarUrl" Style="height: 64px; width: 64px;" />
+</PageHeader>
 
 
 @code {
+    private string _botAvatarUrl;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (this._botAvatarUrl == null)
+        {
+            if (base.TryGetItem(nameof(_botAvatarUrl), out string botAvatarUrl))
+                this._botAvatarUrl = botAvatarUrl;
+            else
+            {
+                IDiscordUserInfo info = await this.UserInfoProvider.GetBotInfoAsync();
+                this._botAvatarUrl = info?.GetAvatarURL(64);
+            }
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    protected override Task PersistAsync()
+    {
+        base.PersistItem(nameof(_botAvatarUrl), this._botAvatarUrl);
+        return Task.CompletedTask;
+    }
 }

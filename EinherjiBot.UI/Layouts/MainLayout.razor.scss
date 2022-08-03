@@ -6,6 +6,12 @@
 
 main {
     flex: 1;
+    padding: 16px;
+}
+
+article {
+    max-width: 1440px;
+    margin: 0 auto;
 }
 
 @media (min-width: 641px) {
