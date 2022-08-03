@@ -110,6 +110,18 @@
 
     private async Task OnDeleteClickedAsync(MouseEventArgs e)
     {
+        if (this._id != null)
+        {
+            string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
+            string message = !string.IsNullOrWhiteSpace(this._text)
+                ? "Are you sure you want to permanently delete empty status?"
+                : $"Are you sure you want to permanently delete status \"{activity} {this._text}\"?";
+            bool? result = await this.Dialogs.ShowMessageBox("Deleting Status", message,
+                yesText: "Delete", cancelText: "Cancel");
+            if (result != true)
+                return;
+        }
+
         this._processing = true;
         if (this._id != null)
         {
