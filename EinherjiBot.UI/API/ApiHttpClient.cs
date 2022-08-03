@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
             this._authProvider = authProvider;
             this._refreshTokenProvider = refreshTokenProvider;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
-            this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.BotVersion}");
+            this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.WebVersion}");
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, object data, CancellationToken cancellationToken = default)

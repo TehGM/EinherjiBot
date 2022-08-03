@@ -12,7 +12,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
         {
             this._client = client;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
-            this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.BotVersion}");
+            this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.WebVersion}");
         }
 
         public Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
