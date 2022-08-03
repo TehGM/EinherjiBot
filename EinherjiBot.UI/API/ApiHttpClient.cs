@@ -9,12 +9,14 @@ namespace TehGM.EinherjiBot.UI.API.Services
     public class ApiHttpClient : IApiClient
     {
         private readonly HttpClient _client;
+        private readonly IAuthService _authService;
         private readonly IWebAuthProvider _authProvider;
         private readonly IRefreshTokenProvider _refreshTokenProvider;
 
-        public ApiHttpClient(HttpClient client, NavigationManager navigation, IWebAuthProvider authProvider, IRefreshTokenProvider refreshTokenProvider)
+        public ApiHttpClient(HttpClient client, NavigationManager navigation, IAuthService authService, IWebAuthProvider authProvider, IRefreshTokenProvider refreshTokenProvider)
         {
             this._client = client;
+            this._authService = authService;
             this._authProvider = authProvider;
             this._refreshTokenProvider = refreshTokenProvider;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
@@ -43,7 +45,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
             string token = await this._refreshTokenProvider.GetAsync(cancellationToken).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(token))
             {
-                LoginResponse response = await (this as IAuthService).RefreshAsync(token, cancellationToken).ConfigureAwait(false);
+                LoginResponse response = await this._authService.RefreshAsync(token, cancellationToken).ConfigureAwait(false);
                 await this._authProvider.LoginAsync(response, cancellationToken).ConfigureAwait(false);
             }
         }
