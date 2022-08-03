@@ -1,0 +1,146 @@
+﻿@using Discord
+@using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.Utilities
+@inject IBotStatusService Service
+
+<div class="spaced-card">
+    <MudCard Elevation="4">
+        <MudCardHeader>
+            <MudGrid>
+                <MudItem xs="4" Class="flex-shrink-1">
+                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing || !this.IsLinkValid" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
+                </MudItem>
+                <MudItem xs="8" Class="d-flex justify-end">
+                    @if (this._processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Color="MudBlazor.Color.Primary" Size="Size.Small" Indeterminate="true"/>
+                    }
+                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing"/>
+                    <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
+                        Disabled="this._processing || !this.HasPendingChanges() || !this.IsLinkValid" 
+                        OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
+                    <MudIconButton Icon="@this.DeleteIcon" Color="MudBlazor.Color.Error" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
+                </MudItem>
+            </MudGrid>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="4" sm="12" md="3" lg="2" xxl="1">
+                    <MudSelect T="ActivityType" @bind-Value="this._activityType" Label="Activity" Disabled="this._processing">
+                        <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
+                        <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
+                        <MudSelectItem Value="ActivityType.Listening"><MudIcon Icon="@Icons.Filled.Headphones"/> Listening to</MudSelectItem>
+                        <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="8" sm="12" md="9" lg="10" xxl="11">
+                    <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" />
+                </MudItem>
+                @if (this.IsStreamingActivity)
+                {
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="this._link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
+                            Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" />
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+@code {
+    [Parameter]
+    public BotStatusResponse ExistingStatus { get; set; }
+
+    [Parameter]
+    public EventCallback<StatusEventArgs> Deleted { get; set; }
+    [Parameter]
+    public EventCallback<StatusEventArgs> Saved { get; set; }
+
+    private Guid? _id;
+    private ActivityType _activityType;
+    private string _text;
+    private string _link;
+    private bool _enabled;
+
+    private bool _processing;
+    private BotStatusResponse _savedStatus;
+
+    private bool IsNew => this._id == null;
+    private bool IsStreamingActivity => this._activityType == ActivityType.Streaming;
+    private bool IsLinkValid => !this.IsStreamingActivity || ActivityLinkValidator.IsLinkValid(this._link);
+
+    private string SaveIcon => this.IsNew ? Icons.Filled.AddCircle : Icons.Material.Filled.Save;
+    private string SaveText => this.IsNew ? "Add" : "Save";
+    private string DeleteIcon => this.IsNew ? Icons.Filled.Clear : Icons.Filled.DeleteForever;
+
+    protected override void OnParametersSet()
+    {
+        if (this._savedStatus == null)
+            this.LoadStatus(this.ExistingStatus);
+        base.OnParametersSet();
+    }
+
+    private bool HasPendingChanges()
+        => this._id == null
+        || this.ExistingStatus.ActivityType != this._activityType
+        || this.ExistingStatus.Text != this._text
+        || this.ExistingStatus.Link != this._link
+        || this.ExistingStatus.IsEnabled != this._enabled;
+
+    private void LoadStatus(BotStatusResponse status)
+    {
+        this._savedStatus = status;
+        this.ExistingStatus = status;
+        this._id = this.ExistingStatus?.ID;
+        this._activityType = this.ExistingStatus?.ActivityType ?? ActivityType.Playing;
+        this._text = this.ExistingStatus?.Text;
+        this._link = this.ExistingStatus?.Link;
+        this._enabled = this.ExistingStatus?.IsEnabled ?? false;
+    }
+
+    public void ClearInputs()
+    {
+        this.LoadStatus(null);
+        base.StateHasChanged();
+    }
+
+    public BotStatusRequest BuildStatus()
+        => new BotStatusRequest(this._text, this.IsStreamingActivity ? this._link : null, this._activityType, this._enabled);
+
+    private async Task OnDeleteClickedAsync(MouseEventArgs e)
+    {
+        this._processing = true;
+        if (this._id != null)
+        {
+            await this.Service.DeleteAsync(this._id.Value);
+            this.Notifications.Add("Status deleted.", Severity.Success);
+        }
+        await this.Deleted.InvokeAsync(new StatusEventArgs(this._id, this.ExistingStatus));
+        this._processing = false;
+    }
+
+    private async Task OnSaveClickedAsync(MouseEventArgs e)
+    {
+        this._processing = true;
+        BotStatusResponse response;
+        if (this._id != null)
+            response = await this.Service.UpdateAsync(this._id.Value, this.BuildStatus());
+        else
+            response = await this.Service.CreateAsync(this.BuildStatus());
+        this.LoadStatus(response);
+        this.Notifications.Add("Status saved.", Severity.Success);
+        await this.Saved.InvokeAsync(new StatusEventArgs(this._id, this.ExistingStatus));
+        this._processing = false;
+    }
+
+    private async Task OnSetClickedAsync(MouseEventArgs e)
+    {
+        this._processing = true;
+        await this.Service.SetCurrentAsync(this.BuildStatus());
+        this.Notifications.Add("Bot's current status changed", Severity.Success);
+        this._processing = false;
+    }
+
+    public record StatusEventArgs(Guid? ID, BotStatusResponse Status);
+}

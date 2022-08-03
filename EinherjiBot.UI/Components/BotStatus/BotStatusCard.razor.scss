@@ -1,0 +1,24 @@
+::deep .mud-card-header {
+    padding-bottom: 1px;
+
+    .mud-progress-circular {
+        align-self: center;
+        margin-right: 15px;
+    }
+
+    .mud-button {
+        align-self: center;
+    }
+}
+
+::deep .mud-card-content {
+    padding-top: 0px;
+
+    .mud-select-input {
+        text-align: center;
+
+        .mud-icon-root {
+            margin-right: 5px;
+        }
+    }
+}

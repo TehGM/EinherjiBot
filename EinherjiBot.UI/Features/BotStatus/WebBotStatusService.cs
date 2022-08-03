@@ -17,7 +17,7 @@ namespace TehGM.EinherjiBot.UI.BotStatus.API
             => this._client.PostJsonAsync<BotStatusResponse>("bot/status", request, cancellationToken);
 
         public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-            => this._client.DeleteJsonAsync($"bot/status/{id}", null, cancellationToken);
+            => this._client.DeleteAsync($"bot/status/{id}", null, cancellationToken);
 
         public Task<IEnumerable<BotStatusResponse>> GetAllAsync(CancellationToken cancellationToken = default)
             => this._client.GetJsonAsync<IEnumerable<BotStatusResponse>>("bot/status", cancellationToken);
@@ -29,6 +29,6 @@ namespace TehGM.EinherjiBot.UI.BotStatus.API
             => this._client.PutJsonAsync<BotStatusResponse>($"bot/status/{id}", request, cancellationToken);
 
         public Task SetCurrentAsync(BotStatusRequest request, CancellationToken cancellationToken = default)
-            => this._client.PostJsonAsync("bot/status/current", request, cancellationToken);
+            => this._client.PostAsync("bot/status/current", request, cancellationToken);
     }
 }

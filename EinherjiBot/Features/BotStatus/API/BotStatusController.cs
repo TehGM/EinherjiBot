@@ -22,7 +22,7 @@ namespace TehGM.EinherjiBot.BotStatus.API.Controllers
             return base.Ok(results);
         }
 
-        [HttpGet("id:guid")]
+        [HttpGet("{id:guid}")]
         [ActionName(nameof(GetAsync))]
         [AuthorizeAdmin]
         public async Task<IActionResult> GetAsync(Guid id, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace TehGM.EinherjiBot.BotStatus.API.Controllers
             return base.CreatedAtAction(nameof(GetAsync), new { id = result.ID }, result);
         }
 
-        [HttpPut("id:guid")]
+        [HttpPut("{id:guid}")]
         [AuthorizeAdmin]
         public async Task<IActionResult> UpdateAsync(Guid id, BotStatusRequest request, CancellationToken cancellationToken)
         {
@@ -51,7 +51,7 @@ namespace TehGM.EinherjiBot.BotStatus.API.Controllers
             return base.Ok(result);
         }
 
-        [HttpDelete("id:guid")]
+        [HttpDelete("{id:guid}")]
         [AuthorizeAdmin]
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {

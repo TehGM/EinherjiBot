@@ -66,7 +66,14 @@ namespace TehGM.EinherjiBot.UI
 
         public static void ConfigureSharedServices(IServiceCollection services, string environment)
         {
-            services.AddMudServices();
+            services.AddMudServices(config =>
+            {
+                config.SnackbarConfiguration.SnackbarVariant = MudBlazor.Variant.Outlined;
+                config.SnackbarConfiguration.NewestOnTop = true;
+                config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomRight;
+                config.SnackbarConfiguration.ShowCloseIcon = true;
+                config.SnackbarConfiguration.PreventDuplicates = false;
+            });
             services.AddAuthorizationCore();
             services.AddAuthShared();
 

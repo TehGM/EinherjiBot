@@ -1,0 +1,69 @@
+﻿@page "/bot/status"
+@using Discord
+@using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.UI.Components.BotStatus
+@attribute [AuthorizeAdmin]
+
+@inject IBotStatusService StatusService
+
+<PageTitle>Bot Status Management</PageTitle>
+<PageHeader Text="Bot Status Management" />
+
+
+@if (this.DisplayExisting)
+{
+    <PageHeader Text="Saved Statuses" Type="Typo.h3" />
+
+    @if (this._existingStatuses != null)
+    {
+        foreach (KeyValuePair<Guid, BotStatusResponse> status in this._existingStatuses)
+        {
+            <BotStatusCard @key="status.Key" ExistingStatus="status.Value" Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved"/>
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="138px" Class="spaced-card"/>
+        }
+    }
+}
+
+<PageHeader Text="Add New" Type="Typo.h3" />
+<BotStatusCard @ref=this._newStatusCard Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved" />
+
+@code {
+    private IDictionary<Guid, BotStatusResponse> _existingStatuses;
+    private BotStatusCard _newStatusCard;
+
+    private bool DisplayExisting => this._existingStatuses == null || this._existingStatuses.Any();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            IEnumerable<BotStatusResponse> results = await this.StatusService.GetAllAsync().ConfigureAwait(false);
+            this._existingStatuses = results.ToDictionary(r => r.ID);
+            base.StateHasChanged();
+            return;
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void OnStatusDeleted(BotStatusCard.StatusEventArgs e)
+    {
+        if (e.ID != null)
+            this._existingStatuses.Remove(e.ID.Value);
+        else
+            this._newStatusCard?.ClearInputs();
+        base.StateHasChanged();
+    }
+
+    private void OnStatusSaved(BotStatusCard.StatusEventArgs e)
+    {
+        if (!this._existingStatuses.ContainsKey(e.ID.Value))
+            this._newStatusCard.ClearInputs();
+        this._existingStatuses[e.ID.Value] = e.Status;
+    }
+}
