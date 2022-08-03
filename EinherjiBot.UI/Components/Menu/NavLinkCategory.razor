@@ -1,21 +1,28 @@
 ﻿<div class="nav-link-category">
-    <div class="header" @onclick="this.OnClickAsync">
-        @if (this.IsOpen)
-        {
-            <div class="oi oi-chevron-bottom arrow"></div>
-        }
-        else
-        {
-            <div class="oi oi-chevron-right arrow"></div>
-        }
-
-        @if (!string.IsNullOrWhiteSpace(this.ImageURL))
-        {
-            <img class="image" src="@this.ImageURL" />
-        }
-
-        <div class="text">@this.Text</div>
-    </div>
+    <MudTooltip Delay="500" Placement="Placement.Bottom">
+        <TooltipContent>
+            @this.RenderTooltipContents()
+        </TooltipContent>
+        <ChildContent>
+            <div class="header" @onclick="this.OnClickAsync">
+                @if (this.IsOpen)
+                {
+                    <div class="oi oi-chevron-bottom arrow"></div>
+                }
+                else
+                {
+                    <div class="oi oi-chevron-right arrow"></div>
+                }
+                
+                @if (!string.IsNullOrWhiteSpace(this.ImageURL))
+                {
+                    <img class="image" src="@this.ImageURL" />
+                }
+                
+                <div class="text">@this.Text</div>
+            </div>
+        </ChildContent>
+    </MudTooltip>
     @if (this.IsOpen)
     {
         <div class="children">
@@ -37,7 +44,16 @@
     public RenderFragment ChildContent { get; set; }
     [Parameter]
     public EventCallback<NavLinkCategory> OnClick { get; set; }
+    [Parameter]
+    public RenderFragment Tooltip { get; set; }
 
     private Task OnClickAsync()
         => this.OnClick.InvokeAsync(this);
+
+    private RenderFragment RenderTooltipContents()
+    {
+        if (this.Tooltip != null)
+            return this.Tooltip;
+        return @<text>@this.Text</text>;
+    }
 }
