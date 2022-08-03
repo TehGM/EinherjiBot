@@ -21,10 +21,10 @@ namespace TehGM.EinherjiBot.UI.API.Services
             this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.BotVersion}");
         }
 
-        public async Task<TResponse> SendJsonAsync<TResponse>(HttpRequestMessage request, object data, CancellationToken cancellationToken = default)
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, object data, CancellationToken cancellationToken = default)
         {
             await this.AttachTokenAsync(request, cancellationToken).ConfigureAwait(false);
-            return await this._client.SendJsonAsync<TResponse>(request, data, "application/json", cancellationToken).ConfigureAwait(false);
+            return await this._client.SendJsonAsync(request, data, "application/json", cancellationToken).ConfigureAwait(false);
         }
 
         private async Task AttachTokenAsync(HttpRequestMessage request, CancellationToken cancellationToken)

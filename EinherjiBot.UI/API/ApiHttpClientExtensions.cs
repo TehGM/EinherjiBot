@@ -1,52 +1,68 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http;
-using System.Text;
 
 namespace TehGM.EinherjiBot.UI.API
 {
     public static class ApiHttpClientExtensions
     {
+        public static async Task<TResponse> SendJsonAsync<TResponse>(this IApiClient client, HttpRequestMessage request, object data, CancellationToken cancellationToken = default)
+        {
+            using HttpResponseMessage response = await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<TResponse>(json);
+        }
+
         // GET
-        public static async Task<HttpResponseMessage> GetJsonAsync(this IApiClient client, string url, CancellationToken cancellationToken = default)
+        public static async Task<HttpResponseMessage> GetAsync(this IApiClient client, string url, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            return await client.SendJsonAsync<HttpResponseMessage>(request, null, cancellationToken).ConfigureAwait(false);
+            return await client.SendAsync(request, null, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<TResponse> GetJsonAsync<TResponse>(this IApiClient client, string url, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            return await client.SendJsonAsync<TResponse>(request, null, cancellationToken).ConfigureAwait(false);
+            return await SendJsonAsync<TResponse>(client, request, null, cancellationToken).ConfigureAwait(false);
         }
 
         // POST
-        public static async Task<HttpResponseMessage> PostJsonAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        public static async Task<HttpResponseMessage> PostAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-            return await client.SendJsonAsync<HttpResponseMessage>(request, data, cancellationToken).ConfigureAwait(false);
+            return await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
         }
 
-        public static Task<TResponse> PostJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
-            => PostJsonAsync<TResponse>(client, url, data, cancellationToken);
+        public static async Task<TResponse> PostJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+            return await SendJsonAsync<TResponse>(client, request, data, cancellationToken).ConfigureAwait(false);
+        }
 
         // PUT
-        public static async Task<HttpResponseMessage> PutJsonAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        public static async Task<HttpResponseMessage> PutAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
-            return await client.SendJsonAsync<HttpResponseMessage>(request, data, cancellationToken).ConfigureAwait(false);
+            return await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
         }
 
-        public static Task<TResponse> PutJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
-            => PutJsonAsync<TResponse>(client, url, data, cancellationToken);
+        public static async Task<TResponse> PutJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, url);
+            return await SendJsonAsync<TResponse>(client, request, data, cancellationToken).ConfigureAwait(false);
+        }
 
         // DELETE
-        public static async Task<HttpResponseMessage> DeleteJsonAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        public static async Task<HttpResponseMessage> DeleteAsync(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
-            return await client.SendJsonAsync<HttpResponseMessage>(request, data, cancellationToken).ConfigureAwait(false);
+            return await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
         }
 
-        public static Task<TResponse> DeleteJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
-            => DeleteJsonAsync<TResponse>(client, url, data, cancellationToken);
+        public static async Task<TResponse> DeleteJsonAsync<TResponse>(this IApiClient client, string url, object data, CancellationToken cancellationToken = default)
+        {
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, url);
+            return await SendJsonAsync<TResponse>(client, request, data, cancellationToken).ConfigureAwait(false);
+        }
     }
 }
