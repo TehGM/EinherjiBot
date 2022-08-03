@@ -1,7 +1,7 @@
 ﻿@using MudBlazor.ThemeManager
 @inherits LayoutComponentBase
 
-<MudThemeProvider Theme="this._theme" />
+<MudThemeProvider Theme="this._theme" IsDarkMode="true" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -24,7 +24,16 @@
 </div>
 
 @code{
-    private MudTheme _theme = new MudTheme();
+    private MudTheme _theme = new MudTheme()
+    {
+        PaletteDark = new Palette()
+        {
+            //Primary = "#d64402ff",
+            Primary = Colors.DeepOrange.Darken1,
+            PrimaryLighten = Colors.DeepOrange.Lighten1,
+            PrimaryDarken = Colors.DeepOrange.Darken4
+        }
+    };
     public bool _themeManagerOpen = false;    
 
     private ThemeManagerTheme _themeManager = new ThemeManagerTheme();

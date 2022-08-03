@@ -28,7 +28,8 @@
                 </a>
         </Authorized>
         <Authorizing>
-            Logging you in...
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+            <div class="login-progress-text">Logging you in...</div>
         </Authorizing>
         <NotAuthorized>
         @if (this.RenderLocation.IsClient)
@@ -51,7 +52,8 @@
         }
         else
         {
-            <text>Refreshing login...</text>
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+            <div class="login-progress-text">Refreshing login...</div>
         }
         </NotAuthorized>
     </AuthorizeView>
