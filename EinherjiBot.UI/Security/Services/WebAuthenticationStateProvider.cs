@@ -59,8 +59,11 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 try
                 {
                     string token = await this._tokenProvider.GetAsync().ConfigureAwait(false);
-                    LoginResponse response = await this._authService.RefreshAsync(token).ConfigureAwait(false);
-                    await this.LoginAsync(response).ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(token))
+                    {
+                        LoginResponse response = await this._authService.RefreshAsync(token).ConfigureAwait(false);
+                        await this.LoginAsync(response).ConfigureAwait(false);
+                    }
                 }
                 catch
                 {

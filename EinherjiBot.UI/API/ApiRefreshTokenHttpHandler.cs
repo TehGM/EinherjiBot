@@ -36,8 +36,11 @@ namespace TehGM.EinherjiBot.UI.API.Services
             if (DateTime.UtcNow < this._authProvider.Expiration.AddSeconds(-5))
                 return;
             string token = await this._tokenProvider.GetAsync(cancellationToken).ConfigureAwait(false);
-            LoginResponse response = await this._authService.RefreshAsync(token, cancellationToken).ConfigureAwait(false);
-            await this._authProvider.LoginAsync(response, cancellationToken).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                LoginResponse response = await this._authService.RefreshAsync(token, cancellationToken).ConfigureAwait(false);
+                await this._authProvider.LoginAsync(response, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }
