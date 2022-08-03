@@ -1,8 +1,8 @@
-﻿<div class="page-header">
+﻿<div class="page-header @this.Type.ToString()">
     @if (this.Text != null)
     {
         <div>
-            <MudText Typo="Typo.h1">@this.Text</MudText>
+            <MudText Typo="this.Type">@this.Text</MudText>
         </div>
     }
     @if (this.ChildContent != null)
@@ -14,6 +14,8 @@
 </div>
 
 @code {
+    [Parameter]
+    public Typo Type { get; set; } = Typo.h1;
     [Parameter]
     public string Text { get; set; }
     [Parameter]
