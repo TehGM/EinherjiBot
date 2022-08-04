@@ -1,7 +1,59 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">    
-    <div class="content px-4">
+<MudThemeProvider Theme="this._theme" />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<div>
+    <MudLayout Class="page">
         @Body
-    </div>
+    </MudLayout>
 </div>
+
+@code{
+    private MudTheme _theme;
+
+    protected override Task OnInitializedAsync()
+    {
+        this.InitDefaultTheme();
+        return base.OnInitializedAsync();
+    }
+
+    private void InitDefaultTheme()
+    {
+        this._theme = new MudTheme()
+        {
+            Palette = BuildDefaultPalette(),
+            PaletteDark = BuildDefaultPalette(),
+            Typography = new Typography()
+            {
+                H1 = new H1()
+                {
+                    FontSize = "2.35rem"
+                },
+                H2 = new H2()
+                {
+                    FontSize = "2.15rem"
+                },
+                H3 = new H3()
+                {
+                    FontSize = "1.85rem"
+                }
+            }
+        };
+
+        Palette BuildDefaultPalette()
+        {
+            Palette palette = new MudTheme().PaletteDark;
+            //palette.Primary = "#d64402ff";
+            palette.Primary = Colors.DeepOrange.Darken1;
+            palette.PrimaryLighten = Colors.DeepOrange.Lighten1;
+            palette.PrimaryDarken = Colors.DeepOrange.Darken4;
+            palette.Surface = "#1D1D1D";
+            palette.Secondary = Colors.DeepPurple.Darken1;
+            palette.SecondaryLighten = Colors.DeepPurple.Lighten1;
+            palette.SecondaryDarken = Colors.DeepPurple.Darken4;
+            return palette;
+        }
+    }
+}

@@ -1,0 +1,11 @@
+::deep .page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 600px) {
+    ::deep .page {
+        flex-direction: row;
+    }
+}

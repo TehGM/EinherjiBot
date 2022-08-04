@@ -1,31 +1,22 @@
 ﻿@using TehGM.EinherjiBot.API
 @using TehGM.EinherjiBot.UI.Components.Menu
+@layout EmptyLayout
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject PersistentComponentState PrerenderingState
 
-<MudThemeProvider Theme="this._theme" />
-<MudDialogProvider/>
-<MudSnackbarProvider/>
+<CascadingValue Value="this._botInfo">
 
-<div>
-    <MudLayout Class="page">
-        <CascadingValue Value="this._botInfo">
+    <NavMenu />
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
 
-            <NavMenu />
-            <main>
-                <article class="content px-4">
-                    @Body
-                </article>
-            </main>
-
-        </CascadingValue>
-    </MudLayout>
-</div>
+</CascadingValue>
 
 @code{
-    private MudTheme _theme;
-
     private IDiscordUserInfo _botInfo;
     private PersistingComponentStateSubscription _prerenderingSubscription;
 
@@ -39,8 +30,6 @@
                 this._prerenderingSubscription = this.PrerenderingState.RegisterOnPersisting(this.PersistAsync);
             this._botInfo = await this.UserInfoProvider.GetBotInfoAsync();
         }
-        this.InitDefaultTheme();
-        //this.StateHasChanged();
         await base.OnInitializedAsync();
     }
 
@@ -48,44 +37,6 @@
     {
         this.PrerenderingState.PersistAsJson(nameof(_botInfo), this._botInfo);
         return Task.CompletedTask;
-    }
-
-    private void InitDefaultTheme()
-    {
-        this._theme = new MudTheme()
-        {
-            Palette = BuildDefaultPalette(),
-            PaletteDark = BuildDefaultPalette(),
-            Typography = new Typography()
-            {
-                H1 = new H1()
-                {
-                    FontSize = "2.35rem"
-                },
-                H2 = new H2()
-                {
-                    FontSize = "2.15rem"
-                },
-                H3 = new H3()
-                {
-                    FontSize = "1.85rem"
-                }
-            }
-        };
-
-        Palette BuildDefaultPalette()
-        {
-            Palette palette = new MudTheme().PaletteDark;
-            //palette.Primary = "#d64402ff";
-            palette.Primary = Colors.DeepOrange.Darken1;
-            palette.PrimaryLighten = Colors.DeepOrange.Lighten1;
-            palette.PrimaryDarken = Colors.DeepOrange.Darken4;
-            palette.Surface = "#1D1D1D";
-            palette.Secondary = Colors.DeepPurple.Darken1;
-            palette.SecondaryLighten = Colors.DeepPurple.Lighten1;
-            palette.SecondaryDarken = Colors.DeepPurple.Darken4;
-            return palette;
-        }
     }
 
     public virtual void Dispose()
