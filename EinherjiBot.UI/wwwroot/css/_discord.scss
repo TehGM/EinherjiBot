@@ -1,0 +1,50 @@
+.discord-avatar {
+    border-radius: 50%;
+
+    &.inline {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+.discord-username {
+    &.inline {
+        font-size: 16px;
+        line-height: 20px;
+    }
+}
+
+.discord-status {
+    &.inline {
+        font-size: 12px !important;
+        line-height: 16px !important;
+    }
+}
+
+.discord-bot-tag, .discord-bot-tag:hover {
+
+    %discord-bot-tag-size {
+        height: 15px;
+        line-height: 15px;
+        font-size: 10px;
+    }
+
+    @extend %discord-bot-tag-size;
+    padding: 0 4px;
+
+    &, &.mud-chip {
+        @extend %discord-bot-tag-size;
+        border-radius: 3px;
+        background-color: rgb(88, 101, 242) !important;
+        margin-left: 5px;
+        height: unset;
+    }
+
+    & > .mud-chip-content {
+        @extend %discord-bot-tag-size;
+        color: white;
+        font-weight: 500;
+        text-rendering: optimizeLegibility;
+        text-transform: uppercase;
+    }
+}

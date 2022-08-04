@@ -14,7 +14,16 @@
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._text)" OnClick="this.OnPreviewClickedAsync">
                         Preview
                         <MudPopover Open="this._previewText != null" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
-                            <MudText Class="align-self-center">@this._previewText</MudText>
+                            <MudAvatar Image="@this.BotInfo?.GetAvatarURL(32)" Class="discord-avatar inline"/>
+                            <div class="d-flex flex-column">
+                                <span class="d-flex flex-row">
+                                    <MudText Class="ma-0 discord-username inline">@this.BotInfo?.Username</MudText>
+                                    <MudChip Class="discord-bot-tag">BOT</MudChip>
+                                </span>
+                                <MudText Class="align-self-center discord-status inline">
+                                    @this._previewText
+                                </MudText>
+                            </div>
                             <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Filled.Close" Size="Size.Small" OnClick="_ => this._previewText = null" />
                         </MudPopover>
                         <MudOverlay DarkBackground="true" Visible="this._previewText != null" OnClick="_ => this._previewText = null" />
@@ -59,6 +68,9 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public IDiscordUserInfo BotInfo { get; set; }
+
     [Parameter]
     public BotStatusResponse ExistingStatus { get; set; }
 
