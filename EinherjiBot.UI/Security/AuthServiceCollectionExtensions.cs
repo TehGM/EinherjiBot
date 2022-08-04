@@ -26,8 +26,12 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
 
-            services.AddHttpClient<IApiClient, ApiHttpClient>();
-            services.AddHttpClient<IAuthService, WebAuthService>();
+            services.TryAddTransient<VersionCheckHttpHandler>();
+
+            services.AddHttpClient<IApiClient, ApiHttpClient>()
+                .AddHttpMessageHandler<VersionCheckHttpHandler>();
+            services.AddHttpClient<IAuthService, WebAuthService>()
+                .AddHttpMessageHandler<VersionCheckHttpHandler>();
 
             return services;
         }

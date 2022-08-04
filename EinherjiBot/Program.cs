@@ -17,6 +17,7 @@ using Serilog;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Utilities;
 using TehGM.EinherjiBot.Security.API.Services;
+using TehGM.EinherjiBot.API.Services;
 
 namespace TehGM.EinherjiBot
 {
@@ -90,7 +91,7 @@ namespace TehGM.EinherjiBot
             services.AddGameServers();
             services.AddSharedAccounts();
             services.AddMessageTriggers();
-            services.AddTransient<API.IUserInfoService, API.Services.ApiUserInfoService>();
+            services.AddTransient<API.IUserInfoService, ApiUserInfoService>();
 
             UI.Program.ConfigureSharedServices(services, environment);
         }
@@ -105,6 +106,9 @@ namespace TehGM.EinherjiBot
             {
                 app.UseExceptionHandler("/Error");
             }
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"),
+                builder => builder.UseMiddleware<VersionCheckMiddleware>());
 
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();

@@ -18,7 +18,7 @@ namespace System.Net.Http
         public static async Task<TResponse> SendJsonAsync<TResponse>(this HttpClient client, HttpRequestMessage request, object data, string contentType, CancellationToken cancellationToken = default)
         {
             using HttpResponseMessage response = await SendJsonAsync(client, request, data, contentType, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
             string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<TResponse>(json);
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using TehGM.EinherjiBot.Security.API;
@@ -9,13 +10,18 @@ namespace TehGM.EinherjiBot.UI.API.Services
     public class ApiHttpClient : IApiClient
     {
         private readonly HttpClient _client;
+        private readonly NavigationManager _navigation;
+        private readonly IDialogService _dialogs;
         private readonly IAuthService _authService;
         private readonly IWebAuthProvider _authProvider;
         private readonly IRefreshTokenProvider _refreshTokenProvider;
 
-        public ApiHttpClient(HttpClient client, NavigationManager navigation, IAuthService authService, IWebAuthProvider authProvider, IRefreshTokenProvider refreshTokenProvider)
+        public ApiHttpClient(HttpClient client, NavigationManager navigation, IDialogService dialogs,
+            IAuthService authService, IWebAuthProvider authProvider, IRefreshTokenProvider refreshTokenProvider)
         {
             this._client = client;
+            this._navigation = navigation;
+            this._dialogs = dialogs;
             this._authService = authService;
             this._authProvider = authProvider;
             this._refreshTokenProvider = refreshTokenProvider;
@@ -26,7 +32,15 @@ namespace TehGM.EinherjiBot.UI.API.Services
         public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, object data, CancellationToken cancellationToken = default)
         {
             await this.AttachTokenAsync(request, cancellationToken).ConfigureAwait(false);
-            return await this._client.SendJsonAsync(request, data, "application/json", cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await this._client.SendJsonAsync(request, data, "application/json", cancellationToken).ConfigureAwait(false);
+            }
+            catch (ClientVersionException)
+            {
+                await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
         }
 
         private async Task AttachTokenAsync(HttpRequestMessage request, CancellationToken cancellationToken)

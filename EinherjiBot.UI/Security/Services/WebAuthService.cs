@@ -1,36 +1,66 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using System.Net.Http;
 using TehGM.EinherjiBot.Security.API;
+using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.Security.Services
 {
     public class WebAuthService : IAuthService
     {
         private readonly HttpClient _client;
+        private readonly NavigationManager _navigation;
+        private readonly IDialogService _dialogs;
 
-        public WebAuthService(HttpClient client, NavigationManager navigation)
+        public WebAuthService(HttpClient client, NavigationManager navigation, IDialogService dialogs)
         {
             this._client = client;
+            this._navigation = navigation;
+            this._dialogs = dialogs;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
             this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.WebVersion}");
         }
 
-        public Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
+        public async Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
         {
-            LoginRequest request = new LoginRequest(accessCode);
-            return this._client.PostJsonAsync<LoginResponse>("auth/token", request, cancellationToken);
+            try
+            {
+                LoginRequest request = new LoginRequest(accessCode);
+                return await this._client.PostJsonAsync<LoginResponse>("auth/token", request, cancellationToken);
+            }
+            catch (ClientVersionException)
+            {
+                await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
         }
 
-        public Task<LoginResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken = default)
+        public async Task<LoginResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            RefreshRequest request = new RefreshRequest(refreshToken);
-            return this._client.PostJsonAsync<LoginResponse>("auth/token/refresh", request, cancellationToken);
+            try
+            {
+                RefreshRequest request = new RefreshRequest(refreshToken);
+                return await this._client.PostJsonAsync<LoginResponse>("auth/token/refresh", request, cancellationToken);
+            }
+            catch (ClientVersionException)
+            {
+                await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
         }
 
-        public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+        public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            RefreshRequest request = new RefreshRequest(refreshToken);
-            return this._client.DeleteJsonAsync("auth/token", request, cancellationToken);
+            try
+            {
+                RefreshRequest request = new RefreshRequest(refreshToken);
+                await this._client.DeleteJsonAsync("auth/token", request, cancellationToken);
+            }
+            catch (ClientVersionException)
+            {
+                await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
         }
     }
 }
