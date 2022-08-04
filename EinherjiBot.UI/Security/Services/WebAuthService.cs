@@ -18,7 +18,6 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             this._navigation = navigation;
             this._dialogs = dialogs;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
-            this._client.DefaultRequestHeaders.Add("User-Agent", $"Einherji Web Client v{EinherjiInfo.WebVersion}");
         }
 
         public async Task<LoginResponse> LoginAsync(string accessCode, CancellationToken cancellationToken = default)
