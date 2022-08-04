@@ -44,7 +44,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudGrid>
-                <MudItem xs="4" sm="12" md="3" lg="2" xxl="1">
+                <MudItem xs="4" sm="12" md="3" lg="2">
                     <MudSelect T="ActivityType" @bind-Value="this._activityType" Label="Activity" Disabled="this._processing">
                         <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
@@ -52,7 +52,7 @@
                         <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="8" sm="12" md="9" lg="10" xxl="11">
+                <MudItem xs="8" sm="12" md="9" lg="10">
                     <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
                 @if (this.IsStreamingActivity)
