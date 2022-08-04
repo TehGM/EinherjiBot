@@ -14,7 +14,7 @@ namespace TehGM.EinherjiBot.API.Services
             this._connection = connection;
         }
 
-        public async Task<UserInfoResponse> GetBotInfoAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<UserInfoResponse> GetBotInfoAsync(CancellationToken cancellationToken = default)
         {
             await this._connection.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
             return CreateUserInfo(this._client.CurrentUser);

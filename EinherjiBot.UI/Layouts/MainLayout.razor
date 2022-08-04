@@ -1,5 +1,8 @@
-﻿@using TehGM.EinherjiBot.UI.Components.Menu
+﻿@using TehGM.EinherjiBot.API
+@using TehGM.EinherjiBot.UI.Components.Menu
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject PersistentComponentState PrerenderingState
 
 <MudThemeProvider Theme="this._theme" />
 <MudDialogProvider/>
@@ -7,24 +10,46 @@
 
 <div>
     <MudLayout Class="page">
-        
-        <NavMenu />
-    
-        <main>
-            <article class="content px-4">
-                @Body
-            </article>
-        </main>
+        <CascadingValue Value="this._botInfo">
+
+            <NavMenu />
+            <main>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+
+        </CascadingValue>
     </MudLayout>
 </div>
 
 @code{
     private MudTheme _theme;
 
+    private IDiscordUserInfo _botInfo;
+    private PersistingComponentStateSubscription _prerenderingSubscription;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (this.PrerenderingState.TryTakeFromJson(nameof(_botInfo), out UserInfoResponse botInfo))
+            this._botInfo = botInfo;
+        else
+        {
+            this._prerenderingSubscription = this.PrerenderingState.RegisterOnPersisting(this.PersistAsync);
+            this._botInfo = await this.UserInfoProvider.GetBotInfoAsync();
+        }
+    }
+
     protected override void OnInitialized()
     {
         this.InitDefaultTheme();
         this.StateHasChanged();
+    }
+
+    private Task PersistAsync()
+    {
+        this.PrerenderingState.PersistAsJson(nameof(_botInfo), this._botInfo);
+        return Task.CompletedTask;
     }
 
     private void InitDefaultTheme()
@@ -63,5 +88,10 @@
             palette.SecondaryDarken = Colors.DeepPurple.Darken4;
             return palette;
         }
+    }
+
+    public virtual void Dispose()
+    {
+        try { this._prerenderingSubscription.Dispose(); } catch { }
     }
 }

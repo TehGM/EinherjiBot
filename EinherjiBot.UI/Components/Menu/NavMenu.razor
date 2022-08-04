@@ -19,7 +19,7 @@
     <div class="nav-menu-items @NavMenuCssClass">
         <nav class="flex-column">
             
-            <NavLinkCategory Identifier="0" Text="Einherji" ImageURL="@this._botAvatarUrl" 
+            <NavLinkCategory Identifier="0" Text="Einherji" ImageURL="@this.BotInfo?.GetAvatarURL(_avatarSize)" 
                 OnClick=@this.OnCategoryClick IsOpen="@(this._currentCategoryIdentifier == 0)">
                 <div class="nav-item">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -152,10 +152,10 @@
 
     private ulong? _currentCategoryIdentifier;
     private bool _collapseNavMenu = true;
-    private string _botAvatarUrl;
-    private string _userAvatarUrl;
     private string NavMenuCssClass => this._collapseNavMenu ? "collapse" : null;
 
+    [CascadingParameter]
+    private IDiscordUserInfo BotInfo { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -165,16 +165,6 @@
                 this._currentCategoryIdentifier = currentCategory;
             else
                 this.UpdateLinkCategory();
-        }
-        if (this._botAvatarUrl == null)
-        {
-            if (base.TryGetItem(nameof(_botAvatarUrl), out string botAvatarUrl))
-                this._botAvatarUrl = botAvatarUrl;
-            else
-            {
-                IDiscordUserInfo info = await this.UserInfoProvider.GetBotInfoAsync();
-                this._botAvatarUrl = info?.GetAvatarURL(_avatarSize);
-            }
         }
 
         this.Navigation.LocationChanged += this.OnLocationChanged;
@@ -218,7 +208,6 @@
 
     protected override Task PersistAsync()
     {
-        base.PersistItem(nameof(_botAvatarUrl), this._botAvatarUrl);
         base.PersistItem(nameof(_currentCategoryIdentifier), this._currentCategoryIdentifier);
         return Task.CompletedTask;
     }
