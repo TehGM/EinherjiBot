@@ -5,12 +5,15 @@ namespace TehGM.EinherjiBot.UI
     public abstract class PrerenderingComponent : ComponentBase, IDisposable
     {
         [Inject]
+        private IRenderLocation RenderLocation { get; init; }
+        [Inject]
         protected PersistentComponentState PrerenderingState { get; init; }
         private PersistingComponentStateSubscription _prerenderingSubscription;
 
         protected override Task OnInitializedAsync()
         {
-            this._prerenderingSubscription = this.PrerenderingState.RegisterOnPersisting(this.PersistAsync);
+            if (this.RenderLocation.IsServer)
+                this._prerenderingSubscription = this.PrerenderingState.RegisterOnPersisting(this.PersistAsync);
             return Task.CompletedTask;
         }
 
