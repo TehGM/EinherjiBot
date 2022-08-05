@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http;
 using System.Security.Claims;
 using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
+using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.Security.Services
 {
@@ -35,7 +37,10 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             base.NotifyAuthenticationStateChanged(Task.FromResult(this.GetState()));
         }
 
-        public async Task LogoutAsync(CancellationToken cancellationToken = default)
+        public Task LogoutAsync(CancellationToken cancellationToken = default)
+            => this.LogoutInternalAsync(true, cancellationToken);
+
+        private async Task LogoutInternalAsync(bool removeRemoteToken, CancellationToken cancellationToken = default)
         {
             this.User = WebAuthContext.None;
             this.Token = null;
@@ -46,7 +51,8 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             if (token != null)
             {
                 await this._tokenProvider.ClearAsync(cancellationToken).ConfigureAwait(false);
-                await this._authService.LogoutAsync(token, cancellationToken).ConfigureAwait(false);
+                if (removeRemoteToken)
+                    await this._authService.LogoutAsync(token, cancellationToken).ConfigureAwait(false);
             }
             base.NotifyAuthenticationStateChanged(Task.FromResult(this.GetState()));
         }
@@ -65,9 +71,9 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                         await this.LoginAsync(response).ConfigureAwait(false);
                     }
                 }
-                catch
+                catch (Exception ex) when (ex is not ClientVersionException)
                 {
-                    await this.LogoutAsync().ConfigureAwait(false);
+                    await this.LogoutInternalAsync(false).ConfigureAwait(false);
                 }
             }
             return this.GetState();
