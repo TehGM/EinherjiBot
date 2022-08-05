@@ -40,9 +40,9 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IHttpClientBuilder AttachHttpHandlers(this IHttpClientBuilder builder)
         {
             return builder
-                .AddHttpMessageHandler<UserAgentHttpHandler>()
+                .AddHttpMessageHandler<RequestExceptionsHttpHandler>()
                 .AddHttpMessageHandler<VersionCheckHttpHandler>()
-                .AddHttpMessageHandler<RequestExceptionsHttpHandler>();
+                .AddHttpMessageHandler<UserAgentHttpHandler>();
         }
 
         public static IServiceCollection AddAuthShared(this IServiceCollection services)
