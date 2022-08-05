@@ -2,7 +2,7 @@
 using System.Net.Http;
 using TehGM.EinherjiBot.API;
 
-namespace TehGM.EinherjiBot.UI.API
+namespace TehGM.EinherjiBot.UI.API.Handlers
 {
     public class VersionCheckHttpHandler : DelegatingHandler
     {
@@ -20,10 +20,12 @@ namespace TehGM.EinherjiBot.UI.API
         {
             request.Headers.Add(CustomHeaders.ClientVersion, EinherjiInfo.WebVersion);
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            if (response.StatusCode == HttpStatusCode.BadRequest && response.Headers.Contains(CustomHeaders.ExpectedClientVersion))
+            if (response.StatusCode == HttpStatusCode.BadRequest && response.Headers.TryGetValues(CustomHeaders.ExpectedClientVersion, out IEnumerable<string> values))
             {
-                this._log.LogError("Client version is outdated");
-                throw new ClientVersionException();
+                string expectedVersion = string.Join(", ", values);
+                this._log.LogError("Client version is outdated (Current: {CurrentVersion}, Expected: {ExpectedVersion})", EinherjiInfo.WebVersion, expectedVersion);
+                response.Content?.Dispose();
+                throw new ClientVersionException(expectedVersion);
             }
             return response;
         }

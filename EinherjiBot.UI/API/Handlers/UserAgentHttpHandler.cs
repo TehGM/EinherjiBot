@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace TehGM.EinherjiBot.UI.API
+namespace TehGM.EinherjiBot.UI.API.Handlers
 {
     public class UserAgentHttpHandler : DelegatingHandler
     {

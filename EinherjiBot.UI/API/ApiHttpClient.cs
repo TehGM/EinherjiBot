@@ -12,16 +12,18 @@ namespace TehGM.EinherjiBot.UI.API.Services
         private readonly HttpClient _client;
         private readonly NavigationManager _navigation;
         private readonly IDialogService _dialogs;
+        private readonly ISnackbar _notifications;
         private readonly IAuthService _authService;
         private readonly IWebAuthProvider _authProvider;
         private readonly IRefreshTokenProvider _refreshTokenProvider;
 
-        public ApiHttpClient(HttpClient client, NavigationManager navigation, IDialogService dialogs,
+        public ApiHttpClient(HttpClient client, NavigationManager navigation, IDialogService dialogs, ISnackbar notifications,
             IAuthService authService, IWebAuthProvider authProvider, IRefreshTokenProvider refreshTokenProvider)
         {
             this._client = client;
             this._navigation = navigation;
             this._dialogs = dialogs;
+            this._notifications = notifications;
             this._authService = authService;
             this._authProvider = authProvider;
             this._refreshTokenProvider = refreshTokenProvider;
@@ -38,6 +40,15 @@ namespace TehGM.EinherjiBot.UI.API.Services
             catch (ClientVersionException)
             {
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                this._notifications.Add(ex.Message, Severity.Error, options =>
+                {
+                    options.RequireInteraction = true;
+                    options.SnackbarVariant = Variant.Filled;
+                });
                 throw;
             }
         }

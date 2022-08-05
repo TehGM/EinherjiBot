@@ -11,12 +11,14 @@ namespace TehGM.EinherjiBot.UI.Security.Services
         private readonly HttpClient _client;
         private readonly NavigationManager _navigation;
         private readonly IDialogService _dialogs;
+        private readonly ISnackbar _notifications;
 
-        public WebAuthService(HttpClient client, NavigationManager navigation, IDialogService dialogs)
+        public WebAuthService(HttpClient client, NavigationManager navigation, IDialogService dialogs, ISnackbar notifications)
         {
             this._client = client;
             this._navigation = navigation;
             this._dialogs = dialogs;
+            this._notifications = notifications;
             this._client.BaseAddress = new Uri(navigation.BaseUri + "api/", UriKind.Absolute);
         }
 
@@ -30,6 +32,11 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             catch (ClientVersionException)
             {
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
+                throw;
+            }
+            catch (HttpRequestException ex)
+            {
+                this.ShowErrorNotification(ex);
                 throw;
             }
         }
@@ -46,6 +53,11 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
+            catch (HttpRequestException ex)
+            {
+                this.ShowErrorNotification(ex);
+                throw;
+            }
         }
 
         public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -60,6 +72,20 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
+            catch (HttpRequestException ex)
+            {
+                this.ShowErrorNotification(ex);
+                throw;
+            }
+        }
+
+        private void ShowErrorNotification(HttpRequestException exception)
+        {
+            this._notifications.Add(exception.Message, Severity.Error, options =>
+            {
+                options.RequireInteraction = true;
+                options.SnackbarVariant = Variant.Text;
+            });
         }
     }
 }

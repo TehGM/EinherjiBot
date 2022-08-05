@@ -6,6 +6,7 @@ using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.Security.Authorization;
 using TehGM.EinherjiBot.Security.Authorization.Services;
 using TehGM.EinherjiBot.UI.API;
+using TehGM.EinherjiBot.UI.API.Handlers;
 using TehGM.EinherjiBot.UI.API.Services;
 using TehGM.EinherjiBot.UI.Security;
 using TehGM.EinherjiBot.UI.Security.Services;
@@ -28,15 +29,20 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddTransient<UserAgentHttpHandler>();
             services.TryAddTransient<VersionCheckHttpHandler>();
+            services.TryAddTransient<RequestExceptionsHttpHandler>();
 
-            services.AddHttpClient<IApiClient, ApiHttpClient>()
-                .AddHttpMessageHandler<UserAgentHttpHandler>()
-                .AddHttpMessageHandler<VersionCheckHttpHandler>();
-            services.AddHttpClient<IAuthService, WebAuthService>()
-                .AddHttpMessageHandler<UserAgentHttpHandler>()
-                .AddHttpMessageHandler<VersionCheckHttpHandler>();
+            services.AddHttpClient<IApiClient, ApiHttpClient>().AttachHttpHandlers();
+            services.AddHttpClient<IAuthService, WebAuthService>().AttachHttpHandlers();
 
             return services;
+        }
+
+        private static IHttpClientBuilder AttachHttpHandlers(this IHttpClientBuilder builder)
+        {
+            return builder
+                .AddHttpMessageHandler<UserAgentHttpHandler>()
+                .AddHttpMessageHandler<VersionCheckHttpHandler>()
+                .AddHttpMessageHandler<RequestExceptionsHttpHandler>();
         }
 
         public static IServiceCollection AddAuthShared(this IServiceCollection services)
