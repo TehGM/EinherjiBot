@@ -9,7 +9,7 @@ using TehGM.EinherjiBot.PlaceholdersEngine.API;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class PlaceholdersEngineDependencyInjectionExtensions
+    public static class PlaceholdersEngineServiceCollectionExtensions
     {
         public static IServiceCollection AddPlaceholdersEngineBackend(this IServiceCollection services)
         {

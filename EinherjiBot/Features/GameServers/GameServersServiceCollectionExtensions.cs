@@ -4,7 +4,7 @@ using TehGM.EinherjiBot.GameServers.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class GameServersDependencyInjectionExtensions
+    public static class GameServersServiceCollectionExtensions
     {
         public static IServiceCollection AddGameServers(this IServiceCollection services)
         {

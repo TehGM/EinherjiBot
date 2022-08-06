@@ -6,7 +6,7 @@ using TehGM.EinherjiBot.BotStatus.API.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class BotStatusDependencyInjectionExtensions
+    public static class BotStatusServiceCollectionExtensions
     {
         public static IServiceCollection AddBotStatusBackend(this IServiceCollection services, Action<BotStatusOptions> configureOptions = null)
         {

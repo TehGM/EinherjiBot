@@ -4,7 +4,7 @@ using TehGM.EinherjiBot.UI.PlaceholdersEngine.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class PlaceholdersEngineDependencyInjectionExtensions
+    public static class PlaceholdersEngineServiceCollectionExtensions
     {
         public static IServiceCollection AddPlaceholdersEngineFrontend(this IServiceCollection services)
         {

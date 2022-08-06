@@ -6,7 +6,7 @@ using TehGM.EinherjiBot.SharedAccounts.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class SharedAccountsDependencyInjectionExtensions
+    public static class SharedAccountsServiceCollectionExtensions
     {
         public static IServiceCollection AddSharedAccounts(this IServiceCollection services, Action<SharedAccountOptions> configure = null)
         {

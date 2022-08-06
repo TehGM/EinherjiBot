@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class DatabaseDependencyInjectionExtensions
+    public static class DatabaseServiceCollectionExtensions
     {
         private static bool _guidRegistered = false;
 
