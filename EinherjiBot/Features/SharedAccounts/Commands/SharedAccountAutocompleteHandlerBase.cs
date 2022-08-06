@@ -15,7 +15,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
             ISharedAccountProvider provider = services.GetRequiredService<ISharedAccountProvider>();
             EinherjiInteractionContext ctx = (EinherjiInteractionContext)context;
 
-            IEnumerable<SharedAccount> servers = await provider.GetOfTypeAsync(this.AccountType, this.ForModeration, ctx.CancellationToken).ConfigureAwait(false);
+            IEnumerable<SharedAccount> servers = await provider.GetAuthorizedOfTypeAsync(this.AccountType, this.ForModeration, ctx.CancellationToken).ConfigureAwait(false);
 
             string input = autocompleteInteraction.Data.Current.Value.ToString();
             if (!string.IsNullOrEmpty(input))

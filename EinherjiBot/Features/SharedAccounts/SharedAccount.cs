@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.SharedAccounts
 {
-    public class SharedAccount : ICacheableEntity<Guid>
+    public class SharedAccount : ICacheableEntity<Guid>, ISharedAccount
     {
         [BsonId]
         public Guid ID { get; }
@@ -13,11 +13,11 @@ namespace TehGM.EinherjiBot.SharedAccounts
         [BsonElement("password")]
         public string Password { get; set; }
         [BsonElement("allowedUsers")]
-        public ICollection<ulong> AuthorizedUserIDs { get; }
+        public IEnumerable<ulong> AuthorizedUserIDs { get; set; }
         [BsonElement("allowedRoles")]
-        public ICollection<ulong> AuthorizedRoleIDs { get; }
+        public IEnumerable<ulong> AuthorizedRoleIDs { get; set; }
         [BsonElement("modUsers")]
-        public ICollection<ulong> ModUserIDs { get; }
+        public IEnumerable<ulong> ModUserIDs { get; set; }
 
         [BsonElement("modifiedByID")]
         public ulong? ModifiedByID { get; set; }
@@ -34,12 +34,8 @@ namespace TehGM.EinherjiBot.SharedAccounts
             this.ModUserIDs = new HashSet<ulong>(modUserIDs ?? Enumerable.Empty<ulong>());
         }
 
-        public SharedAccount(SharedAccountType accountType, string login, string password)
-            : this(Guid.NewGuid(), accountType, null, null, null)
-        {
-            this.Login = login;
-            this.Password = password;
-        }
+        public SharedAccount(SharedAccountType accountType)
+            : this(Guid.NewGuid(), accountType, null, null, null) { }
 
         public Guid GetCacheKey()
             => this.ID;

@@ -13,17 +13,17 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
         public class AccountCommands : EinherjiInteractionModule
         {
             private readonly ISharedAccountProvider _provider;
+            private readonly ISharedAccountImageProvider _imageProvider;
             private readonly IDiscordAuthorizationService _auth;
             private readonly IAuditStore<SharedAccountAuditEntry> _audit;
-            private readonly SharedAccountOptions _options;
 
-            public AccountCommands(ISharedAccountProvider provider, IDiscordAuthorizationService auth,
-                IAuditStore<SharedAccountAuditEntry> audit, IOptionsSnapshot<SharedAccountOptions> options)
+            public AccountCommands(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, 
+                IDiscordAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit)
             {
                 this._provider = provider;
+                this._imageProvider = imageProvider;
                 this._auth = auth;
                 this._audit = audit;
-                this._options = options.Value;
             }
 
             [SlashCommand("get", "Gets netflix account credentials", runMode: RunMode.Sync)]
@@ -93,7 +93,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
 
                 account.ModifiedByID = base.Context.User.Id;
                 account.ModifiedTimestamp = base.Context.Interaction.CreatedAt.UtcDateTime;
-                await this._provider.UpdateAsync(account, base.CancellationToken).ConfigureAwait(false);
+                await this._provider.AddOrUpdateAsync(account, base.CancellationToken).ConfigureAwait(false);
 
                 await this._audit.AddAuditAsync(SharedAccountAuditEntry.Updated(base.Context.User.Id, account.ID, base.Context.Interaction.CreatedAt.UtcDateTime), base.CancellationToken).ConfigureAwait(false);
                 EmbedBuilder embed = await this.CreateAccountEmbedAsync(account).ConfigureAwait(false);
@@ -106,9 +106,8 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                 EmbedBuilder embed = new EmbedBuilder()
                     .AddField("Login", account.Login)
                     .AddField("Password", account.Password)
-                    .WithColor(EinherjiColor.SuccessColor);
-                if (this._options.ImageURLs.TryGetValue(account.AccountType, out string imageURL))
-                    embed.WithThumbnailUrl(imageURL);
+                    .WithColor(EinherjiColor.SuccessColor)
+                    .WithThumbnailUrl(await this._imageProvider.GetAccountImageUrlAsync(account.AccountType));
                 if (account.ModifiedByID != null)
                 {
                     IUser user = await base.Context.Client.GetUserAsync(account.ModifiedByID.Value, base.CancellationToken).ConfigureAwait(false);
