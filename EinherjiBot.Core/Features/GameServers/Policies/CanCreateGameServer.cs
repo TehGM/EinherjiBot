@@ -1,5 +1,4 @@
 ﻿using TehGM.EinherjiBot.Security;
-using TehGM.EinherjiBot.Security.Authorization;
 using TehGM.EinherjiBot.Security.Policies;
 
 namespace TehGM.EinherjiBot.GameServers.Policies

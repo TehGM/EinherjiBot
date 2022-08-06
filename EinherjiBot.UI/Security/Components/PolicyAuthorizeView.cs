@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Rendering;
-using TehGM.EinherjiBot.Security.Authorization;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.UI.Security.Components
 {

@@ -1,5 +1,4 @@
 ﻿using TehGM.EinherjiBot.API;
-using TehGM.EinherjiBot.Security.Authorization;
 using TehGM.EinherjiBot.SharedAccounts.Policies;
 
 namespace TehGM.EinherjiBot.SharedAccounts.API.Services

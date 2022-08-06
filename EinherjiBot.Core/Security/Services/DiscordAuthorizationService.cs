@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace TehGM.EinherjiBot.Security.Authorization.Services
+namespace TehGM.EinherjiBot.Security.Services
 {
     public class DiscordAuthorizationService : IDiscordAuthorizationService
     {

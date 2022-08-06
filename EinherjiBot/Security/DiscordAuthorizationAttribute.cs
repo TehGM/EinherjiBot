@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TehGM.EinherjiBot.Security.Authorization
+namespace TehGM.EinherjiBot.Security
 {
     public interface IDiscordAuthorizationPolicyAttribute
     {

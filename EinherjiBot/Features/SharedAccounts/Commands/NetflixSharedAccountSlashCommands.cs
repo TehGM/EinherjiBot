@@ -2,7 +2,6 @@
 using Discord.Interactions;
 using TehGM.EinherjiBot.Auditing;
 using TehGM.EinherjiBot.Auditing.SharedAccounts;
-using TehGM.EinherjiBot.Security.Authorization;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Commands
 {

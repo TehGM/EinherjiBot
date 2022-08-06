@@ -1,5 +1,4 @@
 ﻿using TehGM.EinherjiBot.Security;
-using TehGM.EinherjiBot.Security.Authorization;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Policies
 {

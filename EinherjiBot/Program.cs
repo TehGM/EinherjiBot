@@ -18,6 +18,7 @@ using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Utilities;
 using TehGM.EinherjiBot.Security.API.Services;
 using TehGM.EinherjiBot.API.Services;
+using TehGM.EinherjiBot.Security.Services;
 
 namespace TehGM.EinherjiBot
 {
@@ -120,7 +121,7 @@ namespace TehGM.EinherjiBot
 
             app.UseAuthentication();
             app.UseMiddleware<AuthContextMiddleware>();
-            app.UseMiddleware<Security.Authorization.Services.DiscordAuthorizationMiddleware>();
+            app.UseMiddleware<DiscordAuthorizationMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();

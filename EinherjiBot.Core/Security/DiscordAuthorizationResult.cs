@@ -1,4 +1,4 @@
-﻿namespace TehGM.EinherjiBot.Security.Authorization
+﻿namespace TehGM.EinherjiBot.Security
 {
     public class DiscordAuthorizationResult
     {

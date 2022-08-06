@@ -6,8 +6,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.Security.API.Services;
-using TehGM.EinherjiBot.Security.Authorization;
-using TehGM.EinherjiBot.Security.Authorization.Services;
 using TehGM.EinherjiBot.Security.Services;
 
 namespace Microsoft.Extensions.DependencyInjection

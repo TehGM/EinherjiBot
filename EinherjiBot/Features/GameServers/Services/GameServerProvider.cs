@@ -1,5 +1,4 @@
 ﻿using TehGM.EinherjiBot.Caching;
-using TehGM.EinherjiBot.Security.Authorization;
 
 namespace TehGM.EinherjiBot.GameServers.Services
 {

@@ -1,6 +1,4 @@
-﻿using TehGM.EinherjiBot.Security.Authorization;
-
-namespace TehGM.EinherjiBot.GameServers.Policies
+﻿namespace TehGM.EinherjiBot.GameServers.Policies
 {
     public class CanAccessGameServer : IDiscordAuthorizationPolicy<GameServer>
     {
