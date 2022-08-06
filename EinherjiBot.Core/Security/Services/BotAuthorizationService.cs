@@ -52,12 +52,12 @@ namespace TehGM.EinherjiBot.Security.Services
         private Task<BotAuthorizationResult> ProcessPolicyAsync<TResource>(TResource resource, Type policy, CancellationToken cancellationToken = default)
         {
             object policyInstance = ActivatorUtilities.CreateInstance(this._services, policy);
-            if (policyInstance is IDiscordAuthorizationPolicy<TResource> pg)
+            if (policyInstance is IBotAuthorizationPolicy<TResource> pg)
                 return pg.EvaluateAsync(resource, cancellationToken);
             if (policyInstance is IBotAuthorizationPolicy p)
                 return p.EvaluateAsync(cancellationToken);
 
-            throw new ArgumentException($"Policy doesn't implement {nameof(IBotAuthorizationPolicy)} or {nameof(IDiscordAuthorizationPolicy<TResource>)} interface.");
+            throw new ArgumentException($"Policy doesn't implement {nameof(IBotAuthorizationPolicy)} or {nameof(IBotAuthorizationPolicy<TResource>)} interface.");
         }
     }
 }

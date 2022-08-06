@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.GameServers.Policies
 {
-    public class CanDeleteGameServer : IDiscordAuthorizationPolicy<GameServer>
+    public class CanDeleteGameServer : IBotAuthorizationPolicy<GameServer>
     {
         private readonly IDiscordAuthContext _auth;
 

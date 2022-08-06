@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.SharedAccounts.Policies
 {
-    public class CanDeleteSharedAccount : IDiscordAuthorizationPolicy<ISharedAccount>
+    public class CanDeleteSharedAccount : IBotAuthorizationPolicy<ISharedAccount>
     {
         private readonly IAuthProvider _auth;
 

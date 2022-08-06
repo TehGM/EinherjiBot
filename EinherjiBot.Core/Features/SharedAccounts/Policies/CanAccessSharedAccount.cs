@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.SharedAccounts.Policies
 {
-    public class CanAccessSharedAccount : IDiscordAuthorizationPolicy<ISharedAccount>
+    public class CanAccessSharedAccount : IBotAuthorizationPolicy<ISharedAccount>
     {
         private readonly IAuthProvider _auth;
 

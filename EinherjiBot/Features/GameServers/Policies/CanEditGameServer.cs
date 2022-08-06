@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.GameServers.Policies
 {
-    public class CanEditGameServer : IDiscordAuthorizationPolicy<GameServer>
+    public class CanEditGameServer : IBotAuthorizationPolicy<GameServer>
     {
         private readonly IDiscordAuthContext _auth;
 

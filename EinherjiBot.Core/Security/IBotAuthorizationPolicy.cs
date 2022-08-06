@@ -5,7 +5,7 @@
         Task<BotAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default);
     }
 
-    public interface IDiscordAuthorizationPolicy<in TResource>
+    public interface IBotAuthorizationPolicy<in TResource>
     {
         Task<BotAuthorizationResult> EvaluateAsync(TResource resource, CancellationToken cancellationToken = default);
     }
