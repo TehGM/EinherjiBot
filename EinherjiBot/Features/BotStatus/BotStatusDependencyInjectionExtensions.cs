@@ -20,8 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddPlaceholdersEngineBackend();
             services.TryAddSingleton<IStatusStore, MongoStatusStore>();
             services.TryAddScoped<IStatusProvider, StatusProvider>();
-            services.TryAddSingleton<IStatusService, RandomStatusService>();
-            services.AddHostedService<RandomStatusService>(s => (RandomStatusService)s.GetRequiredService<IStatusService>());
+            services.TryAddScoped<IBotStatusSetter, BotStatusSetter>();
+            services.AddHostedService<AutoStatusService>();
 
             services.TryAddTransient<IBotStatusService, ApiBotStatusService>();
 

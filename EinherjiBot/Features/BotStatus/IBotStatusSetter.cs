@@ -1,8 +1,8 @@
 ﻿namespace TehGM.EinherjiBot.BotStatus
 {
-    public interface IStatusService
+    public interface IBotStatusSetter
     {
-        //Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken = default);
+        Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken = default);
         Task SetStatusAsync(Status status, CancellationToken cancellationToken = default);
     }
 }

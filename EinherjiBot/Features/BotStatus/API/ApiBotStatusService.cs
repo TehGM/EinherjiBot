@@ -3,9 +3,9 @@
     public class ApiBotStatusService : IBotStatusService
     {
         private readonly IStatusProvider _provider;
-        private readonly IStatusService _service;
+        private readonly IBotStatusSetter _service;
 
-        public ApiBotStatusService(IStatusProvider provider, IStatusService service)
+        public ApiBotStatusService(IStatusProvider provider, IBotStatusSetter service)
         {
             this._provider = provider;
             this._service = service;
