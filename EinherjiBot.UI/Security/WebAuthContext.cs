@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 
@@ -17,20 +16,22 @@ namespace TehGM.EinherjiBot.UI.Security
         public IEnumerable<string> BotRoles { get; }
         // web auth context will never have banned flag, as they'll simply not get authed by backend
         bool IAuthContext.IsBanned => false;
+        public IEnumerable<string> BotFeatures { get; }
 
-        public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, IEnumerable<string> roles)
+        public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, IEnumerable<string> roles, IEnumerable<string> botFeatures)
         {
             this.ID = id;
             this.Username = username;
             this.Discriminator = discriminator;
             this.AvatarHash = avatarHash;
             this.BotRoles = new HashSet<string>(roles ?? Enumerable.Empty<string>());
+            this.BotFeatures = botFeatures;
         }
 
         private WebAuthContext() { }
 
         public static WebAuthContext FromLoginResponse(LoginResponse response)
-            => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles);
+            => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features);
 
         public override string ToString()
             => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();

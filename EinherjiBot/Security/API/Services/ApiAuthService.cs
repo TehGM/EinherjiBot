@@ -9,16 +9,18 @@ namespace TehGM.EinherjiBot.Security.API.Services
         private readonly IJwtGenerator _jwtGenerator;
         private readonly IRefreshTokenGenerator _refreshTokenGenerator;
         private readonly IRefreshTokenStore _refreshTokenStore;
+        private readonly IUserFeatureProvider _userFeatures;
         private readonly JwtOptions _options;
 
         public ApiAuthService(IDiscordAuthProvider auth, IDiscordAuthHttpClient client, IJwtGenerator jwtGenerator, IRefreshTokenGenerator refreshTokenGenerator,
-            IRefreshTokenStore refreshTokenStore, IOptionsSnapshot<JwtOptions> options)
+            IRefreshTokenStore refreshTokenStore, IUserFeatureProvider userFeatures, IOptionsSnapshot<JwtOptions> options)
         {
             this._auth = auth;
             this._client = client;
             this._jwtGenerator = jwtGenerator;
             this._refreshTokenGenerator = refreshTokenGenerator;
             this._refreshTokenStore = refreshTokenStore;
+            this._userFeatures = userFeatures;
             this._options = options.Value;
         }
 
@@ -41,17 +43,18 @@ namespace TehGM.EinherjiBot.Security.API.Services
         private async Task<LoginResponse> AuthenticateAsync(DiscordAccessTokenResponse accessToken, CancellationToken cancellationToken)
         {
             UserInfoResponse currentUser = await this._client.GetCurrentUserAsync(accessToken.AccessToken, cancellationToken).ConfigureAwait(false);
-            UserSecurityData securityData = await this._auth.GetUserSecurityDataAsync(currentUser.ID, cancellationToken).ConfigureAwait(false);
-            if (securityData.IsBanned)
+            IDiscordAuthContext context = await this._auth.GetAsync(currentUser.ID, null, cancellationToken).ConfigureAwait(false);
+            if (context.IsBanned)
                 return null;
 
+            Task<IEnumerable<string>> featuresTask = this._userFeatures.GetForUserAsync(context, cancellationToken);
             Task<IEnumerable<UserGuildInfoResponse>> guildsTask = this._client.GetCurrentUserGuildsAsync(accessToken.AccessToken, cancellationToken);
-            RefreshToken refreshToken = this._refreshTokenGenerator.Generate(securityData.ID, accessToken.RefreshToken);
+            RefreshToken refreshToken = this._refreshTokenGenerator.Generate(context.ID, accessToken.RefreshToken);
             Task persistTokenTask = this._refreshTokenStore.AddAsync(refreshToken, cancellationToken);
 
-            string jwt = this._jwtGenerator.Generate(securityData);
-            await Task.WhenAll(guildsTask, persistTokenTask).ConfigureAwait(false);
-            return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, securityData.Roles)
+            string jwt = this._jwtGenerator.Generate(context);
+            await Task.WhenAll(guildsTask, persistTokenTask, featuresTask).ConfigureAwait(false);
+            return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, context.BotRoles, featuresTask.Result)
             {
                 Guilds = guildsTask.Result
             };

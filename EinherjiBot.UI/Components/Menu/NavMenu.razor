@@ -29,25 +29,30 @@
                 </div>
                 <AuthorizeView>
                     <Authorized>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="/intel" Match="NavLinkMatch.Prefix">
-                                <span class="bi bi-eye" aria-hidden="true"></span>
-                                <span class="text">Intel</span>
-                            </NavLink>
-                        </div>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="/shared-accounts" Match="NavLinkMatch.Prefix">
-                                <span class="bi bi-people" aria-hidden="true"></span>
-                                <span class="text">Shared Accounts</span>
-                            </NavLink>
-                        </div>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="/game-servers" Match="NavLinkMatch.Prefix">
-                                <span class="bi bi-controller" aria-hidden="true"></span>
-                                <span class="text">Game Servers</span>
-                            </NavLink>
-                        </div>
-
+                        <PolicyAuthorizeView PolicyType="typeof(HasIntelFeature)" Context="Intel">
+                            <div class="nav-item">
+                                <NavLink class="nav-link" href="/intel" Match="NavLinkMatch.Prefix">
+                                    <span class="bi bi-eye" aria-hidden="true"></span>
+                                    <span class="text">Intel</span>
+                                </NavLink>
+                            </div>
+                        </PolicyAuthorizeView>
+                        <PolicyAuthorizeView PolicyType="typeof(HasSharedAccountsFeature)" Context="SharedAccounts">
+                            <div class="nav-item">
+                                <NavLink class="nav-link" href="/shared-accounts" Match="NavLinkMatch.Prefix">
+                                    <span class="bi bi-people" aria-hidden="true"></span>
+                                    <span class="text">Shared Accounts</span>
+                                </NavLink>
+                            </div>
+                        </PolicyAuthorizeView>
+                        <PolicyAuthorizeView PolicyType="typeof(HasGameServersFeature)" Context="GameServers">
+                            <div class="nav-item">
+                                <NavLink class="nav-link" href="/game-servers" Match="NavLinkMatch.Prefix">
+                                    <span class="bi bi-controller" aria-hidden="true"></span>
+                                    <span class="text">Game Servers</span>
+                                </NavLink>
+                            </div>
+                        </PolicyAuthorizeView>
                         <PolicyAuthorizeView PolicyType="typeof(AuthorizeAdmin)">
                             <Authorized Context="AuthorizeAdmin">
                                 <div class="nav-item">

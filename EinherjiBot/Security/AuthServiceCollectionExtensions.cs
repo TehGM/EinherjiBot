@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IAuthService, ApiAuthService>();
             services.TryAddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 
+            services.TryAddScoped<IUserFeatureProvider, UserFeatureProvider>();
             services.TryAddSingleton<IRefreshTokenStore, MongoRefreshTokenStore>();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

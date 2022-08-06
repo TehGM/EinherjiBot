@@ -2,6 +2,6 @@
 {
     public interface IJwtGenerator
     {
-        string Generate(UserSecurityData userData);
+        string Generate(IAuthContext context);
     }
 }

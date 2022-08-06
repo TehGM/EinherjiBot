@@ -17,11 +17,11 @@ namespace TehGM.EinherjiBot.Security.API.Services
             this._handler.SetDefaultTimesOnTokenCreation = false;
         }
 
-        public string Generate(UserSecurityData userData)
+        public string Generate(IAuthContext context)
         {
             ClaimsIdentity subject = new ClaimsIdentity(JwtBearerDefaults.AuthenticationScheme, ClaimNames.UserID, ClaimNames.Roles);
-            subject.AddClaim(new Claim(ClaimNames.UserID, userData.ID.ToString()));
-            foreach (string role in userData.Roles)
+            subject.AddClaim(new Claim(ClaimNames.UserID, context.ID.ToString()));
+            foreach (string role in context.BotRoles)
                 subject.AddClaim(new Claim(ClaimNames.Roles, role));
 
             SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()

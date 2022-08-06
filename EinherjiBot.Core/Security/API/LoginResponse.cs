@@ -15,19 +15,22 @@ namespace TehGM.EinherjiBot.Security.API
         public UserInfoResponse User { get; init; }
         [JsonProperty("roles")]
         public IEnumerable<string> Roles { get; init; }
+        [JsonProperty("features")]
+        public IEnumerable<string> Features { get; init; }
         [JsonProperty("guilds", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<UserGuildInfoResponse> Guilds { get; init; }
 
         [JsonConstructor]
         private LoginResponse() { }
 
-        public LoginResponse(string token, string refreshToken, TimeSpan expiration, UserInfoResponse user, IEnumerable<string> roles)
+        public LoginResponse(string token, string refreshToken, TimeSpan expiration, UserInfoResponse user, IEnumerable<string> roles, IEnumerable<string> features)
         {
             this.Token = token;
             this.RefreshToken = refreshToken;
             this.TokenExpirationSeconds = (uint)expiration.TotalSeconds;
             this.User = user;
             this.Roles = roles;
+            this.Features = features;
         }
     }
 }
