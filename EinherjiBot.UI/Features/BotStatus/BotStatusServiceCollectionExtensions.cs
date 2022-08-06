@@ -4,7 +4,7 @@ using TehGM.EinherjiBot.UI.BotStatus.API;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class BotStatusDependencyInjectionExtensions
+    public static class BotStatusServiceCollectionExtensions
     {
         public static IServiceCollection AddBotStatusFrontend(this IServiceCollection services)
         {
