@@ -56,7 +56,9 @@ namespace TehGM.EinherjiBot.Security.API.Services
             await Task.WhenAll(guildsTask, persistTokenTask, featuresTask).ConfigureAwait(false);
             return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, context.BotRoles, featuresTask.Result)
             {
-                Guilds = guildsTask.Result
+                Guilds = guildsTask.Result,
+                KnownDiscordGuildIDs = context.KnownDiscordGuildIDs,
+                KnownDiscordRoleIDs = context.KnownDiscordRoleIDs
             };
         }
 

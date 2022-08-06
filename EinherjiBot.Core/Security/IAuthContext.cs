@@ -9,6 +9,11 @@
         IEnumerable<string> BotRoles { get; }
         bool IsBanned { get; }
 
+        /// <summary>User's guilds that bot can track.</summary>
+        IEnumerable<ulong> KnownDiscordGuildIDs { get; }
+        /// <summary>User's roles that bot can track.</summary>
+        IEnumerable<ulong> KnownDiscordRoleIDs { get; }
+
         string GetUsernameWithDiscriminator()
             => $"{this.Username}#{this.Discriminator}";
 

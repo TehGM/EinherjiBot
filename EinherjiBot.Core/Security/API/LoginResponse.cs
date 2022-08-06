@@ -20,6 +20,11 @@ namespace TehGM.EinherjiBot.Security.API
         [JsonProperty("guilds", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<UserGuildInfoResponse> Guilds { get; init; }
 
+        [JsonProperty("knownGuilds")]
+        public IEnumerable<ulong> KnownDiscordGuildIDs { get; init; }
+        [JsonProperty("knownRoles")]
+        public IEnumerable<ulong> KnownDiscordRoleIDs { get; set; }
+
         [JsonConstructor]
         private LoginResponse() { }
 
