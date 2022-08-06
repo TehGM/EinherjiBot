@@ -3,6 +3,7 @@
     public static class UserRole
     {
         public const string Admin = "Admin";
+        public const string EinherjiBot = "EinherjiBot";
         public const string GameServerCreator = "GameServerCreator";
         public const string SharedAccountCreator = "SharedAccountCreator";
     }

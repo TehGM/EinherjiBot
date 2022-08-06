@@ -42,6 +42,18 @@ namespace TehGM.EinherjiBot.Security.Services
             return new DiscordSocketAuthContext(userTask.Result, guild, guildUserTask.Result, knownIDsTask.Result.KnownGuildIDs, knownIDsTask.Result.KnownRoleIDs, dataTask.Result);
         }
 
+        public async Task<IDiscordAuthContext> GetBotContextAsync(CancellationToken cancellationToken = default)
+        {
+            IUser user = this._client.CurrentUser;
+            IEnumerable<IGuild> guilds = await this._client.GetGuildsAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            KnownIDs knownIDs = await this.GetKnownIDsAsync(user.Id, guilds, cancellationToken).ConfigureAwait(false);
+
+            UserSecurityData securityData = new UserSecurityData(user.Id);
+            securityData.Roles.Add(UserRole.EinherjiBot);
+
+            return new DiscordSocketAuthContext(user, null, null, knownIDs.KnownGuildIDs, knownIDs.KnownRoleIDs, securityData);
+        }
+
         private async Task<KnownIDs> GetKnownIDsAsync(ulong userID, IEnumerable<IGuild> guilds, CancellationToken cancellationToken)
         {
             List<ulong> guildIDs = new List<ulong>(guilds.Count());
