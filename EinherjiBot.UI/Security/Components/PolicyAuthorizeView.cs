@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
         public RouteData RouteData { get; set; } = default!;
 
         [Inject]
-        private IDiscordAuthorizationService AuthService { get; set; }
+        private IBotAuthorizationService AuthService { get; set; }
         [CascadingParameter]
         private Task<AuthenticationState> AuthenticationStateTask { get; set; }
 
@@ -39,7 +39,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
         {
             this._allPolicies = this.GetPolicies();
             this._currentAuthenticationState = await this.AuthenticationStateTask.ConfigureAwait(false);
-            DiscordAuthorizationResult result = await this.AuthService.AuthorizeAsync(this._allPolicies).ConfigureAwait(false);
+            BotAuthorizationResult result = await this.AuthService.AuthorizeAsync(this._allPolicies).ConfigureAwait(false);
             this._isAuthorized = result.Succeeded;
         }
 

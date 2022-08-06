@@ -9,10 +9,10 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         private readonly IEntityCache<Guid, Status> _cache;
         private readonly ILockProvider _lock;
         private readonly ILogger _log;
-        private readonly IDiscordAuthorizationService _auth;
+        private readonly IBotAuthorizationService _auth;
 
         public StatusProvider(IStatusStore store, IEntityCache<Guid, Status> cache, 
-            ILockProvider<StatusProvider> lockProvider, IDiscordAuthorizationService auth, ILogger<StatusProvider> log)
+            ILockProvider<StatusProvider> lockProvider, IBotAuthorizationService auth, ILogger<StatusProvider> log)
         {
             this._store = store;
             this._cache = cache;
@@ -92,7 +92,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
 
         private async Task ThrowIfUnauthorizedAsync(CancellationToken cancellationToken)
         {
-            DiscordAuthorizationResult result = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
+            BotAuthorizationResult result = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
             if (!result.Succeeded)
                 throw new AccessForbiddenException("Only admins can access bot's status management feature");
         }

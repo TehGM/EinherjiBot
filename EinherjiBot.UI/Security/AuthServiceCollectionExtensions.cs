@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
-            services.TryAddTransient<IDiscordAuthorizationService, DiscordAuthorizationService>();
+            services.TryAddTransient<IBotAuthorizationService, BotAuthorizationService>();
             services.TryAddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
             services.TryAddScoped<IAuthProvider>(s => s.GetRequiredService<IWebAuthProvider>());
             services.TryAddScoped<AuthenticationStateProvider>(s => (AuthenticationStateProvider)s.GetRequiredService<IWebAuthProvider>());

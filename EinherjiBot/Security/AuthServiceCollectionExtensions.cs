@@ -26,9 +26,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddScoped<IDiscordAuthContext>(services => services.GetRequiredService<IDiscordAuthProvider>().User);
             services.TryAddScoped<IAuthContext>(services => services.GetRequiredService<IDiscordAuthContext>());
 
-            services.TryAddTransient<IDiscordAuthorizationService, DiscordAuthorizationService>();
+            services.TryAddTransient<IBotAuthorizationService, BotAuthorizationService>();
             services.TryAddScoped<AuthContextMiddleware>();
-            services.TryAddScoped<DiscordAuthorizationMiddleware>();
+            services.TryAddScoped<BotAuthorizationMiddleware>();
 
             services.AddHttpClient<IDiscordAuthHttpClient, DiscordAuthHttpClient>();
             services.TryAddTransient<IDiscordHttpClient>(services => services.GetRequiredService<IDiscordAuthHttpClient>());

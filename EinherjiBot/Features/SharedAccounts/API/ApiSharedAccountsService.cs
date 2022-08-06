@@ -8,9 +8,9 @@ namespace TehGM.EinherjiBot.SharedAccounts.API.Services
         private readonly ISharedAccountProvider _provider;
         private readonly ISharedAccountImageProvider _imageProvider;
         private readonly IAuthContext _user;
-        private readonly IDiscordAuthorizationService _auth;
+        private readonly IBotAuthorizationService _auth;
 
-        public ApiSharedAccountsService(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, IAuthContext user, IDiscordAuthorizationService auth)
+        public ApiSharedAccountsService(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, IAuthContext user, IBotAuthorizationService auth)
         {
             this._provider = provider;
             this._imageProvider = imageProvider;
@@ -77,7 +77,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.API.Services
 
         private async Task<SharedAccountResponse> CreateResponseAsync(ISharedAccount account, CancellationToken cancellationToken)
         {
-            DiscordAuthorizationResult modifyAuthorization = await this._auth.AuthorizeAsync(account, typeof(CanEditSharedAccount), cancellationToken).ConfigureAwait(false);
+            BotAuthorizationResult modifyAuthorization = await this._auth.AuthorizeAsync(account, typeof(CanEditSharedAccount), cancellationToken).ConfigureAwait(false);
             IEnumerable<ulong> authorizedUserIDs = modifyAuthorization.Succeeded ? account.AuthorizedUserIDs : null;
             IEnumerable<ulong> authorizedRoleIDs = modifyAuthorization.Succeeded ? account.AuthorizedRoleIDs : null;
             IEnumerable<ulong> modUserIDs = modifyAuthorization.Succeeded ? account.ModUserIDs : null;

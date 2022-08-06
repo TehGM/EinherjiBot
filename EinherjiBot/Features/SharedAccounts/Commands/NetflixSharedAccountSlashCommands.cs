@@ -13,11 +13,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
         {
             private readonly ISharedAccountProvider _provider;
             private readonly ISharedAccountImageProvider _imageProvider;
-            private readonly IDiscordAuthorizationService _auth;
+            private readonly IBotAuthorizationService _auth;
             private readonly IAuditStore<SharedAccountAuditEntry> _audit;
 
             public AccountCommands(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, 
-                IDiscordAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit)
+                IBotAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit)
             {
                 this._provider = provider;
                 this._imageProvider = imageProvider;
@@ -61,7 +61,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                     await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested shared account not found.", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
-                DiscordAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, 
+                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, 
                     new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) }, base.CancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
                 {

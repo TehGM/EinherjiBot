@@ -2,9 +2,9 @@
 {
     public static class DiscordAuthorizationServiceExtensions
     {
-        public static Task<DiscordAuthorizationResult> AuthorizeAsync(this IDiscordAuthorizationService service, Type policy, CancellationToken cancellationToken = default)
+        public static Task<BotAuthorizationResult> AuthorizeAsync(this IBotAuthorizationService service, Type policy, CancellationToken cancellationToken = default)
             => service.AuthorizeAsync(new[] { policy }, cancellationToken);
-        public static Task<DiscordAuthorizationResult> AuthorizeAsync<TResource>(this IDiscordAuthorizationService service, TResource resource, Type policy, CancellationToken cancellationToken = default)
+        public static Task<BotAuthorizationResult> AuthorizeAsync<TResource>(this IBotAuthorizationService service, TResource resource, Type policy, CancellationToken cancellationToken = default)
             => service.AuthorizeAsync(resource, new[] { policy }, cancellationToken);
     }
 }

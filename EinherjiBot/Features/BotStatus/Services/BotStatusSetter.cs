@@ -12,11 +12,11 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         private readonly IRandomizer _randomizer;
         private readonly IStatusProvider _provider;
         private readonly IPlaceholdersEngine _placeholders;
-        private readonly IDiscordAuthorizationService _auth;
+        private readonly IBotAuthorizationService _auth;
         private readonly ILogger _log;
 
         public BotStatusSetter(DiscordSocketClient client, IRandomizer randomizer, IStatusProvider provider, IPlaceholdersEngine placeholders, 
-            IDiscordAuthorizationService auth, ILogger<BotStatusSetter> log)
+            IBotAuthorizationService auth, ILogger<BotStatusSetter> log)
         {
             this._client = client;
             this._randomizer = randomizer;
@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             if (this._client.CurrentUser == null || this._client.ConnectionState != ConnectionState.Connected)
                 return null;
 
-            DiscordAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
+            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException("You are not authorized to change bot's status");
 
@@ -57,7 +57,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
 
         public async Task SetStatusAsync(Status status, CancellationToken cancellationToken = default)
         {
-            DiscordAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
+            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException("You are not authorized to change bot's status");
 

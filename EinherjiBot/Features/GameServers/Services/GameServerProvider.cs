@@ -4,14 +4,14 @@ namespace TehGM.EinherjiBot.GameServers.Services
 {
     public class GameServerProvider : IGameServerProvider
     {
-        private readonly IDiscordAuthorizationService _authService;
+        private readonly IBotAuthorizationService _authService;
         private readonly IGameServerStore _store;
         private readonly IEntityCache<Guid, GameServer> _cache;
         private readonly ILockProvider _lock;
         private readonly ILogger _log;
 
         public GameServerProvider(IGameServerStore store, IEntityCache<Guid, GameServer> cache, 
-            IDiscordAuthorizationService authService, ILogger<GameServerProvider> log, ILockProvider<GameServerProvider> lockProvider)
+            IBotAuthorizationService authService, ILogger<GameServerProvider> log, ILockProvider<GameServerProvider> lockProvider)
         {
             this._store = store;
             this._cache = cache;
@@ -38,7 +38,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
 
                 if (result != null)
                     this._cache.AddOrReplace(result);
-                DiscordAuthorizationResult authorization = await this._authService.AuthorizeAsync(result, typeof(Policies.CanAccessGameServer), cancellationToken).ConfigureAwait(false);
+                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(result, typeof(Policies.CanAccessGameServer), cancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
                     result = null;
                 return result;
@@ -60,7 +60,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
                 List<GameServer> results = new List<GameServer>(allServers.Count());
                 foreach (GameServer server in allServers)
                 {
-                    DiscordAuthorizationResult authorization = await this._authService.AuthorizeAsync(server, typeof(Policies.CanAccessGameServer), cancellationToken).ConfigureAwait(false);
+                    BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(server, typeof(Policies.CanAccessGameServer), cancellationToken).ConfigureAwait(false);
                     if (authorization.Succeeded)
                         results.Add(server);
                 }
@@ -91,7 +91,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
             GameServer existing = await this.GetAsync(server.ID, cancellationToken).ConfigureAwait(false);
             if (existing != null)
             {
-                DiscordAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing, typeof(Policies.CanEditGameServer), cancellationToken).ConfigureAwait(false);
+                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing, typeof(Policies.CanEditGameServer), cancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
                     throw new InvalidOperationException($"No permissions to edit game server {server.ID}");
             }
@@ -104,7 +104,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
             GameServer existing = await this.GetAsync(id, cancellationToken).ConfigureAwait(false);
             if (existing != null)
             {
-                DiscordAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing, typeof(Policies.CanDeleteGameServer), cancellationToken).ConfigureAwait(false);
+                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing, typeof(Policies.CanDeleteGameServer), cancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
                     throw new InvalidOperationException($"No permissions to delete game server {id}");
             }

@@ -9,11 +9,11 @@
             this._auth = auth;
         }
 
-        public Task<DiscordAuthorizationResult> EvaluateAsync(GameServer resource, CancellationToken cancellationToken = default)
+        public Task<BotAuthorizationResult> EvaluateAsync(GameServer resource, CancellationToken cancellationToken = default)
         {
             if (this._auth.IsAdmin())
-                return Task.FromResult(DiscordAuthorizationResult.Success);
-            return Task.FromResult(DiscordAuthorizationResult.Fail("You have no permission to edit this game server."));
+                return Task.FromResult(BotAuthorizationResult.Success);
+            return Task.FromResult(BotAuthorizationResult.Fail("You have no permission to edit this game server."));
         }
     }
 

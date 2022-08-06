@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.UI.Security.Policies
 {
-    public class HasSharedAccountsFeature : IDiscordAuthorizationPolicy
+    public class HasSharedAccountsFeature : IBotAuthorizationPolicy
     {
         private readonly IWebAuthProvider _provider;
 
@@ -11,12 +11,12 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
             this._provider = provider;
         }
 
-        public Task<DiscordAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
+        public Task<BotAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
         {
             if (this._provider.UserFeatures.Contains(UserFeature.SharedAccounts))
-                return Task.FromResult(DiscordAuthorizationResult.Success);
+                return Task.FromResult(BotAuthorizationResult.Success);
 
-            return Task.FromResult(DiscordAuthorizationResult.Fail("You have no access to Shared Accounts feature"));
+            return Task.FromResult(BotAuthorizationResult.Fail("You have no access to Shared Accounts feature"));
         }
     }
 

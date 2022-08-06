@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.UI.Security.Policies
 {
-    public class HasGameServersFeature : IDiscordAuthorizationPolicy
+    public class HasGameServersFeature : IBotAuthorizationPolicy
     {
         private readonly IWebAuthProvider _provider;
 
@@ -11,12 +11,12 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
             this._provider = provider;
         }
 
-        public Task<DiscordAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
+        public Task<BotAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
         {
             if (this._provider.UserFeatures.Contains(UserFeature.GameServers))
-                return Task.FromResult(DiscordAuthorizationResult.Success);
+                return Task.FromResult(BotAuthorizationResult.Success);
 
-            return Task.FromResult(DiscordAuthorizationResult.Fail("You have no access to Game Servers feature"));
+            return Task.FromResult(BotAuthorizationResult.Fail("You have no access to Game Servers feature"));
         }
     }
 

@@ -5,12 +5,12 @@ using System.Net;
 
 namespace TehGM.EinherjiBot.Security.Services
 {
-    public class DiscordAuthorizationMiddleware : IMiddleware
+    public class BotAuthorizationMiddleware : IMiddleware
     {
         private readonly IAuthContext _auth;
-        private readonly IDiscordAuthorizationService _service;
+        private readonly IBotAuthorizationService _service;
 
-        public DiscordAuthorizationMiddleware(IAuthContext auth, IDiscordAuthorizationService service)
+        public BotAuthorizationMiddleware(IAuthContext auth, IBotAuthorizationService service)
         {
             this._auth = auth;
             this._service = service;
@@ -53,7 +53,7 @@ namespace TehGM.EinherjiBot.Security.Services
                 return;
             }
 
-            DiscordAuthorizationResult result = await this._service.AuthorizeAsync(policies.Select(p => p.PolicyType), context.RequestAborted).ConfigureAwait(false);
+            BotAuthorizationResult result = await this._service.AuthorizeAsync(policies.Select(p => p.PolicyType), context.RequestAborted).ConfigureAwait(false);
             if (!result.Succeeded)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

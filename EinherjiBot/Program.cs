@@ -121,7 +121,7 @@ namespace TehGM.EinherjiBot
 
             app.UseAuthentication();
             app.UseMiddleware<AuthContextMiddleware>();
-            app.UseMiddleware<DiscordAuthorizationMiddleware>();
+            app.UseMiddleware<BotAuthorizationMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();

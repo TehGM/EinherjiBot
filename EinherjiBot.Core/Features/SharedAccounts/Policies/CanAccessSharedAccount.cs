@@ -11,13 +11,13 @@ namespace TehGM.EinherjiBot.SharedAccounts.Policies
             this._auth = auth;
         }
 
-        public Task<DiscordAuthorizationResult> EvaluateAsync(ISharedAccount resource, CancellationToken cancellationToken = default)
+        public Task<BotAuthorizationResult> EvaluateAsync(ISharedAccount resource, CancellationToken cancellationToken = default)
         {
             if (this._auth.IsAdmin()
                 || resource.AuthorizedUserIDs?.Contains(this._auth.ID) == true
                 || resource.AuthorizedRoleIDs?.Intersect(this._auth.KnownDiscordRoleIDs).Any() == true)
-                return Task.FromResult(DiscordAuthorizationResult.Success);
-            return Task.FromResult(DiscordAuthorizationResult.Fail("You have no permission to access this shared account."));
+                return Task.FromResult(BotAuthorizationResult.Success);
+            return Task.FromResult(BotAuthorizationResult.Fail("You have no permission to access this shared account."));
         }
     }
 }

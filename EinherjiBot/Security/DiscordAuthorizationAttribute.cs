@@ -25,8 +25,8 @@ namespace TehGM.EinherjiBot.Security
             if (auth.IsBanned)
                 return PreconditionResult.FromError($"You're banned in {EinherjiInfo.Name} system.");
 
-            IDiscordAuthorizationService authService = services.GetRequiredService<IDiscordAuthorizationService>();
-            DiscordAuthorizationResult result = await authService.AuthorizeAsync(new[] { this.PolicyType }).ConfigureAwait(false);
+            IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
+            BotAuthorizationResult result = await authService.AuthorizeAsync(new[] { this.PolicyType }).ConfigureAwait(false);
             if (!result.Succeeded)
                 return PreconditionResult.FromError(result.Reason ?? "You lack privileges to do this.");
             return PreconditionResult.FromSuccess();
@@ -52,8 +52,8 @@ namespace TehGM.EinherjiBot.Security
             if (auth.IsBanned)
                 return PreconditionResult.FromError($"You're banned in {EinherjiInfo.Name} system.");
 
-            IDiscordAuthorizationService authService = services.GetRequiredService<IDiscordAuthorizationService>();
-            DiscordAuthorizationResult result = await authService.AuthorizeAsync(resource, new[] { this.PolicyType }).ConfigureAwait(false);
+            IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
+            BotAuthorizationResult result = await authService.AuthorizeAsync(resource, new[] { this.PolicyType }).ConfigureAwait(false);
             if (!result.Succeeded)
                 return PreconditionResult.FromError(result.Reason ?? "You lack privileges to do this.");
             return PreconditionResult.FromSuccess();
