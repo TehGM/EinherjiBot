@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMongoDB();
             services.AddEntityCaching();
             services.TryAddSingleton<IMessageTriggersStore, MongoMessageTriggersStore>();
-            services.TryAddSingleton<IMessageTriggersProvider, MessageTriggersProvider>();
+            services.TryAddScoped<IMessageTriggersProvider, MessageTriggersProvider>();
             services.AddHostedService<DiscordMessageTriggersListener>();
 
             MapActions();

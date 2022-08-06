@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using TehGM.EinherjiBot.DiscordClient;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.Utilities.Randomization;
@@ -13,20 +14,20 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         private readonly IDiscordConnection _connection;
         private readonly IRandomizer _randomizer;
         private readonly IPlaceholdersEngine _placeholders;
-        private readonly IStatusProvider _provider;
+        private readonly IServiceProvider _services;
         private readonly ILogger _log;
         private readonly IOptionsMonitor<BotStatusOptions> _options;
 
         private DateTime _lastChangeUtc;
 
-        public RandomStatusService(DiscordSocketClient client, IDiscordConnection connection, IRandomizer randomizer, IPlaceholdersEngine placeholders, IStatusProvider provider,
-            ILogger<RandomStatusService> log, IOptionsMonitor<BotStatusOptions> options)
+        public RandomStatusService(DiscordSocketClient client, IDiscordConnection connection, IRandomizer randomizer, IPlaceholdersEngine placeholders,
+            IServiceProvider services, ILogger<RandomStatusService> log, IOptionsMonitor<BotStatusOptions> options)
         {
             this._client = client;
             this._connection = connection;
             this._randomizer = randomizer;
             this._placeholders = placeholders;
-            this._provider = provider;
+            this._services = services;
             this._log = log;
             this._options = options;
         }
@@ -49,8 +50,13 @@ namespace TehGM.EinherjiBot.BotStatus.Services
                     await Task.Delay(remainingWait, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    await this.RandomizeStatusAsync(cancellationToken).ConfigureAwait(false);
+                    using IServiceScope scope = this._services.CreateScope();
+                    IDiscordAuthProvider auth = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+                    auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
+
+                    await this.RandomizeStatusInternalAsync(scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
                 }
+                catch (Exception ex) when (ex.LogAsError(this._log, "Error when randomizing status")) { }
                 finally
                 {
                     this._lastChangeUtc = DateTime.UtcNow;
@@ -60,14 +66,19 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             }
         }
 
-        public async Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken)
+
+        public Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken = default)
+            => this.RandomizeStatusInternalAsync(this._services, cancellationToken);
+
+        private async Task<Status> RandomizeStatusInternalAsync(IServiceProvider services, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (this._client.CurrentUser == null || this._client.ConnectionState != ConnectionState.Connected)
                 return null;
 
-            IEnumerable<Status> statuses = await this._provider.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            IStatusProvider provider = services.GetRequiredService<IStatusProvider>();
+            IEnumerable<Status> statuses = await provider.GetAllAsync(cancellationToken).ConfigureAwait(false);
             statuses = statuses.Where(s => s.IsEnabled);
             if (!statuses.Any())
                 return null;

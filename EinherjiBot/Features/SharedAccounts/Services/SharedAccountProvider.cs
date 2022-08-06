@@ -9,15 +9,16 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
         private readonly ISharedAccountStore _store;
         private readonly IEntityCache<Guid, SharedAccount> _cache;
         private readonly ILogger _log;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private readonly ILockProvider _lock;
 
         public SharedAccountProvider(ISharedAccountStore store, IEntityCache<Guid, SharedAccount> cache, 
-            IDiscordAuthorizationService authService, ILogger<SharedAccountProvider> log)
+            IDiscordAuthorizationService authService, ILogger<SharedAccountProvider> log, ILockProvider<SharedAccountProvider> lockProvider)
         {
             this._store = store;
             this._cache = cache;
             this._log = log;
             this._authService = authService;
+            this._lock = lockProvider;
 
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
         }
@@ -120,11 +121,6 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             IEnumerable<SharedAccount> results = await this._store.FindAsync(null, null, null, false, cancellationToken).ConfigureAwait(false);
             foreach (SharedAccount result in results)
                 this._cache.AddOrReplace(result);
-        }
-
-        public void Dispose()
-        {
-            try { this._lock?.Dispose(); } catch { }
         }
     }
 }

@@ -8,16 +8,17 @@ namespace TehGM.EinherjiBot.Intel.Services
         private readonly IDiscordClient _client;
         private readonly IEntityCache<ulong, UserIntel> _historyCache;
         private readonly IUserIntelStore _historyStore;
+        private readonly ILockProvider _lock;
         private readonly ILogger _log;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public UserIntelProvider(IDiscordClient client, ILogger<UserIntelProvider> log, 
-            IEntityCache<ulong, UserIntel> historyCache, IUserIntelStore historyStore)
+            IEntityCache<ulong, UserIntel> historyCache, IUserIntelStore historyStore, ILockProvider<UserIntelProvider> lockProvider)
         {
             this._client = client;
             this._historyCache = historyCache;
             this._log = log;
             this._historyStore = historyStore;
+            this._lock = lockProvider;
         }
 
         public async Task<UserIntelContext> GetAsync(ulong userID, ulong? guildID, CancellationToken cancellationToken = default)

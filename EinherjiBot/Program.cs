@@ -83,6 +83,7 @@ namespace TehGM.EinherjiBot
             services.AddAuthBackend();
             services.AddBotAudits();
             services.AddRandomizer();
+            services.AddLocking();
             services.AddPlaceholdersEngineBackend();
 
             services.AddUserIntel();

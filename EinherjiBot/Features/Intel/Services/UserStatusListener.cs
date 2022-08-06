@@ -1,19 +1,20 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.Intel.Services
 {
     public class UserStatusListener : AutostartService
     {
         private readonly DiscordSocketClient _client;
-        private readonly IUserIntelProvider _provider;
         private readonly ILogger _log;
+        private readonly IServiceScopeFactory _services;
 
-        public UserStatusListener(DiscordSocketClient client, IUserIntelProvider provider, ILogger<UserStatusListener> log)
+        public UserStatusListener(DiscordSocketClient client, ILogger<UserStatusListener> log, IServiceScopeFactory services)
         {
             this._client = client;
-            this._provider = provider;
             this._log = log;
+            this._services = services;
 
             this._client.PresenceUpdated += this.PresenceUpdatedAsync;
         }
@@ -26,7 +27,12 @@ namespace TehGM.EinherjiBot.Intel.Services
             if (!HasAnythingChanged())
                 return;
 
-            UserIntelContext intel = await this._provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
+            using IServiceScope scope = this._services.CreateScope();
+            IDiscordAuthProvider auth = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+            auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
+
+            IUserIntelProvider provider = scope.ServiceProvider.GetRequiredService<IUserIntelProvider>();
+            UserIntelContext intel = await provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
 
             if (hasStatusChanged)
                 hasStatusChanged = intel.Intel.ChangeStatus(newPresence.Status);
@@ -37,7 +43,7 @@ namespace TehGM.EinherjiBot.Intel.Services
             if (HasAnythingChanged())
             {
                 this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
-                await this._provider.UpdateIntelAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
+                await provider.UpdateIntelAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
             }
 
             bool HasAnythingChanged()

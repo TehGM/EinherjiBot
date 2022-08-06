@@ -2,17 +2,19 @@
 
 namespace TehGM.EinherjiBot.BotStatus.Services
 {
-    public class StatusProvider : IStatusProvider, IDisposable
+    public class StatusProvider : IStatusProvider
     {
         private readonly IStatusStore _store;
         private readonly IEntityCache<Guid, Status> _cache;
+        private readonly ILockProvider _lock;
         private readonly ILogger _log;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
-        public StatusProvider(IStatusStore store, IEntityCache<Guid, Status> cache, ILogger<StatusProvider> log)
+        public StatusProvider(IStatusStore store, IEntityCache<Guid, Status> cache, 
+            ILockProvider<StatusProvider> lockProvider, ILogger<StatusProvider> log)
         {
             this._store = store;
             this._cache = cache;
+            this._lock = lockProvider;
             this._log = log;
 
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
@@ -79,11 +81,6 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         {
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
-        }
-
-        public void Dispose()
-        {
-            try { this._lock?.Dispose(); } catch { }
         }
     }
 }

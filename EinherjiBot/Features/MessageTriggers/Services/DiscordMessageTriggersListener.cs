@@ -6,15 +6,13 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
     public class DiscordMessageTriggersListener : AutostartService, IDisposable
     {
         private readonly DiscordSocketClient _client;
-        private readonly IMessageTriggersProvider _provider;
         private readonly IServiceProvider _services;
         private readonly ILogger _log;
 
-        public DiscordMessageTriggersListener(DiscordSocketClient client, IMessageTriggersProvider provider,
+        public DiscordMessageTriggersListener(DiscordSocketClient client,
             IServiceProvider services, ILogger<DiscordMessageTriggersListener> log)
         {
             this._client = client;
-            this._provider = provider;
             this._services = services;
             this._log = log;
 
@@ -34,8 +32,14 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                 if (string.IsNullOrWhiteSpace(message.Content))
                     return;
 
-                IEnumerable<MessageTrigger> globalTriggers = await this._provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
-                IEnumerable<MessageTrigger> guildTriggers = await this._provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
+
+                using IServiceScope botScope = this._services.CreateScope();
+                IDiscordAuthProvider auth = botScope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+                auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
+
+                IMessageTriggersProvider provider = botScope.ServiceProvider.GetRequiredService<IMessageTriggersProvider>();
+                IEnumerable<MessageTrigger> globalTriggers = await provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);
+                IEnumerable<MessageTrigger> guildTriggers = await provider.GetForGuild(guildChannel.Guild.Id, base.CancellationToken).ConfigureAwait(false);
                 IEnumerable<MessageTrigger> triggers = globalTriggers.Union(guildTriggers)
                     .Where(t => t.Actions?.Any() == true);
                 if (triggers?.Any() != true)

@@ -8,25 +8,24 @@ namespace TehGM.EinherjiBot.GameServers.Services
         private readonly IDiscordAuthorizationService _authService;
         private readonly IGameServerStore _store;
         private readonly IEntityCache<Guid, GameServer> _cache;
-        private readonly IDiscordAuthContext _auth;
+        private readonly ILockProvider _lock;
         private readonly ILogger _log;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public GameServerProvider(IGameServerStore store, IEntityCache<Guid, GameServer> cache, 
-            IDiscordAuthorizationService authService, IDiscordAuthContext auth, ILogger<GameServerProvider> log)
+            IDiscordAuthorizationService authService, ILogger<GameServerProvider> log, ILockProvider<GameServerProvider> lockProvider)
         {
             this._store = store;
             this._cache = cache;
             this._log = log;
             this._authService = authService;
-            this._auth = auth;
+            this._lock = lockProvider;
 
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
         }
 
         public async Task<GameServer> GetAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 GameServer result = this._cache.Get(id);
@@ -47,13 +46,13 @@ namespace TehGM.EinherjiBot.GameServers.Services
             }
             finally
             {
-                this._lock.Release();
+                _lock.Release();
             }
         }
 
         public async Task<IEnumerable<GameServer>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
@@ -73,7 +72,7 @@ namespace TehGM.EinherjiBot.GameServers.Services
             }
             finally
             {
-                this._lock.Release();
+                _lock.Release();
             }
         }
 
@@ -112,11 +111,6 @@ namespace TehGM.EinherjiBot.GameServers.Services
             }
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
-        }
-
-        public void Dispose()
-        {
-            try { this._lock?.Dispose(); } catch { }
         }
     }
 }

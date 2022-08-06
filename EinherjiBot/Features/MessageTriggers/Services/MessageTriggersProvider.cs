@@ -2,21 +2,22 @@
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
 {
-    public class MessageTriggersProvider : IMessageTriggersProvider, IDisposable
+    public class MessageTriggersProvider : IMessageTriggersProvider
     {
         private readonly IMessageTriggersStore _store;
         private readonly IEntityCache<Guid, MessageTrigger> _cache;
         private readonly IEntityCache<ulong, MessageTriggersCollection> _guildCache;
         private readonly ILogger _log;
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private readonly ILockProvider _lock;
 
         public MessageTriggersProvider(IMessageTriggersStore store, IEntityCache<Guid, MessageTrigger> cache, IEntityCache<ulong, MessageTriggersCollection> guildCache,
-            ILogger<MessageTriggersProvider> log)
+            ILogger<MessageTriggersProvider> log, ILockProvider<MessageTriggersProvider> lockProvider)
         {
             this._store = store;
             this._cache = cache;
             this._guildCache = guildCache;
             this._log = log;
+            this._lock = lockProvider;
         }
 
         public async Task<MessageTrigger> GetAsync(Guid id, CancellationToken cancellationToken = default)
@@ -97,11 +98,6 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
             {
                 this._lock.Release();
             }
-        }
-
-        public void Dispose()
-        {
-            try { this._lock?.Dispose(); } catch { }
         }
     }
 }

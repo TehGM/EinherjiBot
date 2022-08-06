@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
 
+            services.AddLocking();
             services.AddDiscordClient();
             services.AddMongoDB();
             services.AddEntityCaching();
