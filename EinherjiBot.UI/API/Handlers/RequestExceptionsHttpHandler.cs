@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.UI.API.Handlers
 {
@@ -26,7 +28,11 @@ namespace TehGM.EinherjiBot.UI.API.Handlers
                 if (string.IsNullOrWhiteSpace(message))
                     message = $"API request failed - {response.ReasonPhrase}";
                 response.Content?.Dispose();
-                throw new HttpRequestException(message, null, response.StatusCode);
+
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                    throw new AccessForbiddenException(message);
+                else
+                    throw new HttpRequestException(message, null, response.StatusCode);
             }
             return response;
         }
