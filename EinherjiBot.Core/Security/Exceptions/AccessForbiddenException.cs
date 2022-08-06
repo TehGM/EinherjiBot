@@ -1,11 +1,11 @@
-﻿using System.Net.Http;
+﻿using System.Net;
 
 namespace TehGM.EinherjiBot.Security
 {
-    public class AccessForbiddenException : HttpRequestException
+    public class AccessForbiddenException : ApiException
     {
         public AccessForbiddenException(string message, Exception innerException)
-            : base(message, innerException, System.Net.HttpStatusCode.Forbidden) { }
+            : base(message, innerException, HttpStatusCode.Forbidden) { }
         public AccessForbiddenException(string message)
             : this(message, null) { }
         public AccessForbiddenException()

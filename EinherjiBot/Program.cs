@@ -107,6 +107,8 @@ namespace TehGM.EinherjiBot
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseMiddleware<ApiExceptionsMiddleware>();
+
             app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"),
                 builder => builder.UseMiddleware<VersionCheckMiddleware>());
 
