@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
 {
-    public class DiscordMessageTriggersListener : AutostartService, IDisposable
+    public class DiscordMessageTriggersListener : ScopedAutostartService, IDisposable
     {
         private readonly DiscordSocketClient _client;
         private readonly IServiceProvider _services;
         private readonly ILogger _log;
 
-        public DiscordMessageTriggersListener(DiscordSocketClient client,
-            IServiceProvider services, ILogger<DiscordMessageTriggersListener> log)
+        public DiscordMessageTriggersListener(DiscordSocketClient client, IServiceProvider services, ILogger<DiscordMessageTriggersListener> log)
+            : base(services)
         {
             this._client = client;
             this._services = services;
@@ -33,9 +33,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                     return;
 
 
-                using IServiceScope botScope = this._services.CreateScope();
-                IDiscordAuthProvider auth = botScope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-                auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
+                using IServiceScope botScope = await base.CreateBotUserScopeAsync(base.CancellationToken).ConfigureAwait(false);
 
                 IMessageTriggersProvider provider = botScope.ServiceProvider.GetRequiredService<IMessageTriggersProvider>();
                 IEnumerable<MessageTrigger> globalTriggers = await provider.GetGlobalsAsync(base.CancellationToken).ConfigureAwait(false);

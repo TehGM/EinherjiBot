@@ -8,7 +8,7 @@ using TehGM.Utilities.Randomization;
 namespace TehGM.EinherjiBot.BotStatus.Services
 {
     /// <summary>Background service that periodically scans blog channels for last activity and activates or deactivates them.</summary>
-    internal class RandomStatusService : AutostartService, IStatusService, IDisposable
+    internal class RandomStatusService : ScopedAutostartService, IStatusService, IDisposable
     {
         private readonly DiscordSocketClient _client;
         private readonly IDiscordConnection _connection;
@@ -21,7 +21,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         private DateTime _lastChangeUtc;
 
         public RandomStatusService(DiscordSocketClient client, IDiscordConnection connection, IRandomizer randomizer, IPlaceholdersEngine placeholders,
-            IServiceProvider services, ILogger<RandomStatusService> log, IOptionsMonitor<BotStatusOptions> options)
+            IServiceProvider services, ILogger<RandomStatusService> log, IOptionsMonitor<BotStatusOptions> options) : base(services)
         {
             this._client = client;
             this._connection = connection;
@@ -50,11 +50,8 @@ namespace TehGM.EinherjiBot.BotStatus.Services
                     await Task.Delay(remainingWait, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    using IServiceScope scope = this._services.CreateScope();
-                    IDiscordAuthProvider auth = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-                    auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
-
-                    await this.RandomizeStatusInternalAsync(scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                    using IServiceScope scope = await base.CreateBotUserScopeAsync(cancellationToken).ConfigureAwait(false);
+                    await this.RandomizeStatusAsync(scope.ServiceProvider, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (ex.LogAsError(this._log, "Error when randomizing status")) { }
                 finally
@@ -67,10 +64,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         }
 
 
-        public Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken = default)
-            => this.RandomizeStatusInternalAsync(this._services, cancellationToken);
-
-        private async Task<Status> RandomizeStatusInternalAsync(IServiceProvider services, CancellationToken cancellationToken)
+        public async Task<Status> RandomizeStatusAsync(IServiceProvider services, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

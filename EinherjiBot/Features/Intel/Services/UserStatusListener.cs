@@ -4,17 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.Intel.Services
 {
-    public class UserStatusListener : AutostartService
+    public class UserStatusListener : ScopedAutostartService
     {
         private readonly DiscordSocketClient _client;
         private readonly ILogger _log;
-        private readonly IServiceScopeFactory _services;
 
         public UserStatusListener(DiscordSocketClient client, ILogger<UserStatusListener> log, IServiceScopeFactory services)
+            : base(services)
         {
             this._client = client;
             this._log = log;
-            this._services = services;
 
             this._client.PresenceUpdated += this.PresenceUpdatedAsync;
         }
@@ -27,10 +26,7 @@ namespace TehGM.EinherjiBot.Intel.Services
             if (!HasAnythingChanged())
                 return;
 
-            using IServiceScope scope = this._services.CreateScope();
-            IDiscordAuthProvider auth = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
-            auth.User = await auth.GetBotContextAsync(base.CancellationToken).ConfigureAwait(false);
-
+            using IServiceScope scope = await base.CreateBotUserScopeAsync(base.CancellationToken).ConfigureAwait(false);
             IUserIntelProvider provider = scope.ServiceProvider.GetRequiredService<IUserIntelProvider>();
             UserIntelContext intel = await provider.GetAsync(user.Id, null, base.CancellationToken).ConfigureAwait(false);
 
