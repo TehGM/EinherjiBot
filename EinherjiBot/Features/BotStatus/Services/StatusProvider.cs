@@ -1,4 +1,6 @@
 ﻿using TehGM.EinherjiBot.Caching;
+using TehGM.EinherjiBot.Security.Authorization;
+using TehGM.EinherjiBot.Security.Policies;
 
 namespace TehGM.EinherjiBot.BotStatus.Services
 {
@@ -8,13 +10,15 @@ namespace TehGM.EinherjiBot.BotStatus.Services
         private readonly IEntityCache<Guid, Status> _cache;
         private readonly ILockProvider _lock;
         private readonly ILogger _log;
+        private readonly IDiscordAuthorizationService _auth;
 
         public StatusProvider(IStatusStore store, IEntityCache<Guid, Status> cache, 
-            ILockProvider<StatusProvider> lockProvider, ILogger<StatusProvider> log)
+            ILockProvider<StatusProvider> lockProvider, IDiscordAuthorizationService auth, ILogger<StatusProvider> log)
         {
             this._store = store;
             this._cache = cache;
             this._lock = lockProvider;
+            this._auth = auth;
             this._log = log;
 
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
@@ -22,6 +26,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
 
         public async Task<IEnumerable<Status>> GetAllAsync(CancellationToken cancellationToken = default)
         {
+            await this.ThrowIfUnauthorizedAsync(cancellationToken).ConfigureAwait(false);
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
@@ -49,6 +54,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
 
         public async Task<Status> GetAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            await this.ThrowIfUnauthorizedAsync(cancellationToken).ConfigureAwait(false);
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
@@ -73,14 +79,23 @@ namespace TehGM.EinherjiBot.BotStatus.Services
 
         public async Task AddOrUpdateAsync(Status status, CancellationToken cancellationToken = default)
         {
+            await this.ThrowIfUnauthorizedAsync(cancellationToken).ConfigureAwait(false);
             await this._store.UpsertAsync(status, cancellationToken).ConfigureAwait(false);
             this._cache.AddOrReplace(status);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            await this.ThrowIfUnauthorizedAsync(cancellationToken).ConfigureAwait(false);
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
+        }
+
+        private async Task ThrowIfUnauthorizedAsync(CancellationToken cancellationToken)
+        {
+            DiscordAuthorizationResult result = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
+            if (!result.Succeeded)
+                throw new AccessForbiddenException("Only admins can access bot's status management feature");
         }
     }
 }
