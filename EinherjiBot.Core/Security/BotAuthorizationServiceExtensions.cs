@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.Security
 {
-    public static class DiscordAuthorizationServiceExtensions
+    public static class BotAuthorizationServiceExtensions
     {
         public static Task<BotAuthorizationResult> AuthorizeAsync(this IBotAuthorizationService service, Type policy, CancellationToken cancellationToken = default)
             => service.AuthorizeAsync(new[] { policy }, cancellationToken);
