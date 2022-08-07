@@ -1,0 +1,385 @@
+﻿@page "/shared-accounts/{id}"
+@page "/shared-accounts/new"
+@using MudBlazor.Services
+@using TehGM.EinherjiBot.Security
+@using TehGM.EinherjiBot.SharedAccounts
+@using TehGM.EinherjiBot.SharedAccounts.API
+@using TehGM.EinherjiBot.SharedAccounts.Policies
+@using TehGM.EinherjiBot.UI.Components.SharedAccounts
+@inject IBotAuthorizationService Auth
+@inject ISharedAccountsService Service
+
+<PageTitle>@this.Title</PageTitle>
+<PageHeader Text="@this.Title" />
+
+<div class="above-fab">
+    @if (this._account != null || this.IsNew)
+    {
+        <div class="spaced-card">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Account Info</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex flex-column">
+                    <MudItem xs="12" Class="d-flex flex-row gap-3">
+                        <SharedAccountImage AccountType="this._type" />
+                        <MudItem xs="10" Class="d-flex flex-column">
+                            <MudItem xs="12" Class="d-flex flex-row justify-space-between gap-3">
+                                <MudSelect Class="flex-grow-1" Dense=true T="SharedAccountType" @bind-Value="this._type" Label="Type" Disabled="!this.IsNew">
+                                    @foreach (SharedAccountType type in Enum.GetValues<SharedAccountType>())
+                                    {
+                                        <MudSelectItem Value="type">@type.ToString()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                @if (!this.IsNew)
+                                {
+                                    <MudItem xs="2" md="6" lg="4" Class="align-self-end">
+                                        <MudTooltip Delay="0" Class="d-md-none" Placement="Placement.Top">
+                                            <TooltipContent>@_alreadySavedText</TooltipContent>
+                                            <ChildContent>
+                                                <MudAlert Severity="Severity.Normal" Icon="@Icons.Outlined.Info" Variant="Variant.Text" Dense=true>
+                                                    <span class="d-none d-md-block">@_alreadySavedText</span>
+                                                </MudAlert>
+                                            </ChildContent>
+                                        </MudTooltip>
+                                    </MudItem>
+                                }
+                            </MudItem>
+                            <MudTextField @ref=this._loginField @bind-Value="@this._login" Label="Login" Variant="Variant.Text" Class="mt-5"
+                                Counter="@SharedAccountRequest.LoginMaxLength" Validation="this.LoginValidationDelegate" Immediate="true" />
+                            <MudTextField @bind-Value="@this._password" Label="Password" Variant="Variant.Text" InputType="this.PasswordInputType" Class="mt-0"
+                                Counter="@SharedAccountRequest.PasswordMaxLength" Validation="this.PasswordValidationDelegate" Immediate="true"
+                                Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" />
+                        </MudItem>
+                    </MudItem>
+                </MudCardContent>
+            </MudCard>
+        </div>
+    }
+    else
+    {
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="300px" Class="spaced-card"/>
+    }
+    
+    
+    @if ((this._account != null || this.IsNew) && this._authorizedUsers != null && this._authorizedRoles != null && this._modUsers != null)
+    {
+        <div class="spaced-card">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Authorization</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex d-row flex-wrap flex-lg-nowrap gap-4 gap-lg-1">
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Authorized Users
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>These users will be able to get Login and Password.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._authorizedUsers" AllowNewValues="true" />
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Authorized Roles
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>These roles will be able to get Login and Password.<br/>Note that the bot must be present in the guild to check the role.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNewValues="true" />
+                        @if (this._authorizedRoles?.Any() == true)
+                        {
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
+                                The bot must be present in the same guild as the role in order to recognize it.
+                            </MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Mods
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>Mods can edit and even delete this account.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <UserIdList @ref="this._modUsersComponent" @bind-Values="this._modUsers" AllowNewValues="true" />
+                        @if (!this.IsSelfAdded)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true">
+                                If you don't add yourself as a mod, you'll lose ability to edit this account.<br/>
+                                Click <span @onclick="this.OnAddSelfClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
+                            </MudAlert>
+                        }
+                        @if (!this.AreModsSubset)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Text" Dense="true">
+                                All mods must also be authorized in order to access the account's credentials.<br/>
+                                Click <span @onclick="this.OnAddModsClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
+                            </MudAlert>
+                        }
+                    </MudItem>
+                </MudCardContent>
+            </MudCard>
+        </div>
+    }
+    else
+    {
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="200px" Class="spaced-card"/>
+    }
+</div>
+
+<div class="fab bottom-right d-flex flex-row-reverse gap-3">
+    @if (this.CanModify)
+    {
+        <MudFab Color="Color.Success" Size="Size.Large" StartIcon="@Icons.Material.Filled.Save" Disabled="this._processing || !this.HasPendingChanges() || !this.IsValid" OnClick="this.OnSaveClickedAsync" />
+    }
+    @if (!this.IsNew && this._canDelete)
+    {
+        <MudFab Color="Color.Error" Size="Size.Medium" StartIcon="@Icons.Filled.DeleteForever" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
+    }
+    <MudFab Color="Color.Default" Size="Size.Medium" StartIcon="@Icons.Filled.ArrowBack" Disabled="this._processing" OnClick="this.OnReturnClickedAsync" />
+</div>
+
+@code {
+    private const string _alreadySavedText = "Cannot edit type of already saved accounts.";
+
+    [Parameter]
+    public string ID { get; set; }    
+    [CascadingParameter]
+    private Task<AuthenticationState> _authTask { get; set; }
+
+    private ISharedAccount _account;
+    private MudTextField<string> _loginField;
+    private DiscordIdListBase<IDiscordUserInfo> _authorizedUsersComponent;
+    private DiscordIdListBase<RoleInfoResponse> _authorizedRolesComponent;
+    private DiscordIdListBase<IDiscordUserInfo> _modUsersComponent;
+
+    private Guid? _id;
+    private SharedAccountType _type;
+    private string _login;
+    private string _password;
+
+    private string _imageUrl;
+    private bool _processing;
+    private bool _canEdit = false;
+    private bool _canCreate = false;
+    private bool _canDelete = false;
+    private bool _showPassword = false;
+    private IList<ulong> _authorizedUsers;
+    private IList<ulong> _authorizedRoles;
+    private IList<ulong> _modUsers;
+
+    private bool IsValid
+        => !this.LoginValidationDelegate(this._login).Any()
+        && !this.PasswordValidationDelegate(this._password).Any()
+        && this._authorizedUsersComponent?.AllValuesValid == true
+        && this._authorizedRolesComponent?.AllValuesValid == true
+        && this._modUsersComponent?.AllValuesValid == true
+        && this.AreModsSubset;
+    private bool IsNew => string.IsNullOrWhiteSpace(this.ID) || this.ID.Equals("new", StringComparison.OrdinalIgnoreCase);
+    private bool CanModify => this._canEdit || this._canCreate;
+    private InputType PasswordInputType => this._showPassword ? InputType.Text : InputType.Password;
+    private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string Title => this.IsNew ? "New Shared Account" : "Edit Shared Account";
+    private bool IsSelfAdded => this.AuthProvider.User.IsLoggedIn() && this._modUsers?.Contains(this.AuthProvider.User.ID) == true;
+    private bool AreModsSubset => !this._modUsers.Except(this._authorizedUsers).Any();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (this.RenderLocation.IsServer)
+            return;
+
+        await this._authTask;
+        if (!this.IsNew)
+        {
+            try
+            {
+                Base64Guid id = new Base64Guid(this.ID);
+                ISharedAccount account = await this.Service.GetAsync(id);
+                this.LoadAccount(account);
+            }
+            catch (Exception ex)
+            {
+                if (ex is not ApiException)
+                    this.Notifications.Add("An error has occurred.", Severity.Error);
+                this.GoBack();
+                return;
+            }
+        }
+
+        BotAuthorizationResult canCreateResult = !this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(typeof(CanCreateSharedAccount));
+        BotAuthorizationResult canEditResult = this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(this._account, typeof(CanEditSharedAccount));
+        BotAuthorizationResult canDeleteResult = this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(this._account, typeof(CanDeleteSharedAccount));
+        this._canCreate = canCreateResult.Succeeded;
+        this._canEdit = canEditResult.Succeeded;
+        this._canDelete = canDeleteResult.Succeeded;
+
+        if (!this.CanModify && !this._canDelete)
+        {
+            this.GoBack();
+            return;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (this.IsNew)
+            {
+                await this._loginField.Validate();
+                await this._loginField.FocusAsync();
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void LoadAccount(ISharedAccount account)
+    {
+        this._account = account;
+        this._id = this._account?.ID;
+        this._type = this._account?.AccountType ?? SharedAccountType.Netflix;
+        this._login = this._account?.Login;
+        this._password = this._account?.Password;
+        this._authorizedUsers = new List<ulong>(this._account.AuthorizedUserIDs ?? Enumerable.Empty<ulong>());
+        this._authorizedRoles = new List<ulong>(this._account.AuthorizedRoleIDs ?? Enumerable.Empty<ulong>());
+        this._modUsers = new List<ulong>(this._account?.ModUserIDs ?? Enumerable.Empty<ulong>());
+    }
+
+    private bool HasPendingChanges()
+    {
+        if (this._id == null)
+        {
+            return !string.IsNullOrEmpty(this._login)
+                || this._authorizedUsers?.Any() == true
+                || this._authorizedRoles?.Any() == true
+                || this._modUsers?.Any() == true;
+        }
+
+        return this._account.Login != this._login
+            || this._account.Password != this._password
+            || this._account.AuthorizedUserIDs?.SequenceEqual(this._authorizedUsers ?? Enumerable.Empty<ulong>()) != true
+            || this._account.AuthorizedRoleIDs?.SequenceEqual(this._authorizedRoles ?? Enumerable.Empty<ulong>()) != true
+            || this._account.ModUserIDs?.SequenceEqual(this._modUsers ?? Enumerable.Empty<ulong>()) != true;
+    }
+
+    private void OnPasswordShowClicked(MouseEventArgs e)
+        => this._showPassword = !this._showPassword;
+
+    public SharedAccountRequest BuildAccount()
+    {
+        SharedAccountRequest result = new SharedAccountRequest(this._type, this._login, this._password)
+        {
+            AuthorizedUserIDs = this._authorizedUsers,
+            AuthorizedRoleIDs = this._authorizedRoles,
+            ModUserIDs = this._modUsers
+        };
+        return result;
+    }
+
+    private async Task OnSaveClickedAsync(MouseEventArgs e)
+    {
+        if (this.HasPendingChanges())
+        {
+            this._processing = true;
+            SharedAccountResponse response;
+            if (this._id != null)
+            {
+                response = await this.Service.UpdateAsync(this._id.Value, this.BuildAccount());
+                this.Notifications.Add($"Shared {response.AccountType} account {response.Login} updated.", Severity.Success);
+            }
+            else
+            {
+                response = await this.Service.CreateAsync(this.BuildAccount());
+                this.Notifications.Add($"Shared {response.AccountType} account {response.Login} created.", Severity.Success);
+            }
+        }
+        this.GoBack();
+    }
+
+    private async Task OnDeleteClickedAsync(MouseEventArgs e)
+    {
+        if (!this.IsNew)
+        {
+            bool? promptResult = await this.Dialogs.ShowMessageBox("Deleting Account",
+                $"Are you sure you want to permanently delete {this._type} account {this._login}?",
+                yesText: "Delete", cancelText: "Cancel");
+            if (promptResult != true)
+                return;
+
+            this._processing = true;
+            if (this._id != null)
+            {
+                await this.Service.DeleteAsync(this._id.Value);
+                this.Notifications.Add($"Shared {this._account.AccountType} account {this._account.Login} deleted.", Severity.Success);
+            }
+        }
+        this.GoBack();
+    }
+
+    private async Task OnReturnClickedAsync(MouseEventArgs e)
+    {
+        if (this.HasPendingChanges())
+        {
+            bool? result = await this.Dialogs.ShowMessageBox("Unsaved Changes",
+                $"You have made some changes that are not saved. Are you sure you want to leave?",
+                yesText: "Leave", cancelText: "Cancel");
+            if (result != true)
+                return;
+        }
+
+        this.GoBack();
+    }
+    
+    //private void OnAuthorizedUsersChanged(IList<ulong> users)
+    //    => this._authorizedUsers = users;
+    //private void OnAuthorizedRolesChanged(IList<ulong> roles)
+    //    => this._authorizedRoles = roles;
+    //private void OnModUsersChanged(IList<ulong> users)
+    //    => this._modUsers = users;
+
+    private void OnAddSelfClicked(MouseEventArgs e)
+    {
+        ulong id = this.AuthProvider.User.ID;
+        if (!this._authorizedUsers.Contains(id))
+            this._authorizedUsers.Add(id);
+        if (!this._modUsers.Contains(id))
+            this._modUsers.Add(id);
+    }
+
+    private void OnAddModsClicked(MouseEventArgs e)
+    {
+        IEnumerable<ulong> missing = this._modUsers.Except(this._authorizedUsers);
+        foreach (ulong id in missing)
+            this._authorizedUsers.Add(id);
+    }
+
+    private void GoBack()
+        => this.Navigation.NavigateTo("/shared-accounts");
+
+        
+    private Func<string, IEnumerable<string>> LoginValidationDelegate => value =>
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return new string[] { "Login cannot be empty" };
+        if (value.Length > SharedAccountRequest.LoginMaxLength)
+            return new string[] { $"Login cannot be longer than {SharedAccountRequest.LoginMaxLength} characters" };
+        return Enumerable.Empty<string>();
+    };
+
+    private Func<string, IEnumerable<string>> PasswordValidationDelegate => value =>
+    {
+        if (value != null && value.Length > SharedAccountRequest.PasswordMaxLength)
+            return new string[] { $"Login cannot be longer than {SharedAccountRequest.PasswordMaxLength} characters" };
+        return Enumerable.Empty<string>();
+    };
+}

@@ -1,0 +1,51 @@
+﻿@inherits DiscordIdListItemBase<RoleInfoResponse>
+@inject IRoleInfoService RoleInfoProvider
+
+<MudItem xs="12" Class="d-flex flex-row align-items-center id-list-item">
+    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" 
+        Label="Role ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Validation="this.ValidationDelegate" />
+    @if (base.FoundEntity.IsFound())
+    {
+        <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
+            <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
+                <TooltipContent>
+                    @@@base.FoundEntity.Name
+                </TooltipContent>
+                <ChildContent>
+                    <MudText Style="@this.RoleStyle">@@@base.FoundEntity.Name</MudText>
+                </ChildContent>
+            </MudTooltip>
+        </MudItem>
+    }
+    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="true" Size="Size.Medium" />
+</MudItem>
+
+@code {
+    private MudTextField<ulong?> _inputField;
+
+    private string RoleColor => base.FoundEntity.GetHtmlColor() ?? "var(--mud-palette-text-primary)";
+    private string RoleStyle => $"color: {this.RoleColor};";
+
+    protected override async Task<RoleInfoResponse> FindEntityAsync(ulong id)
+    {
+        RoleInfoResponse result = await this.RoleInfoProvider.GetRoleInfoAsync(id);
+        if (result == null)
+            result = RoleInfoResponse.None;
+        return result;
+    }
+
+    protected override async Task ValidateAndLookupAsync()
+    {
+        await base.ValidateAndLookupAsync();
+        if (this.IsError)
+            await this._inputField.Validate();
+    }
+
+    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
+    {
+        if (this.IsError)
+            return new string[] { "Not a valid Discord Role ID." };
+        return Enumerable.Empty<string>();
+    }; 
+}

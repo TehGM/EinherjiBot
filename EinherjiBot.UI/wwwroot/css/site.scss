@@ -36,14 +36,26 @@ h1, h2, h3, h4, h5, h6 {
 .spaced-card {
     margin-bottom: 18px;
     margin-top: 12px;
+
+    .mud-card-header {
+        padding-bottom: 0;
+    }
 }
 
 /*** FABs ***/
+$fab-max-size: 56px;    // mudblazor large fab size
+$fab-margin: 24px;
+.above-fab {
+    margin-bottom: $fab-max-size;   // don't take margin into account to allow just a little overlap
+}
+
 .fab {
+    position: fixed;
+    margin: $fab-margin;
+    align-items: center;
+
     &.bottom-right {
-        position: fixed;
         bottom: 0;
         right: 0;
-        margin: 35px 25px;
     }
 }

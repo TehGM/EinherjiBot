@@ -98,6 +98,9 @@ namespace TehGM.EinherjiBot.UI
 
             services.AddBotStatusFrontend();
             services.AddSharedAccountsFrontend();
+
+            services.AddTransient<EinherjiBot.API.IUserInfoService, API.Services.WebUserInfoService>();
+            services.AddTransient<EinherjiBot.API.IRoleInfoService, API.Services.WebRoleInfoService>();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)

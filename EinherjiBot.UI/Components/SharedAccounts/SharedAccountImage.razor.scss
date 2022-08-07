@@ -1,0 +1,15 @@
+.shared-account-image-container {
+    align-self: center;
+}
+
+::deep .shared-account-image {
+    width: 64px;
+    height: 64px;
+}
+
+@media (min-width: 960px) {
+    ::deep .shared-account-image {
+        width: 128px;
+        height: 128px;
+    }
+}

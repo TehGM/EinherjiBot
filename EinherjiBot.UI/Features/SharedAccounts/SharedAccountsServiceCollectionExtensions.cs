@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using TehGM.EinherjiBot.SharedAccounts;
 using TehGM.EinherjiBot.SharedAccounts.API;
 using TehGM.EinherjiBot.UI.SharedAccounts;
 
@@ -12,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
 
             services.TryAddTransient<ISharedAccountsService, WebSharedAccountsService>();
+            services.TryAddScoped<ISharedAccountImageProvider, WebSharedAccountImageProvider>();
 
             return services;
         }

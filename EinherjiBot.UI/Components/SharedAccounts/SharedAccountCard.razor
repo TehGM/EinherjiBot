@@ -1,4 +1,5 @@
-﻿@using TehGM.EinherjiBot.Security
+﻿@using MudBlazor.Services
+@using TehGM.EinherjiBot.Security
 @using TehGM.EinherjiBot.SharedAccounts
 @using TehGM.EinherjiBot.SharedAccounts.API
 @using TehGM.EinherjiBot.SharedAccounts.Policies
@@ -8,8 +9,8 @@
 <div Class="spaced-card">
     <MudCard Elevation="4">
         <MudCardContent Class="d-flex flex-column">
-            <MudItem xs="12" Class="d-flex flex-row">
-                <MudAvatar Square="true" Image="@this.Account.ImageURL" Alt="@this.Account.AccountType.ToString()" Style="height: 128px; width: 128px;" Class="mr-3" />
+            <MudItem xs="12" Class="d-flex flex-row gap-3">
+                <SharedAccountImage AccountType="@this.Account.AccountType" />
                 <MudItem xs="10" Class="d-flex flex-column">
                     <MudTextField Value="@this.Account.Login" Label="Login" Variant="Variant.Text" Margin="Margin.Dense" ReadOnly="true" />
                     <MudTextField Value="@this.Account.Password" Label="Password" Variant="Variant.Text" Margin="Margin.Dense" ReadOnly="true" 
@@ -19,7 +20,7 @@
             @if (this.ShowBottomRow)
             {
                 <MudItem xs="12" Class="d-flex flex-row">
-                    @if (this.Account.ModifiedByID != null)
+                    @if (this._modifiedByUser != null)
                     {
                         <MudItem xs="8" Class="align-self-center">
                             Last edited @this.Account.ModifiedTimestamp.ToString() by @this._modifiedByUser.GetUsernameWithDiscriminator()
@@ -54,7 +55,7 @@
 
     private IDiscordUserInfo _modifiedByUser;
 
-    private bool ShowBottomRow => this.Account.ModifiedByID != null || this._canEdit || this._canDelete;
+    private bool ShowBottomRow => this._modifiedByUser != null || this._canEdit || this._canDelete;
     private InputType PasswordInputType => this._showPassword ? InputType.Text : InputType.Password;
     private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
 
@@ -71,6 +72,7 @@
         await base.OnParametersSetAsync();
     }
 
+
     private void OnPasswordShowClicked(MouseEventArgs e)
         => this._showPassword = !this._showPassword;
 
@@ -86,8 +88,15 @@
     {
         if (!this._canDelete)
             return;
+            
+        bool? result = await this.Dialogs.ShowMessageBox("Deleting Account", 
+            $"Are you sure you want to permanently delete {this.Account.AccountType} account {this.Account.Login}?",
+            yesText: "Delete", cancelText: "Cancel");
+        if (result != true)
+            return;
+
         await this.Service.DeleteAsync(this.Account.ID).ConfigureAwait(false);
-        this.Notifications.Add($"Shared {this.Account.AccountType} account {this.Account.Login} deleted.");
+        this.Notifications.Add($"Shared {this.Account.AccountType} account {this.Account.Login} deleted.", Severity.Success);
         await this.Deleted.InvokeAsync(this.Account);
     }
 }

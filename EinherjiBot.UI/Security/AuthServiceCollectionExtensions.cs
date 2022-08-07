@@ -22,7 +22,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddScoped<IWebAuthProvider, WebAuthenticationStateProvider>();
             services.TryAddScoped<IAuthProvider>(s => s.GetRequiredService<IWebAuthProvider>());
             services.TryAddScoped<AuthenticationStateProvider>(s => (AuthenticationStateProvider)s.GetRequiredService<IWebAuthProvider>());
-            services.TryAddTransient<IUserInfoService, WebUserInfoService>();
 
             services.TryAddTransient<IRefreshTokenProvider, WebRefreshTokenProvider>();
 

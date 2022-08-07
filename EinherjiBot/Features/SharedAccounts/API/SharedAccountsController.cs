@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TehGM.EinherjiBot.SharedAccounts.API.Controllers
 {
@@ -49,6 +50,14 @@ namespace TehGM.EinherjiBot.SharedAccounts.API.Controllers
         {
             await this._service.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             return base.NoContent();
+        }
+
+        [HttpGet("images")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetImages(CancellationToken cancellationToken)
+        {
+            IDictionary<SharedAccountType, string> images = await this._service.GetImagesAsync(cancellationToken).ConfigureAwait(false);
+            return base.Ok(images);
         }
     }
 }

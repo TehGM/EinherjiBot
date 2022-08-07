@@ -1,0 +1,21 @@
+﻿@using TehGM.EinherjiBot.SharedAccounts
+@inject ISharedAccountImageProvider ImageProvider
+
+@if (!string.IsNullOrWhiteSpace(this._imageUrl))
+{
+    <div class="shared-account-image-container">
+        <MudAvatar Square="true" Image="@this._imageUrl" Alt="@this.AccountType.ToString()" Class="mr-3 rounded-1 shared-account-image" />
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SharedAccountType AccountType { get; set; }
+
+    private string _imageUrl;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        this._imageUrl = await this.ImageProvider.GetAccountImageUrlAsync(this.AccountType);
+    }
+}

@@ -1,4 +1,5 @@
-﻿using TehGM.EinherjiBot.SharedAccounts.API;
+﻿using TehGM.EinherjiBot.SharedAccounts;
+using TehGM.EinherjiBot.SharedAccounts.API;
 using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.SharedAccounts
@@ -26,5 +27,8 @@ namespace TehGM.EinherjiBot.UI.SharedAccounts
 
         public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
             => this._client.DeleteAsync($"shared-accounts/{id}", null, cancellationToken);
+
+        public Task<IDictionary<SharedAccountType, string>> GetImagesAsync(CancellationToken cancellationToken = default)
+            => this._client.GetJsonAsync<IDictionary<SharedAccountType, string>>("shared-accounts/images", cancellationToken);
     }
 }

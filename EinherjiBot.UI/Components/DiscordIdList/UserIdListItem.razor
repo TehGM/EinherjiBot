@@ -1,0 +1,42 @@
+﻿@inherits DiscordIdListItemBase<IDiscordUserInfo>
+
+<MudItem xs="12" Class="d-flex flex-row align-items-center id-list-item">
+    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" 
+        Label="User ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Validation="this.ValidationDelegate" />
+    @if (base.FoundEntity != null)
+    {
+        <MudTooltip Delay="300" Placement="Placement.Top">
+            <TooltipContent>
+                @this.FoundEntity.GetUsernameWithDiscriminator()
+            </TooltipContent>
+            <ChildContent>
+                <MudItem xs="1" Class="d-flex flex-row flex-grow-1 ml-2 user-preview">
+                    <MudAvatar Size="Size.Medium" Image="@base.FoundEntity.GetAvatarURL(64)" Class="mr-1" />
+                </MudItem>
+            </ChildContent>
+        </MudTooltip>
+    }
+    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="true" Size="Size.Medium" />
+</MudItem>
+
+@code {
+    private MudTextField<ulong?> _inputField;
+
+    protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
+        => await this.UserInfoProvider.GetUserInfoAsync(id);
+
+    protected override async Task ValidateAndLookupAsync()
+    {
+        await base.ValidateAndLookupAsync();
+        if (this.IsError)
+            await this._inputField.Validate();
+    }
+
+    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
+    {
+        if (this.IsError)
+            return new string[] { "Not a valid Discord User ID." };
+        return Enumerable.Empty<string>();
+    }; 
+}

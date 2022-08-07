@@ -4,6 +4,7 @@
     {
         Task<IEnumerable<SharedAccountResponse>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<SharedAccountResponse> GetAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IDictionary<SharedAccountType, string>> GetImagesAsync(CancellationToken cancellationToken = default);
 
         Task<SharedAccountResponse> CreateAsync(SharedAccountRequest request, CancellationToken cancellationToken = default);
 

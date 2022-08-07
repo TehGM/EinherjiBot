@@ -9,13 +9,16 @@ namespace TehGM.EinherjiBot.SharedAccounts.API.Services
         private readonly ISharedAccountImageProvider _imageProvider;
         private readonly IAuthContext _user;
         private readonly IBotAuthorizationService _auth;
+        private readonly SharedAccountOptions _options;
 
-        public ApiSharedAccountsService(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, IAuthContext user, IBotAuthorizationService auth)
+        public ApiSharedAccountsService(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, IOptionsSnapshot<SharedAccountOptions> options,
+            IAuthContext user, IBotAuthorizationService auth)
         {
             this._provider = provider;
             this._imageProvider = imageProvider;
             this._user = user;
             this._auth = auth;
+            this._options = options.Value;
         }
 
         public async Task<IEnumerable<SharedAccountResponse>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -92,5 +95,8 @@ namespace TehGM.EinherjiBot.SharedAccounts.API.Services
                 ModifiedTimestamp = account.ModifiedTimestamp
             };
         }
+
+        public Task<IDictionary<SharedAccountType, string>> GetImagesAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(this._options.ImageURLs);
     }
 }
