@@ -23,14 +23,19 @@ namespace TehGM.EinherjiBot.GameServers.Services
         public async Task<IEnumerable<GameServer>> FindAsync(bool? isPublic, ulong? userID, IEnumerable<ulong> roleIDs, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Retrieving game servers from database; UserID = {UserID}; RoleIDs = {RoleIDs}", userID, string.Join(',', roleIDs ?? Enumerable.Empty<ulong>()));
-            List<FilterDefinition<GameServer>> filters = new List<FilterDefinition<GameServer>>(4);
+            List<FilterDefinition<GameServer>> filters = new List<FilterDefinition<GameServer>>(3);
             filters.Add(Builders<GameServer>.Filter.Empty);
             if (isPublic != null)
                 filters.Add(Builders<GameServer>.Filter.Eq(db => db.IsPublic, isPublic.Value));
+
+            List<FilterDefinition<GameServer>> aclFilters = new List<FilterDefinition<GameServer>>(2);
             if (userID != null)
-                filters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedUserIDs, new[] { userID.Value }));
+                aclFilters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedUserIDs, new[] { userID.Value }));
             if (roleIDs?.Any() == true)
-                filters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedRoleIDs, roleIDs));
+                aclFilters.Add(Builders<GameServer>.Filter.AnyIn(db => db.AuthorizedRoleIDs, roleIDs));
+            if (aclFilters.Any())
+                filters.Add(Builders<GameServer>.Filter.Or(aclFilters));
+
             return await this._collection.Find(Builders<GameServer>.Filter.And(filters)).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 

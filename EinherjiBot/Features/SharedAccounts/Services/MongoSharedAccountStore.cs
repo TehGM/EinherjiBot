@@ -23,16 +23,21 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
         public async Task<IEnumerable<SharedAccount>> FindAsync(SharedAccountType? type, ulong? userID, IEnumerable<ulong> roleIDs, bool forModeration, CancellationToken cancellationToken = default)
         {
             this._log.LogTrace("Retrieving shared accounts from database; Type = {Type}; UserID = {UserID}; RoleIDs = {RoleIDs}", type, userID, string.Join(',', roleIDs ?? Enumerable.Empty<ulong>()));
-            List<FilterDefinition<SharedAccount>> filters = new List<FilterDefinition<SharedAccount>>(5);
+            List<FilterDefinition<SharedAccount>> filters = new List<FilterDefinition<SharedAccount>>(4);
             filters.Add(Builders<SharedAccount>.Filter.Empty);
             if (type != null)
                 filters.Add(Builders<SharedAccount>.Filter.Eq(db => db.AccountType, type.Value));
-            if (userID != null)
-                filters.Add(Builders<SharedAccount>.Filter.AnyIn(db => db.AuthorizedUserIDs, new[] { userID.Value }));
-            if (roleIDs?.Any() == true)
-                filters.Add(Builders<SharedAccount>.Filter.AnyIn(db => db.AuthorizedRoleIDs, roleIDs));
             if (forModeration)
                 filters.Add(Builders<SharedAccount>.Filter.AnyIn(db => db.ModUserIDs, new[] { userID.Value }));
+
+            List<FilterDefinition<SharedAccount>> aclFilters = new List<FilterDefinition<SharedAccount>>(2);
+            if (userID != null)
+                aclFilters.Add(Builders<SharedAccount>.Filter.AnyIn(db => db.AuthorizedUserIDs, new[] { userID.Value }));
+            if (roleIDs?.Any() == true)
+                aclFilters.Add(Builders<SharedAccount>.Filter.AnyIn(db => db.AuthorizedRoleIDs, roleIDs));
+            if (aclFilters.Any())
+                filters.Add(Builders<SharedAccount>.Filter.Or(aclFilters));
+
             return await this._collection.Find(Builders<SharedAccount>.Filter.And(filters)).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
