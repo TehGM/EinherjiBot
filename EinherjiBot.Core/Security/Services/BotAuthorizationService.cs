@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot.Security.Services
             object policyInstance = ActivatorUtilities.CreateInstance(this._services, policy);
             if (policyInstance is IBotAuthorizationPolicy p)
                 return p.EvaluateAsync(cancellationToken);
-            throw new ArgumentException($"Policy doesn't implement {nameof(IBotAuthorizationPolicy)} interface.");
+            throw new ArgumentException($"Policy {policy.Name} doesn't implement {nameof(IBotAuthorizationPolicy)} interface.");
         }
 
         private Task<BotAuthorizationResult> ProcessPolicyAsync<TResource>(TResource resource, Type policy, CancellationToken cancellationToken = default)
@@ -57,7 +57,7 @@ namespace TehGM.EinherjiBot.Security.Services
             if (policyInstance is IBotAuthorizationPolicy p)
                 return p.EvaluateAsync(cancellationToken);
 
-            throw new ArgumentException($"Policy doesn't implement {nameof(IBotAuthorizationPolicy)} or {nameof(IBotAuthorizationPolicy<TResource>)} interface.");
+            throw new ArgumentException($"Policy {policy.Name} doesn't implement {nameof(IBotAuthorizationPolicy)} or {nameof(IBotAuthorizationPolicy<TResource>)} interface.");
         }
     }
 }
