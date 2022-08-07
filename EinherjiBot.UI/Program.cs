@@ -91,6 +91,7 @@ namespace TehGM.EinherjiBot.UI
             ConfigureSharedServices(services, environment);
             services.Replace(ServiceDescriptor.Singleton<IRenderLocation>(new Services.RenderLocationProvider(RenderLocation.Client, environment)));
 
+            services.AddLocking();
             services.AddAuthFrontend();
             services.AddEntityCaching();
             services.AddPlaceholdersEngineFrontend();
