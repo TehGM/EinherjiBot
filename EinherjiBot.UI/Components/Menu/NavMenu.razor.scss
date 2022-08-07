@@ -150,6 +150,10 @@ hr {
     }
 }
 
+.collapse, ::deep .user-panel.collapse {
+    display: none;
+}
+
 @media (min-width: 600px) {
     .navbar-toggler {
         display: none;
