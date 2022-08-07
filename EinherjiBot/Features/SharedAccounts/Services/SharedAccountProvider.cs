@@ -50,6 +50,16 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task<SharedAccount> GetAsync(Guid id, CancellationToken cancellationToken)
         {
+            SharedAccount result = await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
+
+            BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(result, typeof(Policies.CanAccessSharedAccount), cancellationToken).ConfigureAwait(false);
+            if (!authorization.Succeeded)
+                throw new AccessForbiddenException($"No permissions to access shared account {result.ID}");
+            return result;
+        }
+
+        private async Task<SharedAccount> GetInternalAsync(Guid id, CancellationToken cancellationToken)
+        {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
@@ -57,17 +67,12 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
                 if (result != null)
                 {
                     this._log.LogTrace("Shared account {AccountID} found in cache", id);
-                }
-                else
-                {
-                    result = await this._store.GetAsync(id, cancellationToken).ConfigureAwait(false);
-                    if (result != null)
-                        this._cache.AddOrReplace(result);
+                    return result;
                 }
 
-                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(result, typeof(Policies.CanAccessSharedAccount), cancellationToken).ConfigureAwait(false);
-                if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"No permissions to access shared account {result.ID}");
+                result = await this._store.GetAsync(id, cancellationToken).ConfigureAwait(false);
+                if (result != null)
+                    this._cache.AddOrReplace(result);
                 return result;
             }
             finally
@@ -85,13 +90,19 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task AddOrUpdateAsync(SharedAccount account, CancellationToken cancellationToken = default)
         {
-            SharedAccount existing = await this.GetAsync(account.ID, cancellationToken).ConfigureAwait(false);
+            SharedAccount existing = await this.GetInternalAsync(account.ID, cancellationToken).ConfigureAwait(false);
             if (existing != null)
             {
-                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing, 
+                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing,
                     new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"No permissions to edit shared account {account.ID}");
+                    throw new AccessForbiddenException($"No permissions to edit shared account {account.ID}.");
+            }
+            else
+            {
+                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(new[] { typeof(Policies.CanCreateSharedAccount) }, cancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
+                    throw new AccessForbiddenException($"No permissions to create shared accounts.");
             }
             await this._store.UpdateAsync(account, cancellationToken).ConfigureAwait(false);
             this._cache.AddOrReplace(account);
@@ -99,14 +110,15 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            SharedAccount existing = await this.GetAsync(id, cancellationToken).ConfigureAwait(false);
-            if (existing != null)
-            {
-                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing,
-                    new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanDeleteSharedAccount) }, cancellationToken).ConfigureAwait(false);
-                if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"No permissions to delete shared account {id}");
-            }
+            SharedAccount existing = await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
+            if (existing == null)
+                return;
+
+            BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing,
+                new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanDeleteSharedAccount) }, cancellationToken).ConfigureAwait(false);
+            if (!authorization.Succeeded)
+                throw new AccessForbiddenException($"No permissions to delete shared account {id}.");
+
             await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             this._cache.Remove(id);
         }
