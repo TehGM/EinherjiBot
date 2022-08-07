@@ -7,10 +7,16 @@ namespace TehGM.EinherjiBot.UI.API
     {
         public static async Task<TResponse> SendJsonAsync<TResponse>(this IApiClient client, HttpRequestMessage request, object data, CancellationToken cancellationToken = default)
         {
-            using HttpResponseMessage response = await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<TResponse>(json);
+            try
+            {
+                using HttpResponseMessage response = await client.SendAsync(request, data, cancellationToken).ConfigureAwait(false);
+                string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<TResponse>(json);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return default;
+            }
         }
 
         // GET

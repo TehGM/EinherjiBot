@@ -52,7 +52,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 });
                 throw;
             }
-            catch
+            catch (Exception ex) when (ex is not HttpRequestException httpEx || httpEx.StatusCode != System.Net.HttpStatusCode.NotFound)
             {
                 this._notifications.Add("An error has occured.", Severity.Error, options =>
                 {
