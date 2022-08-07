@@ -63,17 +63,8 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                SharedAccount result = this._cache.Get(id);
-                if (result != null)
-                {
-                    this._log.LogTrace("Shared account {AccountID} found in cache", id);
-                    return result;
-                }
-
-                result = await this._store.GetAsync(id, cancellationToken).ConfigureAwait(false);
-                if (result != null)
-                    this._cache.AddOrReplace(result);
-                return result;
+                await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
+                return this._cache.Get(id);
             }
             finally
             {
