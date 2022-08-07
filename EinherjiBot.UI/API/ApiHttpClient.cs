@@ -2,6 +2,7 @@
 using MudBlazor;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.UI.Security;
 
@@ -42,9 +43,18 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
-            catch (HttpRequestException ex)
+            catch (ApiException ex)
             {
                 this._notifications.Add(ex.Message, Severity.Error, options =>
+                {
+                    options.RequireInteraction = true;
+                    options.SnackbarVariant = Variant.Filled;
+                });
+                throw;
+            }
+            catch
+            {
+                this._notifications.Add("An error has occured.", Severity.Error, options =>
                 {
                     options.RequireInteraction = true;
                     options.SnackbarVariant = Variant.Filled;

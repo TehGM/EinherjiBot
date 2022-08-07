@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http;
+using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.UI.API;
 
@@ -34,9 +35,14 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
-            catch (HttpRequestException ex)
+            catch (ApiException ex)
             {
                 this.ShowErrorNotification(ex);
+                throw;
+            }
+            catch
+            {
+                this.ShowErrorNotification();
                 throw;
             }
         }
@@ -58,6 +64,11 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 this.ShowErrorNotification(ex);
                 throw;
             }
+            catch
+            {
+                this.ShowErrorNotification();
+                throw;
+            }
         }
 
         public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -77,11 +88,25 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 this.ShowErrorNotification(ex);
                 throw;
             }
+            catch
+            {
+                this.ShowErrorNotification();
+                throw;
+            }
         }
 
         private void ShowErrorNotification(HttpRequestException exception)
         {
             this._notifications.Add(exception.Message, Severity.Error, options =>
+            {
+                options.RequireInteraction = true;
+                options.SnackbarVariant = Variant.Text;
+            });
+        }
+
+        private void ShowErrorNotification()
+        {
+            this._notifications.Add("An error has occured.", Severity.Error, options =>
             {
                 options.RequireInteraction = true;
                 options.SnackbarVariant = Variant.Text;
