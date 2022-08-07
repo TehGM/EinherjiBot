@@ -45,7 +45,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     return result;
 
                 result = await this._client.GetJsonAsync<UserInfoResponse>($"user/info/{userID}", cancellationToken).ConfigureAwait(false);
-                this._cache.AddOrReplace(userID, result, new SlidingEntityExpiration(TimeSpan.FromMinutes(1.5)));
+                this._cache.AddOrReplace(userID, result, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
                 return result;
             }
             finally
