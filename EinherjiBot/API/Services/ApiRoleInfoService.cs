@@ -24,7 +24,7 @@ namespace TehGM.EinherjiBot.API.Services
                 if (role == null)
                     continue;
 
-                return new RoleInfoResponse(role.Id, role.Name, role.Color);
+                return new RoleInfoResponse(role.Id, role.Name, guild.Id, guild.Name, role.Color);
             }
             return null;
         }

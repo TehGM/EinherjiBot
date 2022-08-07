@@ -10,7 +10,8 @@
         <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
             <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
                 <TooltipContent>
-                    @@@base.FoundEntity.Name
+                    @@@base.FoundEntity.Name<br/>
+                    @base.FoundEntity.GuildName
                 </TooltipContent>
                 <ChildContent>
                     <MudText Style="@this.RoleStyle">@@@base.FoundEntity.Name</MudText>
