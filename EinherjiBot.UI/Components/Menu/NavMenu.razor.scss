@@ -1,3 +1,13 @@
+.navbar {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
 .sidebar {
     background-color: var(--menu-background-color);
     display: flex !important;
@@ -31,6 +41,18 @@
 
 .navbar-toggler {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+hr {
+    margin: 1rem 0;
+    color: inherit;
+    background-color: currentColor;
+    border: 0;
+    opacity: .25;
+
+    &:not([size]) {
+        height: 1px;
+    }
 }
 
 .loading-placeholder {
@@ -106,6 +128,8 @@
         display: flex;
         align-items: center;
         color: var(--menu-text-inactive-color);
+        padding: .5rem 1rem;
+        text-decoration: none;
 
         .text {
             transition: background-color 0.3s;

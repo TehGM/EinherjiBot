@@ -15,10 +15,15 @@ html {
 body {
     background-color: var(--page-background-color);
     color: var(--page-text-color);
+    margin: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
     margin-top: 9px;
+}
+
+img, svg {
+    vertical-align: middle;
 }
 
 

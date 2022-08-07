@@ -75,6 +75,16 @@ $height-info-expanded: 70px;
         background-color: var(--background-color-default);
         color: $text-color;
         line-height: 20px;
+        padding: .5rem 1rem;
+        font-size: 1.25rem;
+        border-radius: .3rem;
+        display: inline-block;
+        font-weight: 400;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid transparent;
 
         &:hover {
             background-color: var(--background-color-lighter);
