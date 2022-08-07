@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace TehGM.EinherjiBot.API
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class UserInfoResponse : IDiscordUserInfo
+    public class UserInfoResponse : IDiscordUserInfo, ICacheableEntity<ulong>
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -28,5 +28,8 @@ namespace TehGM.EinherjiBot.API
 
         public override string ToString()
             => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();
+
+        public ulong GetCacheKey()
+            => this.ID;
     }
 }
