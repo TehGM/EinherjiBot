@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class SharedAccountsServiceCollectionExtensions
     {
-        public static IServiceCollection AddSharedAccounts(this IServiceCollection services, Action<SharedAccountOptions> configure = null)
+        public static IServiceCollection AddSharedAccountsBackend(this IServiceCollection services, Action<SharedAccountOptions> configure = null)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));

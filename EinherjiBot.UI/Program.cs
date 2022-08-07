@@ -96,6 +96,7 @@ namespace TehGM.EinherjiBot.UI
             services.AddPlaceholdersEngineFrontend();
 
             services.AddBotStatusFrontend();
+            services.AddSharedAccountsFrontend();
         }
 
         private static void ConfigureLogging(WebAssemblyHostBuilder builder)

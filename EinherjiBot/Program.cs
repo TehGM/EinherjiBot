@@ -91,7 +91,7 @@ namespace TehGM.EinherjiBot
             services.AddAdministration();
             services.AddBotStatusBackend();
             services.AddGameServers();
-            services.AddSharedAccounts();
+            services.AddSharedAccountsBackend();
             services.AddMessageTriggers();
             services.AddTransient<API.IUserInfoService, ApiUserInfoService>();
 

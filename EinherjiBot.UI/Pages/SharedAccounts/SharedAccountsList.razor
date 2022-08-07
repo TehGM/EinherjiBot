@@ -1,0 +1,59 @@
+﻿@page "/shared-accounts"
+@using TehGM.EinherjiBot.SharedAccounts
+@using TehGM.EinherjiBot.SharedAccounts.API
+@using TehGM.EinherjiBot.SharedAccounts.Policies
+@using TehGM.EinherjiBot.UI.Components.SharedAccounts
+@attribute [HasSharedAccountsFeature]
+
+@inject ISharedAccountsService Service
+
+<PageTitle>Shared Accounts</PageTitle>
+<PageHeader Text="Shared Accounts" />
+
+@if (!this.DisplayAccounts)
+{
+    <PageHeader Text="Nope, nothing!" Type="Typo.h3" />
+}
+else
+{
+    @if (this._accounts != null)
+    {
+        foreach (KeyValuePair<Guid, SharedAccountResponse> account in this._accounts)
+        {
+            <SharedAccountCard @key="account.Key" Account="account.Value" Deleted="this.OnAccountDeleted" />
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="200px" Class="spaced-card"/>
+        }
+    }
+}
+
+<PolicyAuthorizeView PolicyType="typeof(CanCreateSharedAccount)">
+    <MudFab Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Class="fab bottom-right" OnClick="this.OnAddClicked" />
+</PolicyAuthorizeView>
+
+@code {
+    private IDictionary<Guid, SharedAccountResponse> _accounts;
+
+    private bool DisplayAccounts => this._accounts == null || this._accounts.Any();
+
+    protected override async Task OnInitializedAsync()
+    {
+        IEnumerable<SharedAccountResponse> accounts = await this.Service.GetAllAsync().ConfigureAwait(false);
+        this._accounts = accounts.ToDictionary(a => a.ID);
+    }
+
+    private void OnAddClicked(MouseEventArgs e)
+    {
+        this.Navigation.NavigateTo("/shared-accounts/new");
+    }
+
+    private void OnAccountDeleted(ISharedAccount account)
+    {
+        this._accounts.Remove(account.ID);
+    }
+}

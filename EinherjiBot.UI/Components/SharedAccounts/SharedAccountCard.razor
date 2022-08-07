@@ -1,0 +1,93 @@
+﻿@using TehGM.EinherjiBot.Security
+@using TehGM.EinherjiBot.SharedAccounts
+@using TehGM.EinherjiBot.SharedAccounts.API
+@using TehGM.EinherjiBot.SharedAccounts.Policies
+@inject IBotAuthorizationService Auth
+@inject ISharedAccountsService Service
+
+<div Class="spaced-card">
+    <MudCard Elevation="4">
+        <MudCardContent Class="d-flex flex-column">
+            <MudItem xs="12" Class="d-flex flex-row">
+                <MudAvatar Square="true" Image="@this.Account.ImageURL" Alt="@this.Account.AccountType.ToString()" Style="height: 128px; width: 128px;" Class="mr-3" />
+                <MudItem xs="10" Class="d-flex flex-column">
+                    <MudTextField Value="@this.Account.Login" Label="Login" Variant="Variant.Text" Margin="Margin.Dense" ReadOnly="true" />
+                    <MudTextField Value="@this.Account.Password" Label="Password" Variant="Variant.Text" Margin="Margin.Dense" ReadOnly="true" 
+                        InputType="this.PasswordInputType" Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" />
+                </MudItem>
+            </MudItem>
+            @if (this.ShowBottomRow)
+            {
+                <MudItem xs="12" Class="d-flex flex-row">
+                    @if (this.Account.ModifiedByID != null)
+                    {
+                        <MudItem xs="8" Class="align-self-center">
+                            Last edited @this.Account.ModifiedTimestamp.ToString() by @this._modifiedByUser.GetUsernameWithDiscriminator()
+                        </MudItem>
+                    }
+                    <MudItem xs="4" Class="d-flex justify-end">
+                        @if (this._canEdit)
+                        {
+                            <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="this.OnEditClicked"><MudIcon Icon="@Icons.Filled.Edit" /> Edit</MudButton>
+                        }
+                        @if (this._canDelete)
+                        {
+                            <MudIconButton Icon="@Icons.Filled.DeleteForever" Color="Color.Error" OnClick="this.OnDeleteClickedAsync" />
+                        }
+                    </MudItem>
+                </MudItem>
+             }
+        </MudCardContent>
+    </MudCard>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SharedAccountResponse Account { get; set; }
+
+    [Parameter]
+    public EventCallback<ISharedAccount> Deleted { get; set; }
+
+    private bool _canEdit;
+    private bool _canDelete;
+    private bool _showPassword = false;
+
+    private IDiscordUserInfo _modifiedByUser;
+
+    private bool ShowBottomRow => this.Account.ModifiedByID != null || this._canEdit || this._canDelete;
+    private InputType PasswordInputType => this._showPassword ? InputType.Text : InputType.Password;
+    private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BotAuthorizationResult canEditResult = await this.Auth.AuthorizeAsync(this.Account, typeof(CanEditSharedAccount)).ConfigureAwait(false);
+        BotAuthorizationResult canDeleteResult = await this.Auth.AuthorizeAsync(this.Account, typeof(CanDeleteSharedAccount)).ConfigureAwait(false);
+        this._canEdit = canEditResult.Succeeded;
+        this._canDelete = canDeleteResult.Succeeded;
+
+        if (this.Account.ModifiedByID != null)
+            this._modifiedByUser = await this.UserInfoProvider.GetUserInfoAsync(this.Account.ModifiedByID.Value).ConfigureAwait(false);
+
+        await base.OnParametersSetAsync();
+    }
+
+    private void OnPasswordShowClicked(MouseEventArgs e)
+        => this._showPassword = !this._showPassword;
+
+    private void OnEditClicked(MouseEventArgs e)
+    {
+        if (!this._canEdit)
+            return;
+        Base64Guid displayID = this.Account.ID;
+        this.Navigation.NavigateTo($"/shared-accounts/{displayID}");
+    }
+
+    private async Task OnDeleteClickedAsync(MouseEventArgs e)
+    {
+        if (!this._canDelete)
+            return;
+        await this.Service.DeleteAsync(this.Account.ID).ConfigureAwait(false);
+        this.Notifications.Add($"Shared {this.Account.AccountType} account {this.Account.Login} deleted.");
+        await this.Deleted.InvokeAsync(this.Account);
+    }
+}
