@@ -14,7 +14,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Policies
                 return result;
 
             if (!base.Auth.IsAdmin() && !base.Auth.HasRole(UserRole.SharedAccountCreator))
-                return BotAuthorizationResult.Fail("You have no permissions to create game servers");
+                return BotAuthorizationResult.Fail("You have no permissions to create shared accounts");
 
             return BotAuthorizationResult.Success;
         }
