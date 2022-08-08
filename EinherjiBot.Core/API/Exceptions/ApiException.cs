@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 
-namespace TehGM.EinherjiBot.Security
+namespace TehGM.EinherjiBot.API
 {
     public class ApiException : HttpRequestException
     {

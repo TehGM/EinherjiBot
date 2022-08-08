@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
-using TehGM.EinherjiBot.Security;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.UI.API.Handlers
 {

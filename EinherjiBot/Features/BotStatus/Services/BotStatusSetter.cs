@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.EinherjiBot.Security.Policies;
 using TehGM.Utilities.Randomization;

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace TehGM.EinherjiBot.Security
+namespace TehGM.EinherjiBot.API
 {
     public class AccessForbiddenException : ApiException
     {

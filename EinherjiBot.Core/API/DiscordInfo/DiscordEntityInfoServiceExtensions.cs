@@ -1,6 +1,4 @@
-﻿using TehGM.EinherjiBot.Security;
-
-namespace TehGM.EinherjiBot.API
+﻿namespace TehGM.EinherjiBot.API
 {
     public static class DiscordEntityInfoServiceExtensions
     {

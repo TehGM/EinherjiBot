@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Security.API.Services
 {

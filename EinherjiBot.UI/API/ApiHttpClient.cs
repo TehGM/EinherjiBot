@@ -2,7 +2,7 @@
 using MudBlazor;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using TehGM.EinherjiBot.Security;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.UI.Security;
 

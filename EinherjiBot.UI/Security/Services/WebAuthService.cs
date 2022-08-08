@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http;
-using TehGM.EinherjiBot.Security;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security.API;
 using TehGM.EinherjiBot.UI.API;
 

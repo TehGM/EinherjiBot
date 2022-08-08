@@ -1,7 +1,4 @@
-﻿using System.Net.Http;
-using TehGM.EinherjiBot.Security;
-
-namespace TehGM.EinherjiBot.UI.API
+﻿namespace TehGM.EinherjiBot.API
 {
     public class ClientVersionException : ApiException
     {

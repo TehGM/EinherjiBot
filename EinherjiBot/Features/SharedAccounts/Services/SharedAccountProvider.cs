@@ -1,4 +1,5 @@
-﻿using TehGM.EinherjiBot.Caching;
+﻿using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.Caching;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Services
 {
