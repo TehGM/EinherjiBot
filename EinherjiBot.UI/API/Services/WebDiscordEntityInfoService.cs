@@ -9,10 +9,10 @@ namespace TehGM.EinherjiBot.UI.API.Services
         public record struct GuildUserKey(ulong UserID, ulong GuildID);
 
         private readonly IApiClient _client;
-        private readonly IEntityCache<UserInfoResponse> _usersCache;
-        private readonly IEntityCache<RoleInfoResponse> _rolesCache;
+        private readonly IEntityCache<ulong, UserInfoResponse> _usersCache;
+        private readonly IEntityCache<ulong, RoleInfoResponse> _rolesCache;
         private readonly IEntityCache<GuildUserKey, GuildUserInfoResponse> _guildUserCache;
-        private readonly IEntityCache<GuildInfoResponse> _guildCache;
+        private readonly IEntityCache<ulong, GuildInfoResponse> _guildCache;
         private readonly ILockProvider _lock;
 
         private UserInfoResponse _cachedBotInfo;
@@ -20,7 +20,8 @@ namespace TehGM.EinherjiBot.UI.API.Services
         private DateTime _cachedAllGuildsTimestamp;
 
         public WebDiscordEntityInfoService(IApiClient client, ILockProvider<WebDiscordEntityInfoService> lockProvider, 
-            IEntityCache<UserInfoResponse> usersCache, IEntityCache<RoleInfoResponse> rolesCache, IEntityCache<GuildUserKey, GuildUserInfoResponse> guildUserCache, IEntityCache<GuildInfoResponse> guildCache)
+            IEntityCache<ulong, UserInfoResponse> usersCache, IEntityCache<ulong, RoleInfoResponse> rolesCache, 
+            IEntityCache<GuildUserKey, GuildUserInfoResponse> guildUserCache, IEntityCache<ulong, GuildInfoResponse> guildCache)
         {
             this._client = client;
             this._usersCache = usersCache;
