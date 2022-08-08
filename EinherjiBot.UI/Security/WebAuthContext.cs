@@ -55,9 +55,7 @@ namespace TehGM.EinherjiBot.UI.Security
             => HashCode.Combine(this.ID);
 
         public ulong GetCacheKey()
-        {
-            throw new NotImplementedException();
-        }
+            => this.ID;
 
         public static bool operator ==(WebAuthContext left, WebAuthContext right)
             => EqualityComparer<WebAuthContext>.Default.Equals(left, right);
