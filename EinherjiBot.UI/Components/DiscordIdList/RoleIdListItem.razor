@@ -1,7 +1,7 @@
 ﻿@inherits DiscordIdListItemBase<RoleInfoResponse>
 @inject IRoleInfoService RoleInfoProvider
 
-<MudItem xs="12" Class="d-flex flex-row align-items-center id-list-item">
+<MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
     <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" 
         Label="Role ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
         Validation="this.ValidationDelegate" />
