@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace TehGM.EinherjiBot.UI.Components.DiscordIdList
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo
 {
-    public abstract class DiscordIdListItemBase<TEntity> : ComponentBase where TEntity : class
+    public abstract class EntityIdListItemBase<TEntity> : ComponentBase where TEntity : class
     {
         [Parameter]
         public ulong? Value { get; set; }

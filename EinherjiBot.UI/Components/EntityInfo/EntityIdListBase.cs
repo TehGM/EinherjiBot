@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace TehGM.EinherjiBot.UI.Components.DiscordIdList
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo
 {
-    public class DiscordIdListBase<TEntity> : ComponentBase where TEntity : class
+    public class EntityIdListBase<TEntity> : ComponentBase where TEntity : class
     {
         [Parameter]
         public bool AllowNewValues { get; set; } = true;
@@ -13,10 +13,10 @@ namespace TehGM.EinherjiBot.UI.Components.DiscordIdList
 
         public bool AllValuesValid => this.InvalidValues?.Any() != true && this.NewItemField?.IsError != true;
 
-        protected DiscordIdListItemBase<TEntity> NewItemField { get; set; }
+        protected EntityIdListItemBase<TEntity> NewItemField { get; set; }
         protected HashSet<ulong> InvalidValues { get; } = new HashSet<ulong>();
 
-        protected virtual async Task OnValueChangedAsync(DiscordIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
+        protected virtual async Task OnValueChangedAsync(EntityIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
         {
             int index = -1;
             bool anythingChanged = false;
@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot.UI.Components.DiscordIdList
                 await this.ValuesChanged.InvokeAsync(this.Values);
         }
 
-        protected virtual async Task OnNewValueInputAsync(DiscordIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
+        protected virtual async Task OnNewValueInputAsync(EntityIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
         {
             if (e.IsValid)
             {

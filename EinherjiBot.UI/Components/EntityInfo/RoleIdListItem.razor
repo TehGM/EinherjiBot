@@ -1,4 +1,4 @@
-﻿@inherits DiscordIdListItemBase<RoleInfoResponse>
+﻿@inherits EntityIdListItemBase<RoleInfoResponse>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
     <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="true"
