@@ -59,7 +59,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
-            catch (HttpRequestException ex)
+            catch (ApiException ex)
             {
                 this.ShowErrorNotification(ex);
                 throw;
@@ -83,7 +83,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
                 await this._dialogs.PromptForReload(this._navigation).ConfigureAwait(false);
                 throw;
             }
-            catch (HttpRequestException ex)
+            catch (ApiException ex)
             {
                 this.ShowErrorNotification(ex);
                 throw;
