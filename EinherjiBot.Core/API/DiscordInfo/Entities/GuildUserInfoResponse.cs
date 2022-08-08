@@ -18,6 +18,8 @@ namespace TehGM.EinherjiBot.API
         [JsonConstructor]
         private GuildUserInfoResponse() : base() { }
 
+        private ulong? _topRoleColor;
+
         public GuildUserInfoResponse(ulong id, string username, string discriminator, string avatarHash, ulong guildID, IEnumerable<RoleInfoResponse> roles)
             : base(id, username, discriminator, avatarHash)
         {
@@ -32,6 +34,13 @@ namespace TehGM.EinherjiBot.API
 
             string ext = this.AvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
             return $"https://cdn.discordapp.com/guilds/{this.GuildID}/users/{this.ID}/avatars/{this.AvatarHash}.{ext}?size={size}";
+        }
+
+        public ulong GetTopRoleColor()
+        {
+            if (this._topRoleColor == null)
+                this._topRoleColor = this.Roles.Where(r => r.Color != 0).MaxBy(r => r.Position)?.Color ?? 0;
+            return this._topRoleColor.Value;
         }
     }
 }
