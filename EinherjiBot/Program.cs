@@ -8,6 +8,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using TehGM.Utilities;
 global using TehGM.EinherjiBot.Security;
+global using AuthorizeAttribute = TehGM.EinherjiBot.Security.Policies.AuthorizeAttribute;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -87,6 +88,7 @@ namespace TehGM.EinherjiBot
             services.AddLocking();
             services.AddPlaceholdersEngineBackend();
 
+            services.AddEntityInfoBackend();
             services.AddUserIntel();
             services.AddAdministration();
             services.AddBotStatusBackend();

@@ -5,7 +5,7 @@ using System.Web;
 namespace TehGM.EinherjiBot.API
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class UserGuildInfoResponse
+    public class OAuthGuildInfoResponse : IDiscordEntityInfo
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -26,7 +26,7 @@ namespace TehGM.EinherjiBot.API
             || (this.PermissionFlags & 0x8uL) == 0x8uL;  // admin
 
         [JsonConstructor]
-        private UserGuildInfoResponse() { }
+        private OAuthGuildInfoResponse() { }
 
         public override string ToString()
             => this.Name;
@@ -41,5 +41,11 @@ namespace TehGM.EinherjiBot.API
             string ext = this.IconHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
             return $"https://cdn.discordapp.com/icons/{this.ID}/{this.IconHash}.{ext}?size={size}";
         }
+
+        public ulong GetCacheKey()
+            => this.ID;
+
+        public override int GetHashCode()
+            => HashCode.Combine(this.ID);
     }
 }

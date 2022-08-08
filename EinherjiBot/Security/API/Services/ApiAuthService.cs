@@ -48,7 +48,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
                 return null;
 
             Task<IEnumerable<string>> featuresTask = this._userFeatures.GetForUserAsync(context, cancellationToken);
-            Task<IEnumerable<UserGuildInfoResponse>> guildsTask = this._client.GetCurrentUserGuildsAsync(accessToken.AccessToken, cancellationToken);
+            Task<IEnumerable<OAuthGuildInfoResponse>> guildsTask = this._client.GetCurrentUserGuildsAsync(accessToken.AccessToken, cancellationToken);
             RefreshToken refreshToken = this._refreshTokenGenerator.Generate(context.ID, accessToken.RefreshToken);
             Task persistTokenTask = this._refreshTokenStore.AddAsync(refreshToken, cancellationToken);
 

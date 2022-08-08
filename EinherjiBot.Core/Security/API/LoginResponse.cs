@@ -18,12 +18,12 @@ namespace TehGM.EinherjiBot.Security.API
         [JsonProperty("features")]
         public IEnumerable<string> Features { get; init; }
         [JsonProperty("guilds", NullValueHandling = NullValueHandling.Ignore)]
-        public IEnumerable<UserGuildInfoResponse> Guilds { get; init; }
+        public IEnumerable<OAuthGuildInfoResponse> Guilds { get; init; }
 
         [JsonProperty("knownGuilds")]
         public IEnumerable<ulong> KnownDiscordGuildIDs { get; init; }
         [JsonProperty("knownRoles")]
-        public IEnumerable<ulong> KnownDiscordRoleIDs { get; set; }
+        public IEnumerable<ulong> KnownDiscordRoleIDs { get; init; }
 
         [JsonConstructor]
         private LoginResponse() { }

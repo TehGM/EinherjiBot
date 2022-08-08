@@ -20,11 +20,11 @@ namespace TehGM.EinherjiBot.Security.Services
             return this.Client.SendJsonAsync<UserInfoResponse>(request, null, null, cancellationToken);
         }
 
-        public Task<IEnumerable<UserGuildInfoResponse>> GetCurrentUserGuildsAsync(string bearerToken, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<OAuthGuildInfoResponse>> GetCurrentUserGuildsAsync(string bearerToken, CancellationToken cancellationToken = default)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/users/@me/guilds");
             request.Headers.Add("Authorization", $"Bearer {bearerToken}");
-            return this.Client.SendJsonAsync<IEnumerable<UserGuildInfoResponse>>(request, null, null, cancellationToken);
+            return this.Client.SendJsonAsync<IEnumerable<OAuthGuildInfoResponse>>(request, null, null, cancellationToken);
         }
     }
 }

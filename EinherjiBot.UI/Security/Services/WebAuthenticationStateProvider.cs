@@ -12,7 +12,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
     {
         public DateTime Expiration { get; private set; }
         public IAuthContext User { get; private set; } = WebAuthContext.None;
-        public IEnumerable<UserGuildInfoResponse> Guilds { get; private set; }
+        public IEnumerable<OAuthGuildInfoResponse> Guilds { get; private set; }
         public string Token { get; private set; }
         public IEnumerable<string> UserFeatures { get; private set; }
 

@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
         {
             if (context.IsAdmin() || context.HasRole(UserRole.GameServerCreator))
                 return true;
-            IEnumerable<GameServer> foundResources = await this._gameServers.FindAsync(null, context.ID, context.KnownDiscordGuildIDs, cancellationToken).ConfigureAwait(false);
+            IEnumerable<GameServer> foundResources = await this._gameServers.FindAsync(null, context.ID, context.KnownDiscordRoleIDs, cancellationToken).ConfigureAwait(false);
             return foundResources?.Any() == true;
         }
     }

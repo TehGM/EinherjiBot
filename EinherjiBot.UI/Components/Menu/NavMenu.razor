@@ -86,7 +86,7 @@
                     </NavLinkCategory>
 
                     @{
-                        IEnumerable<UserGuildInfoResponse> validGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
+                        IEnumerable<OAuthGuildInfoResponse> validGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
                             .Where(g => g.CanManage)
                             .OrderBy(g => g.Name);
                         if (validGuilds?.Any() == true)
@@ -94,7 +94,7 @@
                             <hr/>
                         }
                     }
-                    @foreach (UserGuildInfoResponse guild in validGuilds)
+                    @foreach (OAuthGuildInfoResponse guild in validGuilds)
                     {
                         <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
                             OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
@@ -112,7 +112,7 @@
                     <PolicyAuthorizeView PolicyType="typeof(AuthorizeAdmin)">
                         <Authorized Context="AuthorizeAdmin">
                         @{
-                        IEnumerable<UserGuildInfoResponse> additionalGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
+                        IEnumerable<OAuthGuildInfoResponse> additionalGuilds = (this.AuthProvider as IWebAuthProvider)?.Guilds?
                             .Where(g => !g.CanManage)
                             .OrderBy(g => g.Name);
                         }
@@ -120,7 +120,7 @@
                         {
                             <hr/>
                         }
-                        @foreach (UserGuildInfoResponse guild in additionalGuilds)
+                        @foreach (OAuthGuildInfoResponse guild in additionalGuilds)
                         {
                             <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
                                 OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>

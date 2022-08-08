@@ -1,8 +1,7 @@
-﻿namespace TehGM.EinherjiBot
+﻿namespace TehGM.EinherjiBot.API
 {
-    public interface IDiscordUserInfo
+    public interface IDiscordUserInfo : IDiscordEntityInfo
     {
-        ulong ID { get; }
         string Username { get; }
         string Discriminator { get; }
         string AvatarHash { get; }

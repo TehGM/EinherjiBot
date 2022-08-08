@@ -25,7 +25,7 @@ namespace TehGM.EinherjiBot.Security
         string IDiscordUserInfo.Username => this.DiscordUser?.Username;
         string IDiscordUserInfo.Discriminator => this.DiscordUser?.Discriminator;
         string IDiscordUserInfo.AvatarHash => this.DiscordUser?.AvatarId;
-
+        string IDiscordEntityInfo.Name => this.DiscordUser?.Username;
 
         private readonly UserSecurityData _data;
 
@@ -56,6 +56,12 @@ namespace TehGM.EinherjiBot.Security
             => other is not null && this.ID == other.ID;
         public override int GetHashCode()
             => HashCode.Combine(this.ID);
+
+        public ulong GetCacheKey()
+        {
+            throw new NotImplementedException();
+        }
+
         public static bool operator ==(DiscordSocketAuthContext left, DiscordSocketAuthContext right)
             => EqualityComparer<DiscordSocketAuthContext>.Default.Equals(left, right);
         public static bool operator !=(DiscordSocketAuthContext left, DiscordSocketAuthContext right)

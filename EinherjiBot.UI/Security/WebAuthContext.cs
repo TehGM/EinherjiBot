@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
 
@@ -16,9 +17,12 @@ namespace TehGM.EinherjiBot.UI.Security
         public IEnumerable<string> BotRoles { get; }
         // web auth context will never have banned flag, as they'll simply not get authed by backend
         bool IAuthContext.IsBanned => false;
+        string IDiscordEntityInfo.Name => this.Username;
+
         public IEnumerable<string> BotFeatures { get; }
         public IEnumerable<ulong> KnownDiscordGuildIDs { get; }
         public IEnumerable<ulong> KnownDiscordRoleIDs { get; }
+
 
         public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, 
             IEnumerable<string> roles, IEnumerable<string> botFeatures, IEnumerable<ulong> knownGuilds, IEnumerable<ulong> knownRoles)
@@ -49,6 +53,12 @@ namespace TehGM.EinherjiBot.UI.Security
             => other is not null && this.ID == other.ID;
         public override int GetHashCode()
             => HashCode.Combine(this.ID);
+
+        public ulong GetCacheKey()
+        {
+            throw new NotImplementedException();
+        }
+
         public static bool operator ==(WebAuthContext left, WebAuthContext right)
             => EqualityComparer<WebAuthContext>.Default.Equals(left, right);
         public static bool operator !=(WebAuthContext left, WebAuthContext right)
