@@ -67,7 +67,7 @@
         this._canDelete = canDeleteResult.Succeeded;
 
         if (this.Account.ModifiedByID != null)
-            this._modifiedByUser = await this.UserInfoProvider.GetUserInfoAsync(this.Account.ModifiedByID.Value).ConfigureAwait(false);
+            this._modifiedByUser = await this.EntityInfoProvider.GetUserInfoAsync(this.Account.ModifiedByID.Value).ConfigureAwait(false);
 
         await base.OnParametersSetAsync();
     }

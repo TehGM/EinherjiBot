@@ -28,7 +28,7 @@
         {
             if (this.RenderLocation.IsServer)
                 this._prerenderingSubscription = this.PrerenderingState.RegisterOnPersisting(this.PersistAsync);
-            this._botInfo = await this.UserInfoProvider.GetBotInfoAsync();
+            this._botInfo = await this.EntityInfoProvider.GetBotInfoAsync();
         }
         await base.OnInitializedAsync();
     }

@@ -19,7 +19,7 @@
                 this._botAvatarUrl = botAvatarUrl;
             else
             {
-                IDiscordUserInfo info = await this.UserInfoProvider.GetBotInfoAsync();
+                IDiscordUserInfo info = await this.EntityInfoProvider.GetBotInfoAsync();
                 this._botAvatarUrl = info?.GetAvatarURL(64);
             }
         }

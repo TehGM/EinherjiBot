@@ -24,7 +24,7 @@
     private MudTextField<ulong?> _inputField;
 
     protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
-        => await this.UserInfoProvider.GetUserInfoAsync(id);
+        => await this.EntityInfoProvider.GetUserInfoAsync(id);
 
     protected override async Task ValidateAndLookupAsync()
     {
