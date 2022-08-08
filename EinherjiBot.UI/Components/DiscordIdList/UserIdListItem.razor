@@ -1,7 +1,7 @@
 ﻿@inherits DiscordIdListItemBase<IDiscordUserInfo>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" 
+    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="true"
         Label="User ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
         Validation="this.ValidationDelegate" />
     @if (base.FoundEntity != null)
