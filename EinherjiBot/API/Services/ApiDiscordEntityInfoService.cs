@@ -125,7 +125,7 @@ namespace TehGM.EinherjiBot.API.Services
         private static RoleInfoResponse CreateRoleInfo(IRole role)
             => new RoleInfoResponse(role.Id, role.Name, role.Guild.Id, role.Guild.Name, role.Color, role.Position);
         private static GuildUserInfoResponse CreateGuildUserInfo(IGuildUser user, IEnumerable<RoleInfoResponse> roles)
-            => new GuildUserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId, roles)
+            => new GuildUserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId, user.GuildId, roles)
             {
                 GuildAvatarHash = user.GuildAvatarId,
                 Nickname = user.Nickname
