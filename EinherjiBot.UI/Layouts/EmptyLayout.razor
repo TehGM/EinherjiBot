@@ -27,6 +27,14 @@
             PaletteDark = BuildDefaultPalette(),
             Typography = new Typography()
             {
+                Body1 = new Body1()
+                {
+                    FontSize = "15.4px"
+                },
+                Body2 = new Body2()
+                {
+                    FontSize = "13.4px"
+                },
                 H1 = new H1()
                 {
                     FontSize = "2.35rem"
@@ -57,6 +65,9 @@
             palette.Secondary = Colors.DeepPurple.Darken1;
             palette.SecondaryLighten = Colors.DeepPurple.Lighten1;
             palette.SecondaryDarken = Colors.DeepPurple.Darken4;
+            palette.Tertiary = Colors.BlueGrey.Darken1;
+            palette.TertiaryLighten = Colors.BlueGrey.Lighten1;
+            palette.TertiaryDarken = Colors.BlueGrey.Darken3;
             return palette;
         }
     }

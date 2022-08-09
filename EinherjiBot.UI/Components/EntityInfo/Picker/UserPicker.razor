@@ -8,6 +8,14 @@
     </HeaderContent>
     <ChildContent>
 
+        <MudItem xs="12" Class="d-flex flex-row mx-2 mt-1 mb-4 justify-space-around">
+            <MudItem Class="flex-shrink-1 flex-grow-1">
+                <MudSwitch T="bool" Color="MudBlazor.Color.Tertiary" Checked="@this._showBots" Label="Show Bots" CheckedChanged="this.OnShowBotsChanged" />
+            </MudItem>
+            <MudItem Class="flex-shrink-1 flex-grow-1">
+                <MudSwitch T="bool" Color="MudBlazor.Color.Tertiary" Checked="@this._adminsOnly" Label="Admins Only" CheckedChanged="this.OnAdminsOnlyChanged" />
+            </MudItem>
+        </MudItem>
 
         @if (this._filteredGuilds != null)
         {
@@ -41,6 +49,8 @@
 
 @code {
     private string _filter;
+    private bool _showBots = true;
+    private bool _adminsOnly = false;
     private IEnumerable<ulong> _restrictGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _allGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _filteredGuilds;
@@ -81,6 +91,11 @@
                     u.Nickname?.Contains(this._filter, StringComparison.OrdinalIgnoreCase) == true));
         }
 
+        if (!this._showBots)
+            this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(u => !u.IsBot));
+        if (this._adminsOnly)
+            this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(u => u.IsOwner || u.IsAdmin));
+
         this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.OrderBy(r => r.Nickname ?? r.Username).AsEnumerable());
     }
 
@@ -93,6 +108,17 @@
     private void OnFilterTextChanged(string value)
     {
         this._filter = value;
+        this.ApplyFilter();
+    }
+
+    private void OnShowBotsChanged(bool value)
+    {
+        this._showBots = value;
+        this.ApplyFilter();
+    }
+    private void OnAdminsOnlyChanged(bool value)
+    {
+        this._adminsOnly = value;
         this.ApplyFilter();
     }
 
