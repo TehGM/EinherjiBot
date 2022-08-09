@@ -15,7 +15,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
         private readonly IEntityCache<ulong, GuildInfoResponse> _guildCache;
         private readonly ILockProvider _lock;
 
-        private UserInfoResponse _cachedBotInfo;
+        private ulong? _botID = null;
         private IEnumerable<GuildInfoResponse> _cachedAllGuilds;
         private DateTime _cachedAllGuildsTimestamp;
 
@@ -36,12 +36,14 @@ namespace TehGM.EinherjiBot.UI.API.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (this._cachedBotInfo == null)
+                if (this._botID == null)
                 {
-                    this._cachedBotInfo = await this._client.GetJsonAsync<UserInfoResponse>("entity-info/bot", cancellationToken).ConfigureAwait(false);
-                    this._usersCache.AddOrReplace(this._cachedBotInfo.ID, this._cachedBotInfo, new TimeSpanEntityExpiration(TimeSpan.FromMilliseconds(30)));
+                    UserInfoResponse botInfo = await this._client.GetJsonAsync<UserInfoResponse>("entity-info/bot", cancellationToken).ConfigureAwait(false);
+                    this._botID = botInfo.ID;
+                    this.CacheUser(botInfo);
+                    return botInfo;
                 }
-                return this._cachedBotInfo;
+                return this._usersCache.Get(this._botID.Value);
             }
             finally
             {
@@ -58,7 +60,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     return result;
 
                 result = await this._client.GetJsonAsync<UserInfoResponse>($"entity-info/user/{userID}", cancellationToken).ConfigureAwait(false);
-                this._usersCache.AddOrReplace(userID, result, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+                this.CacheUser(result);
                 return result;
             }
             finally
@@ -86,7 +88,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                         this._cachedAllGuilds = response;
                         this._cachedAllGuildsTimestamp = DateTime.UtcNow;
                         foreach (GuildInfoResponse guild in response)
-                            this._guildCache.AddOrReplace(guild.ID, guild, new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5)));
+                            this.CacheGuild(guild);
                         return response;
                     }
                 }
@@ -104,7 +106,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                         IEnumerable<GuildInfoResponse> response = await this._client.GetJsonAsync<IEnumerable<GuildInfoResponse>>(url, cancellationToken).ConfigureAwait(false);
                         results.AddRange(response);
                         foreach (GuildInfoResponse guild in response)
-                            this._guildCache.AddOrReplace(guild.ID, guild, new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5)));
+                            this.CacheGuild(guild);
                     }
 
                     return results.ToArray();
@@ -127,7 +129,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     return result;
 
                 result = await this._client.GetJsonAsync<GuildUserInfoResponse>($"entity-info/guild/{guildID}/user/{userID}", cancellationToken).ConfigureAwait(false);
-                this._guildUserCache.AddOrReplace(key, result, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+                this.CacheGuildUser(result);
                 return result;
             }
             finally
@@ -146,13 +148,44 @@ namespace TehGM.EinherjiBot.UI.API.Services
 
                 string url = BuildWithArrayQuery($"entity-info/role/{roleID}", "guild", guildIDs);
                 result = await this._client.GetJsonAsync<RoleInfoResponse>(url, cancellationToken).ConfigureAwait(false);
-                this._rolesCache.AddOrReplace(result.ID, result, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+                this.CacheRole(result);
                 return result;
             }
             finally
             {
                 this._lock.Release();
             }
+        }
+
+        private void CacheGuildUser(GuildUserInfoResponse user)
+        {
+            // guild user caching needs special treatment, as same user might be in different guilds
+            GuildUserKey key = new GuildUserKey(user.ID, user.GuildID);
+            this._guildUserCache.AddOrReplace(key, user, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+
+            this.CacheUser(user);
+        }
+
+        private void CacheUser(UserInfoResponse user)
+        {
+            TimeSpan expiration = TimeSpan.FromMinutes(5);
+            if (this._botID != null && user.ID == this._botID)
+                expiration = TimeSpan.FromMinutes(50);
+            this._usersCache.AddOrReplace(user, new SlidingEntityExpiration(expiration));
+        }
+
+        private void CacheRole(RoleInfoResponse role)
+        {
+            this._rolesCache.AddOrReplace(role, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+        }
+
+        private void CacheGuild(GuildInfoResponse guild)
+        {
+            this._guildCache.AddOrReplace(guild, new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5)));
+            foreach (RoleInfoResponse role in guild.Roles)
+                this.CacheRole(role);
+            foreach (GuildUserInfoResponse user in guild.Users)
+                this.CacheGuildUser(user);
         }
 
         private static string BuildWithArrayQuery<T>(string url, string queryKey, IEnumerable<T> queryValues)
