@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using TehGM.EinherjiBot.API;
 
-namespace TehGM.EinherjiBot.UI.Components.EntityInfo
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
 {
     public class EntityIdListBase<TEntity> : ComponentBase where TEntity : class, IDiscordEntityInfo
     {
