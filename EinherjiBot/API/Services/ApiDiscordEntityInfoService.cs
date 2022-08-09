@@ -89,7 +89,7 @@ namespace TehGM.EinherjiBot.API.Services
                 IEnumerable<GuildUserInfoResponse> users = usersTask.Result.Select(u => CreateGuildUserInfo(u, roles.IntersectBy(u.RoleIds, r => r.ID)));
                 await usersTask.ConfigureAwait(false);
 
-                GuildInfoResponse result = new GuildInfoResponse(guild.Id, guild.Name)
+                GuildInfoResponse result = new GuildInfoResponse(guild.Id, guild.Name, guild.IconId)
                 {
                     Users = users,
                     Roles = roles

@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Web;
 
 namespace TehGM.EinherjiBot.API
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class OAuthGuildInfoResponse : IDiscordEntityInfo
+    public class OAuthGuildInfoResponse : IDiscordGuildInfo, IDiscordEntityInfo
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -30,17 +29,6 @@ namespace TehGM.EinherjiBot.API
 
         public override string ToString()
             => this.Name;
-
-        public string GetIconURL(ushort size = 1024)
-        {
-            if (string.IsNullOrWhiteSpace(this.IconHash))
-            {
-                string encodedName = HttpUtility.UrlEncodeUnicode(this.Name);
-                return $"https://ui-avatars.com/api?name={encodedName}&size={size}&length=3&uppercase=false&format=png";
-            }
-            string ext = this.IconHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/icons/{this.ID}/{this.IconHash}.{ext}?size={size}";
-        }
 
         public ulong GetCacheKey()
             => this.ID;
