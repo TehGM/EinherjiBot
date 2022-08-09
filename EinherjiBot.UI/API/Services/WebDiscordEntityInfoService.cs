@@ -78,7 +78,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 if (ids?.Any() != true)
                 {
                     TimeSpan cacheExpiration = TimeSpan.FromMinutes(5);
-                    if (this._cachedAllGuilds == null || this._cachedAllGuildsTimestamp < DateTime.UtcNow - cacheExpiration)
+                    if (this._cachedAllGuilds != null && this._cachedAllGuildsTimestamp < DateTime.UtcNow - cacheExpiration)
                         return this._cachedAllGuilds;
                     else
                     {
