@@ -67,8 +67,11 @@
 
     private Task RedirectToLoginAsync()
         => this.LoginRedirect.RedirectAsync();
-    private Task LogoutAsync()
-        => (this.AuthProvider as IWebAuthProvider).LogoutAsync();
+    private async Task LogoutAsync()
+    {
+        await (this.AuthProvider as IWebAuthProvider).LogoutAsync();
+        this.Navigation.NavigateTo("/", false, false);
+    }
     private void ToggleExpanded()
         => this.IsExpanded = !this.IsExpanded;
 }
