@@ -37,7 +37,7 @@ namespace TehGM.EinherjiBot.API.Services
 
         // role
         /// <inheritdoc/>
-        public async Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, ulong[] guildIDs, CancellationToken cancellationToken = default)
+        public async Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default)
         {
             if (guildIDs != null && !guildIDs.Any())
                 return null;
@@ -60,7 +60,7 @@ namespace TehGM.EinherjiBot.API.Services
 
         // guild
         /// <inheritdoc/>
-        public async Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(ulong[] ids, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
         {
             if (ids != null && !ids.Any())
                 return null;

@@ -67,7 +67,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
             }
         }
 
-        public async Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(ulong[] ids, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(IEnumerable<ulong> ids, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -92,7 +92,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 }
                 else
                 {
-                    List<GuildInfoResponse> results = new List<GuildInfoResponse>(ids.Length);
+                    List<GuildInfoResponse> results = new List<GuildInfoResponse>(ids.Count());
 
                     // if some are cached, we don't need to retrieve them from server, eh?
                     results.AddRange(this._guildCache.Find(g => ids.Contains(g.ID)));
@@ -136,7 +136,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
             }
         }
 
-        public async Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, ulong[] guildIDs, CancellationToken cancellationToken = default)
+        public async Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

@@ -8,7 +8,7 @@
         /// <param name="guildIDs">IDs of the guilds to check. If null, all bot's guilds will be checked.</param>
         /// <param name="cancellationToken">Token for operation cancellation.</param>
         /// <returns>Role info if found; otherwise null.</returns>
-        Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, ulong[] guildIDs, CancellationToken cancellationToken = default);
+        Task<RoleInfoResponse> GetRoleInfoAsync(ulong roleID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default);
 
         // user
         /// <summary>Gets User entity info for bot's user.</summary>
@@ -28,7 +28,7 @@
         /// <param name="cancellationToken">Token for operation cancellation.</param>
         /// <returns>All Guild infos found.</returns>
         /// <exception cref="AccessForbiddenException">User has no access to requested guild.</exception>
-        Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(ulong[] ids, CancellationToken cancellationToken = default);
+        Task<IEnumerable<GuildInfoResponse>> GetGuildInfosAsync(IEnumerable<ulong> ids, CancellationToken cancellationToken = default);
 
         // guild user
         /// <summary>Gets Guild User entity info for one specific user. Only guilds with bot added will be checked.</summary>
