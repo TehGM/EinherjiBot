@@ -24,8 +24,7 @@
 @code {
     private MudTextField<ulong?> _inputField;
 
-    private string RoleColor => base.FoundEntity.GetHtmlColor() ?? "var(--mud-palette-text-primary)";
-    private string RoleStyle => $"color: {this.RoleColor};";
+    private string RoleStyle => $"color: {base.FoundEntity.GetHtmlColorOrDefault()};";
 
     protected override async Task<RoleInfoResponse> FindEntityAsync(ulong id)
     {
