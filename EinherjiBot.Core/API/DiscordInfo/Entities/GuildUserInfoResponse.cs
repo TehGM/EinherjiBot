@@ -30,7 +30,7 @@ namespace TehGM.EinherjiBot.API
         public string GetGuildAvatarURL(ushort size = 1024)
         {
             if (string.IsNullOrWhiteSpace(this.GuildAvatarHash))
-                return (this as IDiscordUserInfo).GetAvatarURL(size);
+                return this.GetAvatarURL(size);
 
             string ext = this.AvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
             return $"https://cdn.discordapp.com/guilds/{this.GuildID}/users/{this.ID}/avatars/{this.AvatarHash}.{ext}?size={size}";

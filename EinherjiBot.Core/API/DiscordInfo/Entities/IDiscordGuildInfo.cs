@@ -1,6 +1,4 @@
-﻿using System.Web;
-
-namespace TehGM.EinherjiBot.API
+﻿namespace TehGM.EinherjiBot.API
 {
     public interface IDiscordGuildInfo : IDiscordEntityInfo
     {
@@ -10,16 +8,5 @@ namespace TehGM.EinherjiBot.API
 
         ulong IDiscordEntityInfo.ID => this.ID;
         string IDiscordEntityInfo.Name => this.Name;
-
-        string GetIconURL(ushort size = 1024)
-        {
-            if (string.IsNullOrWhiteSpace(this.IconHash))
-            {
-                string encodedName = HttpUtility.UrlEncodeUnicode(this.Name);
-                return $"https://ui-avatars.com/api?name={encodedName}&size={size}&length=3&uppercase=false&format=png";
-            }
-            string ext = this.IconHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/icons/{this.ID}/{this.IconHash}.{ext}?size={size}";
-        }
     }
 }

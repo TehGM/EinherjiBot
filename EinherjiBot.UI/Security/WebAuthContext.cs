@@ -43,7 +43,7 @@ namespace TehGM.EinherjiBot.UI.Security
             => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features, response.KnownDiscordGuildIDs, response.KnownDiscordRoleIDs);
 
         public override string ToString()
-            => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();
+            => this.GetUsernameWithDiscriminator();
 
         public override bool Equals(object obj)
             => this.Equals(obj as IAuthContext);

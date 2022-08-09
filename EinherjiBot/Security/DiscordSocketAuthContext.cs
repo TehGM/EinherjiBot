@@ -41,10 +41,6 @@ namespace TehGM.EinherjiBot.Security
 
         private DiscordSocketAuthContext() { }
 
-        string IDiscordUserInfo.GetAvatarURL(ushort size)
-            => this.DiscordUser.GetSafeAvatarUrl(ImageFormat.Auto, size);
-        string IDiscordUserInfo.GetUsernameWithDiscriminator()
-            => this.ToString();
         public override string ToString()
             => this.DiscordUser?.GetUsernameWithDiscriminator();
 

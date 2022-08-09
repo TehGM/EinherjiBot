@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace TehGM.EinherjiBot.API
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class UserInfoResponse : IDiscordUserInfo, IDiscordEntityInfo, ICacheableEntity<ulong>
+    public class UserInfoResponse : IDiscordUserInfo, ICacheableEntity<ulong>
     {
         [JsonProperty("id")]
         public ulong ID { get; init; }
@@ -30,7 +30,7 @@ namespace TehGM.EinherjiBot.API
         }
 
         public override string ToString()
-            => (this as IDiscordUserInfo).GetUsernameWithDiscriminator();
+            => this.GetUsernameWithDiscriminator();
 
         public override int GetHashCode()
             => HashCode.Combine(this.ID);
