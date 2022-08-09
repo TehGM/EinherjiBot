@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.API
 {
-    public static class RoleInfoExtensions
+    public static class DiscordRoleInfoExtensions
     {
         public static bool IsFound(this RoleInfoResponse response)
             => response != null && response.ID != 0;
