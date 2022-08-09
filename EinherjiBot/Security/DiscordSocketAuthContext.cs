@@ -58,9 +58,7 @@ namespace TehGM.EinherjiBot.Security
             => HashCode.Combine(this.ID);
 
         public ulong GetCacheKey()
-        {
-            throw new NotImplementedException();
-        }
+            => this.ID;
 
         public static bool operator ==(DiscordSocketAuthContext left, DiscordSocketAuthContext right)
             => EqualityComparer<DiscordSocketAuthContext>.Default.Equals(left, right);
