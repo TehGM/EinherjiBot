@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.UI.Components.EntityInfo
 {
-    public class EntityIdListBase<TEntity> : ComponentBase where TEntity : class
+    public class EntityIdListBase<TEntity> : ComponentBase where TEntity : class, IDiscordEntityInfo
     {
         [Parameter]
         public bool AllowNewValues { get; set; } = true;

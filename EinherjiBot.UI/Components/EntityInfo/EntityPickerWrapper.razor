@@ -1,0 +1,58 @@
+﻿<div class="entity-picker @this.CssClass">
+    <MudDrawer Open="@this.Open" Width="300px" Class="mx-2" Elevation="3" Variant="DrawerVariant.Temporary" Anchor="Anchor.Right" OpenChanged="this.OnOpenChangedAsync" >
+
+        @if (this.HeaderContent != null)
+        {
+            <div class="picker-header">
+                @this.HeaderContent
+            </div>
+        }
+
+        @if (this.ShowDefaultFilter)
+        {
+            <MudTextField Class="picker-filter-field" T="string" Value="this.DefaultFilterValue" Variant="Variant.Outlined" Margin="Margin.Dense" 
+                AdornmentIcon="@this.FilterFieldIcon" Adornment="Adornment.Start" Clearable="true"
+                Label="Filter" HelperText="@this.DefaultFilterHelperText" HelperTextOnFocus="true"
+                DebounceInterval="200" MaxLength="128" ValueChanged="this.OnFilterTextChanged" />
+        }
+
+        <div class="picker-items">
+            @this.ChildContent
+        </div>
+
+    </MudDrawer>
+</div>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+    [Parameter]
+    public string CssClass { get; set; }
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Width { get; set; } = "300px";
+
+    [Parameter]
+    public RenderFragment HeaderContent { get; set; }
+
+    [Parameter]
+    public bool ShowDefaultFilter { get; set; } = true;
+    [Parameter]
+    public string DefaultFilterValue { get; set; }
+    [Parameter]
+    public string DefaultFilterHelperText { get; set; } = "Find by Name";
+    [Parameter]
+    public EventCallback<string> DefaultFilterValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private string FilterFieldIcon => string.IsNullOrWhiteSpace(this.DefaultFilterValue) ? Icons.Filled.FilterAltOff : Icons.Filled.FilterAlt;
+
+    private Task OnOpenChangedAsync(bool open)
+        => this.OpenChanged.InvokeAsync(open);
+
+    private Task OnFilterTextChanged(string value)
+        => this.DefaultFilterValueChanged.InvokeAsync(value);
+}

@@ -21,6 +21,9 @@ namespace TehGM.EinherjiBot.API
         [JsonProperty("position")]
         public int Position { get; init; }
 
+        [JsonIgnore]
+        public bool IsEveryone => this.Position == 0;
+
         [JsonConstructor]
         private RoleInfoResponse() { }
 

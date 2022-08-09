@@ -47,6 +47,12 @@ img, svg {
     }
 }
 
+.text-cutoff {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 /*** FABs ***/
 $fab-max-size: 56px;    // mudblazor large fab size
 $fab-margin: 24px;

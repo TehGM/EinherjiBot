@@ -1,0 +1,88 @@
+﻿@inherits DiscordEntityPickerBase<RoleInfoResponse>
+
+<EntityPickerWrapper Open="base.IsOpen" CssClass="role-picker" OpenChanged="base.OnDrawerOpenChanged"
+    DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find Role by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
+    <HeaderContent>
+        <MudText Color="Color.Primary" Typo="Typo.h6">Role Picker</MudText>
+    </HeaderContent>
+    <ChildContent>
+        @if (this._filteredGuilds != null)
+        {
+            @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<RoleInfoResponse>> guild in this._filteredGuilds)
+            {
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                    @foreach (RoleInfoResponse role in guild.Value)
+                    {
+                        <div class="picker-item" @onclick="_ => base.PickEntity(role)">
+                            <MudText @key="role.IsEveryone ? 0 : role.ID" Class="text-cutoff" Style="@this.GetRoleStyle(role)">@this.GetRoleText(role)</MudText>
+                        </div>
+                    }
+                </EntityPickerGuildSection>
+            }
+        }
+    </ChildContent>
+</EntityPickerWrapper>
+
+@code {
+    private string _filter;
+    private IEnumerable<ulong> _restrictGuilds;
+    private IDictionary<GuildInfoResponse, IEnumerable<RoleInfoResponse>> _allGuilds;
+    private IDictionary<GuildInfoResponse, IEnumerable<RoleInfoResponse>> _filteredGuilds;
+    private TaskCompletionSource<RoleInfoResponse> _closeWaitTcs;
+
+    public Task<RoleInfoResponse> OpenAsync(string filter, IEnumerable<ulong> restrictGuilds, CancellationToken cancellationToken = default)
+    {
+        this._filter = filter;
+        this._restrictGuilds = restrictGuilds;
+        return base.OpenAsync(cancellationToken);
+    }
+
+    protected override async Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        IEnumerable<GuildInfoResponse> data = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
+        this._allGuilds = data.ToDictionary(g => g, g => g.Roles);
+        this.ApplyFilter();
+    }
+
+    protected override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        this._allGuilds = null;
+        this._filteredGuilds = null;
+        this._filter = null;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFilter()
+    {
+        this._filteredGuilds = this._allGuilds;
+
+        if (this._restrictGuilds != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._restrictGuilds, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
+        if (!string.IsNullOrWhiteSpace(this._filter))
+        {
+            string filter = this._filter;
+            if (filter.StartsWith('@'))
+                filter = filter[1..];
+
+            this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(r => r.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.OrderByDescending(r => r.Position).AsEnumerable());
+    }
+
+    private string GetRoleText(RoleInfoResponse role)
+    {
+        if (role.IsEveryone)
+            return role.Name;
+        return $"@{role.Name}";
+    }
+
+    private string GetRoleStyle(RoleInfoResponse role)
+        => $"color: {role.GetHtmlColorOrDefault()}";
+
+    private void OnFilterTextChanged(string value)
+    {
+        this._filter = value;
+        this.ApplyFilter();
+    }
+}

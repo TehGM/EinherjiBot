@@ -1,0 +1,41 @@
+﻿<div class="guild-section @this.CssClass">
+    <MudItem xs="12" Class="d-flex flex-row flex-grow-1 guild-section-header" @onclick="this.OnHeaderClickedAsync">
+        <MudIcon Icon="@this.ArrowIcon" Size="Size.Medium" Class="section-header-arrow" />
+        <MudAvatar Image="@this.Guild.GetIconURL(32)" Size="Size.Small" Alt="@this.Guild.Name" Class="section-header-image" />
+        <MudText Class="flex-shrink-1 section-header-text text-cutoff">@this.Guild.Name</MudText>
+    </MudItem>
+
+    <MudCollapse Expanded="this.IsExpanded">
+        <div class="guild-section-content">
+            @this.ChildContent
+        </div>
+    </MudCollapse>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IDiscordGuildInfo Guild { get; set; }
+    [Parameter]
+    public string CssClass { get; set; }
+    [Parameter]
+    public bool IsExpanded { get; set; } = true;
+    [Parameter]
+    public EventCallback<bool> IsExpandedChanged { get; set; }
+
+    [Parameter]
+    public string CollapsedIcon { get; set; } = Icons.Filled.ArrowRight;
+    [Parameter]
+    public string ExpandedIcon { get; set; } = Icons.Filled.ArrowDropDown;
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    private string ArrowIcon => this.IsExpanded ? this.ExpandedIcon : this.CollapsedIcon;
+    private string ExpandedClass => this.IsExpanded ? "expanded" : string.Empty;
+
+    private Task OnHeaderClickedAsync(MouseEventArgs e)
+    {
+        this.IsExpanded = !this.IsExpanded;
+        return this.IsExpandedChanged.InvokeAsync(this.IsExpanded);
+    }
+}

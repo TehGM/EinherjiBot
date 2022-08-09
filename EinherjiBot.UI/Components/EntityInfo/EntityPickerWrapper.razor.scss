@@ -1,0 +1,56 @@
+.entity-picker {
+    ::deep .mud-drawer {
+        background-color: var(--menu-background-color);
+    }
+
+    ::deep .picker-header {
+        text-align: center;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+
+        & > h6 {
+            font-weight: 700;
+        }
+    }
+
+    ::deep .picker-item {
+        height: 42px;
+        padding-bottom: 0.5rem;
+        padding-top: 0.5rem;
+        padding-left: 8px;
+        padding-right: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-weight: 500;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        &:hover {
+            background-color: rgba(var(--mud-palette-secondary-rgb),.12);
+        }
+
+        &:first-of-type {
+            padding-top: 0.7rem;
+        }
+
+        &:not(:last-of-type) {
+            padding-bottom: 0.5rem;
+        }
+
+        & > p {
+            font-size: 15px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            margin-left: 5px;
+        }
+    }
+
+    ::deep .picker-filter-field {
+        flex-grow: 0;
+    }
+}

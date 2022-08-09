@@ -18,10 +18,13 @@
             </MudTooltip>
         </MudItem>
     }
-    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="true" Size="Size.Medium" />
+    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null" Size="Size.Medium" OnClick="this.OnPickerClicked" />
 </MudItem>
 
 @code {
+    [CascadingParameter]
+    private RolePicker Picker { get; set; }
+
     private MudTextField<ulong?> _inputField;
 
     private string RoleStyle => $"color: {base.FoundEntity.GetHtmlColorOrDefault()};";
@@ -43,8 +46,15 @@
 
     private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
     {
-        if (this.IsError)
+        if (base.IsError)
             return new string[] { "Not a valid Discord Role ID." };
         return Enumerable.Empty<string>();
     }; 
+
+    private async Task OnPickerClicked(MouseEventArgs e)
+    {
+        RoleInfoResponse entity = await this.Picker.OpenAsync();
+        if (entity != null)
+            await base.SetValueAsync(entity.ID);
+    }
 }

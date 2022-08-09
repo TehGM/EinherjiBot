@@ -9,9 +9,12 @@
 
     <NavMenu />
     <main>
-        <article class="content px-4">
-            @Body
-        </article>
+        <RolePicker @ref="this._rolePicker" />
+        <CascadingValue Value="this._rolePicker">
+            <article class="content px-4">
+                @Body
+            </article>
+        </CascadingValue>
     </main>
 
 </CascadingValue>
@@ -19,6 +22,8 @@
 @code{
     private IDiscordUserInfo _botInfo;
     private PersistingComponentStateSubscription _prerenderingSubscription;
+
+    private RolePicker _rolePicker;
 
     protected override async Task OnInitializedAsync()
     {
