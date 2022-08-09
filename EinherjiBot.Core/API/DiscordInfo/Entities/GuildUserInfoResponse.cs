@@ -14,11 +14,17 @@ namespace TehGM.EinherjiBot.API
         public string GuildAvatarHash { get; init; }
         [JsonProperty("guildID")]
         public ulong GuildID { get; init; }
+        [JsonProperty("bot")]
+        public bool IsBot { get; init; }
+        [JsonProperty("admin")]
+        public bool IsAdmin { get; init; }
+        [JsonProperty("owner")]
+        public bool IsOwner { get; init; }
 
         [JsonConstructor]
         private GuildUserInfoResponse() : base() { }
 
-        private ulong? _topRoleColor;
+        private RoleInfoResponse _topRoleWithColor;
 
         public GuildUserInfoResponse(ulong id, string username, string discriminator, string avatarHash, ulong guildID, IEnumerable<RoleInfoResponse> roles)
             : base(id, username, discriminator, avatarHash)
@@ -36,11 +42,11 @@ namespace TehGM.EinherjiBot.API
             return $"https://cdn.discordapp.com/guilds/{this.GuildID}/users/{this.ID}/avatars/{this.AvatarHash}.{ext}?size={size}";
         }
 
-        public ulong GetTopRoleColor()
+        public RoleInfoResponse GetTopRoleWithColor()
         {
-            if (this._topRoleColor == null)
-                this._topRoleColor = this.Roles.Where(r => r.Color != 0).MaxBy(r => r.Position)?.Color ?? 0;
-            return this._topRoleColor.Value;
+            if (this._topRoleWithColor == null)
+                this._topRoleWithColor = this.Roles.Where(r => r.Color != 0).MaxBy(r => r.Position);
+            return this._topRoleWithColor;
         }
     }
 }

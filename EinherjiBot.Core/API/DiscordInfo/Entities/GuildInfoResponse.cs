@@ -12,6 +12,8 @@ namespace TehGM.EinherjiBot.API
         public string Name { get; init; }
         [JsonProperty("icon")]
         public string IconHash { get; init; }
+        [JsonProperty("owner")]
+        public ulong OwnerID { get; init; }
         [JsonProperty("users", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<GuildUserInfoResponse> Users { get; init; }
         [JsonProperty("roles", NullValueHandling = NullValueHandling.Ignore)]

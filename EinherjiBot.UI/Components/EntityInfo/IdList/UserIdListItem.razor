@@ -17,10 +17,13 @@
             </ChildContent>
         </MudTooltip>
     }
-    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="true" Size="Size.Medium" />
+    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null" Size="Size.Medium" OnClick="this.OnPickerClicked" />
 </MudItem>
 
 @code {
+    [CascadingParameter]
+    private UserPicker Picker { get; set; }
+
     private MudTextField<ulong?> _inputField;
 
     protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
@@ -39,4 +42,11 @@
             return new string[] { "Not a valid Discord User ID." };
         return Enumerable.Empty<string>();
     }; 
+
+    private async Task OnPickerClicked(MouseEventArgs e)
+    {
+        GuildUserInfoResponse entity = await this.Picker.OpenAsync();
+        if (entity != null)
+            await base.SetValueAsync(entity.ID);
+    }
 }

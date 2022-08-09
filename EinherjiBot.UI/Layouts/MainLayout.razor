@@ -10,10 +10,13 @@
     <NavMenu />
     <main>
         <RolePicker @ref="this._rolePicker" />
+        <UserPicker @ref="this._userPicker" />
         <CascadingValue Value="this._rolePicker">
-            <article class="content px-4">
-                @Body
-            </article>
+            <CascadingValue Value="this._userPicker">
+                <article class="content px-4">
+                    @Body
+                </article>
+            </CascadingValue>
         </CascadingValue>
     </main>
 
@@ -24,6 +27,7 @@
     private PersistingComponentStateSubscription _prerenderingSubscription;
 
     private RolePicker _rolePicker;
+    private UserPicker _userPicker;
 
     protected override async Task OnInitializedAsync()
     {

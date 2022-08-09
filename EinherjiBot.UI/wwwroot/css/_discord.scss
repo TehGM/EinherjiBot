@@ -8,6 +8,8 @@
 }
 
 .discord-username {
+    font-weight: 500;
+
     &.inline {
         font-size: 16px;
         line-height: 20px;
@@ -39,6 +41,7 @@
         background-color: rgb(88, 101, 242) !important;
         margin-left: 5px;
         height: unset;
+        margin-right: 0px;
     }
 
     & > .mud-chip-content {
@@ -47,5 +50,16 @@
         font-weight: 500;
         text-rendering: optimizeLegibility;
         text-transform: uppercase;
+    }
+}
+
+.discord-admin-icon {
+    height: 16px;
+    width: 16px;
+    margin-left: 5px;
+    vertical-align: text-top;
+
+    &.owner {
+        color: rgb(250, 166, 26);
     }
 }

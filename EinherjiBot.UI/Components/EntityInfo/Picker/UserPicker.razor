@@ -1,0 +1,128 @@
+﻿@using System.Drawing
+@inherits DiscordEntityPickerBase<GuildUserInfoResponse>
+
+<EntityPickerWrapper Open="base.IsOpen" CssClass="user-picker" OpenChanged="base.OnDrawerOpenChanged"
+    DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find User by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
+    <HeaderContent>
+        <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">User Picker</MudText>
+    </HeaderContent>
+    <ChildContent>
+
+
+        @if (this._filteredGuilds != null)
+        {
+            @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> guild in this._filteredGuilds)
+            {
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                    @foreach (GuildUserInfoResponse user in guild.Value)
+                    {
+                        <div class="picker-item gap-2" @onclick="_ => base.PickEntity(user)">
+                            <MudAvatar Image="@user.GetGuildAvatarURL(32)" Class="discord-avatar inline"/>
+                            <div class="d-flex flex-column">
+                                <span class="d-flex flex-row">
+                                    <MudText Class="ma-0 discord-username inline" Style="@this.GetUserStyle(user)">@this.GetUserText(user)</MudText>
+                                    @if (user.IsBot)
+                                    {
+                                        <MudChip Class="discord-bot-tag">BOT</MudChip>
+                                    }
+                                    @this.RenderAdminIcon(user)
+                                </span>
+                                <MudText Class="align-self-center discord-status inline">
+                                    @user.GetUsernameWithDiscriminator()
+                                </MudText>
+                            </div>
+                        </div>
+                    }
+                </EntityPickerGuildSection>
+            }
+        }
+    </ChildContent>
+</EntityPickerWrapper>
+
+@code {
+    private string _filter;
+    private IEnumerable<ulong> _restrictGuilds;
+    private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _allGuilds;
+    private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _filteredGuilds;
+    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
+
+    public Task<GuildUserInfoResponse> OpenAsync(string filter, IEnumerable<ulong> restrictGuilds, CancellationToken cancellationToken = default)
+    {
+        this._filter = filter;
+        this._restrictGuilds = restrictGuilds;
+        return base.OpenAsync(cancellationToken);
+    }
+
+    protected override async Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        IEnumerable<GuildInfoResponse> data = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
+        this._allGuilds = data.ToDictionary(g => g, g => g.Users);
+        this.ApplyFilter();
+    }
+
+    protected override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        this._allGuilds = null;
+        this._filteredGuilds = null;
+        this._filter = null;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFilter()
+    {
+        this._filteredGuilds = this._allGuilds;
+
+        if (this._restrictGuilds != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._restrictGuilds, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
+        if (!string.IsNullOrWhiteSpace(this._filter))
+        {
+            this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(u => 
+                    u.GetUsernameWithDiscriminator().Contains(this._filter, StringComparison.OrdinalIgnoreCase) ||
+                    u.Nickname?.Contains(this._filter, StringComparison.OrdinalIgnoreCase) == true));
+        }
+
+        this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.OrderBy(r => r.Nickname ?? r.Username).AsEnumerable());
+    }
+
+    private string GetUserText(GuildUserInfoResponse user)
+        => user.Nickname ?? user.Username;
+
+    private string GetUserStyle(GuildUserInfoResponse user)
+        => $"color: {user.GetTopRoleWithColor().GetHtmlColorOrDefault()}";
+
+    private void OnFilterTextChanged(string value)
+    {
+        this._filter = value;
+        this.ApplyFilter();
+    }
+
+    private RenderFragment RenderAdminIcon(GuildUserInfoResponse user)
+    {
+        string tooltipText = null;
+        string iconClass = null;
+        if (user.IsOwner)
+        {
+            tooltipText = "Owner";
+            iconClass = "discord-admin-icon owner";
+        }
+        else if (user.IsAdmin)
+        {
+            tooltipText = "Administrator";
+            iconClass = "discord-admin-icon admin";
+        }
+        else
+            return null;
+
+        return __builder =>
+        {
+            <MudTooltip Delay="500" Placement="Placement.Top">
+                <TooltipContent>
+                    @tooltipText
+                </TooltipContent>
+                <ChildContent>
+                    <MudIcon Size="MudBlazor.Size.Small" Class="@iconClass" Icon="@Icons.Filled.Star" />
+                </ChildContent>
+            </MudTooltip>
+        };
+    }
+}

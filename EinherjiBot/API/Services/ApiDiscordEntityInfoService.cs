@@ -92,7 +92,8 @@ namespace TehGM.EinherjiBot.API.Services
                 GuildInfoResponse result = new GuildInfoResponse(guild.Id, guild.Name, guild.IconId)
                 {
                     Users = users,
-                    Roles = roles
+                    Roles = roles,
+                    OwnerID = guild.OwnerId
                 };
                 results.Add(result);
             }
@@ -128,7 +129,10 @@ namespace TehGM.EinherjiBot.API.Services
             => new GuildUserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId, user.GuildId, roles)
             {
                 GuildAvatarHash = user.GuildAvatarId,
-                Nickname = user.Nickname
+                Nickname = user.Nickname,
+                IsBot = user.IsBot || user.IsWebhook,
+                IsAdmin = user.GuildPermissions.Administrator,
+                IsOwner = user.Guild.OwnerId == user.Id
             };
     }
 }
