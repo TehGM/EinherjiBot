@@ -36,14 +36,14 @@ namespace TehGM.EinherjiBot.UI.API.Services
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (this._botID == null)
+                if (this._botID == null || !this._usersCache.TryGet(this._botID.Value, out UserInfoResponse cachedResult))
                 {
-                    UserInfoResponse botInfo = await this._client.GetJsonAsync<UserInfoResponse>("entity-info/bot", cancellationToken).ConfigureAwait(false);
-                    this._botID = botInfo.ID;
-                    this.CacheUser(botInfo);
-                    return botInfo;
+                    UserInfoResponse result = await this._client.GetJsonAsync<UserInfoResponse>("entity-info/bot", cancellationToken).ConfigureAwait(false);
+                    this._botID = result.ID;
+                    this.CacheUser(result);
+                    return result;
                 }
-                return this._usersCache.Get(this._botID.Value);
+                return cachedResult;
             }
             finally
             {
