@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.Identifier = identifier;
             this.AllowedContext = allowedContext;
 
-            this.MatchingRegex = new Regex($"{PlaceholderSymbol.OpenTag}{this.Identifier}(?:[{Regex.Escape(_regexParamsCharset)}]*?)?{PlaceholderSymbol.CloseTag}",
+            this.MatchingRegex = new Regex($"{PlaceholderSymbol.OpenTag}{this.Identifier}(?:{Regex.Escape(PlaceholderSymbol.ParameterSplitter)}[{Regex.Escape(_regexParamsCharset)}]*?)?{PlaceholderSymbol.CloseTag}",
                 RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline);
         }
     }
