@@ -16,6 +16,6 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         IPlaceholder CreateInstance(IServiceProvider services, Type type);
         /// <summary>Gets information for all registered placeholders.</summary>
         /// <returns>Key-value pairs for all registered placeholders.</returns>
-        IEnumerable<KeyValuePair<PlaceholderAttribute, Type>> GetRegisteredPlaceholders();
+        IEnumerable<KeyValuePair<OldPlaceholderAttribute, Type>> GetRegisteredPlaceholders();
     }
 }

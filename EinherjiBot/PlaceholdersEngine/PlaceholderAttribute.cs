@@ -1,7 +1,7 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class PlaceholderAttribute : Attribute, IEquatable<PlaceholderAttribute>, IEquatable<string>
+    public class OldPlaceholderAttribute : Attribute, IEquatable<OldPlaceholderAttribute>, IEquatable<string>
     {
         public const RegexOptions DefaultRegexOptions = RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled;
 
@@ -11,7 +11,7 @@
 
         public Regex PlaceholderRegex { get; }
 
-        public PlaceholderAttribute(string placeholder, RegexOptions regexOptions)
+        public OldPlaceholderAttribute(string placeholder, RegexOptions regexOptions)
         {
             if (string.IsNullOrWhiteSpace(placeholder))
                 throw new ArgumentNullException(placeholder);
@@ -21,18 +21,18 @@
             this.PlaceholderRegex = new Regex(placeholder, regexOptions);
         }
 
-        public PlaceholderAttribute(string placeholder)
+        public OldPlaceholderAttribute(string placeholder)
             : this(placeholder, DefaultRegexOptions) { }
 
         public override bool Equals(object obj)
         {
-            if (obj is PlaceholderAttribute attr)
+            if (obj is OldPlaceholderAttribute attr)
                 return this.Equals(attr);
             if (obj is string placeholder)
                 return this.Equals(placeholder);
             return false;
         }
-        public bool Equals(PlaceholderAttribute other)
+        public bool Equals(OldPlaceholderAttribute other)
             => other is not null && string.Equals(this.Placeholder, other.Placeholder, StringComparison.OrdinalIgnoreCase);
         public bool Equals(string other)
             => string.Equals(this.Placeholder, other, StringComparison.OrdinalIgnoreCase);

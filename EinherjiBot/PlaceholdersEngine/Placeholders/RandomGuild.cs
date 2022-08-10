@@ -3,7 +3,7 @@ using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("{{RandomGuild}}")]
+    [OldPlaceholder("{{RandomGuild}}")]
     public class RandomGuild : IPlaceholder
     {
         private readonly IDiscordClient _client;

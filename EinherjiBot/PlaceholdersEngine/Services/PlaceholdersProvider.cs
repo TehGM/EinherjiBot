@@ -7,12 +7,12 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     internal class PlaceholdersProvider : IPlaceholdersProvider
     {
-        private readonly IDictionary<PlaceholderAttribute, Type> _placeholders;
+        private readonly IDictionary<OldPlaceholderAttribute, Type> _placeholders;
         private readonly ILogger _log;
 
         public PlaceholdersProvider(ILogger<PlaceholdersEngineService> log)
         {
-            this._placeholders = new Dictionary<PlaceholderAttribute, Type>();
+            this._placeholders = new Dictionary<OldPlaceholderAttribute, Type>();
             this._log = log;
         }
 
@@ -32,9 +32,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             if (Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute)))
                 throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's compiler-generated.");
 
-            PlaceholderAttribute placeholder = type.GetCustomAttribute<PlaceholderAttribute>();
+            OldPlaceholderAttribute placeholder = type.GetCustomAttribute<OldPlaceholderAttribute>();
             if (placeholder == null)
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it isn't decorated with {nameof(PlaceholderAttribute)}.");
+                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it isn't decorated with {nameof(OldPlaceholderAttribute)}.");
 
             if (this._placeholders.TryAdd(placeholder, type))
             {
@@ -53,7 +53,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             => (IPlaceholder)ActivatorUtilities.CreateInstance(services, type);
 
         /// <inheritdoc/>
-        public IEnumerable<KeyValuePair<PlaceholderAttribute, Type>> GetRegisteredPlaceholders()
+        public IEnumerable<KeyValuePair<OldPlaceholderAttribute, Type>> GetRegisteredPlaceholders()
             => this._placeholders.AsEnumerable();
     }
 }

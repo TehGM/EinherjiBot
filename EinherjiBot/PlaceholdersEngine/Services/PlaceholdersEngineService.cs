@@ -27,7 +27,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
             StringBuilder builder = new StringBuilder(text);
-            foreach (KeyValuePair<PlaceholderAttribute, Type> placeholderInfo in this._provider.GetRegisteredPlaceholders())
+            foreach (KeyValuePair<OldPlaceholderAttribute, Type> placeholderInfo in this._provider.GetRegisteredPlaceholders())
             {
                 IEnumerable<Match> matches = placeholderInfo.Key.PlaceholderRegex
                     .Matches(builder.ToString())

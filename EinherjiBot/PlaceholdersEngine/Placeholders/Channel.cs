@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder($"{{{{Channel:(\\d{{1,20}})(?::({_modeMention}|{_modeName}))?}}}}", DisplayName = "{{Channel}}")]
+    [OldPlaceholder($"{{{{Channel:(\\d{{1,20}})(?::({_modeMention}|{_modeName}))?}}}}", DisplayName = "{{Channel}}")]
     internal class Channel : IPlaceholder
     {
         private const string _modeMention = "Mention";

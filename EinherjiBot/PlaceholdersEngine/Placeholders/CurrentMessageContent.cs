@@ -3,7 +3,7 @@
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     // this placeholder will break when not in message context (like message trigger)
-    [Placeholder("{{CurrentMessageContent}}")]
+    [OldPlaceholder("{{CurrentMessageContent}}")]
     public class CurrentMessageContent : IPlaceholder
     {
         private readonly IMessage _message;

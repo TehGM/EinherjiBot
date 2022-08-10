@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("{{GuildCount}}")]
+    [OldPlaceholder("{{GuildCount}}")]
     public class GuildCount : IPlaceholder
     {
         private readonly IDiscordClient _client;

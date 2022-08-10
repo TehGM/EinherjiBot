@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("{{BotWebsite}}")]
+    [OldPlaceholder("{{BotWebsite}}")]
     public class BotWebsite : IPlaceholder
     {
         public Task<string> GetReplacementAsync(Match placeholder, CancellationToken cancellationToken = default)
