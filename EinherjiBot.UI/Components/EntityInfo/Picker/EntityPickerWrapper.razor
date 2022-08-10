@@ -16,10 +16,16 @@
                 DebounceInterval="200" MaxLength="128" ValueChanged="this.OnFilterTextChanged" />
         }
 
-        <div class="picker-items">
+        <div class="picker-items" style="padding-bottom: @this.ItemsMargin;">
             @this.ChildContent
         </div>
 
+        @if (this.ShowPrivacyAlert && !this._alertSuppressed)
+        {
+            <MudAlert Severity="Severity.Normal" Variant="Variant.Text" Class="picker-privacy-alert" ShowCloseIcon="true" CloseIconClicked="this.OnPolicyAlertClosed">
+                For privacy reasons, only guilds both you and @EinherjiInfo.Name are in can be viewed.
+            </MudAlert>
+        }
     </MudDrawer>
 </div>
 
@@ -46,13 +52,23 @@
     public EventCallback<string> DefaultFilterValueChanged { get; set; }
 
     [Parameter]
+    public bool EnablePrivacyAlert { get; set; }
+
+    [Parameter]
     public EventCallback<bool> OpenChanged { get; set; }
 
+    private bool _alertSuppressed;
+
     private string FilterFieldIcon => string.IsNullOrWhiteSpace(this.DefaultFilterValue) ? Icons.Filled.FilterAltOff : Icons.Filled.FilterAlt;
+    private bool ShowPrivacyAlert => this.EnablePrivacyAlert && !this._alertSuppressed && this.AuthProvider.User?.IsAdmin() != true;
+    private string ItemsMargin => this.ShowPrivacyAlert && !this._alertSuppressed ? "70px" : "0";
 
     private Task OnOpenChangedAsync(bool open)
         => this.OpenChanged.InvokeAsync(open);
 
     private Task OnFilterTextChanged(string value)
         => this.DefaultFilterValueChanged.InvokeAsync(value);
+
+    private void OnPolicyAlertClosed()
+        => this._alertSuppressed = true;
 }

@@ -13,7 +13,7 @@ namespace TehGM.EinherjiBot
             => HasRole(context, UserRole.Admin);
 
         public static bool HasRole(this IAuthContext context, string role)
-            => context.BotRoles.Contains(role);
+            => context?.BotRoles?.Contains(role) == true;
 
         public static ClaimsPrincipal ToClaimsPrincipal(this IAuthContext context, string scheme)
         {

@@ -1,7 +1,7 @@
 ﻿@using System.Drawing
 @inherits DiscordEntityPickerBase<GuildUserInfoResponse>
 
-<EntityPickerWrapper Open="base.IsOpen" CssClass="user-picker" OpenChanged="base.OnDrawerOpenChanged"
+<EntityPickerWrapper Open="base.IsOpen" CssClass="user-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
     DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find User by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
     <HeaderContent>
         <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">User Picker</MudText>

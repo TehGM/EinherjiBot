@@ -1,6 +1,6 @@
 ﻿@inherits DiscordEntityPickerBase<RoleInfoResponse>
 
-<EntityPickerWrapper Open="base.IsOpen" CssClass="role-picker" OpenChanged="base.OnDrawerOpenChanged"
+<EntityPickerWrapper Open="base.IsOpen" CssClass="role-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
     DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find Role by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
     <HeaderContent>
         <MudText Color="Color.Primary" Typo="Typo.h6">Role Picker</MudText>

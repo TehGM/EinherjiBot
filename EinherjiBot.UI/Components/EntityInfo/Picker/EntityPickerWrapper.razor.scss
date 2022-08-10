@@ -54,3 +54,11 @@
         flex-grow: 0;
     }
 }
+
+::deep .picker-privacy-alert {
+    position: fixed;
+    bottom: 0;
+    margin-right: 10px;
+    font-size: 12px;
+    background-color: var(--menu-background-color);
+}
