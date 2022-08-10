@@ -2,7 +2,7 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("Guild", PlaceholderUsage.GuildMessageContext | PlaceholderUsage.Admin)]
+    [Placeholder("Guild", PlaceholderUsage.Admin)]
     public class GuildPlaceholder
     {
         [PlaceholderProperty("ID", IsRequired = true, IDType = IDType.Guild)]
