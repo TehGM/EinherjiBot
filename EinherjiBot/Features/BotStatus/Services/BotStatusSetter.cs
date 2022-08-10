@@ -65,7 +65,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             string text = status.Text;
             if (!string.IsNullOrWhiteSpace(status.Text))
             {
-                text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, cancellationToken).ConfigureAwait(false);
+                text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, PlaceholderUsage.Status, cancellationToken).ConfigureAwait(false);
                 this._log.LogDebug("Changing status to `{Status}`", text);
             }
             else

@@ -66,6 +66,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                 if (!parameters.TryGetValue(propAttribute.Name, out string value) && propAttribute.IsRequired)
                     throw new PlaceholderFormatException($"Placeholder's parameter '{propAttribute.Name}' is missing.");
 
+                if (value == null)
+                    continue;
+
                 object actualValue = property.PropertyType.IsEnum
                     ? Enum.Parse(property.PropertyType, value, ignoreCase: true)
                     : Convert.ChangeType(value, property.PropertyType);

@@ -21,11 +21,11 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         }
 
         /// <inheritdoc/>
-        public async Task<string> ConvertPlaceholdersAsync(string text, CancellationToken cancellationToken = default)
-            => await this.ConvertPlaceholdersAsync(text, this._services, cancellationToken);
+        public async Task<string> ConvertPlaceholdersAsync(string text, PlaceholderUsage context, CancellationToken cancellationToken = default)
+            => await this.ConvertPlaceholdersAsync(text, context, this._services, cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<string> ConvertPlaceholdersAsync(string text, IServiceProvider services, CancellationToken cancellationToken = default)
+        public async Task<string> ConvertPlaceholdersAsync(string text, PlaceholderUsage context, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
@@ -38,6 +38,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 
                 if (!matches.Any())
                     continue;
+
+                if (!descriptor.AvailableInContext(context))
+                    throw new PlaceholderContextException(descriptor);
 
                 IPlaceholderHandler handler = (IPlaceholderHandler)ActivatorUtilities.CreateInstance(services, descriptor.HandlerType);
                 foreach (Match match in matches.OrderByDescending(m => m.Index))

@@ -30,6 +30,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.Properties = LoadProperties(type);
         }
 
+        public bool AvailableInContext(PlaceholderUsage context)
+            => (this.PlaceholderAttribute.AllowedContext & context) != PlaceholderUsage.None;
+
         private static IEnumerable<PlaceholderPropertyDescriptor> LoadProperties(Type type)
         {
             IEnumerable<PropertyInfo> properties = type.GetProperties(MemberBindingFlags);

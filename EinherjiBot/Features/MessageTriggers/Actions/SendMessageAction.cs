@@ -40,10 +40,10 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                 return;
 
             IPlaceholdersEngine placeholders = services.GetRequiredService<IPlaceholdersEngine>();
-            string text = await placeholders.ConvertPlaceholdersAsync(this.Text, cancellationToken).ConfigureAwait(false);
+            string text = await placeholders.ConvertPlaceholdersAsync(this.Text, trigger.PlaceholderContext, cancellationToken).ConfigureAwait(false);
 
             Embed embed = this.Embed != null
-                ? await this.Embed.BuildAsync(message.Author, placeholders, client, services, cancellationToken).ConfigureAwait(false)
+                ? await this.Embed.BuildAsync(message.Author, placeholders, trigger.PlaceholderContext, client, services, cancellationToken).ConfigureAwait(false)
                 : null;
 
             AllowedMentions allowedMentions = this.DisableMentions ? AllowedMentions.None : AllowedMentions.All;
@@ -105,13 +105,13 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             public EmbedInfo()
                 : this(null) { }
 
-            public async Task<Embed> BuildAsync(IUser currentUser, IPlaceholdersEngine placeholders, IDiscordClient client, IServiceProvider services, CancellationToken cancellationToken = default)
+            public async Task<Embed> BuildAsync(IUser currentUser, IPlaceholdersEngine placeholders, PlaceholderUsage placeholderContext, IDiscordClient client, IServiceProvider services, CancellationToken cancellationToken = default)
             {
                 EmbedBuilder result = new EmbedBuilder();
                 if (!string.IsNullOrEmpty(this.Description))
-                    result.WithDescription(await placeholders.ConvertPlaceholdersAsync(this.Description, services, cancellationToken).ConfigureAwait(false));
+                    result.WithDescription(await placeholders.ConvertPlaceholdersAsync(this.Description, placeholderContext, services, cancellationToken).ConfigureAwait(false));
                 if (!string.IsNullOrWhiteSpace(this.Title))
-                    result.WithTitle(await placeholders.ConvertPlaceholdersAsync(this.Title, services, cancellationToken).ConfigureAwait(false));
+                    result.WithTitle(await placeholders.ConvertPlaceholdersAsync(this.Title, placeholderContext, services, cancellationToken).ConfigureAwait(false));
                 if (!string.IsNullOrWhiteSpace(this.URL))
                     result.WithUrl(this.URL);
                 if (!string.IsNullOrWhiteSpace(this.ImageURL))
@@ -126,7 +126,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                     result.WithColor(this.Color.Value);
 
                 foreach (FieldInfo field in this.Fields)
-                    result.AddField(field.Name, await placeholders.ConvertPlaceholdersAsync(field.Value, services, cancellationToken).ConfigureAwait(false), field.IsInline);
+                    result.AddField(field.Name, await placeholders.ConvertPlaceholdersAsync(field.Value, placeholderContext, services, cancellationToken).ConfigureAwait(false), field.IsInline);
 
                 if (this.UseCurrentUserAsAuthor)
                     result.WithAuthor(currentUser);
@@ -142,7 +142,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                     string imageUrl = this.Footer.UseCurrentUserAsImage ? currentUser.GetSafeAvatarUrl()
                         : this.Footer.UseBotUserAsImage ? client.CurrentUser.GetSafeAvatarUrl()
                         : this.Footer.ImageURL;
-                    result.WithFooter(await placeholders.ConvertPlaceholdersAsync(this.Footer.Text, services, cancellationToken).ConfigureAwait(false),
+                    result.WithFooter(await placeholders.ConvertPlaceholdersAsync(this.Footer.Text, placeholderContext, services, cancellationToken).ConfigureAwait(false),
                         imageUrl);
                 }
 

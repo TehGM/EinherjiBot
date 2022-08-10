@@ -19,7 +19,7 @@
         /// <summary>Placeholder can be used in any context that doesn't depend on any scoped services.</summary>
         StaticContext = Status,
         /// <summary>Placeholder can be used in context that depends on received guild message.</summary>
-        GuildMessageContext = StaticContext | MessageTrigger,
+        GuildMessageContext = MessageTrigger,
         /// <summary>Placeholder can be used in context that depend on received message of any type.</summary>
         AnyMessageContext = GuildMessageContext | GlobalMessageTrigger,
         /// <summary>Placeholder can be used in any context.</summary>

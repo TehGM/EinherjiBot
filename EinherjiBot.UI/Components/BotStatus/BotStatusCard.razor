@@ -1,5 +1,6 @@
 ﻿@using Discord
 @using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 @using TehGM.EinherjiBot.Utilities
 @inject IBotStatusService Service
@@ -181,7 +182,7 @@
     private async Task OnPreviewClickedAsync(MouseEventArgs e)
     {
         this._processing = true;
-        PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text));
+        PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text, PlaceholderUsage.Status));
         this._processing = false;
         string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
         this._previewText = $"{activity} {response.Result}";
