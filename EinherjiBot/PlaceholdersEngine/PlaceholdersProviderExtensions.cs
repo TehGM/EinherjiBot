@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
 
             // we purposefully allow null/anstract handler types to let provider's implementation throw the exception
             IDictionary<Type, Type> placeholders = placeholderTypes.ToDictionary(t => t,
-                t => handlerTypes.FirstOrDefault(t => t.IsGenericType && !t.ContainsGenericParameters && t.GenericTypeArguments.First() == t);
+                t => handlerTypes.FirstOrDefault(t => t.IsGenericType && !t.ContainsGenericParameters && t.GenericTypeArguments.First() == t));
 
             return provider.AddPlaceholders(placeholders);
         }
