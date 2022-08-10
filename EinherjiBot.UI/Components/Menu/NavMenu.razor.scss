@@ -180,6 +180,10 @@ hr {
     display: none;
 }
 
+::deep .mobile-loading {
+    display: block;
+}
+
 @media (min-width: 600px) {
     .navbar-toggler {
         display: none;
@@ -188,6 +192,10 @@ hr {
     .collapse, ::deep .user-panel.collapse {
         /* Never collapse the sidebar for wide screens */
         display: block;
+    }
+
+    ::deep .mobile-loading {
+        display: none;
     }
 
     .sidebar {

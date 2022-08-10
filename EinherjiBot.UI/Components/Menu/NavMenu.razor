@@ -150,6 +150,16 @@
     </div>
 
     <CurrentUserPanel CssClass="@this.NavMenuCssClass" />
+    <AuthorizeView>
+        <Authorizing>
+            <MudProgressLinear Class="mobile-loading" Color="Color.Primary" Indeterminate="true" />
+        </Authorizing>
+        <NotAuthorized>
+            <ServerOnly>
+                <MudProgressLinear Class="mobile-loading" Color="Color.Primary" Indeterminate="true" />
+            </ServerOnly>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code {
