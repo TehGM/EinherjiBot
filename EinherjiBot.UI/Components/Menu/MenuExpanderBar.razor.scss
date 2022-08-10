@@ -1,0 +1,25 @@
+.menu-expander-bar {
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: background-color 0.3s;
+    background-color: var(--background-color-darkest);
+    border-top: 1px solid var(--background-color-default);
+
+    &:hover {
+        background-color: var(--background-color-default);
+    }
+
+    span {
+        text-align: center;
+        width: auto;
+    }
+
+    &.less-dark {
+        background-color: var(--background-color-darker);
+
+        &:hover {
+            background-color: var(--background-color-default);
+        }
+    }
+}

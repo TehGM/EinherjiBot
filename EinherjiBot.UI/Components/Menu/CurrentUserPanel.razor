@@ -5,16 +5,7 @@
     <AuthorizeView>
         <Authorized>
                 <div class="expander">
-                    <div class="expander-bar" @onclick=@this.ToggleExpanded>
-                    @if (this.IsExpanded)
-                    {
-                        <span class="oi oi-chevron-bottom"></span>
-                    }
-                    else
-                    {
-                        <span class="oi oi-chevron-top"></span>
-                    }
-                    </div>
+                    <MenuExpanderBar @bind-Expanded="@this.IsExpanded" />
                     <div class="user-info">
                         <img src="@this.AuthProvider.User?.GetAvatarURL(256)" />
                         <div class="username-bar">
@@ -72,6 +63,4 @@
         await (this.AuthProvider as IWebAuthProvider).LogoutAsync();
         this.Navigation.NavigateTo("/", false, false);
     }
-    private void ToggleExpanded()
-        => this.IsExpanded = !this.IsExpanded;
 }

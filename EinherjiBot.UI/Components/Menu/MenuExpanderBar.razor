@@ -1,0 +1,29 @@
+﻿<div class="menu-expander-bar @this.ColorClass @this.CssClass" @onclick="@this.OnToggleAsync">
+@if (this.Expanded)
+{
+    <span class="oi oi-chevron-bottom"></span>
+}
+else
+{
+    <span class="oi oi-chevron-top"></span>
+}
+</div>
+
+@code {
+    [Parameter]
+    public bool Expanded { get; set; } = true;
+    [Parameter]
+    public EventCallback<bool> ExpandedChanged { get; set; }
+    [Parameter]
+    public bool LessDark { get; set; } = false;
+    [Parameter]
+    public string CssClass { get; set; } = null;
+
+    private string ColorClass => this.LessDark ? "less-dark" : null;
+
+    private Task OnToggleAsync()
+    {
+        this.Expanded = !this.Expanded;
+        return this.ExpandedChanged.InvokeAsync(this.Expanded);
+    }
+}

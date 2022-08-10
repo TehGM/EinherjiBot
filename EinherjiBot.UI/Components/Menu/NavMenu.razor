@@ -96,21 +96,23 @@
                             .OrderBy(g => g.Name);
                         if (validGuilds?.Any() == true)
                         {
-                            <hr/>
+                            <MenuExpanderBar @bind-Expanded="@this._guildsExpanded" LessDark="true" CssClass="my-3" />
                         }
                     }
-                    @foreach (OAuthGuildInfoResponse guild in validGuilds)
-                    {
-                        <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
-                            OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
-                            <div class="nav-item">
-                                <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
-                                    <span class="oi oi-bolt" aria-hidden="true"></span>
-                                    <span class="text">Message Triggers</span>
-                                </NavLink>
-                            </div>
-                        </NavLinkCategory>
-                    }
+                    <MudCollapse Expanded="@this._guildsExpanded">
+                        @foreach (OAuthGuildInfoResponse guild in validGuilds)
+                        {
+                            <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
+                                OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
+                                <div class="nav-item">
+                                    <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
+                                        <span class="oi oi-bolt" aria-hidden="true"></span>
+                                        <span class="text">Message Triggers</span>
+                                    </NavLink>
+                                </div>
+                            </NavLinkCategory>
+                        }
+                    </MudCollapse>
                     
                     @*for administration purposes, admin can view all guilds*@
                     @*TODO: even more valuably, should see bot's guilds*@
@@ -123,20 +125,22 @@
                         }
                         @if (additionalGuilds?.Any() == true)
                         {
-                            <hr/>
+                            <MenuExpanderBar @bind-Expanded="@this._adminGuildsExpanded" LessDark="true" CssClass="my-3" />
                         }
-                        @foreach (OAuthGuildInfoResponse guild in additionalGuilds)
-                        {
-                            <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
-                                OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
-                                <div class="nav-item">
-                                    <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
-                                        <span class="oi oi-bolt" aria-hidden="true"></span>
-                                        <span class="text">Message Triggers</span>
-                                    </NavLink>
-                                </div>
-                            </NavLinkCategory>
-                        }
+                        <MudCollapse Expanded="@this._adminGuildsExpanded">
+                            @foreach (OAuthGuildInfoResponse guild in additionalGuilds)
+                            {
+                                <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(_avatarSize)" 
+                                    OnClick=@this.OnCategoryClick IsOpen=@(this._currentCategoryIdentifier == guild.ID)>
+                                    <div class="nav-item">
+                                        <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
+                                            <span class="oi oi-bolt" aria-hidden="true"></span>
+                                            <span class="text">Message Triggers</span>
+                                        </NavLink>
+                                    </div>
+                                </NavLinkCategory>
+                            }
+                        </MudCollapse>
                         </Authorized>
                     </PolicyAuthorizeView>
                 </Authorized>
@@ -173,6 +177,9 @@
     private ulong? _currentCategoryIdentifier;
     private bool _collapseNavMenu = true;
     private string NavMenuCssClass => this._collapseNavMenu ? "collapse" : null;
+
+    private bool _guildsExpanded = true;
+    private bool _adminGuildsExpanded = true;
 
     [CascadingParameter]
     private IDiscordUserInfo BotInfo { get; set; }
