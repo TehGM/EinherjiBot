@@ -4,7 +4,7 @@
             @this.RenderTooltipContents()
         </TooltipContent>
         <ChildContent>
-            <div class="header" @onclick="this.OnClickAsync">
+            <div class="header @this.HeaderClass" @onclick="this.OnClickAsync">
                 @if (this.IsOpen)
                 {
                     <div class="oi oi-chevron-bottom arrow"></div>
@@ -46,6 +46,8 @@
     [Parameter]
     public RenderFragment Tooltip { get; set; }
 
+    private string HeaderClass => this.IsOpen ? "expanded" : null;
+
     private Task OnClickAsync()
         => this.OnClick.InvokeAsync(this);
 
@@ -53,6 +55,7 @@
     {
         if (this.Tooltip != null)
             return this.Tooltip;
-        return @<text>@this.Text</text>;
+        return 
+    @<text>@this.Text</text>;
     }
 }
