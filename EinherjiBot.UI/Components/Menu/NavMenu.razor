@@ -179,7 +179,7 @@
     private string NavMenuCssClass => this._collapseNavMenu ? "collapse" : null;
 
     private bool _guildsExpanded = true;
-    private bool _adminGuildsExpanded = true;
+    private bool _adminGuildsExpanded = false;
 
     [CascadingParameter]
     private IDiscordUserInfo BotInfo { get; set; }
