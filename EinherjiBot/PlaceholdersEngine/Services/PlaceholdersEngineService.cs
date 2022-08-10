@@ -9,13 +9,15 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         private readonly IPlaceholdersProvider _provider;
         private readonly IPlaceholderSerializer _serializer;
         private readonly IServiceProvider _services;
+        private readonly IAuthContext _auth;
         private readonly ILogger _log;
 
         public PlaceholdersEngineService(IPlaceholdersProvider provider, IPlaceholderSerializer serializer,
-            IServiceProvider services, ILogger<PlaceholdersEngineService> log)
+            IAuthContext auth, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
         {
             this._provider = provider;
             this._serializer = serializer;
+            this._auth = auth;
             this._services = services;
             this._log = log;
         }
@@ -28,6 +30,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         public async Task<string> ConvertPlaceholdersAsync(string text, PlaceholderUsage context, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
+
+            if (this._auth.IsAdmin() || this._auth.IsEinherji())
+                context |= PlaceholderUsage.Admin;
 
             StringBuilder builder = new StringBuilder(text);
             foreach (PlaceholderDescriptor descriptor in this._provider.GetRegisteredPlaceholders())
