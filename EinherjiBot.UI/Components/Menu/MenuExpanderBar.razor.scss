@@ -15,11 +15,12 @@
         width: auto;
     }
 
-    &.less-dark {
-        background-color: var(--background-color-darker);
+    &.light {
+        border-top: 1px solid var(--background-color-lightest);
+        background-color: var(--background-color-dark);
 
         &:hover {
-            background-color: var(--background-color-default);
+            background-color: var(--background-color-lighter);
         }
     }
 }

@@ -96,7 +96,7 @@
                             .OrderBy(g => g.Name);
                         if (validGuilds?.Any() == true)
                         {
-                            <MenuExpanderBar @bind-Expanded="@this._guildsExpanded" LessDark="true" CssClass="my-3" />
+                            <MenuExpanderBar @bind-Expanded="@this._guildsExpanded" Light="true" CssClass="my-3" />
                         }
                     }
                     <MudCollapse Expanded="@this._guildsExpanded">
@@ -125,7 +125,7 @@
                         }
                         @if (additionalGuilds?.Any() == true)
                         {
-                            <MenuExpanderBar @bind-Expanded="@this._adminGuildsExpanded" LessDark="true" CssClass="my-3" />
+                            <MenuExpanderBar @bind-Expanded="@this._adminGuildsExpanded" Light="true" CssClass="my-3" />
                         }
                         <MudCollapse Expanded="@this._adminGuildsExpanded">
                             @foreach (OAuthGuildInfoResponse guild in additionalGuilds)

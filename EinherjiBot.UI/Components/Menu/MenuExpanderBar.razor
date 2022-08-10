@@ -15,11 +15,11 @@ else
     [Parameter]
     public EventCallback<bool> ExpandedChanged { get; set; }
     [Parameter]
-    public bool LessDark { get; set; } = false;
+    public bool Light { get; set; } = false;
     [Parameter]
     public string CssClass { get; set; } = null;
 
-    private string ColorClass => this.LessDark ? "less-dark" : null;
+    private string ColorClass => this.Light ? "light" : null;
 
     private Task OnToggleAsync()
     {
