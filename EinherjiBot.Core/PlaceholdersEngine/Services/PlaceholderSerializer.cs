@@ -5,10 +5,6 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     public class PlaceholderSerializer : IPlaceholderSerializer
     {
-        public const string OpenTag = "{{";
-        public const string CloseTag = "}}";
-        public const string ParameterSplitter = "||";
-        public const string KeyValueSplitter = "==";
 
         private const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
@@ -33,16 +29,16 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                     parameters.Add(propAttribute.Name, value.ToString());
             }
 
-            StringBuilder builder = new StringBuilder(OpenTag);
+            StringBuilder builder = new StringBuilder(PlaceholderSymbol.OpenTag);
             builder.Append(identifier.Identifier);
             foreach (KeyValuePair<string, string> parameter in parameters)
             {
-                builder.Append(ParameterSplitter);
+                builder.Append(PlaceholderSymbol.ParameterSplitter);
                 builder.Append(parameter.Key);
-                builder.Append(KeyValueSplitter);
+                builder.Append(PlaceholderSymbol.KeyValueSplitter);
                 builder.Append(parameter.Value);
             }
-            builder.Append(CloseTag);
+            builder.Append(PlaceholderSymbol.CloseTag);
             return builder.ToString();
         }
 
@@ -53,11 +49,11 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             if (placeholderType == null)
                 throw new ArgumentNullException(nameof(placeholderType));
 
-            if (!placeholderValue.StartsWith(OpenTag, StringComparison.Ordinal) || !placeholderValue.EndsWith(CloseTag, StringComparison.Ordinal))
-                throw new PlaceholderFormatException($"Placeholder value must be wrapped in '{OpenTag}' and '{CloseTag}' tags.", placeholderType);
-            placeholderValue = placeholderValue[OpenTag.Length..^CloseTag.Length];
+            if (!placeholderValue.StartsWith(PlaceholderSymbol.OpenTag, StringComparison.Ordinal) || !placeholderValue.EndsWith(PlaceholderSymbol.CloseTag, StringComparison.Ordinal))
+                throw new PlaceholderFormatException($"Placeholder value must be wrapped in '{PlaceholderSymbol.OpenTag}' and '{PlaceholderSymbol.CloseTag}' tags.", placeholderType);
+            placeholderValue = placeholderValue[PlaceholderSymbol.OpenTag.Length..^PlaceholderSymbol.CloseTag.Length];
 
-            string[] segments = placeholderValue.Split(ParameterSplitter);
+            string[] segments = placeholderValue.Split(PlaceholderSymbol.ParameterSplitter);
             ParseIdentifier(segments, placeholderType);
 
             IDictionary<string, string> parameters = ParseParameters(segments, placeholderType);
@@ -96,14 +92,14 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             IDictionary<string, string> parameters = new Dictionary<string, string>(segments.Length - 1, StringComparer.OrdinalIgnoreCase);
             foreach (string segment in segments[1..])
             {
-                int splitterIndex = segment.IndexOf(KeyValueSplitter);
+                int splitterIndex = segment.IndexOf(PlaceholderSymbol.KeyValueSplitter);
                 if (splitterIndex < 0)
                     throw new PlaceholderFormatException($"Placeholder's segment '{segment}' contains no value.", placeholderType);
                 string key = segment.Remove(splitterIndex);
                 if (parameters.ContainsKey(key))
                     throw new PlaceholderFormatException($"Placeholder has duplicated parameter key '{key}'.", placeholderType);
 
-                string value = segment.Substring(splitterIndex + KeyValueSplitter.Length);
+                string value = segment.Substring(splitterIndex + PlaceholderSymbol.KeyValueSplitter.Length);
                 if (string.IsNullOrWhiteSpace(value))
                     throw new PlaceholderFormatException($"Placeholder's key '{key}' contains no value.", placeholderType);
             }
