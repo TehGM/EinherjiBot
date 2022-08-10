@@ -15,7 +15,7 @@ namespace TehGM.Analyzers.PlaceholdersEngine
     public class PlaceholderAnalyzer : DiagnosticAnalyzer
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
-            => ImmutableArray.Create(DiagnosticRule.MissingInterface, DiagnosticRule.MissingAttribute, DiagnosticRule.IsAbstract, DiagnosticRule.IsClass, DiagnosticRule.IsGeneric);
+            => ImmutableArray.Create(DiagnosticRule.IsAbstract, DiagnosticRule.IsClass, DiagnosticRule.IsGeneric);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -31,25 +31,9 @@ namespace TehGM.Analyzers.PlaceholdersEngine
             if (!PlaceholderDeclarationContext.TryGetFromContext(nodeContext, out PlaceholderDeclarationContext context))
                 return;
 
-            AnalyzeMissingInterface(context);
-            AnalyzeMissingAttribute(context);
             AnalyzeIsAbstract(context);
             AnalyzeIsClass(context);
             AnalyzeIsGeneric(context);
-        }
-
-        private static void AnalyzeMissingInterface(PlaceholderDeclarationContext context)
-        {
-            if (context.HasRequiredInterface)
-                return;
-            context.ReportDiagnostic(DiagnosticRule.MissingInterface);
-        }
-
-        private static void AnalyzeMissingAttribute(PlaceholderDeclarationContext context)
-        {
-            if (context.HasRequiredAttribute || context.IsAbstract)
-                return;
-            context.ReportDiagnostic(DiagnosticRule.MissingAttribute);
         }
 
         private static void AnalyzeIsAbstract(PlaceholderDeclarationContext context)

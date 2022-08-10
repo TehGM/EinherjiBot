@@ -20,14 +20,11 @@ namespace TehGM.Analyzers.PlaceholdersEngine
         public bool IsAbstract => this.AbstractToken != default;
         public bool IsClass => this.Declaration is ClassDeclarationSyntax;
 
-        public PlaceholderDeclarationContext(SyntaxNodeAnalysisContext context, TypeDeclarationSyntax declaration, INamedTypeSymbol symbol,
-            bool hasRequiredAttribute, bool hasRequiredInterface, SyntaxToken abstractToken)
+        public PlaceholderDeclarationContext(SyntaxNodeAnalysisContext context, TypeDeclarationSyntax declaration, INamedTypeSymbol symbol, SyntaxToken abstractToken)
         {
             this.NodeContext = context;
             this.Declaration = declaration;
             this.Symbol = symbol;
-            this.HasRequiredAttribute = hasRequiredAttribute;
-            this.HasRequiredInterface = hasRequiredInterface;
             this.AbstractToken = abstractToken;
         }
 
@@ -37,17 +34,10 @@ namespace TehGM.Analyzers.PlaceholdersEngine
             if (!(context.Node is TypeDeclarationSyntax declaration))
                 return false;
 
-            bool hasRequiredAttribute = declaration.AttributeLists.SelectMany(list => list.Attributes)
-                .Any(attr => attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute + "Attribute");
-            bool hasRequiredInterface = declaration.BaseList?.Types.Any(t => t.Type.ToString() == RequiredTypeName.PlaceholderInterface) == true;
-
-            if (!hasRequiredAttribute && !hasRequiredInterface)
-                return false;
-
             SyntaxToken abstractToken = declaration.Modifiers.FirstOrDefault(modifier => modifier.IsKind(SyntaxKind.AbstractKeyword));
             INamedTypeSymbol symbol = context.SemanticModel.GetDeclaredSymbol(declaration);
 
-            result = new PlaceholderDeclarationContext(context, declaration, symbol, hasRequiredAttribute, hasRequiredInterface, abstractToken);
+            result = new PlaceholderDeclarationContext(context, declaration, symbol, abstractToken);
             return true;
         }
 
