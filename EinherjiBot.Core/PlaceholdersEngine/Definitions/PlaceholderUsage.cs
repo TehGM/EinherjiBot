@@ -11,8 +11,10 @@
         Status = 1 << 1,
         /// <summary>Placeholder can be used by message triggers.</summary>
         MessageTrigger = 1 << 2,
-        /// <summary>Placholder can be used by global message triggers.</summary>
+        /// <summary>Placeholder can be used by global message triggers.</summary>
         GlobalMessageTrigger = 1 << 3,
+        /// <summary>Placeholder will be usable by admins regardless of the context.</summary>
+        Admin = 1 << 4,
 
         /// <summary>Placeholder can be used in any context that doesn't depend on any scoped services.</summary>
         StaticContext = Status,
