@@ -19,12 +19,10 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
-            if (handlerType == null)
-                throw new ArgumentNullException(nameof(handlerType));
 
             PlaceholderAttribute attribute = type.GetCustomAttribute<PlaceholderAttribute>(inherit: false);
             if (attribute == null)
-                throw new ArgumentException($"Property {type} isn't decorated with {nameof(PlaceholderAttribute)}.");
+                throw new ArgumentException($"Property {type} isn't decorated with {nameof(PlaceholdersEngine.PlaceholderAttribute)}.");
 
             this.PlaceholderType = type;
             this.PlaceholderAttribute = attribute;

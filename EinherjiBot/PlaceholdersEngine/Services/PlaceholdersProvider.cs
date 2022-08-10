@@ -16,14 +16,17 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         }
 
         /// <inheritdoc/>
-        public bool AddPlaceholder(Type placeholderType, Type handlerType)
+        public bool AddPlaceholder(Type placeholderType, Type handlerType, bool validateHandler = true)
         {
             this._log.LogTrace("Adding status placeholder type {Type}", placeholderType);
 
-            if (handlerType == null)
-                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it has no matching handler.");
-            if (handlerType.IsAbstract)
-                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because associated handler is abstract.");
+            if (validateHandler)
+            {
+                if (handlerType == null)
+                    throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it has no matching handler.");
+                if (handlerType.IsAbstract)
+                    throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because associated handler is abstract.");
+            }
 
             if (!placeholderType.IsClass)
                 throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's not a class.");
