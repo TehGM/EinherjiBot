@@ -4,7 +4,7 @@
     {
         public const string OpenTag = "{{";
         public const string CloseTag = "}}";
-        public const string ParameterSplitter = "||";
-        public const string KeyValueSplitter = "==";
+        public const string ParameterSplitter = "::";
+        public const string KeyValueSplitter = "=";
     }
 }
