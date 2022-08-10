@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 IEnumerable<Type> types = Assembly.GetExecutingAssembly().DefinedTypes.Where(t =>
                         typeof(IPlaceholder).IsAssignableFrom(t) &&
                         !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute)) &&
-                        Attribute.IsDefined(t, typeof(PlaceholderAttribute), true));
+                        Attribute.IsDefined(t, typeof(OldPlaceholderAttribute), true));
                 int count = provider.AddPlaceholders(types);
                 log.LogInformation("Loaded {Count} placeholders", count);
                 return provider;
@@ -33,6 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IPlaceholdersEngine, PlaceholdersEngineService>();
 
             services.TryAddTransient<IPlaceholdersService, ApiPlaceholdersService>();
+            services.TryAddTransient<IPlaceholderSerializer, PlaceholderSerializer>();
 
             return services;
         }
