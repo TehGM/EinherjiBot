@@ -21,7 +21,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.AllowedContext = allowedContext;
 
             this.MatchingRegex = new Regex($"{PlaceholderSymbol.OpenTag}{this.Identifier}(?:{Regex.Escape(PlaceholderSymbol.ParameterSplitter)}[{Regex.Escape(_regexParamsCharset)}]*?)?{PlaceholderSymbol.CloseTag}",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline);
+                RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline,
+                TimeSpan.FromMilliseconds(250));
         }
     }
 }
