@@ -193,7 +193,11 @@
     }
 
     private void OnLocationChanged(object sender, LocationChangedEventArgs args)
-        => this.UpdateLinkCategory();
+    {
+        this._collapseNavMenu = true;
+        this.UpdateLinkCategory();
+        base.StateHasChanged();
+    }
 
     private void UpdateLinkCategory()
     {
