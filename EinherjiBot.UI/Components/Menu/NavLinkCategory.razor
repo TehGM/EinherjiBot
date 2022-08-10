@@ -23,12 +23,11 @@
             </div>
         </ChildContent>
     </MudTooltip>
-    @if (this.IsOpen)
-    {
+    <MudCollapse Expanded="@this.IsOpen">
         <div class="children">
             @this.ChildContent
         </div>
-    }
+    </MudCollapse>
 </div>
 
 @code {
