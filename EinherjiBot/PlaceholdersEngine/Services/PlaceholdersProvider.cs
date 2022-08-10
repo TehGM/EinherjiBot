@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
 
@@ -7,53 +6,55 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     internal class PlaceholdersProvider : IPlaceholdersProvider
     {
-        private readonly IDictionary<OldPlaceholderAttribute, Type> _placeholders;
+        private readonly IDictionary<string, PlaceholderDescriptor> _placeholders;
         private readonly ILogger _log;
 
         public PlaceholdersProvider(ILogger<PlaceholdersEngineService> log)
         {
-            this._placeholders = new Dictionary<OldPlaceholderAttribute, Type>();
+            this._placeholders = new Dictionary<string, PlaceholderDescriptor>(StringComparer.OrdinalIgnoreCase);
             this._log = log;
         }
 
         /// <inheritdoc/>
-        public bool AddPlaceholder(Type type)
+        public bool AddPlaceholder(Type placeholderType, Type handlerType)
         {
-            this._log.LogTrace("Adding status placeholder type {Type}", type);
+            this._log.LogTrace("Adding status placeholder type {Type}", placeholderType);
 
-            if (!type.IsClass)
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's not a class.");
-            if (type.IsAbstract)
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's abstract.");
-            if (type.IsGenericType)
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's generic.");
-            if (!typeof(IPlaceholder).IsAssignableFrom(type))
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it doesn't implement {nameof(IPlaceholder)} interface.");
-            if (Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute)))
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it's compiler-generated.");
+            if (handlerType == null)
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it has no matching handler.");
+            if (handlerType.IsAbstract)
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because associated handler is abstract.");
 
-            OldPlaceholderAttribute placeholder = type.GetCustomAttribute<OldPlaceholderAttribute>();
+            if (!placeholderType.IsClass)
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's not a class.");
+            if (placeholderType.IsAbstract)
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's abstract.");
+            if (placeholderType.IsGenericType)
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's generic.");
+            if (!typeof(IPlaceholder).IsAssignableFrom(placeholderType))
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it doesn't implement {nameof(IPlaceholder)} interface.");
+            if (Attribute.IsDefined(placeholderType, typeof(CompilerGeneratedAttribute)))
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's compiler-generated.");
+
+            PlaceholderAttribute placeholder = placeholderType.GetCustomAttribute<PlaceholderAttribute>();
             if (placeholder == null)
-                throw new InvalidOperationException($"Cannot add placeholder type {type.FullName} because it isn't decorated with {nameof(OldPlaceholderAttribute)}.");
+                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it isn't decorated with {nameof(PlaceholderAttribute)}.");
 
-            if (this._placeholders.TryAdd(placeholder, type))
+            PlaceholderDescriptor descriptor = new PlaceholderDescriptor(placeholderType, handlerType);
+            if (this._placeholders.TryAdd(placeholder.Identifier, descriptor))
             {
-                this._log.LogDebug("Added placeholder {Placeholder}", placeholder.GetDisplayText());
+                this._log.LogDebug("Added placeholder {Placeholder}", placeholder.Identifier);
                 return true;
             }
             else
             {
-                this._log.LogWarning("Cannot add placeholder {Placeholder} as it was already added before", placeholder.GetDisplayText());
+                this._log.LogWarning("Cannot add placeholder {Placeholder} as it was already added before", placeholder.Identifier);
                 return false;
             }
         }
 
         /// <inheritdoc/>
-        public IPlaceholder CreateInstance(IServiceProvider services, Type type)
-            => (IPlaceholder)ActivatorUtilities.CreateInstance(services, type);
-
-        /// <inheritdoc/>
-        public IEnumerable<KeyValuePair<OldPlaceholderAttribute, Type>> GetRegisteredPlaceholders()
-            => this._placeholders.AsEnumerable();
+        public IEnumerable<PlaceholderDescriptor> GetRegisteredPlaceholders()
+            => this._placeholders.Values;
     }
 }

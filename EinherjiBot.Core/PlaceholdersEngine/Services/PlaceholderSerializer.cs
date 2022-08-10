@@ -5,9 +5,6 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     public class PlaceholderSerializer : IPlaceholderSerializer
     {
-
-        private const BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
         public string Serialize(object placeholder)
         {
             if (placeholder == null)
@@ -16,7 +13,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             Type placeholderType = placeholder.GetType();
             PlaceholderAttribute identifier = GetPlaceholderAttribute(placeholderType);
 
-            IEnumerable<PropertyInfo> properties = placeholderType.GetProperties(_bindingFlags);
+            IEnumerable<PropertyInfo> properties = placeholderType.GetProperties(PlaceholderDescriptor.MemberBindingFlags);
             IDictionary<string, string> parameters = new Dictionary<string, string>(properties.Count(), StringComparer.OrdinalIgnoreCase);
             foreach (PropertyInfo property in properties)
             {
@@ -24,7 +21,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                 if (propAttribute == null)
                     continue;
 
-                object value = property.GetValue(placeholder, _bindingFlags, null, null, null);
+                object value = property.GetValue(placeholder, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
                 if (value != null || propAttribute.IsRequired)
                     parameters.Add(propAttribute.Name, value.ToString());
             }
@@ -59,7 +56,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             IDictionary<string, string> parameters = ParseParameters(segments, placeholderType);
             object result = Activator.CreateInstance(placeholderType, nonPublic: true);
 
-            IEnumerable<PropertyInfo> properties = placeholderType.GetProperties(_bindingFlags);
+            IEnumerable<PropertyInfo> properties = placeholderType.GetProperties(PlaceholderDescriptor.MemberBindingFlags);
             foreach (PropertyInfo property in properties)
             {
                 PlaceholderPropertyAttribute propAttribute = property.GetCustomAttribute<PlaceholderPropertyAttribute>(inherit: true);
@@ -72,7 +69,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                 object actualValue = property.PropertyType.IsEnum
                     ? Enum.Parse(property.PropertyType, value, ignoreCase: true)
                     : Convert.ChangeType(value, property.PropertyType);
-                property.SetValue(result, actualValue, _bindingFlags, null, null, null);
+                property.SetValue(result, actualValue, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
             }
 
             return result;
@@ -81,6 +78,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         private static string ParseIdentifier(string[] segments, Type placeholderType)
         {
             PlaceholderAttribute identifier = GetPlaceholderAttribute(placeholderType);
+            if (identifier == null)
+                throw new InvalidOperationException($"Type {placeholderType.FullName} is not decorated with {nameof(PlaceholderAttribute)}");
             string name = segments[0];
             if (!identifier.Identifier.Equals(name, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Placeholder identifier mismatch.");

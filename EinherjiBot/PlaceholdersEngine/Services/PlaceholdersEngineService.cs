@@ -1,5 +1,5 @@
-﻿using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
-using System.Text;
+﻿using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
@@ -7,12 +7,15 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
     internal class PlaceholdersEngineService : IPlaceholdersEngine
     {
         private readonly IPlaceholdersProvider _provider;
+        private readonly IPlaceholderSerializer _serializer;
         private readonly IServiceProvider _services;
         private readonly ILogger _log;
 
-        public PlaceholdersEngineService(IPlaceholdersProvider provider, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
+        public PlaceholdersEngineService(IPlaceholdersProvider provider, IPlaceholderSerializer serializer,
+            IServiceProvider services, ILogger<PlaceholdersEngineService> log)
         {
             this._provider = provider;
+            this._serializer = serializer;
             this._services = services;
             this._log = log;
         }
@@ -27,19 +30,20 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
             StringBuilder builder = new StringBuilder(text);
-            foreach (KeyValuePair<OldPlaceholderAttribute, Type> placeholderInfo in this._provider.GetRegisteredPlaceholders())
+            foreach (PlaceholderDescriptor descriptor in this._provider.GetRegisteredPlaceholders())
             {
-                IEnumerable<Match> matches = placeholderInfo.Key.PlaceholderRegex
+                IEnumerable<Match> matches = descriptor.MatchingRegex
                     .Matches(builder.ToString())
                     .Where(m => m != null && m.Success);
 
                 if (!matches.Any())
                     continue;
 
-                IPlaceholder placeholder = this._provider.CreateInstance(services, placeholderInfo.Value);
+                IPlaceholderHandler handler = (IPlaceholderHandler)ActivatorUtilities.CreateInstance(services, descriptor.HandlerType);
                 foreach (Match match in matches.OrderByDescending(m => m.Index))
                 {
-                    string replacement = await placeholder.GetReplacementAsync(match, cancellationToken).ConfigureAwait(false);
+                    object placehoder = this._serializer.Deserialize(match.Value, descriptor.PlaceholderType);
+                    string replacement = await handler.GetReplacementAsync(placehoder, cancellationToken).ConfigureAwait(false);
                     builder.Remove(match.Index, match.Length);
                     builder.Insert(match.Index, replacement);
                 }
