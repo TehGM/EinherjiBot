@@ -8,12 +8,17 @@
 @inject ILogger<NavMenu> Log
 
 <div class="sidebar">
-    <div class="top-row ps-3 navbar navbar-dark">
+    <div class="top-row px-3 navbar navbar-dark">
         <div class="container-fluid">
             <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
+        <AuthorizeView>
+            <Authorized>
+                <img class="mobile-user-avatar @this.NavMenuCssClass" src="@this.AuthProvider.User?.GetAvatarURL(64)" />
+            </Authorized>
+        </AuthorizeView>
     </div>
     
     <div class="nav-menu-items @NavMenuCssClass">
