@@ -64,7 +64,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                     continue;
 
                 if (!parameters.TryGetValue(propAttribute.Name, out string value) && propAttribute.IsRequired)
-                    throw new PlaceholderFormatException($"Placeholder's parameter '{propAttribute.Name} is missing.");
+                    throw new PlaceholderFormatException($"Placeholder's parameter '{propAttribute.Name}' is missing.");
 
                 object actualValue = property.PropertyType.IsEnum
                     ? Enum.Parse(property.PropertyType, value, ignoreCase: true)
@@ -101,6 +101,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                 string value = segment.Substring(splitterIndex + PlaceholderSymbol.KeyValueSplitter.Length);
                 if (string.IsNullOrWhiteSpace(value))
                     throw new PlaceholderFormatException($"Placeholder's key '{key}' contains no value.", placeholderType);
+
+                parameters.Add(key, value);
             }
             return parameters;
         }
