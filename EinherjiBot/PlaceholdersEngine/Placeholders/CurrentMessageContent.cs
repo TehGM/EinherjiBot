@@ -2,7 +2,6 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [OldPlaceholder("{{CurrentMessageContent}}")]
     public class CurrentMessageContentPlaceholderHandler : PlaceholderHandler<CurrentMessageContentPlaceholder>
     {
         private readonly IMessage _message;

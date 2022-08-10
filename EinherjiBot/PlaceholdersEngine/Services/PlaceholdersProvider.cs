@@ -34,8 +34,6 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
                 throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's abstract.");
             if (placeholderType.IsGenericType)
                 throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's generic.");
-            if (!typeof(IPlaceholder).IsAssignableFrom(placeholderType))
-                throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it doesn't implement {nameof(IPlaceholder)} interface.");
             if (Attribute.IsDefined(placeholderType, typeof(CompilerGeneratedAttribute)))
                 throw new InvalidOperationException($"Cannot add placeholder type {placeholderType.FullName} because it's compiler-generated.");
 
