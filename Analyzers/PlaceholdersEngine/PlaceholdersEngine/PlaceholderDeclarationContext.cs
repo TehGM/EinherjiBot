@@ -34,6 +34,11 @@ namespace TehGM.Analyzers.PlaceholdersEngine
             if (!(context.Node is TypeDeclarationSyntax declaration))
                 return false;
 
+            bool hasRequiredAttribute = declaration.AttributeLists.SelectMany(list => list.Attributes)
+                .Any(attr => attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute || attr.Name.ToString() == RequiredTypeName.PlaceholderAttribute + "Attribute");
+            if (!hasRequiredAttribute)
+                return false;
+
             SyntaxToken abstractToken = declaration.Modifiers.FirstOrDefault(modifier => modifier.IsKind(SyntaxKind.AbstractKeyword));
             INamedTypeSymbol symbol = context.SemanticModel.GetDeclaredSymbol(declaration);
 
