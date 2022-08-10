@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 ILogger log = services.GetRequiredService<ILogger<PlaceholdersProvider>>();
 
                 log.LogDebug("Loading placeholders");
-                int count = provider.AddPlaceholders(new[] { typeof(TehGM.EinherjiBot.UI.Program).Assembly, typeof(PlaceholderAttribute).Assembly });
+                int count = provider.AddPlaceholders(new[] { typeof(TehGM.EinherjiBot.UI.Program).Assembly, typeof(PlaceholderAttribute).Assembly }, validateHandlers: false);
                 log.LogInformation("Loaded {Count} placeholders", count);
                 return provider;
             });
