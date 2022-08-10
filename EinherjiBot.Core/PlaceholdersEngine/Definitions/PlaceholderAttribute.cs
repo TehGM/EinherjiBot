@@ -6,7 +6,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
     public class PlaceholderAttribute : Attribute
     {
         public string Identifier { get; }
-        public PlaceholderUsage AllowedContext { get; init; }
+        public PlaceholderUsage AllowedContext { get; }
 
         public Regex MatchingRegex { get; }
 
