@@ -19,8 +19,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 PlaceholdersProvider provider = ActivatorUtilities.CreateInstance<PlaceholdersProvider>(services);
                 ILogger log = services.GetRequiredService<ILogger<PlaceholdersProvider>>();
 
-                log.LogDebug("Loading all placeholders from current assembly");
-                int count = provider.AddPlaceholders(Assembly.GetExecutingAssembly(), typeof(PlaceholderAttribute).Assembly);
+                log.LogDebug("Loading placeholders");
+                int count = provider.AddPlaceholders(new[] { Assembly.GetExecutingAssembly(), typeof(PlaceholderAttribute).Assembly });
                 log.LogInformation("Loaded {Count} placeholders", count);
                 return provider;
             });

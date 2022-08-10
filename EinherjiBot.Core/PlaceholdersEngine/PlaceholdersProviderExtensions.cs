@@ -18,12 +18,19 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         /// <summary>Adds placeholders to the provider.</summary>
         /// <param name="provider">Placeholder provider to add placeholders to.</param>
         /// <param name="types">Types of the placeholders and their matched handlers.</param>
+        /// <param name="validateHandlers">Whether handlers should be validated. Server-side it should always be true.</param>
         /// <exception cref="InvalidOperationException">Any placeholder type isn't valid. See message for more details.</exception>
         /// <returns>Count of added placeholders. Will be less than count of <see cref="types"/> if some placeholders were already added previously.</returns>
-        public static int AddPlaceholders(this IPlaceholdersProvider provider, IEnumerable<KeyValuePair<Type, Type>> types)
-            => types.Count(t => provider.AddPlaceholder(t.Key, t.Value));
+        public static int AddPlaceholders(this IPlaceholdersProvider provider, IEnumerable<KeyValuePair<Type, Type>> types, bool validateHandlers = true)
+            => types.Count(t => provider.AddPlaceholder(t.Key, t.Value, validateHandlers));
 
-        public static int AddPlaceholders(this IPlaceholdersProvider provider, params Assembly[] assemblies)
+        /// <summary>Adds placeholders to the provider.</summary>
+        /// <param name="provider">Placeholder provider to add placeholders to.</param>
+        /// <param name="assemblies">Assemblies to look for placeholders and their handlers in.</param>
+        /// <param name="validateHandlers">Whether handlers should be validated. Server-side it should always be true.</param>
+        /// <exception cref="InvalidOperationException">Any placeholder type isn't valid. See message for more details.</exception>
+        /// <returns>Count of added placeholders. Will be less than count of <see cref="types"/> if some placeholders were already added previously.</returns>
+        public static int AddPlaceholders(this IPlaceholdersProvider provider, Assembly[] assemblies, bool validateHandlers = true)
         {
             IEnumerable<Type> foundTypes = assemblies.SelectMany(a => a.DefinedTypes.Where(t => !Attribute.IsDefined(t, typeof(CompilerGeneratedAttribute))));
             IEnumerable<Type> placeholderTypes = foundTypes.Where(t => Attribute.IsDefined(t, typeof(PlaceholderAttribute), true));
@@ -37,7 +44,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
                     return handlerTypes.FirstOrDefault(h => genericType.IsAssignableFrom(h));
                 });
 
-            return provider.AddPlaceholders(placeholders);
+            return provider.AddPlaceholders(placeholders, validateHandlers);
         }
     }
 }

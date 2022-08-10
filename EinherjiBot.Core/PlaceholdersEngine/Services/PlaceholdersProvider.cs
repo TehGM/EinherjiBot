@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
-    internal class PlaceholdersProvider : IPlaceholdersProvider
+    public class PlaceholdersProvider : IPlaceholdersProvider
     {
         private readonly IDictionary<string, PlaceholderDescriptor> _placeholders;
         private readonly ILogger _log;
 
-        public PlaceholdersProvider(ILogger<PlaceholdersEngineService> log)
+        public PlaceholdersProvider(ILogger<PlaceholdersProvider> log)
         {
             this._placeholders = new Dictionary<string, PlaceholderDescriptor>(StringComparer.OrdinalIgnoreCase);
             this._log = log;
