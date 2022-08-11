@@ -46,14 +46,14 @@ namespace TehGM.EinherjiBot.Security.Services
                 return;
             }
 
-            IEnumerable<IDiscordAuthorizationPolicyAttribute> policies = endpoint.Metadata.GetOrderedMetadata<IDiscordAuthorizationPolicyAttribute>();
+            IEnumerable<IBotAuthorizationPolicyAttribute> policies = endpoint.Metadata.GetOrderedMetadata<IBotAuthorizationPolicyAttribute>();
             if (!policies.Any())
             {
                 await next.Invoke(context).ConfigureAwait(false);
                 return;
             }
 
-            BotAuthorizationResult result = await this._service.AuthorizeAsync(policies.Select(p => p.PolicyType), context.RequestAborted).ConfigureAwait(false);
+            BotAuthorizationResult result = await this._service.AuthorizeAsync(policies.SelectMany(p => p.PolicyTypes), context.RequestAborted).ConfigureAwait(false);
             if (!result.Succeeded)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

@@ -13,14 +13,14 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
 
         public Task<BotAuthorizationResult> EvaluateAsync(CancellationToken cancellationToken = default)
         {
-            if (this._provider.UserFeatures.Contains(UserFeature.Intel))
+            if (this._provider.UserFeatures?.Contains(UserFeature.Intel) == true)
                 return Task.FromResult(BotAuthorizationResult.Success);
 
             return Task.FromResult(BotAuthorizationResult.Fail("You have no access to Intel feature"));
         }
     }
 
-    public class HasIntelFeatureAttribute : AuthorizeAttribute
+    public class HasIntelFeatureAttribute : AuthorizeAttribute, IBotAuthorizationPolicyAttribute
     {
         public HasIntelFeatureAttribute() : base(typeof(HasIntelFeature)) { }
     }

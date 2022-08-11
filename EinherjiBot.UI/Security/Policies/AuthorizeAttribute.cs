@@ -1,23 +1,15 @@
-﻿using TehGM.EinherjiBot.Security.Policies;
+﻿using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.UI.Security.Policies
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class AuthorizeAttribute : Attribute
+    public class AuthorizeAttribute : Attribute, IBotAuthorizationPolicyAttribute
     {
         public IEnumerable<Type> PolicyTypes { get; }
 
         public AuthorizeAttribute(params Type[] policies)
         {
-            if (!policies.Contains(typeof(Authorize)))
-            {
-                List<Type> types = new List<Type>(policies.Length + 1);
-                types.Add(typeof(Authorize));
-                types.AddRange(policies);
-                this.PolicyTypes = types;
-            }
-            else
-                this.PolicyTypes = policies;
+            this.PolicyTypes = AuthorizationPolicyHelper.AppendAuthorizePolicy(policies);
         }
     }
 }
