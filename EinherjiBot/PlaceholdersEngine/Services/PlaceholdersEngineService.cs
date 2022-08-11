@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
@@ -9,15 +10,15 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         private readonly IPlaceholdersProvider _provider;
         private readonly IPlaceholderSerializer _serializer;
         private readonly IServiceProvider _services;
-        private readonly IAuthContext _auth;
+        private readonly IAuthContext _authContext;
         private readonly ILogger _log;
 
         public PlaceholdersEngineService(IPlaceholdersProvider provider, IPlaceholderSerializer serializer,
-            IAuthContext auth, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
+            IAuthContext authContext, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
         {
             this._provider = provider;
             this._serializer = serializer;
-            this._auth = auth;
+            this._authContext = authContext;
             this._services = services;
             this._log = log;
         }
@@ -31,7 +32,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         {
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
-            if (this._auth.IsAdmin() || this._auth.IsEinherji())
+            if (this._authContext.IsAdmin() || this._authContext.IsEinherji())
                 context |= PlaceholderUsage.Admin;
 
             StringBuilder builder = new StringBuilder(text);
@@ -46,6 +47,14 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 
                 if (!descriptor.AvailableInContext(context))
                     throw new PlaceholderContextException(descriptor);
+
+                if (descriptor.Policies.Any())
+                {
+                    IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
+                    BotAuthorizationResult authorization = await authService.AuthorizeAsync(descriptor.Policies, cancellationToken).ConfigureAwait(false);
+                    if (!authorization.Succeeded)
+                        throw new AccessForbiddenException($"You have no permissions to use this placeholder.");
+                }
 
                 IPlaceholderHandler handler = (IPlaceholderHandler)ActivatorUtilities.CreateInstance(services, descriptor.HandlerType);
                 foreach (Match match in matches.OrderByDescending(m => m.Index))

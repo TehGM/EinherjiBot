@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine
 {
@@ -11,6 +12,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         public PlaceholderAttribute PlaceholderAttribute { get; }
         public Type HandlerType { get; }
         public IEnumerable<PlaceholderPropertyDescriptor> Properties { get; }
+
+        public IEnumerable<Type> Policies { get; }
 
         public string Identifier => this.PlaceholderAttribute.Identifier;
         public Regex MatchingRegex => this.PlaceholderAttribute.MatchingRegex;
@@ -28,6 +31,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.PlaceholderAttribute = attribute;
             this.HandlerType = handlerType;
             this.Properties = LoadProperties(type);
+            this.Policies = LoadPolicies(type, handlerType);
         }
 
         public bool AvailableInContext(PlaceholderUsage context)
@@ -46,6 +50,20 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
                 results.Add(new PlaceholderPropertyDescriptor(property, propAttribute));
             }
             return results;
+        }
+
+        private static IEnumerable<Type> LoadPolicies(Type placeholderType, Type handlerType)
+        {
+            IEnumerable<IBotAuthorizationPolicyAttribute> policies = GetFromType(placeholderType);
+            if (handlerType != null)
+                policies = policies.Union(GetFromType(handlerType));
+
+            return policies.SelectMany(attribute => attribute.PolicyTypes);
+
+            IEnumerable<IBotAuthorizationPolicyAttribute> GetFromType(Type type)
+                => type.GetCustomAttributes(inherit: true)
+                .Where(attribute => attribute is IBotAuthorizationPolicyAttribute)
+                .Cast<IBotAuthorizationPolicyAttribute>();
         }
     }
 
