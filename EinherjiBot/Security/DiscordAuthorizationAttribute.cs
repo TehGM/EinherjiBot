@@ -4,13 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace TehGM.EinherjiBot.Security
 {
-    public interface IDiscordAuthorizationPolicyAttribute
+    public interface IBotAuthorizationPolicyAttribute
     {
         Type PolicyType { get; }
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class DiscordAuthorizationAttribute : PreconditionAttribute, IDiscordAuthorizationPolicyAttribute
+    public class DiscordAuthorizationAttribute : PreconditionAttribute, IBotAuthorizationPolicyAttribute
     {
         public Type PolicyType { get; }
 
@@ -34,7 +34,7 @@ namespace TehGM.EinherjiBot.Security
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class DiscordResourceAuthorizationAttribute<TResource> : ParameterPreconditionAttribute, IDiscordAuthorizationPolicyAttribute
+    public class DiscordResourceAuthorizationAttribute<TResource> : ParameterPreconditionAttribute, IBotAuthorizationPolicyAttribute
     {
         public Type PolicyType { get; }
 

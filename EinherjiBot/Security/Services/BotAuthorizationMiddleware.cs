@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot.Security.Services
                 return;
             }
 
-            IEnumerable<IDiscordAuthorizationPolicyAttribute> policies = endpoint.Metadata.GetOrderedMetadata<IDiscordAuthorizationPolicyAttribute>();
+            IEnumerable<IBotAuthorizationPolicyAttribute> policies = endpoint.Metadata.GetOrderedMetadata<IBotAuthorizationPolicyAttribute>();
             if (!policies.Any())
             {
                 await next.Invoke(context).ConfigureAwait(false);
