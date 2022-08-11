@@ -17,7 +17,7 @@ namespace TehGM.EinherjiBot.Security.Services
         {
             if (policies?.Any() != true)
                 return BotAuthorizationResult.Success;
-            this._log.LogDebug("Authorizing policies {Policies}", string.Join(',', policies.Select(p => p.Name)));
+            this._log.LogTrace("Authorizing policies {Policies}", string.Join(',', policies.Select(p => p.Name)));
             foreach (Type policy in policies)
             {
                 BotAuthorizationResult policyResult = await this.ProcessPolicyAsync(policy, cancellationToken).ConfigureAwait(false);
@@ -31,7 +31,7 @@ namespace TehGM.EinherjiBot.Security.Services
         {
             if (policies?.Any() != true)
                 return BotAuthorizationResult.Success;
-            this._log.LogDebug("Authorizing policies {Policies} against resource {Type} {Resource}", string.Join(',', policies.Select(p => p.Name)), typeof(TResource).Name, resource.ToString());
+            this._log.LogTrace("Authorizing policies {Policies} against resource {Type} {Resource}", string.Join(',', policies.Select(p => p.Name)), typeof(TResource).Name, resource.ToString());
             foreach (Type policy in policies)
             {
                 BotAuthorizationResult policyResult = await this.ProcessPolicyAsync(resource, policy, cancellationToken).ConfigureAwait(false);
