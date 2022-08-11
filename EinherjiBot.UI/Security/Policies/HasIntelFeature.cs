@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
         }
     }
 
-    public class HasIntelFeatureAttribute : AuthorizeAttribute
+    public class HasIntelFeatureAttribute : AuthorizeAttribute, IBotAuthorizationPolicyAttribute
     {
         public HasIntelFeatureAttribute() : base(typeof(HasIntelFeature)) { }
     }

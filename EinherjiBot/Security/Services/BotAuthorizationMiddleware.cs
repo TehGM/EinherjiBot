@@ -53,7 +53,7 @@ namespace TehGM.EinherjiBot.Security.Services
                 return;
             }
 
-            BotAuthorizationResult result = await this._service.AuthorizeAsync(policies.Select(p => p.PolicyType), context.RequestAborted).ConfigureAwait(false);
+            BotAuthorizationResult result = await this._service.AuthorizeAsync(policies.SelectMany(p => p.PolicyTypes), context.RequestAborted).ConfigureAwait(false);
             if (!result.Succeeded)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

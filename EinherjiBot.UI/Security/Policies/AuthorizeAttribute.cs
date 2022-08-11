@@ -1,9 +1,10 @@
-﻿using TehGM.EinherjiBot.Security.Policies;
+﻿using TehGM.EinherjiBot.Security;
+using TehGM.EinherjiBot.Security.Policies;
 
 namespace TehGM.EinherjiBot.UI.Security.Policies
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class AuthorizeAttribute : Attribute
+    public class AuthorizeAttribute : Attribute, IBotAuthorizationPolicyAttribute
     {
         public IEnumerable<Type> PolicyTypes { get; }
 

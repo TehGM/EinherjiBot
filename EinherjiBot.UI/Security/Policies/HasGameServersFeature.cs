@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
         }
     }
 
-    public class HasGameServersFeatureAttribute : AuthorizeAttribute
+    public class HasGameServersFeatureAttribute : AuthorizeAttribute, IBotAuthorizationPolicyAttribute
     {
         public HasGameServersFeatureAttribute() : base(typeof(HasGameServersFeature)) { }
     }

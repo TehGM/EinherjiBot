@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.UI.Security.Policies
         }
     }
 
-    public class HasSharedAccountsFeatureAttribute : AuthorizeAttribute
+    public class HasSharedAccountsFeatureAttribute : AuthorizeAttribute, IBotAuthorizationPolicyAttribute
     {
         public HasSharedAccountsFeatureAttribute() : base(typeof(HasSharedAccountsFeature)) { }
     }

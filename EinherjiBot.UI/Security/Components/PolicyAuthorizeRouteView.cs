@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Rendering;
 using System.Diagnostics.CodeAnalysis;
 using TehGM.EinherjiBot.Caching;
-using AuthorizeAttribute = TehGM.EinherjiBot.UI.Security.Policies.AuthorizeAttribute;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.UI.Security.Components
 {
@@ -90,7 +90,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
                     return Enumerable.Empty<Type>();
                 }
 
-                if (attr is AuthorizeAttribute authAttribute)
+                if (attr is IBotAuthorizationPolicyAttribute authAttribute)
                 {
                     foundPolicies ??= new List<Type>();
                     foundPolicies.AddRange(authAttribute.PolicyTypes);
