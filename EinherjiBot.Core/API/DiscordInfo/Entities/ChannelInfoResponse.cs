@@ -15,8 +15,8 @@ namespace TehGM.EinherjiBot.API
         public ulong? GuildID { get; init; }
         [JsonProperty("guildName")]
         public string GuildName { get; init; }
-        [JsonProperty("category")]
-        public ulong? CategoryID { get; init; }
+        [JsonProperty("parent")]
+        public ulong? ParentID { get; init; }
         [JsonProperty("topic")]
         public string Topic { get; init; }
         [JsonProperty("position")]

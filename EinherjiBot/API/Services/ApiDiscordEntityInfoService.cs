@@ -167,7 +167,7 @@ namespace TehGM.EinherjiBot.API.Services
             {
                 GuildName = (channel as IGuildChannel)?.Guild.Name,
                 Topic = (channel as ITextChannel)?.Topic,
-                CategoryID = (channel as INestedChannel)?.CategoryId,
+                ParentID = (channel as INestedChannel)?.CategoryId,
                 Position = (channel as IGuildChannel)?.Position ?? 0
             };
         }
