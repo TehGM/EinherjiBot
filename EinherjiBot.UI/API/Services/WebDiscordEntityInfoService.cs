@@ -42,7 +42,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 {
                     UserInfoResponse result = await this._client.GetJsonAsync<UserInfoResponse>("entity-info/bot", cancellationToken).ConfigureAwait(false);
                     this._botID = result.ID;
-                    this.CacheUser(result);
+                    this.CacheUser(result.ID, result);
                     return result;
                 }
                 return cachedResult;
@@ -62,7 +62,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     return result;
 
                 result = await this._client.GetJsonAsync<UserInfoResponse>($"entity-info/user/{userID}", cancellationToken).ConfigureAwait(false);
-                this.CacheUser(result);
+                this.CacheUser(userID, result);
                 return result;
             }
             finally
@@ -90,7 +90,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                         this._cachedAllGuilds = response;
                         this._cachedAllGuildsTimestamp = DateTime.UtcNow;
                         foreach (GuildInfoResponse guild in response)
-                            this.CacheGuild(guild);
+                            this.CacheGuild(guild.ID, guild);
                         return response;
                     }
                 }
@@ -108,7 +108,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                         IEnumerable<GuildInfoResponse> response = await this._client.GetJsonAsync<IEnumerable<GuildInfoResponse>>(url, cancellationToken).ConfigureAwait(false);
                         results.AddRange(response);
                         foreach (GuildInfoResponse guild in response)
-                            this.CacheGuild(guild);
+                            this.CacheGuild(guild.ID, guild);
                     }
 
                     return results.ToArray();
@@ -131,7 +131,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     return result;
 
                 result = await this._client.GetJsonAsync<GuildUserInfoResponse>($"entity-info/guild/{guildID}/user/{userID}", cancellationToken).ConfigureAwait(false);
-                this.CacheGuildUser(result);
+                this.CacheGuildUser(userID, result);
                 return result;
             }
             finally
@@ -150,7 +150,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
 
                 string url = BuildWithArrayQuery($"entity-info/role/{roleID}", "guild", guildIDs);
                 result = await this._client.GetJsonAsync<RoleInfoResponse>(url, cancellationToken).ConfigureAwait(false);
-                this.CacheRole(result);
+                this.CacheRole(roleID, result);
                 return result;
             }
             finally
@@ -169,7 +169,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
 
                 string url = BuildWithArrayQuery($"entity-info/channel/{channelID}", "guild", guildIDs);
                 result = await this._client.GetJsonAsync<ChannelInfoResponse>(url, cancellationToken).ConfigureAwait(false);
-                this.CacheChannel(result);
+                this.CacheChannel(channelID, result);
                 return result;
             }
             finally
@@ -178,42 +178,44 @@ namespace TehGM.EinherjiBot.UI.API.Services
             }
         }
 
-        private void CacheGuildUser(GuildUserInfoResponse user)
+        private void CacheGuildUser(ulong id, GuildUserInfoResponse user)
         {
             // guild user caching needs special treatment, as same user might be in different guilds
-            GuildUserKey key = new GuildUserKey(user.ID, user.GuildID);
+            GuildUserKey key = new GuildUserKey(id, user.GuildID);
             this._guildUserCache.AddOrReplace(key, user, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
 
-            this.CacheUser(user);
+            this.CacheUser(id, user);
         }
 
-        private void CacheUser(UserInfoResponse user)
+        private void CacheUser(ulong id, UserInfoResponse user)
         {
             TimeSpan expiration = TimeSpan.FromMinutes(5);
-            if (this._botID != null && user.ID == this._botID)
+            if (this._botID != null && id == this._botID)
                 expiration = TimeSpan.FromMinutes(50);
-            this._usersCache.AddOrReplace(user, new SlidingEntityExpiration(expiration));
+            this._usersCache.AddOrReplace(id, user, new SlidingEntityExpiration(expiration));
         }
 
-        private void CacheRole(RoleInfoResponse role)
+        private void CacheRole(ulong id, RoleInfoResponse role)
         {
-            this._rolesCache.AddOrReplace(role, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+            this._rolesCache.AddOrReplace(id, role, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
         }
 
-        private void CacheGuild(GuildInfoResponse guild)
+        private void CacheGuild(ulong id, GuildInfoResponse guild)
         {
-            this._guildCache.AddOrReplace(guild, new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5)));
+            this._guildCache.AddOrReplace(id, guild, new TimeSpanEntityExpiration(TimeSpan.FromMinutes(5)));
+            if (guild == null)
+                return;
             foreach (RoleInfoResponse role in guild.Roles)
-                this.CacheRole(role);
+                this.CacheRole(role.ID, role);
             foreach (GuildUserInfoResponse user in guild.Users)
-                this.CacheGuildUser(user);
+                this.CacheGuildUser(user.ID, user);
             foreach (ChannelInfoResponse channel in guild.Channels)
-                this.CacheChannel(channel);
+                this.CacheChannel(channel.ID, channel);
         }
 
-        private void CacheChannel(ChannelInfoResponse channel)
+        private void CacheChannel(ulong id, ChannelInfoResponse channel)
         {
-            this._channelsCache.AddOrReplace(channel, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
+            this._channelsCache.AddOrReplace(id, channel, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
         }
 
         private static string BuildWithArrayQuery<T>(string url, string queryKey, IEnumerable<T> queryValues)
