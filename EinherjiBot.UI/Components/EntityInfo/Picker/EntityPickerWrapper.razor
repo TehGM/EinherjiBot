@@ -10,7 +10,7 @@
 
         @if (this.ShowDefaultFilter)
         {
-            <MudTextField Class="picker-filter-field" T="string" Value="this.DefaultFilterValue" Variant="Variant.Outlined" Margin="Margin.Dense" 
+            <MudTextField Class="picker-filter-field mx-2" T="string" Value="this.DefaultFilterValue" Variant="Variant.Outlined" Margin="Margin.Dense" 
                 AdornmentIcon="@this.FilterFieldIcon" Adornment="Adornment.Start" Clearable="true"
                 Label="Filter" HelperText="@this.DefaultFilterHelperText" HelperTextOnFocus="true"
                 DebounceInterval="200" MaxLength="128" ValueChanged="this.OnFilterTextChanged" />
