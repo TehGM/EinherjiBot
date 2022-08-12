@@ -10,7 +10,7 @@
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<RoleInfoResponse>> guild in this._filteredGuilds)
             {
-                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (RoleInfoResponse role in guild.Value)
                     {
                         <div class="picker-item" @onclick="_ => base.PickEntity(role)">

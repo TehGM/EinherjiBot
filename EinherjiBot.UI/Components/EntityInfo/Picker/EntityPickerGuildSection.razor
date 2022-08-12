@@ -21,6 +21,8 @@
     public bool IsExpanded { get; set; }
     [Parameter]
     public EventCallback<bool> IsExpandedChanged { get; set; }
+    [Parameter]
+    public bool InitiallyExpanded { get; set; } = false;
 
     [Parameter]
     public string CollapsedIcon { get; set; } = Icons.Filled.ArrowRight;
@@ -32,6 +34,11 @@
 
     private string ArrowIcon => this.IsExpanded ? this.ExpandedIcon : this.CollapsedIcon;
     private string ExpandedClass => this.IsExpanded ? "expanded" : string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        this.IsExpanded = this.InitiallyExpanded;
+    }
 
     private Task OnHeaderClickedAsync(MouseEventArgs e)
     {

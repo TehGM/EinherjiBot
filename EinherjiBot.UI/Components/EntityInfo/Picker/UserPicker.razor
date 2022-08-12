@@ -21,7 +21,7 @@
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> guild in this._filteredGuilds)
             {
-                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                        <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (GuildUserInfoResponse user in guild.Value)
                     {
                         <div class="picker-item gap-2" @onclick="_ => base.PickEntity(user)">

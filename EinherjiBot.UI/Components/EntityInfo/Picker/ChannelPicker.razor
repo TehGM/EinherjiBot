@@ -10,7 +10,7 @@
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<ChannelSorting>> guild in this._filteredGuilds)
             {
-                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (ChannelSorting channels in guild.Value)
                     {
                         @this.RenderChannels(channels)
