@@ -13,8 +13,8 @@
                 <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (RoleInfoResponse role in guild.Value)
                     {
-                        <div class="picker-item" @onclick="_ => base.PickEntity(role)">
-                            <MudText @key="role.IsEveryone ? 0 : role.ID" Class="text-cutoff" Style="@this.GetRoleStyle(role)">@this.GetRoleText(role)</MudText>
+                        <div @key="@(role.IsEveryone ? 0 : role.ID)" class="picker-item" @onclick="_ => base.PickEntity(role)">
+                            <MudText Class="text-cutoff" Style="@this.GetRoleStyle(role)">@this.GetRoleText(role)</MudText>
                         </div>
                     }
                 </EntityPickerGuildSection>
