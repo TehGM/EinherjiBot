@@ -9,22 +9,11 @@
 
     <NavMenu />
     <main>
-        <RolePicker @ref="this._rolePicker" />
-        <UserPicker @ref="this._userPicker" />
-        <ChannelPicker @ref="this._channelPicker" />
-        <GuildPicker @ref="this._guildPicker" />
-
-        <CascadingValue Value="this._rolePicker">
-            <CascadingValue Value="this._userPicker">
-                <CascadingValue Value="this._channelPicker">
-                    <CascadingValue Value="this._guildPicker">
-                        <article class="content px-4">
-                                @Body
-                        </article>
-                    </CascadingValue>
-                </CascadingValue>
-            </CascadingValue>
-        </CascadingValue>
+        <CascadingPickers>
+            <article class="content px-4">
+                @Body
+            </article>
+        </CascadingPickers>
     </main>
 
 </CascadingValue>
@@ -32,11 +21,6 @@
 @code{
     private IDiscordUserInfo _botInfo;
     private PersistingComponentStateSubscription _prerenderingSubscription;
-
-    private RolePicker _rolePicker;
-    private UserPicker _userPicker;
-    private ChannelPicker _channelPicker;
-    private GuildPicker _guildPicker;
 
     protected override async Task OnInitializedAsync()
     {

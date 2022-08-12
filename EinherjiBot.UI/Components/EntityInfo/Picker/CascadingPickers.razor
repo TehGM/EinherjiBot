@@ -1,0 +1,26 @@
+﻿<RolePicker @ref="this._rolePicker" />
+<UserPicker @ref="this._userPicker" />
+<ChannelPicker @ref="this._channelPicker" />
+<GuildPicker @ref="this._guildPicker" />
+
+<CascadingValue Value="this._rolePicker">
+    <CascadingValue Value="this._userPicker">
+        <CascadingValue Value="this._channelPicker">
+            <CascadingValue Value="this._guildPicker">
+                <article class="content px-4">
+                        @this.ChildContent
+                </article>
+            </CascadingValue>
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+
+    private RolePicker _rolePicker;
+    private UserPicker _userPicker;
+    private ChannelPicker _channelPicker;
+    private GuildPicker _guildPicker;
+}
