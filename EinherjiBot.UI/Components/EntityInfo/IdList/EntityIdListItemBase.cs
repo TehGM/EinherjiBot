@@ -5,6 +5,8 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
     public abstract class EntityIdListItemBase<TEntity> : ComponentBase where TEntity : class
     {
         [Parameter]
+        public bool ReadOnly { get; set; }
+        [Parameter]
         public ulong? Value { get; set; }
         [Parameter]
         public EventCallback<ValueChangedEventArgs<ulong?>> ValueChanged { get; set; }

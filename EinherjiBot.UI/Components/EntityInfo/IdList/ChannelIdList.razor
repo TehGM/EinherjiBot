@@ -3,11 +3,11 @@
 <div class="id-list d-flex flex-column">
     @foreach (ulong id in base.Values)
     {
-        <ChannelIdListItem @key="id" Value="id" PickerSettings="this.PickerSettings" ValueChanged="base.OnValueChangedAsync" />
+        <ChannelIdListItem @key="id" Value="id" ReadOnly="base.ReadOnly" PickerSettings="this.PickerSettings" ValueChanged="base.OnValueChangedAsync" />
     }
-    @if (this.AllowNewValues)
+    @if (this.AllowNewValues && !base.ReadOnly)
     {
-        <ChannelIdListItem @ref="base.NewItemField" PickerSettings="this.PickerSettings" ValueChanged="base.OnNewValueInputAsync" />
+        <ChannelIdListItem @ref="base.NewItemField" ReadOnly="base.ReadOnly" PickerSettings="this.PickerSettings" ValueChanged="base.OnNewValueInputAsync" />
     }
 </div>
 

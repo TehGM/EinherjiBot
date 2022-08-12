@@ -1,7 +1,7 @@
 ﻿@inherits EntityIdListItemBase<ChannelInfoResponse>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="true"
+    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
         Label="Channel ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
         Validation="this.ValidationDelegate" />
     @if (base.FoundEntity != null)
@@ -20,7 +20,10 @@
             </MudTooltip>
         </MudItem>
     }
-    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null" Size="Size.Medium" OnClick="this.OnPickerClicked" />
+    @if (!base.ReadOnly)
+    {
+        <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null || base.ReadOnly" Size="Size.Medium" OnClick="this.OnPickerClicked" />
+    }
 </MudItem>
 
 @code {
