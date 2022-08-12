@@ -1,0 +1,15 @@
+﻿@inherits EntityIdListBase<ChannelInfoResponse>
+
+<div class="id-list d-flex flex-column">
+    @foreach (ulong id in base.Values)
+    {
+        <ChannelIdListItem @key="id" Value="id" ValueChanged="base.OnValueChangedAsync" />
+    }
+    @if (this.AllowNewValues)
+    {
+        <ChannelIdListItem @ref="base.NewItemField" ValueChanged="base.OnNewValueInputAsync" />
+    }
+</div>
+
+@code {
+}

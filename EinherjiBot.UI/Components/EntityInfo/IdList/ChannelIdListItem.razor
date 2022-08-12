@@ -1,0 +1,93 @@
+﻿@inherits EntityIdListItemBase<ChannelInfoResponse>
+
+<MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
+    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="true"
+        Label="Channel ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Validation="this.ValidationDelegate" />
+    @if (base.FoundEntity != null)
+    {
+        <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
+            <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
+                <TooltipContent>
+                    <MudItem xs="12" Class="d-flex flex-column flex-shrink-1">
+                        <span>@this.RenderIcon(base.FoundEntity, Size.Small) @base.FoundEntity.Name (@this.RenderParents(Size.Small))</span>
+                        <span>@base.FoundEntity.GuildName</span>
+                    </MudItem>
+                </TooltipContent>
+                <ChildContent>
+                    <MudText Class="text-cutoff">@this.RenderIcon(base.FoundEntity, Size.Medium) @base.FoundEntity.Name</MudText>
+                </ChildContent>
+            </MudTooltip>
+        </MudItem>
+    }
+    <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null" Size="Size.Medium" OnClick="this.OnPickerClicked" />
+</MudItem>
+
+@code {
+    [CascadingParameter]
+    private RolePicker Picker { get; set; }
+
+    private MudTextField<ulong?> _inputField;
+    private ICollection<ChannelInfoResponse> _parents;
+
+    protected override async Task<ChannelInfoResponse> FindEntityAsync(ulong id)
+    {
+        ChannelInfoResponse result = await this.EntityInfoProvider.GetChannelInfoAsync(id);
+        ulong? parentID = result.ParentID;
+        while (parentID != null)
+        {
+            ChannelInfoResponse parent = await this.EntityInfoProvider.GetChannelInfoAsync(parentID.Value);
+            this._parents ??= new List<ChannelInfoResponse>();
+            this._parents.Add(parent);
+            parentID = parent.ParentID;
+        }
+        return result;
+    }
+
+    protected override async Task ValidateAndLookupAsync()
+    {
+        await base.ValidateAndLookupAsync();
+        if (this.IsError)
+            await this._inputField.Validate();
+    }
+
+    private RenderFragment RenderIcon(ChannelInfoResponse channel, Size size)
+    {
+        if (channel.Type == Discord.ChannelType.Text)
+            return @<MudIcon Icon="@Icons.Filled.Numbers" Size="size" />;
+        if (channel.Type.IsThread())
+            return @<MudIcon Icon="@Icons.Filled.SubdirectoryArrowRight" Size="size" />;
+        if (channel.Type == Discord.ChannelType.Category)
+            return @<MudIcon Icon="@Icons.Filled.AutoAwesomeMotion" Size="size" />;
+        if (channel.Type == Discord.ChannelType.Voice)
+            return @<MudIcon Icon="@Icons.Filled.VolumeUp" Size="size" />;
+        return null;
+    }
+
+    private RenderFragment RenderParents(Size iconSize)
+    {
+        if (this._parents?.Any() != true)
+            return null;
+        return __builder =>
+        {
+            @foreach (ChannelInfoResponse parent in this._parents)
+            {
+                <MudIcon Icon="@Icons.Filled.ArrowRightAlt" Size="iconSize" /> @RenderIcon(parent, iconSize) @parent.Name
+            }
+        };
+    }
+
+    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
+    {
+        if (base.IsError)
+            return new string[] { "Not a valid Discord Channel ID." };
+        return Enumerable.Empty<string>();
+    }; 
+
+    private async Task OnPickerClicked(MouseEventArgs e)
+    {
+        RoleInfoResponse entity = await this.Picker.OpenAsync();
+        if (entity != null)
+            await base.SetValueAsync(entity.ID);
+    }
+}
