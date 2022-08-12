@@ -3,10 +3,10 @@
 <div class="id-list d-flex flex-column">
     @foreach (ulong id in base.Values)
     {
-        <RoleIdListItem @key="id" Value="id" ValueChanged="base.OnValueChangedAsync" />
+        <RoleIdListItem @key="id" Value="id" ReadOnly="base.ReadOnly" ValueChanged="base.OnValueChangedAsync" />
     }
-    @if (this.AllowNewValues)
+    @if (this.AllowNewValues && !base.ReadOnly)
     {
-        <RoleIdListItem @ref="base.NewItemField" ValueChanged="base.OnNewValueInputAsync" />
+        <RoleIdListItem @ref="base.NewItemField" ReadOnly="base.ReadOnly" ValueChanged="base.OnNewValueInputAsync" />
     }
 </div>

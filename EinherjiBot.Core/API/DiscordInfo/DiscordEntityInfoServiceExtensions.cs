@@ -28,5 +28,12 @@
             IEnumerable<GuildInfoResponse> results = await service.GetGuildInfosAsync(new[] { id }, cancellationToken).ConfigureAwait(false);
             return results.FirstOrDefault();
         }
+
+        /// <summary>Gets Role entity info for one specific role.</summary>
+        /// <param name="channelID">ID of the channel.</param>
+        /// <param name="cancellationToken">Token for operation cancellation.</param>
+        /// <returns>Channel info if found; otherwise null.</returns>
+        public static Task<ChannelInfoResponse> GetChannelInfoAsync(this IDiscordEntityInfoService service, ulong channelID, CancellationToken cancellationToken = default)
+            => service.GetChannelInfoAsync(channelID, null, cancellationToken);
     }
 }

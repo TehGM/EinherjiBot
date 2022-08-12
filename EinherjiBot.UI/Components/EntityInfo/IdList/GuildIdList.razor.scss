@@ -1,0 +1,16 @@
+::deep .role-preview {
+    overflow: hidden;
+
+    .mud-grid-item {
+        min-width: 100%;
+    }
+
+    &, & p {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        flex-grow: 1;
+        flex-shrink: 1;
+        font-size: 14px;
+    }
+}

@@ -6,6 +6,8 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
     public class EntityIdListBase<TEntity> : ComponentBase where TEntity : class, IDiscordEntityInfo
     {
         [Parameter]
+        public bool ReadOnly { get; set; }
+        [Parameter]
         public bool AllowNewValues { get; set; } = true;
         [Parameter]
         public IList<ulong> Values { get; set; }

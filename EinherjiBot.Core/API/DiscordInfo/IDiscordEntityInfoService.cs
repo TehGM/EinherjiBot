@@ -39,5 +39,13 @@
         /// <returns>Guild User info if found; null if not found, or if bot is not present in requested guild.</returns>
         /// <exception cref="AccessForbiddenException">User has no access to requested guild.</exception>
         Task<GuildUserInfoResponse> GetGuildUserInfoAsync(ulong userID, ulong guildID, CancellationToken cancellationToken = default);
+
+        // channel
+        /// <summary>Gets Channel entity info for one specific channel, with optional guilds restriction.</summary>
+        /// <param name="channelID">ID of the channel.</param>
+        /// <param name="guildIDs">IDs of the guilds to check. If null, all bot's guilds will be checked.</param>
+        /// <param name="cancellationToken">Token for operation cancellation.</param>
+        /// <returns>Channel info if found; otherwise null.</returns>
+        Task<ChannelInfoResponse> GetChannelInfoAsync(ulong channelID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default);
     }
 }

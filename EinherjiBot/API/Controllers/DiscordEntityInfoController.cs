@@ -88,5 +88,23 @@ namespace TehGM.EinherjiBot.API.Controllers
                 return base.NotFound();
             return base.Ok(response);
         }
+
+        [HttpGet("guild/{guildID:ulong}/channel/{channelID:ulong}")]
+        [Authorize]
+        public Task<IActionResult> GetGuildChannelAsync(ulong guildID, ulong channelID, CancellationToken cancellationToken)
+            => this.GetChannelAsync(channelID, new[] { guildID }, cancellationToken);
+
+        [HttpGet("channel/{id:ulong}")]
+        [Authorize]
+        public async Task<IActionResult> GetChannelAsync(ulong id, [FromQuery(Name = "guild")] ulong[] guildIDs, CancellationToken cancellationToken)
+        {
+            if (guildIDs?.Any() != true)
+                guildIDs = null;
+
+            ChannelInfoResponse response = await this._service.GetChannelInfoAsync(id, guildIDs, cancellationToken).ConfigureAwait(false);
+            if (response == null)
+                return base.NotFound();
+            return base.Ok(response);
+        }
     }
 }

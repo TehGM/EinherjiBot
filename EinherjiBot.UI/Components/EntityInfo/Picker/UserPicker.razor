@@ -21,21 +21,21 @@
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> guild in this._filteredGuilds)
             {
-                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (GuildUserInfoResponse user in guild.Value)
                     {
                         <div class="picker-item gap-2" @onclick="_ => base.PickEntity(user)">
                             <MudAvatar Image="@user.GetGuildAvatarURL(32)" Class="discord-avatar inline"/>
                             <div class="d-flex flex-column">
                                 <span class="d-flex flex-row">
-                                    <MudText Class="ma-0 discord-username inline" Style="@this.GetUserStyle(user)">@this.GetUserText(user)</MudText>
+                                    <MudText Class="ma-0 discord-username inline text-cutoff" Style="@this.GetUserStyle(user)">@this.GetUserText(user)</MudText>
                                     @if (user.IsBot)
                                     {
                                         <MudChip Class="discord-bot-tag">BOT</MudChip>
                                     }
                                     @this.RenderAdminIcon(user)
                                 </span>
-                                <MudText Class="align-self-center discord-status inline">
+                                <MudText Class="align-self-center discord-status inline text-cutoff">
                                     @user.GetUsernameWithDiscriminator()
                                 </MudText>
                             </div>
@@ -51,15 +51,15 @@
     private string _filter;
     private bool _showBots = true;
     private bool _adminsOnly = false;
-    private IEnumerable<ulong> _restrictGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _allGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _filteredGuilds;
     private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
 
-    public Task<GuildUserInfoResponse> OpenAsync(string filter, IEnumerable<ulong> restrictGuilds, CancellationToken cancellationToken = default)
+    private EntityPickerSettings _settings;
+
+    public Task<GuildUserInfoResponse> OpenAsync(EntityPickerSettings settings, CancellationToken cancellationToken = default)
     {
-        this._filter = filter;
-        this._restrictGuilds = restrictGuilds;
+        this._settings = settings;
         return base.OpenAsync(cancellationToken);
     }
 
@@ -67,6 +67,7 @@
     {
         IEnumerable<GuildInfoResponse> data = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
         this._allGuilds = data.ToDictionary(g => g, g => g.Users);
+        this._settings ??= new EntityPickerSettings();
         this.ApplyFilter();
     }
 
@@ -74,6 +75,7 @@
     {
         this._allGuilds = null;
         this._filteredGuilds = null;
+        this._settings = null;
         return Task.CompletedTask;
     }
 
@@ -81,8 +83,8 @@
     {
         this._filteredGuilds = this._allGuilds;
 
-        if (this._restrictGuilds != null)
-            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._restrictGuilds, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
+        if (this._settings.ShownGuildIDs != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._settings.ShownGuildIDs, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
         if (!string.IsNullOrWhiteSpace(this._filter))
         {
             this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(u => 

@@ -1,0 +1,12 @@
+﻿@inherits EntityIdListBase<IDiscordGuildInfo>
+
+<div class="id-list d-flex flex-column">
+    @foreach (ulong id in base.Values)
+    {
+        <GuildIdListItem @key="id" Value="id" ReadOnly="base.ReadOnly" ValueChanged="base.OnValueChangedAsync" />
+    }
+    @if (this.AllowNewValues && !base.ReadOnly)
+    {
+        <GuildIdListItem @ref="base.NewItemField" ReadOnly="base.ReadOnly" ValueChanged="base.OnNewValueInputAsync" />
+    }
+</div>

@@ -28,7 +28,7 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.Picker
             return result;
         }
 
-        public void PickEntity(TEntity value)
+        public virtual void PickEntity(TEntity value)
             => this._closeTcs.TrySetResult(value);
 
         public void Cancel()

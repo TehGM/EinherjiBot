@@ -1,0 +1,69 @@
+﻿@using System.Drawing
+@inherits DiscordEntityPickerBase<IDiscordGuildInfo>
+
+<EntityPickerWrapper Open="base.IsOpen" CssClass="guild-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
+    DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find User by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
+    <HeaderContent>
+        <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">Guild Picker</MudText>
+    </HeaderContent>
+    <ChildContent>
+        @if (this._filteredGuilds != null)
+        {
+            @foreach (IDiscordGuildInfo guild in this._filteredGuilds)
+            {
+                <div @key="@guild.ID" class="picker-item gap-2 px-3 py-1" @onclick="_ => base.PickEntity(guild)">
+                    <MudAvatar Image="@guild.GetIconURL(32)" Class="discord-avatar inline"/>
+                    <MudText Class="text-cutoff">@guild.Name</MudText>
+                </div>
+            }
+        }
+    </ChildContent>
+</EntityPickerWrapper>
+
+@code {
+    private string _filter;
+    private bool _showBots = true;
+    private bool _adminsOnly = false;
+    private IEnumerable<IDiscordGuildInfo> _allGuilds;
+    private IEnumerable<IDiscordGuildInfo> _filteredGuilds;
+    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
+
+    private EntityPickerSettings _settings;
+
+    public Task<IDiscordGuildInfo> OpenAsync(EntityPickerSettings settings, CancellationToken cancellationToken = default)
+    {
+        this._settings = settings;
+        return base.OpenAsync(cancellationToken);
+    }
+
+    protected override async Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        this._allGuilds = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
+        this._settings ??= new EntityPickerSettings();
+        this.ApplyFilter();
+    }
+
+    protected override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        this._allGuilds = null;
+        this._filteredGuilds = null;
+        this._settings = null;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFilter()
+    {
+        this._filteredGuilds = this._allGuilds;
+
+        if (this._settings.ShownGuildIDs != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._settings.ShownGuildIDs, g => g.ID);
+        if (!string.IsNullOrWhiteSpace(this._filter))
+            this._filteredGuilds = this._filteredGuilds.Where(g => g.Name.Contains(this._filter, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void OnFilterTextChanged(string value)
+    {
+        this._filter = value;
+        this.ApplyFilter();
+    }
+}

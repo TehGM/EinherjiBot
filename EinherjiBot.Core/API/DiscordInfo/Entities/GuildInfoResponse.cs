@@ -6,6 +6,8 @@ namespace TehGM.EinherjiBot.API
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
     public class GuildInfoResponse : IDiscordGuildInfo, IDiscordEntityInfo
     {
+        public static GuildInfoResponse None { get; } = new GuildInfoResponse();
+
         [JsonProperty("id")]
         public ulong ID { get; init; }
         [JsonProperty("name")]
@@ -14,10 +16,13 @@ namespace TehGM.EinherjiBot.API
         public string IconHash { get; init; }
         [JsonProperty("owner")]
         public ulong OwnerID { get; init; }
+
         [JsonProperty("users", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<GuildUserInfoResponse> Users { get; init; }
         [JsonProperty("roles", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<RoleInfoResponse> Roles { get; init; }
+        [JsonProperty("channels", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<ChannelInfoResponse> Channels { get; init; }
 
         [JsonConstructor]
         private GuildInfoResponse() { }

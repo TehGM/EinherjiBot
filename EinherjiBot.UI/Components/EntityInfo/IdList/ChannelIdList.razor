@@ -1,0 +1,21 @@
+﻿@inherits EntityIdListBase<ChannelInfoResponse>
+
+<div class="id-list d-flex flex-column">
+    @foreach (ulong id in base.Values)
+    {
+        <ChannelIdListItem @key="id" Value="id" ReadOnly="base.ReadOnly" PickerSettings="this.PickerSettings" ValueChanged="base.OnValueChangedAsync" />
+    }
+    @if (this.AllowNewValues && !base.ReadOnly)
+    {
+        <ChannelIdListItem @ref="base.NewItemField" ReadOnly="base.ReadOnly" PickerSettings="this.PickerSettings" ValueChanged="base.OnNewValueInputAsync" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ChannelPickerSettings PickerSettings { get; set; } = new ChannelPickerSettings()
+    {
+        PickableChannelTypes = new[] { Discord.ChannelType.Text, Discord.ChannelType.Voice },
+        ShownChannelTypes = new[] { Discord.ChannelType.Text, Discord.ChannelType.Voice }
+    };
+}
