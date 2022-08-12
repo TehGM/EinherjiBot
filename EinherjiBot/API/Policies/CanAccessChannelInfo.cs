@@ -16,19 +16,19 @@ namespace TehGM.EinherjiBot.API.Policies
             if (this._auth.User.IsAdmin())
                 return BotAuthorizationResult.Success;
 
-            // voice channels are a special case
-            // for some stupid reason they, unlike any other channel, only return user if he's connected, regardless of access permissions
-            if (resource is IVoiceChannel voiceChannel)
+            if (resource is IGuildChannel guildChannel)
             {
-                IGuildUser guildUser = await voiceChannel.Guild.GetUserAsync(this._auth.User.ID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
-                ChannelPermissions perms = guildUser.GetPermissions(voiceChannel);
+                IGuildUser guildUser = await guildChannel.Guild.GetUserAsync(this._auth.User.ID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+                ChannelPermissions perms = guildUser.GetPermissions(guildChannel);
                 if (perms.ViewChannel)
                     return BotAuthorizationResult.Success;
             }
-
-            IUser user = await resource.GetUserAsync(this._auth.User.ID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions());
-            if (user != null)
-                return BotAuthorizationResult.Success;
+            else
+            {
+                IUser user = await resource.GetUserAsync(this._auth.User.ID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions());
+                if (user != null)
+                    return BotAuthorizationResult.Success;
+            }
             return BotAuthorizationResult.Fail($"You have no permission to access channel {resource.Id}.");
         }
     }
