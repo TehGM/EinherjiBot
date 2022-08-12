@@ -11,6 +11,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
         private readonly IApiClient _client;
         private readonly IEntityCache<ulong, UserInfoResponse> _usersCache;
         private readonly IEntityCache<ulong, RoleInfoResponse> _rolesCache;
+        private readonly IEntityCache<ulong, ChannelInfoResponse> _channelsCache;
         private readonly IEntityCache<GuildUserKey, GuildUserInfoResponse> _guildUserCache;
         private readonly IEntityCache<ulong, GuildInfoResponse> _guildCache;
         private readonly ILockProvider _lock;
@@ -20,12 +21,13 @@ namespace TehGM.EinherjiBot.UI.API.Services
         private DateTime _cachedAllGuildsTimestamp;
 
         public WebDiscordEntityInfoService(IApiClient client, ILockProvider<WebDiscordEntityInfoService> lockProvider, 
-            IEntityCache<ulong, UserInfoResponse> usersCache, IEntityCache<ulong, RoleInfoResponse> rolesCache, 
+            IEntityCache<ulong, UserInfoResponse> usersCache, IEntityCache<ulong, RoleInfoResponse> rolesCache, IEntityCache<ulong, ChannelInfoResponse> channelsCache,
             IEntityCache<GuildUserKey, GuildUserInfoResponse> guildUserCache, IEntityCache<ulong, GuildInfoResponse> guildCache)
         {
             this._client = client;
             this._usersCache = usersCache;
             this._rolesCache = rolesCache;
+            this._channelsCache = channelsCache;
             this._guildUserCache = guildUserCache;
             this._guildCache = guildCache;
             this._lock = lockProvider;
@@ -157,6 +159,25 @@ namespace TehGM.EinherjiBot.UI.API.Services
             }
         }
 
+        public async Task<ChannelInfoResponse> GetChannelInfoAsync(ulong channelID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default)
+        {
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (this._channelsCache.TryGet(channelID, out ChannelInfoResponse result))
+                    return result;
+
+                string url = BuildWithArrayQuery($"entity-info/channel/{channelID}", "guild", guildIDs);
+                result = await this._client.GetJsonAsync<ChannelInfoResponse>(url, cancellationToken).ConfigureAwait(false);
+                this.CacheChannel(result);
+                return result;
+            }
+            finally
+            {
+                this._lock.Release();
+            }
+        }
+
         private void CacheGuildUser(GuildUserInfoResponse user)
         {
             // guild user caching needs special treatment, as same user might be in different guilds
@@ -186,6 +207,13 @@ namespace TehGM.EinherjiBot.UI.API.Services
                 this.CacheRole(role);
             foreach (GuildUserInfoResponse user in guild.Users)
                 this.CacheGuildUser(user);
+            foreach (ChannelInfoResponse channel in guild.Channels)
+                this.CacheChannel(channel);
+        }
+
+        private void CacheChannel(ChannelInfoResponse channel)
+        {
+            this._channelsCache.AddOrReplace(channel, new SlidingEntityExpiration(TimeSpan.FromMinutes(5)));
         }
 
         private static string BuildWithArrayQuery<T>(string url, string queryKey, IEnumerable<T> queryValues)

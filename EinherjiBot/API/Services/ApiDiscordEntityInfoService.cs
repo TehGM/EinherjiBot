@@ -84,15 +84,26 @@ namespace TehGM.EinherjiBot.API.Services
                     continue;
                 }
 
+                Task<IReadOnlyCollection<IGuildChannel>> channelsTask = guild.GetChannelsAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions());
                 Task<IReadOnlyCollection<IGuildUser>> usersTask = guild.GetUsersAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions());
                 IEnumerable<RoleInfoResponse> roles = guild.Roles.Select(CreateRoleInfo);
                 IEnumerable<GuildUserInfoResponse> users = usersTask.Result.Select(u => CreateGuildUserInfo(u, roles.IntersectBy(u.RoleIds, r => r.ID)));
+                await channelsTask.ConfigureAwait(false);
+                List<ChannelInfoResponse> channels = new List<ChannelInfoResponse>(channelsTask.Result.Count);
+                foreach (IChannel channel in channelsTask.Result)
+                {
+                    authorization = await this._auth.AuthorizeAsync(channel, typeof(CanAccessChannelInfo), cancellationToken).ConfigureAwait(false);
+                    if (authorization.Succeeded)
+                        channels.Add(CreateChannelInfo(channel));
+                }
+
                 await usersTask.ConfigureAwait(false);
 
                 GuildInfoResponse result = new GuildInfoResponse(guild.Id, guild.Name, guild.IconId)
                 {
                     Users = users,
                     Roles = roles,
+                    Channels = channels,
                     OwnerID = guild.OwnerId
                 };
                 results.Add(result);
@@ -112,7 +123,7 @@ namespace TehGM.EinherjiBot.API.Services
 
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(guild, typeof(CanAccessGuildInfo), cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"You have no access to Discord guild {guild.Id}");
+                throw new AccessForbiddenException(authorization.Reason);
 
             IGuildUser user = await guild.GetUserAsync(userID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
             if (user == null)
@@ -121,10 +132,44 @@ namespace TehGM.EinherjiBot.API.Services
             return CreateGuildUserInfo(user, roles);
         }
 
+        public async Task<ChannelInfoResponse> GetChannelInfoAsync(ulong channelID, IEnumerable<ulong> guildIDs, CancellationToken cancellationToken = default)
+        {
+            if (guildIDs != null && !guildIDs.Any())
+                return null;
+
+            await this._connection.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+            IEnumerable<IGuild> guilds = await this._client.GetGuildsAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            if (guildIDs != null)
+                guilds = guilds.Where(g => guildIDs.Contains(g.Id));
+
+            foreach (IGuild guild in guilds)
+            {
+                IChannel channel = await guild.GetChannelAsync(channelID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
+                if (channel == null)
+                    continue;
+
+                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(channel, typeof(CanAccessChannelInfo), cancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
+                    throw new AccessForbiddenException(authorization.Reason);
+
+                return CreateChannelInfo(channel);
+            }
+            return null;
+        }
+
         private static UserInfoResponse CreateUserInfo(IUser user)
             => new UserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId);
         private static RoleInfoResponse CreateRoleInfo(IRole role)
             => new RoleInfoResponse(role.Id, role.Name, role.Guild.Id, role.Guild.Name, role.Color, role.Position);
+        private static ChannelInfoResponse CreateChannelInfo(IChannel channel)
+        {
+            return new ChannelInfoResponse(channel.Id, channel.Name, channel.GetChannelType().Value, (channel as IGuildChannel)?.GuildId)
+            {
+                Topic = (channel as ITextChannel)?.Topic,
+                CategoryID = (channel as INestedChannel)?.CategoryId,
+                Position = (channel as IGuildChannel)?.Position ?? 0
+            };
+        }
         private static GuildUserInfoResponse CreateGuildUserInfo(IGuildUser user, IEnumerable<RoleInfoResponse> roles)
             => new GuildUserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId, user.GuildId, roles)
             {
