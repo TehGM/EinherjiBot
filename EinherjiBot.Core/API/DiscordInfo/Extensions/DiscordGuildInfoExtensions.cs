@@ -4,6 +4,9 @@ namespace TehGM.EinherjiBot.API
 {
     public static class DiscordGuildInfoExtensions
     {
+        public static bool IsFound(this IDiscordGuildInfo response)
+            => response != null && response.ID != 0;
+
         public static string GetIconURL(this IDiscordGuildInfo guild, ushort size = 1024)
         {
             if (string.IsNullOrWhiteSpace(guild.IconHash))

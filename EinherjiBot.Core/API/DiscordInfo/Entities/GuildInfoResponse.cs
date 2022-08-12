@@ -6,6 +6,8 @@ namespace TehGM.EinherjiBot.API
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
     public class GuildInfoResponse : IDiscordGuildInfo, IDiscordEntityInfo
     {
+        public static GuildInfoResponse None { get; } = new GuildInfoResponse();
+
         [JsonProperty("id")]
         public ulong ID { get; init; }
         [JsonProperty("name")]
