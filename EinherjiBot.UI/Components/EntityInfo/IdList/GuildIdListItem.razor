@@ -25,7 +25,7 @@
 
 @code {
     [CascadingParameter]
-    private RolePicker Picker { get; set; }
+    private GuildPicker Picker { get; set; }
 
     private MudTextField<ulong?> _inputField;
 
@@ -53,7 +53,7 @@
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {
-        RoleInfoResponse entity = await this.Picker.OpenAsync();
+        IDiscordGuildInfo entity = await this.Picker.OpenAsync();
         if (entity != null)
             await base.SetValueAsync(entity.ID);
     }
