@@ -175,6 +175,7 @@
     private IList<ulong> _authorizedUsers;
     private IList<ulong> _authorizedRoles;
     private IList<ulong> _modUsers;
+    private IList<ulong> _channelsTest = new List<ulong>();
 
     private bool IsValid
         => !this.LoginValidationDelegate(this._login).Any()

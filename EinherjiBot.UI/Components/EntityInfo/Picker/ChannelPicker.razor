@@ -1,0 +1,188 @@
+﻿@inherits DiscordEntityPickerBase<ChannelInfoResponse>
+
+<EntityPickerWrapper Open="base.IsOpen" CssClass="user-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
+    DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find Channel by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
+    <HeaderContent>
+        <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">Channel Picker</MudText>
+    </HeaderContent>
+    <ChildContent>
+        @if (this._filteredGuilds != null)
+        {
+            @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<ChannelSorting>> guild in this._filteredGuilds)
+            {
+                <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key">
+                    @foreach (ChannelSorting channels in guild.Value)
+                    {
+                        @this.RenderChannels(channels)
+                    }
+                </EntityPickerGuildSection>
+            }
+        }
+    </ChildContent>
+</EntityPickerWrapper>
+
+@code {
+    private string _filter;
+    private IDictionary<GuildInfoResponse, IEnumerable<ChannelSorting>> _allGuilds;
+    private IDictionary<GuildInfoResponse, IEnumerable<ChannelSorting>> _filteredGuilds;
+    private IDictionary<ChannelInfoResponse, IEnumerable<ChannelInfoResponse>> _sortedChannels;
+    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
+
+    private ChannelPickerSettings _settings;
+
+    public Task<ChannelInfoResponse> OpenAsync(ChannelPickerSettings settings, CancellationToken cancellationToken = default)
+    {
+        this._settings = settings;
+        return base.OpenAsync(cancellationToken);
+    }
+
+    protected override async Task OnOpeningAsync(CancellationToken cancellationToken)
+    {
+        IEnumerable<GuildInfoResponse> data = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
+        this._allGuilds = data.ToDictionary(g => g, g => this.SortChannelHierarchy(g.Channels, parentID: null));
+        this._settings ??= new ChannelPickerSettings();
+        this.ApplyFilter();
+    }
+
+    protected override Task OnClosingAsync(CancellationToken cancellationToken)
+    {
+        this._allGuilds = null;
+        this._filteredGuilds = null;
+        this._settings = null;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFilter()
+    {
+        this._filteredGuilds = this._allGuilds;
+
+        if (this._settings.ShownGuildIDs != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._settings.ShownGuildIDs, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
+
+        if (!string.IsNullOrWhiteSpace(this._filter))
+        {
+            this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value
+                .Select(ch => ch.AsFiltered(this._filter))
+                .Where(ch => ch is not null));
+        }
+    }
+
+    private class ChannelSorting
+    {
+        public ChannelInfoResponse Parent { get; }
+        public IEnumerable<ChannelSorting> Children { get; }
+
+        public ChannelSorting(ChannelInfoResponse parent, IEnumerable<ChannelSorting> children)
+        {
+            this.Parent = parent;
+            this.Children = children;
+        }
+
+        public ChannelSorting AsFiltered(string filter)
+        {
+            IEnumerable<ChannelSorting> filteredChildren = this.Children
+                .Select(ch => ch.AsFiltered(filter))
+                .Where(ch => ch is not null);
+            if (filteredChildren.Any() || this.Parent.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                return new ChannelSorting(this.Parent, filteredChildren);
+            return null;
+        }
+    }
+
+    private IEnumerable<ChannelSorting> SortChannelHierarchy(IEnumerable<ChannelInfoResponse> allChannels, ulong? parentID)
+    {
+        return allChannels.Where(channel => channel.ParentID == parentID)
+            .OrderBy(channel => channel.Position)
+            .Select(channel => new ChannelSorting(channel, this.SortChannelHierarchy(allChannels, channel.ID)));
+    }
+
+    private string GetUserText(GuildUserInfoResponse user)
+        => user.Nickname ?? user.Username;
+
+    private string GetUserStyle(GuildUserInfoResponse user)
+        => $"color: {user.GetTopRoleWithColor().GetHtmlColorOrDefault()}";
+
+    private void OnFilterTextChanged(string value)
+    {
+        this._filter = value;
+        this.ApplyFilter();
+    }
+
+    private RenderFragment RenderChannels(ChannelSorting channels)
+    {
+        bool isPickable = this.IsChannelPickable(channels.Parent);
+        bool isShown = this.IsChannelShown(channels);
+
+        string additionalClass = isPickable ? null : "non-pickable";
+        string childrenContainerClass = isShown ? "ml-2" : null;
+
+        return __builder =>
+        {
+            @if (isShown)
+            {
+                <div @key="channels.Parent.ID" class="picker-item @additionalClass" @onclick="_ => base.PickEntity(channels.Parent)">
+                    <MudText Class="text-cutoff">@this.RenderIcon(channels.Parent, Size.Medium) @channels.Parent.Name</MudText>
+                </div>
+            }
+            @foreach (ChannelSorting subChannels in channels.Children)
+            {
+                <div class="@childrenContainerClass">
+                    @this.RenderChannels(subChannels)
+                </div>
+            }
+        };
+    }
+
+    public override void PickEntity(ChannelInfoResponse value)
+    {
+        if (!this.IsChannelPickable(value))
+            return;
+        base.PickEntity(value);
+    }
+
+    private bool IsChannelPickable(ChannelInfoResponse channel)
+        => this._settings?.PickableChannelTypes == null 
+        || this._settings.PickableChannelTypes.Contains(channel.Type);
+    private bool IsChannelShown(ChannelSorting channels)
+        => this._settings?.ShownChannelTypes == null
+        || this._settings.ShownChannelTypes.Contains(channels.Parent.Type)
+        || channels.Children.Any(child => this.IsChannelShown(child));
+
+    private RenderFragment RenderIcon(ChannelInfoResponse channel, Size size)
+    {
+        string icon = ChannelIcon.GetForChannel(channel);
+        if (string.IsNullOrWhiteSpace(icon))
+            return null;
+        return @<MudIcon Icon="@icon" Size="size" />;
+    }
+
+    private RenderFragment RenderAdminIcon(GuildUserInfoResponse user)
+    {
+        string tooltipText = null;
+        string iconClass = null;
+        if (user.IsOwner)
+        {
+            tooltipText = "Owner";
+            iconClass = "discord-admin-icon owner";
+        }
+        else if (user.IsAdmin)
+        {
+            tooltipText = "Administrator";
+            iconClass = "discord-admin-icon admin";
+        }
+        else
+            return null;
+
+        return __builder =>
+        {
+            <MudTooltip Delay="500" Placement="Placement.Top">
+                <TooltipContent>
+                    @tooltipText
+                </TooltipContent>
+                <ChildContent>
+                    <MudIcon Size="MudBlazor.Size.Small" Class="@iconClass" Icon="@Icons.Filled.Star" />
+                </ChildContent>
+            </MudTooltip>
+        };
+    }
+}

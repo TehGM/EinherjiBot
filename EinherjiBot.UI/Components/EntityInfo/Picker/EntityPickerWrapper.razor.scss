@@ -20,7 +20,6 @@
         padding-left: 8px;
         padding-right: 8px;
         border-radius: 4px;
-        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -28,8 +27,14 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        user-select: none;
 
-        &:hover {
+        &.not-pickable {
+            cursor: default;
+        }
+
+        &:not(.non-pickable):hover {
+            cursor: pointer;
             background-color: rgba(var(--mud-palette-secondary-rgb),.12);
         }
 

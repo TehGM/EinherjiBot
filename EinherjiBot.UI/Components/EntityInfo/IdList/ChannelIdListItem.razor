@@ -24,8 +24,10 @@
 </MudItem>
 
 @code {
+    [Parameter]
+    public ChannelPickerSettings PickerSettings { get; set; }
     [CascadingParameter]
-    private RolePicker Picker { get; set; }
+    private ChannelPicker Picker { get; set; }
 
     private MudTextField<ulong?> _inputField;
     private ICollection<ChannelInfoResponse> _parents;
@@ -53,15 +55,10 @@
 
     private RenderFragment RenderIcon(ChannelInfoResponse channel, Size size)
     {
-        if (channel.Type == Discord.ChannelType.Text)
-            return @<MudIcon Icon="@Icons.Filled.Numbers" Size="size" />;
-        if (channel.Type.IsThread())
-            return @<MudIcon Icon="@Icons.Filled.SubdirectoryArrowRight" Size="size" />;
-        if (channel.Type == Discord.ChannelType.Category)
-            return @<MudIcon Icon="@Icons.Filled.AutoAwesomeMotion" Size="size" />;
-        if (channel.Type == Discord.ChannelType.Voice)
-            return @<MudIcon Icon="@Icons.Filled.VolumeUp" Size="size" />;
-        return null;
+        string icon = ChannelIcon.GetForChannel(channel);
+        if (string.IsNullOrWhiteSpace(icon))
+            return null;
+        return @<MudIcon Icon="@icon" Size="size" />;
     }
 
     private RenderFragment RenderParents(Size iconSize)
@@ -86,7 +83,7 @@
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {
-        RoleInfoResponse entity = await this.Picker.OpenAsync();
+        ChannelInfoResponse entity = await this.Picker.OpenAsync(this.PickerSettings);
         if (entity != null)
             await base.SetValueAsync(entity.ID);
     }

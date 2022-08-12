@@ -3,13 +3,19 @@
 <div class="id-list d-flex flex-column">
     @foreach (ulong id in base.Values)
     {
-        <ChannelIdListItem @key="id" Value="id" ValueChanged="base.OnValueChangedAsync" />
+        <ChannelIdListItem @key="id" Value="id" PickerSettings="this.PickerSettings" ValueChanged="base.OnValueChangedAsync" />
     }
     @if (this.AllowNewValues)
     {
-        <ChannelIdListItem @ref="base.NewItemField" ValueChanged="base.OnNewValueInputAsync" />
+        <ChannelIdListItem @ref="base.NewItemField" PickerSettings="this.PickerSettings" ValueChanged="base.OnNewValueInputAsync" />
     }
 </div>
 
 @code {
+    [Parameter]
+    public ChannelPickerSettings PickerSettings { get; set; } = new ChannelPickerSettings()
+    {
+        PickableChannelTypes = new[] { Discord.ChannelType.Text, Discord.ChannelType.Voice },
+        ShownChannelTypes = new[] { Discord.ChannelType.Text, Discord.ChannelType.Voice }
+    };
 }
