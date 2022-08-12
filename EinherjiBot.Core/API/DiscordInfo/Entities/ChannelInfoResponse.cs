@@ -13,6 +13,8 @@ namespace TehGM.EinherjiBot.API
         public ChannelType Type { get; init; }
         [JsonProperty("guild")]
         public ulong? GuildID { get; init; }
+        [JsonProperty("guildName")]
+        public string GuildName { get; init; }
         [JsonProperty("category")]
         public ulong? CategoryID { get; init; }
         [JsonProperty("topic")]

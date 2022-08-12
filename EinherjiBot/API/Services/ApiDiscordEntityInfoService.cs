@@ -165,6 +165,7 @@ namespace TehGM.EinherjiBot.API.Services
         {
             return new ChannelInfoResponse(channel.Id, channel.Name, channel.GetChannelType().Value, (channel as IGuildChannel)?.GuildId)
             {
+                GuildName = (channel as IGuildChannel)?.Guild.Name,
                 Topic = (channel as ITextChannel)?.Topic,
                 CategoryID = (channel as INestedChannel)?.CategoryId,
                 Position = (channel as IGuildChannel)?.Position ?? 0
