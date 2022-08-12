@@ -25,15 +25,15 @@
 
 @code {
     private string _filter;
-    private IEnumerable<ulong> _restrictGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<RoleInfoResponse>> _allGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<RoleInfoResponse>> _filteredGuilds;
     private TaskCompletionSource<RoleInfoResponse> _closeWaitTcs;
 
-    public Task<RoleInfoResponse> OpenAsync(string filter, IEnumerable<ulong> restrictGuilds, CancellationToken cancellationToken = default)
+    private EntityPickerSettings _settings;
+
+    public Task<RoleInfoResponse> OpenAsync(EntityPickerSettings settings, CancellationToken cancellationToken = default)
     {
-        this._filter = filter;
-        this._restrictGuilds = restrictGuilds;
+        this._settings = settings;
         return base.OpenAsync(cancellationToken);
     }
 
@@ -41,6 +41,7 @@
     {
         IEnumerable<GuildInfoResponse> data = await this.EntityInfoProvider.GetGuildInfosAsync(cancellationToken);
         this._allGuilds = data.ToDictionary(g => g, g => g.Roles);
+        this._settings ??= new EntityPickerSettings();
         this.ApplyFilter();
     }
 
@@ -48,6 +49,7 @@
     {
         this._allGuilds = null;
         this._filteredGuilds = null;
+        this._settings = null;
         return Task.CompletedTask;
     }
 
@@ -55,8 +57,8 @@
     {
         this._filteredGuilds = this._allGuilds;
 
-        if (this._restrictGuilds != null)
-            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._restrictGuilds, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
+        if (this._settings.ShownGuildIDs != null)
+            this._filteredGuilds = this._filteredGuilds.IntersectBy(this._settings.ShownGuildIDs, g => g.Key.ID).ToDictionary(g => g.Key, g => g.Value);
         if (!string.IsNullOrWhiteSpace(this._filter))
         {
             string filter = this._filter;
