@@ -18,10 +18,11 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
         public bool IsValid => this.FoundEntity != null;
         public bool IsError => !this.IsEmpty && !this.IsValid;
 
-        protected override async Task OnInitializedAsync()
+
+        protected override async Task OnParametersSetAsync()
         {
             await this.ValidateAndLookupAsync();
-            await base.OnInitializedAsync();
+            await base.OnParametersSetAsync();
         }
 
         public Task SetValueAsync(ulong? value)
