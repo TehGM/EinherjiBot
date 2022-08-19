@@ -1,9 +1,9 @@
 ﻿@inherits EntityIdListItemBase<RoleInfoResponse>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
+    <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
         Label="Role ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
-        Validation="this.ValidationDelegate" />
+        Error="this.IsError" ErrorText="Not a valid Discord Role ID." />
     @if (base.FoundEntity.IsFound())
     {
         <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
@@ -28,8 +28,6 @@
     [CascadingParameter]
     private RolePicker Picker { get; set; }
 
-    private MudTextField<ulong?> _inputField;
-
     private string RoleStyle => $"color: {base.FoundEntity.GetHtmlColorOrDefault()};";
 
     protected override async Task<RoleInfoResponse> FindEntityAsync(ulong id)
@@ -39,20 +37,6 @@
             result = RoleInfoResponse.None;
         return result;
     }
-
-    protected override async Task ValidateAndLookupAsync()
-    {
-        await base.ValidateAndLookupAsync();
-        if (this.IsError)
-            await this._inputField.Validate();
-    }
-
-    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
-    {
-        if (base.IsError)
-            return new string[] { "Not a valid Discord Role ID." };
-        return Enumerable.Empty<string>();
-    }; 
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {

@@ -1,9 +1,9 @@
 ﻿@inherits EntityIdListItemBase<IDiscordGuildInfo>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
+    <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
         Label="Guild ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
-        Validation="this.ValidationDelegate" />
+        Error="this.IsError" ErrorText="Not a valid Discord Guild ID." />
     @if (base.FoundEntity.IsFound())
     {
         <MudTooltip Delay="300" Placement="Placement.Top">
@@ -27,8 +27,6 @@
     [CascadingParameter]
     private GuildPicker Picker { get; set; }
 
-    private MudTextField<ulong?> _inputField;
-
     protected override async Task<IDiscordGuildInfo> FindEntityAsync(ulong id)
     {
         IDiscordGuildInfo result = await this.EntityInfoProvider.GetGuildInfoAsync(id);
@@ -36,20 +34,6 @@
             result = GuildInfoResponse.None;
         return result;
     }
-
-    protected override async Task ValidateAndLookupAsync()
-    {
-        await base.ValidateAndLookupAsync();
-        if (this.IsError)
-            await this._inputField.Validate();
-    }
-
-    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
-    {
-        if (base.IsError)
-            return new string[] { "Not a valid Discord Guild ID." };
-        return Enumerable.Empty<string>();
-    }; 
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {
