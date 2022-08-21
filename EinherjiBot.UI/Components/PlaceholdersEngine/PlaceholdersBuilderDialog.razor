@@ -28,7 +28,7 @@
             <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled" Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholder" >
                 @foreach (PlaceholderDescriptor placeholderType in this._availablePlaceholders)
                 {
-                    <MudSelectItem Value="placeholderType">{{@placeholderType.Identifier}}</MudSelectItem>
+                    <MudSelectItem Value="placeholderType">@placeholderType.DisplayName</MudSelectItem>
                 }
             </MudSelect>
 

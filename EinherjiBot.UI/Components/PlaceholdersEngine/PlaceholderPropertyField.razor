@@ -3,16 +3,16 @@
 
 @if (this.Descriptor.PropertyType == typeof(string))
 {
-    <MudTextField Label="@this.Descriptor.PropertyAttribute.Name" T="string" Value="this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
+    <MudTextField Label="@this.Descriptor.DisplayName" T="string" Value="this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
         Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled" />
 }
 else if (this.Descriptor.PropertyType.IsEnum)
 {
-    <MudSelect T="string" Label="@this.Descriptor.PropertyAttribute.Name" Value="@this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)" 
+    <MudSelect T="string" Label="@this.Descriptor.DisplayName" Value="@this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)" 
         Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled">
-        @foreach (string value in Enum.GetNames(this.Descriptor.PropertyType))
+        @foreach (KeyValuePair<string, string> value in EnumExtensions.GetDisplayNames(this.Descriptor.PropertyType))
         {
-            <MudSelectItem Value="value">@value.ToString()</MudSelectItem>
+            <MudSelectItem Value="value.Key">@value.Value</MudSelectItem>
         }
     </MudSelect>
 }
@@ -20,23 +20,23 @@ else if (this.Descriptor.PropertyType == typeof(ulong) || this.Descriptor.Proper
 {
     if (this.Descriptor.PropertyAttribute.IDType == IDType.User)
     {
-        <UserIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+        <UserIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
     }
     else if (this.Descriptor.PropertyAttribute.IDType == IDType.Guild)
     {
-        <GuildIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+        <GuildIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
     }
     else if (this.Descriptor.PropertyAttribute.IDType == IDType.Channel)
     {
-        <ChannelIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+        <ChannelIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
     }
     else if (this.Descriptor.PropertyAttribute.IDType == IDType.Role)
     {
-        <RoleIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+        <RoleIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
     }
     else
     {
-        <MudTextField T="ulong?" Label="@this.Descriptor.PropertyAttribute.Name" Value="@((ulong?)this.Value)" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
+        <MudTextField T="ulong?" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
             Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled" />
     }
 }

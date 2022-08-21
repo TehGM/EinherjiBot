@@ -2,7 +2,7 @@
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
     <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
-        Label="User ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Label="@this.Label" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
         Error="base.IsError" ErrorText="Not a valid Discord User ID." />
     @if (base.FoundEntity != null)
     {
@@ -26,6 +26,8 @@
 @code {
     [CascadingParameter]
     private UserPicker Picker { get; set; }
+    [Parameter]
+    public string Label { get; set; } = "User ID";
 
     protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
         => await this.EntityInfoProvider.GetUserInfoAsync(id);

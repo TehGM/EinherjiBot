@@ -4,6 +4,7 @@
     public class CurrentChannelPlaceholder
     {
         [PlaceholderProperty("Mode")]
+        [DisplayName("Display Mode")]
         public ChannelDisplayMode DisplayMode { get; init; } = ChannelDisplayMode.Mention;
     }
 }

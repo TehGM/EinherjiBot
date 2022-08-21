@@ -7,6 +7,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
     public class GuildPlaceholder
     {
         [PlaceholderProperty("ID", IsRequired = true, IDType = IDType.Guild)]
+        [DisplayName("Guild ID")]
         public ulong GuildID { get; init; }
 
         public class GuildPlaceholderHandler : PlaceholderHandler<GuildPlaceholder>

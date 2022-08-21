@@ -7,8 +7,10 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
     public class UserPlaceholder
     {
         [PlaceholderProperty("ID", IsRequired = true, IDType = IDType.User)]
+        [DisplayName("User ID")]
         public ulong UserID { get; init; }
         [PlaceholderProperty("Mode")]
+        [DisplayName("Display Mode")]
         public UserDisplayMode DisplayMode { get; init; } = UserDisplayMode.Username;
 
         public class UserPlaceholderHandler : PlaceholderHandler<UserPlaceholder>

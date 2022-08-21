@@ -1,6 +1,7 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [Placeholder("BotWebsite", PlaceholderUsage.Any)]
+    [DisplayName("Bot Website")]
     public class BotWebsitePlaceholder
     {
         public class BotWebsitePlaceholderHandler : PlaceholderHandler<BotWebsitePlaceholder>

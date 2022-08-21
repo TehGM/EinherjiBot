@@ -17,6 +17,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
 
         public string Identifier => this.PlaceholderAttribute.Identifier;
         public Regex MatchingRegex => this.PlaceholderAttribute.MatchingRegex;
+        public string DisplayName => this._displayNameAttribute?.Name ?? this.Identifier;
+
+        private DisplayNameAttribute _displayNameAttribute;
 
         public PlaceholderDescriptor(Type type, Type handlerType)
         {
@@ -32,6 +35,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.HandlerType = handlerType;
             this.Properties = LoadProperties(type);
             this.Policies = LoadPolicies(type, handlerType);
+            this._displayNameAttribute = type.GetCustomAttribute<DisplayNameAttribute>(inherit: true);
         }
 
         public bool AvailableInContext(PlaceholderUsage context)
@@ -73,6 +77,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         public PlaceholderPropertyAttribute PropertyAttribute { get; }
 
         public Type PropertyType => this.Property.PropertyType;
+        public string DisplayName => this._displayNameAttribute?.Name ?? this.Property.Name;
+
+        private DisplayNameAttribute _displayNameAttribute;
 
         public PlaceholderPropertyDescriptor(PropertyInfo property, PlaceholderPropertyAttribute attribute)
         {
@@ -83,6 +90,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
 
             this.Property = property;
             this.PropertyAttribute = attribute;
+            this._displayNameAttribute = property.GetCustomAttribute<DisplayNameAttribute>(inherit: true);
         }
 
         public PlaceholderPropertyDescriptor(PropertyInfo property)
