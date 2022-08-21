@@ -25,7 +25,7 @@
                 </MudAlert>
             </MudCollapse>
 
-            <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled" Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholderAsync" >
+            <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled" Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholder" >
                 @foreach (PlaceholderDescriptor placeholderType in this._availablePlaceholders)
                 {
                     <MudSelectItem Value="placeholderType">{{@placeholderType.Identifier}}</MudSelectItem>
@@ -43,9 +43,7 @@
             }
 
             <MudDivider Class="my-2" DividerType="DividerType.Middle" />
-            <MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="string.IsNullOrEmpty(this._previewValue)" >
-                @(this._previewValue ?? "Preview disabled when properties have errors")
-            </MudField>
+            <PlaceholderPreview Context="this.Context" Error="!this.AllPropertiesValid" Placeholder="this._selectedPlaceholder" SerializedPlaceholder="@this._serializedPlaceholder" />
 
             @if (this._selectedPlaceholder?.Properties?.Any() == true)
             {
@@ -55,7 +53,7 @@
 
                     @foreach (PlaceholderPropertyDescriptor property in this._selectedPlaceholder.Properties)
                     {
-                        <PlaceholderPropertyField @key="property" Descriptor="property" Value="this.GetCurrentValue(property)" ValueChanged="this.OnPropertyValueChangedAsync" />
+                        <PlaceholderPropertyField @key="property" Descriptor="property" Value="this.GetCurrentValue(property)" ValueChanged="this.OnPropertyValueChanged" />
                     }
                 </div>
             }
@@ -108,22 +106,22 @@
         }
         this._availablePlaceholders = placeholders.OrderBy(p => p.Identifier).ToArray();
 
-        await this.UpdatePlaceholderAsync(this._availablePlaceholders.First());
+        this.UpdatePlaceholder(this._availablePlaceholders.First());
 
         await base.OnParametersSetAsync();
     }
 
-    private Task UpdatePlaceholderAsync(PlaceholderDescriptor descriptor)
+    private void UpdatePlaceholder(PlaceholderDescriptor descriptor)
     {
         if (this._selectedPlaceholder?.Identifier == descriptor.Identifier)
-            return Task.CompletedTask;
+            return;
 
         this._selectedPlaceholder = descriptor;
         this._placeholderValue = Activator.CreateInstance(descriptor.PlaceholderType, nonPublic: true);
         // fields will trigger their update event AFTER this method returns, so just add all as invalid initially
         // this will prevent API call when components are invalid just after placeholder type change, but the events haven't fired yet
         this._invalidProperties = new HashSet<PlaceholderPropertyDescriptor>(descriptor.Properties);
-        return this.SerializePlaceholderAsync();
+        this.SerializePlaceholder();
     }
 
     private object GetCurrentValue(PlaceholderPropertyDescriptor property)
@@ -136,7 +134,7 @@
         return Convert.ChangeType(value, property.PropertyType);
     }
 
-    private Task OnPropertyValueChangedAsync(PropertyChangedEventArgs e)
+    private void OnPropertyValueChanged(PropertyChangedEventArgs e)
     {
         if (e.IsValid)
             this._invalidProperties.Remove(e.Property);
@@ -144,20 +142,13 @@
             this._invalidProperties.Add(e.Property);
 
         e.Property.Property.SetValue(this._placeholderValue, e.Value, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
-        return this.SerializePlaceholderAsync();
+        this.SerializePlaceholder();
     }
 
-    private async Task SerializePlaceholderAsync()
+    private void SerializePlaceholder()
     {
         this._serializedPlaceholder = this.Serializer.Serialize(this._placeholderValue);
         this._showConfirmationAlert = false;
-        if (this.AllPropertiesValid)
-        {
-            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._serializedPlaceholder, this.Context));
-            this._previewValue = converted?.Result ?? null;
-        }
-        else
-            this._previewValue = null;
     }
 
     private async Task OnCopyAndCloseClickedAsync()

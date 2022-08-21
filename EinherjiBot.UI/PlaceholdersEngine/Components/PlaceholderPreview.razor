@@ -1,0 +1,35 @@
+﻿@using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.PlaceholdersEngine.API
+
+@inject IPlaceholdersService Placeholders
+
+<MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="this.Error || string.IsNullOrEmpty(this._preview)" >
+    @(this._preview ?? this.ErrorText)
+</MudField>
+
+@code {
+    [Parameter]
+    public string SerializedPlaceholder { get; set; }
+    [Parameter, EditorRequired]
+    public PlaceholderUsage Context { get; set; }
+    [Parameter]
+    public bool Error { get; set; }
+    [Parameter]
+    public string ErrorText { get; set; } = "Preview disabled when properties have errors";
+    [Parameter, EditorRequired]
+    public PlaceholderDescriptor Placeholder { get; set; }
+
+    private string _preview;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!this.Error && !string.IsNullOrEmpty(this.SerializedPlaceholder))
+        {
+            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this.SerializedPlaceholder, this.Context));
+            this._preview = converted?.Result ?? null;
+        }
+        else
+            this._preview = null;
+        await base.OnParametersSetAsync();
+    }
+}
