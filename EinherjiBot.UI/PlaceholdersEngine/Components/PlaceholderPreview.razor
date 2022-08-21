@@ -1,13 +1,20 @@
-﻿@using TehGM.EinherjiBot.PlaceholdersEngine
+﻿@using System.Text.RegularExpressions
+@using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 
 @inject IPlaceholdersService Placeholders
 
-<MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="this.Error || string.IsNullOrEmpty(this._preview)" >
-    @(this._preview ?? this.ErrorText)
-</MudField>
+<div class="placeholder-preview">
+    <MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="this.IsError" >
+        @this._preview
+    </MudField>
+</div>
 
 @code {
+    private static Regex _userMentionRegex = new Regex(@"^<@!?\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static Regex _channelMentionRegex = new Regex(@"^<#\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static Regex _roleMentionRegex = new Regex(@"^<@&\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     [Parameter]
     public string SerializedPlaceholder { get; set; }
     [Parameter, EditorRequired]
@@ -16,20 +23,48 @@
     public bool Error { get; set; }
     [Parameter]
     public string ErrorText { get; set; } = "Preview disabled when properties have errors";
-    [Parameter, EditorRequired]
-    public PlaceholderDescriptor Placeholder { get; set; }
+    [Parameter]
+    public ulong? EntityID { get; set; }
 
-    private string _preview;
+    private RenderFragment _preview;
+
+    private bool IsError => this.Error || string.IsNullOrEmpty(this.SerializedPlaceholder);
 
     protected override async Task OnParametersSetAsync()
     {
-        if (!this.Error && !string.IsNullOrEmpty(this.SerializedPlaceholder))
+        if (!this.IsError)
         {
             PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this.SerializedPlaceholder, this.Context));
-            this._preview = converted?.Result ?? null;
+            this._preview = await this.RenderPreviewAsync(converted?.Result);
         }
         else
-            this._preview = null;
+            this._preview = await this.RenderPreviewAsync(null);
         await base.OnParametersSetAsync();
+    }
+
+    private async ValueTask<RenderFragment> RenderPreviewAsync(string preview)
+    {
+        if (string.IsNullOrWhiteSpace(preview))
+            return @<text>@this.ErrorText</text>;
+
+        if (this.EntityID != null)
+        {
+            if (_userMentionRegex.IsMatch(preview))
+            {
+                IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(this.EntityID.Value);
+                return @<span class="mention-preview">@@@user.Username</span>;
+            }
+            if (_channelMentionRegex.IsMatch(preview))
+            {
+                ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(this.EntityID.Value);
+                return @<span class="mention-preview">#@channel.Name</span>;
+            }
+            if (_roleMentionRegex.IsMatch(preview))
+            {
+                RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this.EntityID.Value);
+                return @<span class="mention-preview">@@@role.Name</span>;
+            }
+        }
+        return @<text>@preview</text>;
     }
 }

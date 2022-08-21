@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
 {
@@ -9,7 +10,12 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
         bool IsError => !this.IsEmpty && !this.IsValid;
     }
 
-    public abstract class EntityIdListItemBase<TEntity> : ComponentBase, IEntityValidatingField where TEntity : class
+    public interface IEntityValidatingField<out TEntity> : IEntityValidatingField where TEntity : class, IDiscordEntityInfo
+    {
+        TEntity FoundEntity { get; }
+    }
+
+    public abstract class EntityIdListItemBase<TEntity> : ComponentBase, IEntityValidatingField<TEntity> where TEntity : class, IDiscordEntityInfo
     {
         [Parameter]
         public bool ReadOnly { get; set; }
@@ -19,7 +25,7 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
         public EventCallback<ValueChangedEventArgs<ulong?>> ValueChanged { get; set; }
 
         protected abstract Task<TEntity> FindEntityAsync(ulong id);
-        protected TEntity FoundEntity { get; private set; }
+        public TEntity FoundEntity { get; private set; }
 
         public bool IsEmpty => this.Value == null;
         public bool IsValid => this.FoundEntity != null;
