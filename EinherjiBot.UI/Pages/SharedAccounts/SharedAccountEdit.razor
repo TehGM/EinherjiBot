@@ -213,6 +213,8 @@
                 return;
             }
         }
+        else 
+            this.LoadAccount(null);
 
         BotAuthorizationResult canCreateResult = !this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(typeof(CanCreateSharedAccount));
         BotAuthorizationResult canEditResult = this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(this._account, typeof(CanEditSharedAccount));
@@ -251,8 +253,8 @@
         this._type = this._account?.AccountType ?? SharedAccountType.Netflix;
         this._login = this._account?.Login;
         this._password = this._account?.Password;
-        this._authorizedUsers = new List<ulong>(this._account.AuthorizedUserIDs ?? Enumerable.Empty<ulong>());
-        this._authorizedRoles = new List<ulong>(this._account.AuthorizedRoleIDs ?? Enumerable.Empty<ulong>());
+        this._authorizedUsers = new List<ulong>(this._account?.AuthorizedUserIDs ?? Enumerable.Empty<ulong>());
+        this._authorizedRoles = new List<ulong>(this._account?.AuthorizedRoleIDs ?? Enumerable.Empty<ulong>());
         this._modUsers = new List<ulong>(this._account?.ModUserIDs ?? Enumerable.Empty<ulong>());
     }
 
