@@ -2,9 +2,11 @@
 @using TehGM.EinherjiBot.BotStatus.API
 @using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @using TehGM.EinherjiBot.Utilities
 @inject IBotStatusService Service
 @inject IPlaceholdersService Placeholders
+@inject IPlaceholdersBuilder PlaceholdersDialog
 
 <div class="spaced-card">
     <MudCard Elevation="4">
@@ -29,6 +31,7 @@
                         </MudPopover>
                         <MudOverlay DarkBackground="true" Visible="this._previewText != null" OnClick="_ => this._previewText = null" />
                     </MudButton>
+                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Tertiary" Disabled="this._processing" OnClick="this.OnPlaceholdersDialogClickedAsync">Placeholder Builder</MudButton>
                 </MudItem>
                 <MudItem xs="8" Class="d-flex justify-end">
                     @if (this._processing)
@@ -186,6 +189,13 @@
         this._processing = false;
         string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
         this._previewText = $"{activity} {response.Result}";
+    }
+
+    private async Task OnPlaceholdersDialogClickedAsync(MouseEventArgs e)
+    {
+        this._processing = true;
+        string placeholderValue = await this.PlaceholdersDialog.OpenAsync(PlaceholderUsage.Status);
+        this._processing = false;
     }
 
     public record StatusEventArgs(Guid? ID, BotStatusResponse Status);

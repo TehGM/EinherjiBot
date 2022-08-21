@@ -3,6 +3,7 @@ using System.Reflection;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.EinherjiBot.PlaceholdersEngine.API;
 using TehGM.EinherjiBot.PlaceholdersEngine.Services;
+using TehGM.EinherjiBot.UI.PlaceholdersEngine;
 using TehGM.EinherjiBot.UI.PlaceholdersEngine.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,6 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
             services.TryAddTransient<IPlaceholdersService, WebPlaceholdersService>();
             services.TryAddTransient<IPlaceholderSerializer, PlaceholderSerializer>();
+            services.TryAddTransient<IPlaceholdersBuilder, PlaceholdersBuilderOpener>();
 
             return services;
         }

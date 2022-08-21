@@ -70,3 +70,21 @@ $fab-margin: 24px;
         right: 0;
     }
 }
+
+/*** DIALOGS ***/
+// putting this here seems to be the only way to force full height without fullscreen
+.placeholder-builder-dialog {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100vh;
+
+/*    & .mud-dialog-content {
+        height: 100%;
+    }*/
+}
+
+// this is really nasty but seems mud blazor doesn't allow other styling of the container
+// and we need to stop picker drawers from showing all the time like idiots
+.mud-dialog-container.mud-dialog-centerright {
+    padding-right: 0;
+}

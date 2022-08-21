@@ -1,0 +1,84 @@
+﻿@using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
+
+@if (this.Descriptor.PropertyType == typeof(string))
+{
+    <MudTextField Label="@this.Descriptor.PropertyAttribute.Name" T="string" Value="this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
+        Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled" />
+}
+else if (this.Descriptor.PropertyType.IsEnum)
+{
+    <MudSelect T="string" Label="@this.Descriptor.PropertyAttribute.Name" Value="@this.Value.ToString()" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)" 
+        Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled">
+        @foreach (string value in Enum.GetNames(this.Descriptor.PropertyType))
+        {
+            <MudSelectItem Value="value">@value.ToString()</MudSelectItem>
+        }
+    </MudSelect>
+}
+else if (this.Descriptor.PropertyType == typeof(ulong) || this.Descriptor.PropertyType == typeof(ulong?))
+{
+    if (this.Descriptor.PropertyAttribute.IDType == IDType.User)
+    {
+        <UserIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+    }
+    else if (this.Descriptor.PropertyAttribute.IDType == IDType.Guild)
+    {
+        <GuildIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+    }
+    else if (this.Descriptor.PropertyAttribute.IDType == IDType.Channel)
+    {
+        <ChannelIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+    }
+    else if (this.Descriptor.PropertyAttribute.IDType == IDType.Role)
+    {
+        <RoleIdListItem @ref="this._entityField" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+    }
+    else
+    {
+        <MudTextField T="ulong?" Label="@this.Descriptor.PropertyAttribute.Name" Value="@((ulong?)this.Value)" ValueChanged="value => this.OnPropertyValueChangedAsync(value, true)"
+            Required="@this.Descriptor.PropertyAttribute.IsRequired" Variant="Variant.Filled" />
+    }
+}
+
+@code {
+    [Parameter]
+    public PlaceholderPropertyDescriptor Descriptor { get; set; }
+    [Parameter]
+    public object Value { get; set; }
+    [Parameter]
+    public EventCallback<PropertyChangedEventArgs> ValueChanged { get; set; }
+
+    public bool IsValid { get; private set; }
+
+    private IEntityValidatingField _entityField;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await this.OnPropertyValueChangedAsync(this.Value, this._entityField?.IsError != true);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private Task OnPropertyValueChangedAsync(object value, bool valid)
+    {
+        object actualValue = null;
+        if (value is null)
+        {
+            if (this.Descriptor.PropertyType.IsValueType && Nullable.GetUnderlyingType(this.Descriptor.PropertyType) != null)
+                actualValue = Activator.CreateInstance(this.Descriptor.PropertyType);
+        }
+        else
+        {
+            actualValue = this.Descriptor.PropertyType.IsEnum
+                ? Enum.Parse(this.Descriptor.PropertyType, value.ToString(), ignoreCase: true)
+                : Convert.ChangeType(value, this.Descriptor.PropertyType);
+        }
+
+        this.Value = actualValue;
+        this.IsValid = valid || (!this.Descriptor.PropertyAttribute.IsRequired && this.Descriptor.PropertyType.IsDefaultValue(actualValue));
+        return this.ValueChanged.InvokeAsync(new PropertyChangedEventArgs(this.Descriptor, actualValue, this.IsValid));
+    }
+}
