@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 using TehGM.EinherjiBot.PlaceholdersEngine;
-using TehGM.EinherjiBot.UI.PlaceholdersEngine.Components;
+using TehGM.EinherjiBot.UI.Components.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
 {
