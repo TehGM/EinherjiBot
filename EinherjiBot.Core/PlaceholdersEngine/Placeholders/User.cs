@@ -4,13 +4,16 @@ using TehGM.EinherjiBot.API;
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [Placeholder("User", PlaceholderUsage.Any)]
+    [Description("Is replaced with mention/name of a specific user.")]
     public class UserPlaceholder
     {
         [PlaceholderProperty("ID", IsRequired = true, IDType = IDType.User)]
         [DisplayName("User ID")]
+        [Description("ID of the user. <i>Click on the purple button to open the user picker!</i>")]
         public ulong UserID { get; init; }
         [PlaceholderProperty("Mode")]
         [DisplayName("Display Mode")]
+        [Description("Determines how the user will be displayed.")]
         public UserDisplayMode DisplayMode { get; init; } = UserDisplayMode.Username;
 
         public class UserPlaceholderHandler : PlaceholderHandler<UserPlaceholder>

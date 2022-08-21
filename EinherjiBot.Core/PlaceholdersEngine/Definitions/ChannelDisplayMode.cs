@@ -2,9 +2,9 @@
 {
     public enum ChannelDisplayMode
     {
-        [Description("Will mention the channel (#channel).")]
+        [Description("Will mention the channel (<i>#channel</i>).")]
         Mention,
-        [Description("Will use channels's name as normal text (channel).")]
+        [Description("Will use channels's name as normal text (<i>channel</i>).")]
         Name
     }
 }

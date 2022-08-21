@@ -18,8 +18,10 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
         public string Identifier => this.PlaceholderAttribute.Identifier;
         public Regex MatchingRegex => this.PlaceholderAttribute.MatchingRegex;
         public string DisplayName => this._displayNameAttribute?.Name ?? this.Identifier;
+        public string Description => this._descriptionAttribute?.Description;
 
         private DisplayNameAttribute _displayNameAttribute;
+        private DescriptionAttribute _descriptionAttribute;
 
         public PlaceholderDescriptor(Type type, Type handlerType)
         {
@@ -36,6 +38,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.Properties = LoadProperties(type);
             this.Policies = LoadPolicies(type, handlerType);
             this._displayNameAttribute = type.GetCustomAttribute<DisplayNameAttribute>(inherit: true);
+            this._descriptionAttribute = type.GetCustomAttribute<DescriptionAttribute>(inherit: true);
         }
 
         public bool AvailableInContext(PlaceholderUsage context)
@@ -78,8 +81,10 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
 
         public Type PropertyType => this.Property.PropertyType;
         public string DisplayName => this._displayNameAttribute?.Name ?? this.Property.Name;
+        public string Description => this._descriptionAttribute?.Description;
 
         private DisplayNameAttribute _displayNameAttribute;
+        private DescriptionAttribute _descriptionAttribute;
 
         public PlaceholderPropertyDescriptor(PropertyInfo property, PlaceholderPropertyAttribute attribute)
         {
@@ -91,6 +96,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine
             this.Property = property;
             this.PropertyAttribute = attribute;
             this._displayNameAttribute = property.GetCustomAttribute<DisplayNameAttribute>(inherit: true);
+            this._descriptionAttribute = property.GetCustomAttribute<DescriptionAttribute>(inherit: true);
         }
 
         public PlaceholderPropertyDescriptor(PropertyInfo property)

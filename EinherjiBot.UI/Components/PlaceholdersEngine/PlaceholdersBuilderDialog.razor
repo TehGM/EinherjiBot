@@ -25,12 +25,20 @@
                 </MudAlert>
             </MudCollapse>
 
-            <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled" Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholder" >
+            <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled"
+                Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholder" >
                 @foreach (PlaceholderDescriptor placeholderType in this._availablePlaceholders)
                 {
                     <MudSelectItem Value="placeholderType">@placeholderType.DisplayName</MudSelectItem>
                 }
             </MudSelect>
+
+            @if (!string.IsNullOrWhiteSpace(this._selectedPlaceholder?.Description))
+            {
+                <MudAlert Dense="true" Severity="Severity.Normal" Icon="@Icons.Filled.HelpCenter" Variant="Variant.Text">
+                    @(new MarkupString(this._selectedPlaceholder.Description))
+                </MudAlert>
+            }
 
             <MudDivider Class="my-2" DividerType="DividerType.Middle" />
             <MudTextField Value="@this._serializedPlaceholder" Label="Result" Variant="Variant.Outlined" ReadOnly="true" Class="mt-2"
@@ -60,7 +68,7 @@
         </MudContainer>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Tertiary" OnClick="OnCloseClicked" Variant="Variant.Text">Close</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="OnCloseClicked" Variant="Variant.Text">Close</MudButton>
         <MudButton Color="Color.Primary" OnClick="OnCopyClickedAsync" Variant="Variant.Outlined" Disabled="!this.AllPropertiesValid">Copy</MudButton>
         <MudButton Color="Color.Primary" OnClick="OnCopyAndCloseClickedAsync" Variant="Variant.Filled" Disabled="!this.AllPropertiesValid">Copy & Close</MudButton>
     </DialogActions>

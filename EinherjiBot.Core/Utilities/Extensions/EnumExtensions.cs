@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace TehGM.EinherjiBot
 {
@@ -18,6 +17,9 @@ namespace TehGM.EinherjiBot
         public static IReadOnlyDictionary<string, string> GetDisplayNames<TEnum>() where TEnum : struct, Enum
             => GetDisplayNames(typeof(TEnum));
 
+        public static string GetDescription<TEnum>(this TEnum value) where TEnum : struct, Enum
+            => GetDescription(typeof(TEnum), value.ToString());
+
         // reflection
         public static IReadOnlyDictionary<string, string> GetDisplayNames(Type enumType)
         {
@@ -30,6 +32,12 @@ namespace TehGM.EinherjiBot
             MemberInfo valueInfo = enumType.GetMember(memberName).First();
             DisplayNameAttribute attribute = valueInfo.GetCustomAttribute<DisplayNameAttribute>(inherit: true);
             return attribute?.Name ?? valueInfo.Name;
+        }
+
+        public static string GetDescription(Type enumType, string memberName)
+        {
+            MemberInfo valueInfo = enumType.GetMember(memberName).First();
+            return valueInfo.GetDescription();
         }
     }
 }

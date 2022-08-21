@@ -4,10 +4,12 @@ using TehGM.EinherjiBot.Security;
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [Placeholder("Guild", PlaceholderUsage.Admin)]
+    [Description("Is replaced with name of a specific guild.")]
     public class GuildPlaceholder
     {
         [PlaceholderProperty("ID", IsRequired = true, IDType = IDType.Guild)]
         [DisplayName("Guild ID")]
+        [Description("ID of the guild. <i>Click on the purple button to open the guild picker!</i>")]
         public ulong GuildID { get; init; }
 
         public class GuildPlaceholderHandler : PlaceholderHandler<GuildPlaceholder>

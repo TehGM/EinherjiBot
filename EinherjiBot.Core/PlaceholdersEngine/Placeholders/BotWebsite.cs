@@ -2,6 +2,7 @@
 {
     [Placeholder("BotWebsite", PlaceholderUsage.Any)]
     [DisplayName("Bot Website")]
+    [Description("Is replaced with bot's website URL.")]
     public class BotWebsitePlaceholder
     {
         public class BotWebsitePlaceholderHandler : PlaceholderHandler<BotWebsitePlaceholder>
