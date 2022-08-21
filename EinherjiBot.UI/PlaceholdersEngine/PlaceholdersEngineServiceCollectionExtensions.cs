@@ -25,6 +25,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 log.LogInformation("Loaded {Count} placeholders", count);
                 return provider;
             });
+            services.TryAddTransient<IPlaceholdersEngine, PlaceholdersEngineService>();
+
             services.TryAddTransient<IPlaceholdersService, WebPlaceholdersService>();
             services.TryAddTransient<IPlaceholderSerializer, PlaceholderSerializer>();
             services.TryAddTransient<IPlaceholdersBuilder, PlaceholdersBuilderOpener>();

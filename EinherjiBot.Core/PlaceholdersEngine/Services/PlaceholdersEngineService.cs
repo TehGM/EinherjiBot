@@ -1,24 +1,26 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.Security;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 {
     /// <inheritdoc/>
-    internal class PlaceholdersEngineService : IPlaceholdersEngine
+    public class PlaceholdersEngineService : IPlaceholdersEngine
     {
         private readonly IPlaceholdersProvider _provider;
         private readonly IPlaceholderSerializer _serializer;
         private readonly IServiceProvider _services;
-        private readonly IAuthContext _authContext;
+        private readonly IAuthProvider _auth;
         private readonly ILogger _log;
 
         public PlaceholdersEngineService(IPlaceholdersProvider provider, IPlaceholderSerializer serializer,
-            IAuthContext authContext, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
+            IAuthProvider auth, IServiceProvider services, ILogger<PlaceholdersEngineService> log)
         {
             this._provider = provider;
             this._serializer = serializer;
-            this._authContext = authContext;
+            this._auth = auth;
             this._services = services;
             this._log = log;
         }
@@ -32,15 +34,16 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         {
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
-            if (this._authContext.IsAdmin() || this._authContext.IsEinherji())
+            IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
+            if (this._auth.User.IsAdmin() || this._auth.User.IsEinherji())
                 context |= PlaceholderUsage.Admin;
 
-            StringBuilder builder = new StringBuilder(text);
+            ICollection<PlaceholderMatch> foundMatches = new List<PlaceholderMatch>();
             foreach (PlaceholderDescriptor descriptor in this._provider.GetRegisteredPlaceholders())
             {
                 IEnumerable<Match> matches = descriptor.MatchingRegex
-                    .Matches(builder.ToString())
-                    .Where(m => m != null && m.Success);
+                    .Matches(text)
+                    .Where(m => m?.Success == true);
 
                 if (!matches.Any())
                     continue;
@@ -50,22 +53,30 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
 
                 if (descriptor.Policies.Any())
                 {
-                    IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
                     BotAuthorizationResult authorization = await authService.AuthorizeAsync(descriptor.Policies, cancellationToken).ConfigureAwait(false);
                     if (!authorization.Succeeded)
                         throw new AccessForbiddenException($"You have no permissions to use this placeholder.");
                 }
 
+                if (descriptor.HandlerType == null)
+                    throw new InvalidOperationException("Can't convert placeholder with no handler assigned.");
+
                 IPlaceholderHandler handler = (IPlaceholderHandler)ActivatorUtilities.CreateInstance(services, descriptor.HandlerType);
-                foreach (Match match in matches.OrderByDescending(m => m.Index))
-                {
-                    object placehoder = this._serializer.Deserialize(match.Value, descriptor.PlaceholderType);
-                    string replacement = await handler.GetReplacementAsync(placehoder, cancellationToken).ConfigureAwait(false);
-                    builder.Remove(match.Index, match.Length);
-                    builder.Insert(match.Index, replacement);
-                }
+                foreach (Match match in matches)
+                    foundMatches.Add(new PlaceholderMatch(match, descriptor, handler));
+            }
+
+            StringBuilder builder = new StringBuilder(text);
+            foreach (PlaceholderMatch match in foundMatches.OrderByDescending(m => m.RegexMatch.Index))
+            {
+                object placehoder = this._serializer.Deserialize(match.RegexMatch.Value, match.Descriptor.PlaceholderType);
+                string replacement = await match.Handler.GetReplacementAsync(placehoder, cancellationToken).ConfigureAwait(false);
+                builder.Remove(match.RegexMatch.Index, match.RegexMatch.Length);
+                builder.Insert(match.RegexMatch.Index, replacement);
             }
             return builder.ToString();
         }
+
+        private record PlaceholderMatch(Match RegexMatch, PlaceholderDescriptor Descriptor, IPlaceholderHandler Handler);
     }
 }
