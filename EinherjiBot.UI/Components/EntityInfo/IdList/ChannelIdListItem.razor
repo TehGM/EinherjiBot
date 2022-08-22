@@ -10,7 +10,7 @@
             <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
                 <TooltipContent>
                     <MudItem xs="12" Class="d-flex flex-column flex-shrink-1">
-                        <span>@this.RenderIcon(base.FoundEntity, Size.Small) @base.FoundEntity.Name (@this.RenderParents(Size.Small))</span>
+                        <span>@this.RenderIcon(base.FoundEntity, Size.Small) @base.FoundEntity.Name @this.RenderParents(Size.Small)</span>
                         <span>@base.FoundEntity.GuildName</span>
                     </MudItem>
                 </TooltipContent>
@@ -38,6 +38,7 @@
 
     protected override async Task<ChannelInfoResponse> FindEntityAsync(ulong id)
     {
+        this._parents?.Clear();
         ChannelInfoResponse result = await this.EntityInfoProvider.GetChannelInfoAsync(id);
         ulong? parentID = result.ParentID;
         while (parentID != null)
@@ -64,10 +65,12 @@
             return null;
         return __builder =>
         {
+            <text>(</text>
             @foreach (ChannelInfoResponse parent in this._parents)
             {
                 <MudIcon Icon="@Icons.Filled.ArrowRightAlt" Size="iconSize" /> @RenderIcon(parent, iconSize) @parent.Name
             }
+            <text>)</text>
         };
     }
 
