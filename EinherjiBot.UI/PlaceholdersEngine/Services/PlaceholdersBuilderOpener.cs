@@ -13,7 +13,7 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
             this._dialogService = dialogService;
         }
 
-        public async Task<string> OpenAsync(PlaceholderUsage context)
+        public async Task<PlaceholderBuilderResult> OpenAsync(PlaceholderUsage context)
         {
             DialogParameters parameters = new DialogParameters
             {
@@ -35,8 +35,8 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
             IDialogReference dialog = this._dialogService.Show<PlaceholdersBuilderDialog>(PlaceholdersBuilderDialog.DefaultTitle, parameters, options);
             DialogResult result = await dialog.Result;
             if (result.Cancelled)
-                return null;
-            return result.Data.ToString();
+                return PlaceholderBuilderResult.Cancelled;
+            return (PlaceholderBuilderResult)result.Data;
         }
     }
 }

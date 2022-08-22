@@ -190,12 +190,5 @@
         this._previewText = $"{activity} {response.Result}";
     }
 
-    private async Task OnPlaceholdersDialogClickedAsync(MouseEventArgs e)
-    {
-        this._processing = true;
-        string placeholderValue = await this.PlaceholdersDialog.OpenAsync(PlaceholderUsage.Status);
-        this._processing = false;
-    }
-
     public record StatusEventArgs(Guid? ID, BotStatusResponse Status);
 }

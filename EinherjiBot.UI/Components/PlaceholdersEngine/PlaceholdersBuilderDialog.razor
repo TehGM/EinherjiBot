@@ -1,6 +1,7 @@
 ﻿@using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 @using TehGM.EinherjiBot.Security
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @inject IPlaceholdersProvider PlaceholdersProvider
 @inject IBotAuthorizationService AuthorizationService
 @inject IPlaceholderSerializer Serializer
@@ -173,7 +174,7 @@
     private async Task OnCopyAndCloseClickedAsync()
     {
         await this.OnCopyClickedAsync();
-        this.OnCloseClicked();
+        this.Dialog.Close(PlaceholderBuilderResult.Success(this._serializedPlaceholder, this._placeholderValue, this._selectedPlaceholder));
     }
 
     private async Task OnCopyClickedAsync()
@@ -186,7 +187,7 @@
 
     private void OnCloseClicked()
     {
-        this.Dialog.Close(this._serializedPlaceholder);
+        this.Dialog.Cancel();
     }
 
     private void OnHelpClicked()
