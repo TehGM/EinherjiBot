@@ -2,6 +2,7 @@
 {
     public enum SharedAccountType
     {
-        Netflix
+        Netflix,
+        NordVPN
     }
 }
