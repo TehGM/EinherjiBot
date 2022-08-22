@@ -4,7 +4,7 @@
     flex-direction: column;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 800px) {
     ::deep .page {
         flex-direction: row;
     }
