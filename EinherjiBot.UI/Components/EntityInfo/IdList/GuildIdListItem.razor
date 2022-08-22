@@ -27,12 +27,14 @@
     [CascadingParameter]
     private GuildPicker Picker { get; set; }
     [Parameter]
+    public bool AllowNone { get; set; }
+    [Parameter]
     public string Label { get; set; } = "Guild ID";
 
     protected override async Task<IDiscordGuildInfo> FindEntityAsync(ulong id)
     {
         IDiscordGuildInfo result = await this.EntityInfoProvider.GetGuildInfoAsync(id);
-        if (result == null)
+        if (result == null && this.AllowNone)
             result = GuildInfoResponse.None;
         return result;
     }
