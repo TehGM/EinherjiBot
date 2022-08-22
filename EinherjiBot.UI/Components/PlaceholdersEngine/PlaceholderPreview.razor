@@ -6,7 +6,7 @@
 
 <div class="placeholder-preview">
     <MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="this.IsError" >
-        @this._preview
+        @(this._preview ?? this.NullPreview)
     </MudField>
 </div>
 
@@ -28,43 +28,63 @@
 
     private RenderFragment _preview;
 
+    private string _serializedPlaceholder;
+    private ulong? _entityID;
+
     private bool IsError => this.Error || string.IsNullOrEmpty(this.SerializedPlaceholder);
 
     protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
+
+        if (!this.CheckNeedsUpdate())
+            return;
+
         if (!this.IsError)
         {
-            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this.SerializedPlaceholder, this.Context));
+            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._serializedPlaceholder, this.Context));
             this._preview = await this.RenderPreviewAsync(converted?.Result);
         }
         else
-            this._preview = await this.RenderPreviewAsync(null);
-        await base.OnParametersSetAsync();
+            this._preview = null;
+    }
+
+    private bool CheckNeedsUpdate()
+    {
+        bool dirty = this.SerializedPlaceholder != this._serializedPlaceholder || this.EntityID != this._entityID;
+        if (dirty)
+        {
+            this._entityID = this.EntityID;
+            this._serializedPlaceholder = this.SerializedPlaceholder;
+        }
+        return dirty;
     }
 
     private async ValueTask<RenderFragment> RenderPreviewAsync(string preview)
     {
         if (string.IsNullOrWhiteSpace(preview))
-            return @<text>@this.ErrorText</text>;
+            return null;
 
-        if (this.EntityID != null)
+        if (this._entityID != null)
         {
             if (_userMentionRegex.IsMatch(preview))
             {
-                IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(this.EntityID.Value);
+                IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(this._entityID.Value);
                 return @<span class="mention-preview">@@@user.Username</span>;
             }
             if (_channelMentionRegex.IsMatch(preview))
             {
-                ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(this.EntityID.Value);
+                ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(this._entityID.Value);
                 return @<span class="mention-preview">#@channel.Name</span>;
             }
             if (_roleMentionRegex.IsMatch(preview))
             {
-                RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this.EntityID.Value);
+                RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this._entityID.Value);
                 return @<span class="mention-preview">@@@role.Name</span>;
             }
         }
         return @<text>@preview</text>;
     }
+
+    private RenderFragment NullPreview => @<text>@this.ErrorText</text>;
 }
