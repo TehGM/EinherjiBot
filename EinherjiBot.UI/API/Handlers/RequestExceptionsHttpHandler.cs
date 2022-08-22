@@ -36,6 +36,8 @@ namespace TehGM.EinherjiBot.UI.API.Handlers
                 {
                     if (values.Contains(nameof(PlaceholderConvertException)))
                         throw new PlaceholderConvertException(message);
+                    if (values.Contains(nameof(PlaceholderContextException)))
+                        throw new PlaceholderContextException(message);
                 }
                 else
                     throw new HttpRequestException(message, null, response.StatusCode);

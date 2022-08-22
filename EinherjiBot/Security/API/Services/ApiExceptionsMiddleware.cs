@@ -31,6 +31,8 @@ namespace TehGM.EinherjiBot.Security.API.Services
 
                 if (ex is PlaceholderConvertException)
                     context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderConvertException));
+                else if (ex is PlaceholderContextException)
+                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderContextException));
 
                 await context.Response.WriteAsync(ex.Message).ConfigureAwait(false);
             }

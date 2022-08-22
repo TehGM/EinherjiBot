@@ -17,6 +17,8 @@ namespace TehGM.EinherjiBot.BotStatus
         public ActivityType ActivityType { get; set; } = ActivityType.Playing;
         [BsonElement("enabled")]
         public bool IsEnabled { get; set; }
+        [BsonElement("lastError"), BsonIgnoreIfNull]
+        public ErrorInfo LastError { get; set; }
 
         [BsonConstructor]
         private Status(Guid id)

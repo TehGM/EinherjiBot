@@ -65,6 +65,14 @@
                             Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" DebounceInterval="350" />
                     </MudItem>
                 }
+                @if (!string.IsNullOrWhiteSpace(this._error?.Message))
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Error">
+                            @this._error.Message
+                        </MudAlert>
+                    </MudItem>
+                }
             </MudGrid>
         </MudCardContent>
     </MudCard>
@@ -92,6 +100,7 @@
 
     private bool _processing;
     private BotStatusResponse _savedStatus;
+    private ErrorInfoResponse _error;
 
     private bool IsNew => this._id == null;
     private bool IsStreamingActivity => this._activityType == ActivityType.Streaming;
@@ -124,6 +133,7 @@
         this._text = this.ExistingStatus?.Text;
         this._link = this.ExistingStatus?.Link;
         this._enabled = this.ExistingStatus?.IsEnabled ?? false;
+        this._error = this.ExistingStatus?.LastError;
     }
 
     public void ClearInputs()
@@ -176,18 +186,39 @@
     private async Task OnSetClickedAsync(MouseEventArgs e)
     {
         this._processing = true;
-        await this.Service.SetCurrentAsync(this.BuildStatus());
-        this.Notifications.Add("Bot's current status changed", Severity.Success);
-        this._processing = false;
+        try
+        {
+            this._error = null;
+            await this.Service.SetCurrentAsync(this.BuildStatus());
+            this.Notifications.Add("Bot's current status changed", Severity.Success);
+        }
+        catch (Exception ex) when (ex is PlaceholderContextException || ex is PlaceholderConvertException)
+        {
+            this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
+        }
+        finally
+        {
+            this._processing = false;
+        }
     }
 
     private async Task OnPreviewClickedAsync(MouseEventArgs e)
     {
         this._processing = true;
-        PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text, PlaceholderUsage.Status));
-        this._processing = false;
-        string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
-        this._previewText = $"{activity} {response.Result}";
+        try
+        {
+            PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text, PlaceholderUsage.Status));
+            string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
+            this._previewText = $"{activity} {response.Result}";
+        }
+        catch (Exception ex) when (ex is PlaceholderContextException || ex is PlaceholderConvertException)
+        {
+            this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
+        }
+        finally
+        {
+            this._processing = false;
+        }
     }
 
     public record StatusEventArgs(Guid? ID, BotStatusResponse Status);
