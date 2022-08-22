@@ -1,0 +1,197 @@
+﻿@using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.PlaceholdersEngine.API
+@using TehGM.EinherjiBot.Security
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
+@inject IPlaceholdersProvider PlaceholdersProvider
+@inject IBotAuthorizationService AuthorizationService
+@inject IPlaceholderSerializer Serializer
+@inject IPlaceholdersService Placeholders
+
+<CascadingPickers>
+<MudDialog Class="placeholder-builder-dialog" DisableSidePadding="true">
+    <DialogContent>
+
+        <MudContainer Style="overflow-y: scroll;">
+            <MudText Typo="Typo.h4" Class="mx-3 mb-2 d-flex flex-row align-center gap-2 cursor-help" @onclick="this.OnHelpClicked" >
+                <MudIcon Icon="@Icons.Filled.Code" Color="Color.Secondary" Size="Size.Large" />
+                Placeholder Builder
+                <MudIcon Class="cursor-pointer" Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" />
+            </MudText>
+            
+            <MudCollapse Expanded="this._showHelp">
+                <MudAlert Severity="Severity.Normal" Variant="Variant.Text" NoIcon="true">
+                    <p>Many features of @EinherjiInfo.Name support placeholders. These placeholders will automatically be replaced with current data taken straight from Discord. Super neat, ay?</p>
+                    <p class="mt-1">However these placeholders need to be defined in a specific format. Otherwise they'll get confused, curl up and cry, and won't work. This tool is designed to help with that!</p>
+                    <p class="mt-1">Select your placeholder, update properties (if any), and click them mighty copy button next to the result!</p>
+                </MudAlert>
+            </MudCollapse>
+
+            <MudSelect Class="flex-grow-1" T="PlaceholderDescriptor" Label="Placeholder Type" Variant="Variant.Filled"
+                Value="this._selectedPlaceholder" ValueChanged="this.UpdatePlaceholder" >
+                @foreach (PlaceholderDescriptor placeholderType in this._availablePlaceholders)
+                {
+                    <MudSelectItem Value="placeholderType">@placeholderType.DisplayName</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (!string.IsNullOrWhiteSpace(this._selectedPlaceholder?.Description))
+            {
+                <MudAlert Dense="true" Severity="Severity.Normal" Icon="@Icons.Filled.HelpCenter" Variant="Variant.Text">
+                    @(new MarkupString(this._selectedPlaceholder.Description))
+                </MudAlert>
+            }
+
+            <MudDivider Class="my-2" DividerType="DividerType.Middle" />
+            <MudTextField Value="@this._serializedPlaceholder" Label="Result" Variant="Variant.Outlined" ReadOnly="true" Class="mt-2"
+                Adornment="Adornment.Start" AdornmentColor="this.CopyButtonColor" AdornmentIcon="@Icons.Filled.CopyAll" OnAdornmentClick="this.OnCopyClickedAsync"/>
+            @if (this._showConfirmationAlert)
+            {
+                <MudAlert Severity="Severity.Success" Variant="Variant.Text">
+                    Placeholder copied! Now go paste it somewhere. Click <span @onclick="this.OnCloseClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to close.
+                </MudAlert>
+            }
+
+            <MudDivider Class="my-2" DividerType="DividerType.Middle" />
+            <PlaceholderPreview Context="this.Context" Error="!this.AllPropertiesValid" EntityID="this._previewEntityID" SerializedPlaceholder="@this._serializedPlaceholder" />
+
+            @if (this._selectedPlaceholder?.Properties?.Any() == true)
+            {
+                <div class="placeholder-fields mt-2">
+                    <MudDivider Class="my-2" DividerType="DividerType.Middle" />
+                    <MudText Class="mb-2" Typo="Typo.h4">Parameters</MudText>
+
+                    @foreach (PlaceholderPropertyDescriptor property in this._selectedPlaceholder.Properties)
+                    {
+                        <PlaceholderPropertyField @key="property" Descriptor="property" Value="this.GetCurrentValue(property)" ValueChanged="this.OnPropertyValueChanged" />
+                    }
+                </div>
+            }
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" OnClick="OnCloseClicked" Variant="Variant.Text">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="OnCopyClickedAsync" Variant="Variant.Outlined" Disabled="!this.AllPropertiesValid">Copy</MudButton>
+        <MudButton Color="Color.Primary" OnClick="OnCopyAndCloseClickedAsync" Variant="Variant.Filled" Disabled="!this.AllPropertiesValid">Copy & Close</MudButton>
+    </DialogActions>
+</MudDialog>
+</CascadingPickers>
+
+@code {
+    public const string DefaultTitle = "Placeholder Builder";
+
+    private IEnumerable<PlaceholderDescriptor> _availablePlaceholders;
+    private PlaceholderDescriptor _selectedPlaceholder;
+    private object _placeholderValue;
+    private string _serializedPlaceholder;
+    private string _previewValue;
+
+    private HashSet<PlaceholderPropertyDescriptor> _invalidProperties;
+    private bool _showConfirmationAlert;
+    private bool _showHelp;
+
+    [CascadingParameter]
+    private MudDialogInstance Dialog { get; set; }
+    [Parameter]
+    public PlaceholderUsage Context { get; set; }
+
+    private bool AllPropertiesValid => this._invalidProperties?.Any() != true;
+    private Color CopyButtonColor => this.AllPropertiesValid ? Color.Primary : Color.Default;
+
+    private ulong? _previewEntityID;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IEnumerable<PlaceholderDescriptor> allPlaceholders = this.PlaceholdersProvider.GetRegisteredPlaceholders();
+        List<PlaceholderDescriptor> placeholders = new List<PlaceholderDescriptor>(allPlaceholders.Count());
+
+        foreach (PlaceholderDescriptor placeholder in allPlaceholders.Where(p => p.AvailableInContext(this.Context)))
+        {
+            if (placeholder.Policies?.Any() == true)
+            {
+                BotAuthorizationResult authorization = await this.AuthorizationService.AuthorizeAsync(placeholder.Policies);
+                if (!authorization.Succeeded)
+                    continue;
+            }
+
+            placeholders.Add(placeholder);
+        }
+        this._availablePlaceholders = placeholders.OrderBy(p => p.Identifier).ToArray();
+
+        this.UpdatePlaceholder(this._availablePlaceholders.First());
+
+        await base.OnParametersSetAsync();
+    }
+
+    private void UpdatePlaceholder(PlaceholderDescriptor descriptor)
+    {
+        if (this._selectedPlaceholder?.Identifier == descriptor.Identifier)
+            return;
+
+        this._selectedPlaceholder = descriptor;
+        this._placeholderValue = Activator.CreateInstance(descriptor.PlaceholderType, nonPublic: true);
+        // fields will trigger their update event AFTER this method returns, so just add all as invalid initially
+        // this will prevent API call when components are invalid just after placeholder type change, but the events haven't fired yet
+        this._invalidProperties = new HashSet<PlaceholderPropertyDescriptor>(descriptor.Properties);
+        this.SerializePlaceholder();
+    }
+
+    private object GetCurrentValue(PlaceholderPropertyDescriptor property)
+    {
+        object value = property.Property.GetValue(this._placeholderValue, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
+        if (value == null)
+            return null;
+        if (property.PropertyType.IsEnum)
+            return Enum.Parse(property.PropertyType, value.ToString(), ignoreCase: true);
+        return Convert.ChangeType(value, property.PropertyType);
+    }
+
+    private void OnPropertyValueChanged(PropertyChangedEventArgs e)
+    {
+        if (e.IsValid)
+            this._invalidProperties.Remove(e.Property);
+        else
+            this._invalidProperties.Add(e.Property);
+
+
+        if (e.Value != null && e.Property.PropertyAttribute.IDType != IDType.None && typeof(ulong?).IsAssignableFrom(e.Value.GetType()))
+        {
+            if (e.IsValid)
+                this._previewEntityID = (ulong?)e.Value;
+            else
+                this._previewEntityID = null;
+        }
+
+        e.Property.Property.SetValue(this._placeholderValue, e.Value, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
+        this.SerializePlaceholder();
+    }
+
+    private void SerializePlaceholder()
+    {
+        this._serializedPlaceholder = this.Serializer.Serialize(this._placeholderValue);
+        this._showConfirmationAlert = false;
+    }
+
+    private async Task OnCopyAndCloseClickedAsync()
+    {
+        await this.OnCopyClickedAsync();
+        this.Dialog.Close(PlaceholderBuilderResult.Success(this._serializedPlaceholder, this._placeholderValue, this._selectedPlaceholder));
+    }
+
+    private async Task OnCopyClickedAsync()
+    {
+        if (!this.AllPropertiesValid)
+            return;
+        await this.Clipboard.WriteTextAsync(this._serializedPlaceholder);
+        this._showConfirmationAlert = true;
+    }
+
+    private void OnCloseClicked()
+    {
+        this.Dialog.Cancel();
+    }
+
+    private void OnHelpClicked()
+    {
+        this._showHelp = !this._showHelp;
+    }
+}

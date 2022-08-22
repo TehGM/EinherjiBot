@@ -93,7 +93,7 @@
                                 <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
-                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNewValues="true" />
+                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNone="true" AllowNewValues="true" />
                         @if (this._authorizedRoles?.Any() == true)
                         {
                             <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">

@@ -30,7 +30,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
         public async Task ExecuteAsync(MessageTrigger trigger, IMessage message, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             IPlaceholdersEngine placeholders = services.GetRequiredService<IPlaceholdersEngine>();
-            string text = await placeholders.ConvertPlaceholdersAsync(message.Content, services, cancellationToken).ConfigureAwait(false);
+            string text = await placeholders.ConvertPlaceholdersAsync(message.Content, trigger.PlaceholderContext, services, cancellationToken).ConfigureAwait(false);
             MessageTriggerAuditEntry entry = new MessageTriggerAuditEntry(message, text, this.Lifetime);
 
             IAuditStore<MessageTriggerAuditEntry> audit = services.GetRequiredService<IAuditStore<MessageTriggerAuditEntry>>();

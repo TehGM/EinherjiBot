@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.UI.API.Handlers
 {
@@ -31,6 +32,15 @@ namespace TehGM.EinherjiBot.UI.API.Handlers
 
                 if (response.StatusCode == HttpStatusCode.Forbidden)
                     throw new AccessForbiddenException(message);
+                else if (response.Headers.TryGetValues(CustomHeaders.ExceptionType, out IEnumerable<string> values))
+                {
+                    if (values.Contains(nameof(PlaceholderConvertException)))
+                        throw new PlaceholderConvertException(message);
+                    if (values.Contains(nameof(PlaceholderContextException)))
+                        throw new PlaceholderContextException(message);
+                    if (values.Contains(nameof(PlaceholderFormatException)))
+                        throw new PlaceholderFormatException(message);
+                }
                 else
                     throw new HttpRequestException(message, null, response.StatusCode);
             }

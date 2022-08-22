@@ -9,13 +9,19 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.API
 
         [JsonProperty("value", Required = Required.Always)]
         [MaxLength(MaxValueLength)]
-        public string Value { get; }
+        public string Value { get; init; }
+        [JsonProperty("context")]
+        public PlaceholderUsage Context { get; init; }
 
-        public PlaceholdersConvertRequest(string value)
+        [JsonConstructor]
+        private PlaceholdersConvertRequest() { }
+
+        public PlaceholdersConvertRequest(string value, PlaceholderUsage context)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             this.Value = value;
+            this.Context = context;
         }
     }
 }

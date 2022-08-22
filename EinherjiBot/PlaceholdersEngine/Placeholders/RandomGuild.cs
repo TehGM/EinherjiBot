@@ -1,21 +1,22 @@
 ﻿using Discord;
+using TehGM.EinherjiBot.Security.Policies;
 using TehGM.Utilities.Randomization;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("{{RandomGuild}}")]
-    public class RandomGuild : IPlaceholder
+    [AuthorizeBotOrAdmin]
+    public class RandomGuildPlaceholderHandler : PlaceholderHandler<RandomGuildPlaceholder>
     {
         private readonly IDiscordClient _client;
         private readonly IRandomizer _randomizer;
 
-        public RandomGuild(IDiscordClient client, IRandomizer randomizer)
+        public RandomGuildPlaceholderHandler(IDiscordClient client, IRandomizer randomizer)
         {
             this._client = client;
             this._randomizer = randomizer;
         }
 
-        public async Task<string> GetReplacementAsync(Match placeholder, CancellationToken cancellationToken = default)
+        protected override async Task<string> GetReplacementAsync(RandomGuildPlaceholder placeholder, CancellationToken cancellationToken = default)
         {
             IEnumerable<IGuild> guilds = await this._client.GetGuildsAsync(CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
             IGuild randomGuild = this._randomizer.GetRandomValue(guilds);

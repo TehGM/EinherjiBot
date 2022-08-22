@@ -2,18 +2,16 @@
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    // this placeholder will break when not in message context (like message trigger)
-    [Placeholder("{{CurrentMessageContent}}")]
-    public class CurrentMessageContent : IPlaceholder
+    public class CurrentMessageContentPlaceholderHandler : PlaceholderHandler<CurrentMessageContentPlaceholder>
     {
         private readonly IMessage _message;
 
-        public CurrentMessageContent(IMessage message)
+        public CurrentMessageContentPlaceholderHandler(IMessage message)
         {
             this._message = message;
         }
 
-        public Task<string> GetReplacementAsync(Match placeholder, CancellationToken cancellationToken = default)
+        protected override Task<string> GetReplacementAsync(CurrentMessageContentPlaceholder placeholder, CancellationToken cancellationToken = default)
             => Task.FromResult(this._message.Content);
     }
 }

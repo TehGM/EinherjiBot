@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.Security.API.Services
 {
@@ -27,6 +28,14 @@ namespace TehGM.EinherjiBot.Security.API.Services
                 context.Response.Headers.Pragma = "no-cache";
                 context.Response.Headers.Expires = "-1";
                 context.Response.Headers.ETag = default;
+
+                if (ex is PlaceholderConvertException)
+                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderConvertException));
+                else if (ex is PlaceholderContextException)
+                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderContextException));
+                else if (ex is PlaceholderFormatException)
+                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderFormatException));
+
                 await context.Response.WriteAsync(ex.Message).ConfigureAwait(false);
             }
         }

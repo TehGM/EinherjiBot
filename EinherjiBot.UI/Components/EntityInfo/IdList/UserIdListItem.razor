@@ -1,9 +1,9 @@
 ﻿@inherits EntityIdListItemBase<IDiscordUserInfo>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
-        Label="User ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
-        Validation="this.ValidationDelegate" />
+    <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
+        Label="@this.Label" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1"
+        Error="base.IsError" ErrorText="Not a valid Discord User ID." />
     @if (base.FoundEntity != null)
     {
         <MudTooltip Delay="300" Placement="Placement.Top">
@@ -26,25 +26,11 @@
 @code {
     [CascadingParameter]
     private UserPicker Picker { get; set; }
-
-    private MudTextField<ulong?> _inputField;
+    [Parameter]
+    public string Label { get; set; } = "User ID";
 
     protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
         => await this.EntityInfoProvider.GetUserInfoAsync(id);
-
-    protected override async Task ValidateAndLookupAsync()
-    {
-        await base.ValidateAndLookupAsync();
-        if (this.IsError)
-            await this._inputField.Validate();
-    }
-
-    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
-    {
-        if (this.IsError)
-            return new string[] { "Not a valid Discord User ID." };
-        return Enumerable.Empty<string>();
-    }; 
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {

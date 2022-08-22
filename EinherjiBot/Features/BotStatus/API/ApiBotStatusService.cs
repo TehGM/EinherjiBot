@@ -1,4 +1,6 @@
-﻿namespace TehGM.EinherjiBot.BotStatus.API.Services
+﻿using TehGM.EinherjiBot.API;
+
+namespace TehGM.EinherjiBot.BotStatus.API.Services
 {
     public class ApiBotStatusService : IBotStatusService
     {
@@ -46,13 +48,17 @@
             result.Link = request.Link;
             result.ActivityType = request.ActivityType;
             result.IsEnabled = request.IsEnabled;
+            result.LastError = null;
             await this._provider.AddOrUpdateAsync(result, cancellationToken).ConfigureAwait(false);
 
             return FromStatus(result);
         }
 
         private static BotStatusResponse FromStatus(Status status)
-            => new BotStatusResponse(status.ID, status.Text, status.Link, status.ActivityType, status.IsEnabled);
+            => new BotStatusResponse(status.ID, status.Text, status.Link, status.ActivityType, status.IsEnabled)
+            {
+                LastError = (ErrorInfoResponse)status.LastError
+            };
 
         public Task SetCurrentAsync(BotStatusRequest request, CancellationToken cancellationToken = default)
         {

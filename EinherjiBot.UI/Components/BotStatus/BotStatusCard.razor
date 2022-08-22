@@ -1,15 +1,18 @@
 ﻿@using Discord
 @using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @using TehGM.EinherjiBot.Utilities
 @inject IBotStatusService Service
 @inject IPlaceholdersService Placeholders
+@inject IPlaceholdersBuilder PlaceholdersDialog
 
 <div class="spaced-card">
     <MudCard Elevation="4">
         <MudCardHeader>
-            <MudGrid>
-                <MudItem xs="4" Class="flex-shrink-1">
+            <MudGrid Class="flex-wrap">
+                <MudItem xs="7" sm="6" md="8">
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing || !this.IsLinkValid" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._text)" OnClick="this.OnPreviewClickedAsync">
                         Preview
@@ -29,12 +32,12 @@
                         <MudOverlay DarkBackground="true" Visible="this._previewText != null" OnClick="_ => this._previewText = null" />
                     </MudButton>
                 </MudItem>
-                <MudItem xs="8" Class="d-flex justify-end">
+                <MudItem xs="5" sm="6" md="4" Class="d-flex justify-end">
                     @if (this._processing)
                     {
                         <MudProgressCircular Class="ms-n1" Color="MudBlazor.Color.Primary" Size="Size.Small" Indeterminate="true"/>
                     }
-                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing"/>
+                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
                     <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
                         Disabled="this._processing || !this.HasPendingChanges() || !this.IsLinkValid" 
                         OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
@@ -44,7 +47,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudGrid>
-                <MudItem xs="4" sm="12" md="3" lg="2">
+                <MudItem xs="12" md="3" lg="2">
                     <MudSelect T="ActivityType" @bind-Value="this._activityType" Label="Activity" Disabled="this._processing">
                         <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
@@ -52,7 +55,7 @@
                         <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="8" sm="12" md="9" lg="10">
+                <MudItem xs="12" md="9" lg="10">
                     <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
                 @if (this.IsStreamingActivity)
@@ -60,6 +63,14 @@
                     <MudItem xs="12">
                         <MudTextField @bind-Value="this._link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
                             Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" DebounceInterval="350" />
+                    </MudItem>
+                }
+                @if (!string.IsNullOrWhiteSpace(this._error?.Message))
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Error">
+                            @this._error.Message
+                        </MudAlert>
                     </MudItem>
                 }
             </MudGrid>
@@ -89,6 +100,7 @@
 
     private bool _processing;
     private BotStatusResponse _savedStatus;
+    private ErrorInfoResponse _error;
 
     private bool IsNew => this._id == null;
     private bool IsStreamingActivity => this._activityType == ActivityType.Streaming;
@@ -121,6 +133,7 @@
         this._text = this.ExistingStatus?.Text;
         this._link = this.ExistingStatus?.Link;
         this._enabled = this.ExistingStatus?.IsEnabled ?? false;
+        this._error = this.ExistingStatus?.LastError;
     }
 
     public void ClearInputs()
@@ -173,18 +186,39 @@
     private async Task OnSetClickedAsync(MouseEventArgs e)
     {
         this._processing = true;
-        await this.Service.SetCurrentAsync(this.BuildStatus());
-        this.Notifications.Add("Bot's current status changed", Severity.Success);
-        this._processing = false;
+        try
+        {
+            this._error = null;
+            await this.Service.SetCurrentAsync(this.BuildStatus());
+            this.Notifications.Add("Bot's current status changed", Severity.Success);
+        }
+        catch (PlaceholderException ex)
+        {
+            this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
+        }
+        finally
+        {
+            this._processing = false;
+        }
     }
 
     private async Task OnPreviewClickedAsync(MouseEventArgs e)
     {
         this._processing = true;
-        PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text));
-        this._processing = false;
-        string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
-        this._previewText = $"{activity} {response.Result}";
+        try
+        {
+            PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text, PlaceholderUsage.Status));
+            string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
+            this._previewText = $"{activity} {response.Result}";
+        }
+        catch (PlaceholderException ex)
+        {
+            this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
+        }
+        finally
+        {
+            this._processing = false;
+        }
     }
 
     public record StatusEventArgs(Guid? ID, BotStatusResponse Status);

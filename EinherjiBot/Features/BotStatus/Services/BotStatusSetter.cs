@@ -50,6 +50,12 @@ namespace TehGM.EinherjiBot.BotStatus.Services
                 await this.SetStatusAsync(status, cancellationToken).ConfigureAwait(false);
                 return status;
             }
+            catch (PlaceholderException ex)
+            {
+                status.LastError = new ErrorInfo(DateTime.UtcNow, ex.Message);
+                await this._provider.AddOrUpdateAsync(status, cancellationToken).ConfigureAwait(false);
+                return null;
+            }
             catch (Exception ex) when (ex.LogAsError(this._log, "Failed changing status to {Status}", status))
             {
                 return null;
@@ -65,7 +71,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             string text = status.Text;
             if (!string.IsNullOrWhiteSpace(status.Text))
             {
-                text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, cancellationToken).ConfigureAwait(false);
+                text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, PlaceholderUsage.Status, cancellationToken).ConfigureAwait(false);
                 this._log.LogDebug("Changing status to `{Status}`", text);
             }
             else

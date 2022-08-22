@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers
 {
@@ -28,6 +29,8 @@ namespace TehGM.EinherjiBot.MessageTriggers
         private Lazy<Regex> PatternRegex { get; }
         [BsonIgnore]
         public bool IsGlobal => this.GuildID == GlobalGuildID;
+        [BsonIgnore]
+        public PlaceholderUsage PlaceholderContext => this.IsGlobal ? PlaceholderUsage.GlobalMessageTrigger : PlaceholderUsage.MessageTrigger;
 
         [BsonConstructor(nameof(ID), nameof(GuildID), nameof(Filters), nameof(Actions))]
         private MessageTrigger(Guid id, ulong guildID, MessageTriggerFilters filters, IEnumerable<IMessageTriggerAction> actions)

@@ -11,7 +11,7 @@
 
         public async Task<PlaceholdersConvertResponse> ConvertAsync(PlaceholdersConvertRequest request, CancellationToken cancellationToken = default)
         {
-            string result = await this._engine.ConvertPlaceholdersAsync(request.Value, cancellationToken).ConfigureAwait(false);
+            string result = await this._engine.ConvertPlaceholdersAsync(request.Value, request.Context, cancellationToken).ConfigureAwait(false);
             return new PlaceholdersConvertResponse(result);
         }
     }

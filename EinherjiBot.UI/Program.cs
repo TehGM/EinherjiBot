@@ -81,6 +81,7 @@ namespace TehGM.EinherjiBot.UI
 
             services.AddBlazoredLocalStorage();
             services.Replace(ServiceDescriptor.Scoped<IJsonSerializer, NewtonsoftJsonSerializer>());
+            services.AddClipboard();
 
             // this will be overriden in ConfigureServices on client-side only
             services.TryAddSingleton<IRenderLocation>(s => new Services.RenderLocationProvider(RenderLocation.Server, environment));

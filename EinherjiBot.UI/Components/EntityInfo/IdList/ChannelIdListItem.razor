@@ -1,9 +1,9 @@
 ﻿@inherits EntityIdListItemBase<ChannelInfoResponse>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
-    <MudTextField @ref="this._inputField" T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
-        Label="Channel ID" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
-        Validation="this.ValidationDelegate" />
+    <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
+        Label="@this.Label" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Error="base.IsError" ErrorText="Not a valid Discord Channel ID." />
     @if (base.FoundEntity != null)
     {
         <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
@@ -31,8 +31,9 @@
     public ChannelPickerSettings PickerSettings { get; set; }
     [CascadingParameter]
     private ChannelPicker Picker { get; set; }
+    [Parameter]
+    public string Label { get; set; } = "Channel ID";
 
-    private MudTextField<ulong?> _inputField;
     private ICollection<ChannelInfoResponse> _parents;
 
     protected override async Task<ChannelInfoResponse> FindEntityAsync(ulong id)
@@ -47,13 +48,6 @@
             parentID = parent.ParentID;
         }
         return result;
-    }
-
-    protected override async Task ValidateAndLookupAsync()
-    {
-        await base.ValidateAndLookupAsync();
-        if (this.IsError)
-            await this._inputField.Validate();
     }
 
     private RenderFragment RenderIcon(ChannelInfoResponse channel, Size size)
@@ -76,13 +70,6 @@
             }
         };
     }
-
-    private Func<ulong?, IEnumerable<string>> ValidationDelegate => value =>
-    {
-        if (base.IsError)
-            return new string[] { "Not a valid Discord Channel ID." };
-        return Enumerable.Empty<string>();
-    }; 
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {
