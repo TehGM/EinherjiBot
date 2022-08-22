@@ -1,13 +1,10 @@
 ﻿using System.Net;
-using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.PlaceholdersEngine
 {
     [Serializable]
-    public class PlaceholderConvertException : ApiException
+    public class PlaceholderConvertException : PlaceholderException
     {
-        public Type PlaceholderType { get; }
-
         public PlaceholderConvertException(string message, Type placeholderType, Exception innerException = null)
             : base(message, innerException, HttpStatusCode.UnprocessableEntity)
         {

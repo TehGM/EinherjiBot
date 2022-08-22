@@ -1,12 +1,12 @@
-﻿namespace TehGM.EinherjiBot.PlaceholdersEngine
+﻿using System.Net;
+
+namespace TehGM.EinherjiBot.PlaceholdersEngine
 {
     [Serializable]
-    public class PlaceholderFormatException : Exception
+    public class PlaceholderFormatException : PlaceholderException
     {
-        public Type PlaceholderType { get; }
-
         public PlaceholderFormatException(string message, Type placeholderType, Exception innerException = null)
-            : base(message, innerException)
+            : base(message, innerException, HttpStatusCode.BadRequest)
         {
             this.PlaceholderType = placeholderType;
         }

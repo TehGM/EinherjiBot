@@ -192,7 +192,7 @@
             await this.Service.SetCurrentAsync(this.BuildStatus());
             this.Notifications.Add("Bot's current status changed", Severity.Success);
         }
-        catch (Exception ex) when (ex is PlaceholderContextException || ex is PlaceholderConvertException)
+        catch (PlaceholderException ex)
         {
             this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
         }
@@ -211,7 +211,7 @@
             string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
             this._previewText = $"{activity} {response.Result}";
         }
-        catch (Exception ex) when (ex is PlaceholderContextException || ex is PlaceholderConvertException)
+        catch (PlaceholderException ex)
         {
             this._error = new ErrorInfoResponse((UnixTimestamp)DateTime.UtcNow, ex.Message);
         }

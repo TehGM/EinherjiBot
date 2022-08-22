@@ -38,6 +38,8 @@ namespace TehGM.EinherjiBot.UI.API.Handlers
                         throw new PlaceholderConvertException(message);
                     if (values.Contains(nameof(PlaceholderContextException)))
                         throw new PlaceholderContextException(message);
+                    if (values.Contains(nameof(PlaceholderFormatException)))
+                        throw new PlaceholderFormatException(message);
                 }
                 else
                     throw new HttpRequestException(message, null, response.StatusCode);

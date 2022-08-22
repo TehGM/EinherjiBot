@@ -33,6 +33,8 @@ namespace TehGM.EinherjiBot.Security.API.Services
                     context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderConvertException));
                 else if (ex is PlaceholderContextException)
                     context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderContextException));
+                else if (ex is PlaceholderFormatException)
+                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderFormatException));
 
                 await context.Response.WriteAsync(ex.Message).ConfigureAwait(false);
             }

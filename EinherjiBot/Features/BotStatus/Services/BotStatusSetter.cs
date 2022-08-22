@@ -50,7 +50,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
                 await this.SetStatusAsync(status, cancellationToken).ConfigureAwait(false);
                 return status;
             }
-            catch (PlaceholderConvertException ex)
+            catch (PlaceholderException ex)
             {
                 status.LastError = new ErrorInfo(DateTime.UtcNow, ex.Message);
                 await this._provider.AddOrUpdateAsync(status, cancellationToken).ConfigureAwait(false);
