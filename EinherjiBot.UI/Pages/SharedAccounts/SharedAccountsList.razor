@@ -36,7 +36,9 @@
 </div>
 
 <PolicyAuthorizeView PolicyType="typeof(CanCreateSharedAccount)">
-    <MudFab Color="Color.Success" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add" Class="fab bottom-right" OnClick="this.OnAddClicked" />
+    <FabContainer>
+        <MudFab Color="Color.Success" Size="Size.Large" StartIcon="@Icons.Material.Filled.Add" OnClick="this.OnAddClicked" />
+    </FabContainer>
 </PolicyAuthorizeView>
 
 @code {

@@ -135,7 +135,7 @@
     }
 </div>
 
-<div class="fab bottom-right d-flex flex-row-reverse gap-3">
+<FabContainer>
     @if (this.CanModify)
     {
         <MudFab Color="Color.Success" Size="Size.Large" StartIcon="@Icons.Material.Filled.Save" Disabled="this._processing || !this.HasPendingChanges() || !this.IsValid" OnClick="this.OnSaveClickedAsync" />
@@ -145,7 +145,7 @@
         <MudFab Color="Color.Error" Size="Size.Medium" StartIcon="@Icons.Filled.DeleteForever" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
     }
     <MudFab Color="Color.Default" Size="Size.Medium" StartIcon="@Icons.Filled.ArrowBack" Disabled="this._processing" OnClick="this.OnReturnClickedAsync" />
-</div>
+</FabContainer>
 
 @code {
     private const string _alreadySavedText = "Cannot edit type of already saved accounts.";

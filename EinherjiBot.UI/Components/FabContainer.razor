@@ -1,0 +1,8 @@
+﻿<div class="fab bottom-right d-flex flex-row-reverse gap-3">
+    @this.ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+}

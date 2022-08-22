@@ -38,9 +38,9 @@
 <BotStatusCard @ref=this._newStatusCard Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved" />
 </div>
 
-<div class="fab bottom-right d-flex flex-row-reverse gap-3">
+<FabContainer>
     <PlaceholderBuilderFab />
-</div>
+</FabContainer>
 
 @code {
     private IDictionary<Guid, BotStatusResponse> _existingStatuses;
