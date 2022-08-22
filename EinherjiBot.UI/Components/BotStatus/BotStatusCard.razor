@@ -11,8 +11,8 @@
 <div class="spaced-card">
     <MudCard Elevation="4">
         <MudCardHeader>
-            <MudGrid>
-                <MudItem xs="4" Class="flex-shrink-1">
+            <MudGrid Class="flex-wrap">
+                <MudItem xs="7" sm="6" md="8">
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing || !this.IsLinkValid" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._text)" OnClick="this.OnPreviewClickedAsync">
                         Preview
@@ -31,14 +31,13 @@
                         </MudPopover>
                         <MudOverlay DarkBackground="true" Visible="this._previewText != null" OnClick="_ => this._previewText = null" />
                     </MudButton>
-                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Tertiary" Disabled="this._processing" OnClick="this.OnPlaceholdersDialogClickedAsync">Placeholder Builder</MudButton>
                 </MudItem>
-                <MudItem xs="8" Class="d-flex justify-end">
+                <MudItem xs="5" sm="6" md="4" Class="d-flex justify-end">
                     @if (this._processing)
                     {
                         <MudProgressCircular Class="ms-n1" Color="MudBlazor.Color.Primary" Size="Size.Small" Indeterminate="true"/>
                     }
-                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing"/>
+                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
                     <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
                         Disabled="this._processing || !this.HasPendingChanges() || !this.IsLinkValid" 
                         OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
@@ -48,7 +47,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudGrid>
-                <MudItem xs="4" sm="12" md="3" lg="2">
+                <MudItem xs="12" md="3" lg="2">
                     <MudSelect T="ActivityType" @bind-Value="this._activityType" Label="Activity" Disabled="this._processing">
                         <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
@@ -56,7 +55,7 @@
                         <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="8" sm="12" md="9" lg="10">
+                <MudItem xs="12" md="9" lg="10">
                     <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
                 @if (this.IsStreamingActivity)

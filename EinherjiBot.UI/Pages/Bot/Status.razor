@@ -1,7 +1,10 @@
 ﻿@page "/bot/status"
 @using Discord
 @using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.UI.Components.BotStatus
+@using TehGM.EinherjiBot.UI.Components.PlaceholdersEngine
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @attribute [AuthorizeAdmin]
 
 @inject IBotStatusService StatusService
@@ -10,6 +13,7 @@
 <PageHeader Text="Bot Status Management" />
 
 
+<div class="above-fab">
 @if (this.DisplayExisting)
 {
     <PageHeader Text="Saved Statuses" Type="Typo.h3" />
@@ -32,6 +36,11 @@
 
 <PageHeader Text="Add New" Type="Typo.h3" />
 <BotStatusCard @ref=this._newStatusCard Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved" />
+</div>
+
+<div class="fab bottom-right d-flex flex-row-reverse gap-3">
+    <PlaceholderBuilderFab />
+</div>
 
 @code {
     private IDictionary<Guid, BotStatusResponse> _existingStatuses;

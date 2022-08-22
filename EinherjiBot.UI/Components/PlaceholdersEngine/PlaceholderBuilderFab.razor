@@ -1,0 +1,23 @@
+﻿@using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.UI.PlaceholdersEngine
+
+@inject IPlaceholdersBuilder PlaceholdersDialog
+
+<MudFab Color="MudBlazor.Color.Dark" Size="Size.Medium" IconColor="MudBlazor.Color.Secondary" StartIcon="@Icons.Filled.Code" Label="Placeholder Builder" 
+    OnClick="this.OnPlaceholdersDialogClickedAsync" />
+
+@code {
+    [Parameter]
+    public EventCallback<string> PlaceholderChosen { get; set; }
+    [Parameter]
+    public EventCallback Cancelled { get; set; }
+
+    private async Task OnPlaceholdersDialogClickedAsync(MouseEventArgs e)
+    {
+        string placeholderValue = await this.PlaceholdersDialog.OpenAsync(PlaceholderUsage.Status);
+        if (placeholderValue != null)
+            await this.PlaceholderChosen.InvokeAsync(placeholderValue);
+        else
+            await this.Cancelled.InvokeAsync();
+    }
+}
