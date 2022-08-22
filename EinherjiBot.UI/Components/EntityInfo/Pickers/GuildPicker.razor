@@ -22,11 +22,8 @@
 
 @code {
     private string _filter;
-    private bool _showBots = true;
-    private bool _adminsOnly = false;
     private IEnumerable<IDiscordGuildInfo> _allGuilds;
     private IEnumerable<IDiscordGuildInfo> _filteredGuilds;
-    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
 
     private EntityPickerSettings _settings;
 

@@ -25,8 +25,6 @@
     private string _filter;
     private IDictionary<GuildInfoResponse, IEnumerable<ChannelSorting>> _allGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<ChannelSorting>> _filteredGuilds;
-    private IDictionary<ChannelInfoResponse, IEnumerable<ChannelInfoResponse>> _sortedChannels;
-    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
 
     private ChannelPickerSettings _settings;
 

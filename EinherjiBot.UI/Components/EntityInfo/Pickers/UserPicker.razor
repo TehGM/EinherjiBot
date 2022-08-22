@@ -38,7 +38,6 @@
     private bool _adminsOnly = false;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _allGuilds;
     private IDictionary<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> _filteredGuilds;
-    private TaskCompletionSource<GuildUserInfoResponse> _closeWaitTcs;
 
     private EntityPickerSettings _settings;
 
