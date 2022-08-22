@@ -1,5 +1,6 @@
 ﻿@import "_themes.scss";
 @import "_discord.scss";
+@import "_flex.scss";
 
 /*** GENERAL DEFAULTS ***/
 html {
@@ -77,10 +78,6 @@ $fab-margin: 24px;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 100vh;
-
-/*    & .mud-dialog-content {
-        height: 100%;
-    }*/
 }
 
 // this is really nasty but seems mud blazor doesn't allow other styling of the container

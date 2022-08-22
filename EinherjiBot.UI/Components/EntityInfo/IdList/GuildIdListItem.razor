@@ -19,7 +19,8 @@
     }
     @if (!base.ReadOnly)
     {
-        <MudIconButton Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" Disabled="this.Picker == null || base.ReadOnly" Size="Size.Medium" OnClick="this.OnPickerClicked" />
+        <MudIconButton Class="align-self-first-baseline" Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" 
+            Disabled="this.Picker == null || base.ReadOnly" Size="Size.Medium" OnClick="this.OnPickerClicked" />
     }
 </MudItem>
 
