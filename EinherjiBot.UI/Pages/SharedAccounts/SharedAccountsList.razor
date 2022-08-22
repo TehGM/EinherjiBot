@@ -8,32 +8,29 @@
 @inject ISharedAccountsService Service
 
 <PageTitle>Shared Accounts</PageTitle>
+<PageHeader Text="Shared Accounts" />
 
-<div class="above-fab">
-    <PageHeader Text="Shared Accounts" />
-    
-    @if (!this.DisplayAccounts)
+@if (!this.DisplayAccounts)
+{
+    <PageHeader Text="Nope, nothing!" Type="Typo.h3" />
+}
+else
+{
+    @if (this._accounts != null)
     {
-        <PageHeader Text="Nope, nothing!" Type="Typo.h3" />
+        foreach (KeyValuePair<Guid, SharedAccountResponse> account in this._accounts)
+        {
+            <SharedAccountCard @key="account.Key" Account="account.Value" Deleted="this.OnAccountDeleted" />
+        }
     }
     else
     {
-        @if (this._accounts != null)
+        for (int i = 0; i < 3; i++)
         {
-            foreach (KeyValuePair<Guid, SharedAccountResponse> account in this._accounts)
-            {
-                <SharedAccountCard @key="account.Key" Account="account.Value" Deleted="this.OnAccountDeleted" />
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="200px" Class="spaced-card"/>
-            }
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="200px" Class="spaced-card"/>
         }
     }
-</div>
+}
 
 <PolicyAuthorizeView PolicyType="typeof(CanCreateSharedAccount)">
     <FabContainer>

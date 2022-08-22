@@ -12,8 +12,6 @@
 <PageTitle>Bot Status Management</PageTitle>
 <PageHeader Text="Bot Status Management" />
 
-
-<div class="above-fab">
 @if (this.DisplayExisting)
 {
     <PageHeader Text="Saved Statuses" Type="Typo.h3" />
@@ -36,7 +34,6 @@
 
 <PageHeader Text="Add New" Type="Typo.h3" />
 <BotStatusCard @ref=this._newStatusCard Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved" />
-</div>
 
 <FabContainer>
     <PlaceholderBuilderFab />
