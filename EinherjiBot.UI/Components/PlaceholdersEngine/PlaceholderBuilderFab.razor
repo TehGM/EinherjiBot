@@ -8,16 +8,11 @@
 
 @code {
     [Parameter]
-    public EventCallback<PlaceholderBuilderResult> PlaceholderChosen { get; set; }
-    [Parameter]
-    public EventCallback Cancelled { get; set; }
+    public EventCallback<PlaceholderBuilderResult> Closed { get; set; }
 
     private async Task OnPlaceholdersDialogClickedAsync(MouseEventArgs e)
     {
         PlaceholderBuilderResult result = await this.PlaceholdersDialog.OpenAsync(PlaceholderUsage.Status);
-        if (result?.IsSuccess == true)
-            await this.PlaceholderChosen.InvokeAsync(result);
-        else
-            await this.Cancelled.InvokeAsync();
+        await this.Closed.InvokeAsync(result);
     }
 }
