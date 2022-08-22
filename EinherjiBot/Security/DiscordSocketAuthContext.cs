@@ -25,6 +25,7 @@ namespace TehGM.EinherjiBot.Security
         string IDiscordUserInfo.Username => this.DiscordUser?.Username;
         string IDiscordUserInfo.Discriminator => this.DiscordUser?.Discriminator;
         string IDiscordUserInfo.AvatarHash => this.DiscordUser?.AvatarId;
+        bool IDiscordUserInfo.IsBot => this.DiscordUser?.IsBot ?? false;
         string IDiscordEntityInfo.Name => this.DiscordUser?.Username;
 
         private readonly UserSecurityData _data;

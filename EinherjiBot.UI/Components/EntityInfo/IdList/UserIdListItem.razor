@@ -8,7 +8,8 @@
     {
         <MudTooltip Delay="300" Placement="Placement.Top">
             <TooltipContent>
-                @this.FoundEntity.GetUsernameWithDiscriminator()
+                <DiscordUserPreview User="base.FoundEntity" 
+                    UseGuildAvatar="false" UseGuildNickname="false" UseGuildRoleColor="false" ShowAdminIcon="false" />
             </TooltipContent>
             <ChildContent>
                 <MudItem xs="1" Class="d-flex flex-row flex-grow-1 ml-2 user-preview">

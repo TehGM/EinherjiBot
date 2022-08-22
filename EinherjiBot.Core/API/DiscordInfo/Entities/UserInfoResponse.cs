@@ -14,6 +14,8 @@ namespace TehGM.EinherjiBot.API
         public string Discriminator { get; init; }
         [JsonProperty("avatar", NullValueHandling = NullValueHandling.Include)]
         public string AvatarHash { get; init; }
+        [JsonProperty("bot")]
+        public bool IsBot { get; init; }
 
         [JsonIgnore]
         string IDiscordEntityInfo.Name => this.Username;

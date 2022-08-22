@@ -158,7 +158,10 @@ namespace TehGM.EinherjiBot.API.Services
         }
 
         private static UserInfoResponse CreateUserInfo(IUser user)
-            => new UserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId);
+            => new UserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId)
+            {
+                IsBot = user.IsBot || user.IsWebhook
+            };
         private static RoleInfoResponse CreateRoleInfo(IRole role)
             => new RoleInfoResponse(role.Id, role.Name, role.Guild.Id, role.Guild.Name, role.Color, role.Position);
         private static ChannelInfoResponse CreateChannelInfo(IChannel channel)

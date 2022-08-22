@@ -6,6 +6,7 @@
         string Username { get; }
         string Discriminator { get; }
         string AvatarHash { get; }
+        bool IsBot { get; }
 
         ulong IDiscordEntityInfo.ID => this.ID;
     }

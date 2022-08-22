@@ -1,0 +1,112 @@
+﻿<div class="d-flex flex-row gap-2 discord-user-preview @this.CssClass" @onclick="e => this.Clicked.InvokeAsync(e)">
+    @if (this.ShowAvatar)
+    {
+        <MudAvatar Image="@this.GetUserAvatarURL(this.AvatarSize)" Class="discord-avatar inline"/>
+    }
+    <div class="d-flex flex-column">
+        <span class="d-flex flex-row">
+            <MudText Class="ma-0 discord-username inline text-cutoff" Style="@this.GetUserStyle()">@this.GetUserText()</MudText>
+            @if (this.ShowBotTag && this.User.IsBot)
+            {
+                <MudChip Class="discord-bot-tag">BOT</MudChip>
+            }
+            @this.RenderAdminIcon()
+        </span>
+        <MudText Class="align-self-center discord-status inline text-cutoff">
+            @this.StatusText
+        </MudText>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string CssClass { get; set; }
+    [Parameter, EditorRequired]
+    public IDiscordUserInfo User { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> Clicked { get; set; }
+
+    [Parameter]
+    public ushort AvatarSize { get; set; } = 32;
+    [Parameter]
+    public string CustomNameText { get; set; } = null;
+    [Parameter]
+    public string CustomStatusText { get; set; } = null;
+
+    [Parameter]
+    public bool ShowAvatar { get; set; } = true;
+    [Parameter]
+    public bool ShowAdminIcon { get; set; } = true;
+    [Parameter]
+    public bool ShowBotTag { get; set; } = true;
+
+    [Parameter]
+    public bool UseGuildNickname { get; set; } = true;
+    [Parameter]
+    public bool UseGuildRoleColor { get; set; } = true;
+    [Parameter]
+    public bool UseGuildAvatar { get; set; } = true;
+
+    private string StatusText => this.CustomStatusText ?? this.User.GetUsernameWithDiscriminator();
+
+    private string GetUserText()
+    {
+        if (this.CustomNameText != null)
+            return this.CustomNameText;
+
+        string result = null;
+        if (this.UseGuildNickname && this.User is GuildUserInfoResponse guildUser)
+            result = guildUser.Nickname;
+        if (string.IsNullOrEmpty(result))
+            result = this.User.Username;
+        return result;
+    }
+
+    private string GetUserStyle()
+    {
+        string color = "var(--mud-palette-text-primary)";
+        if (this.UseGuildRoleColor && this.User is GuildUserInfoResponse guildUser)
+            color = guildUser.GetTopRoleWithColor().GetHtmlColorOrDefault(defaultValue: color) ?? color;
+        return $"color: {color};";
+    }
+
+    private string GetUserAvatarURL(ushort size)
+    {
+        if (this.UseGuildAvatar && this.User is GuildUserInfoResponse guildUser)
+            return guildUser.GetGuildAvatarURL(size);
+        return this.User.GetAvatarURL();
+    }
+
+    private RenderFragment RenderAdminIcon()
+    {
+        if (this.User is not GuildUserInfoResponse user || !this.ShowAdminIcon)
+            return null;
+
+        string tooltipText = null;
+        string iconClass = null;
+        if (user.IsOwner)
+        {
+            tooltipText = "Owner";
+            iconClass = "discord-admin-icon owner";
+        }
+        else if (user.IsAdmin)
+        {
+            tooltipText = "Administrator";
+            iconClass = "discord-admin-icon admin";
+        }
+        else
+            return null;
+
+        return __builder =>
+        {
+            <MudTooltip Delay="500" Placement="Placement.Top">
+                <TooltipContent>
+                    @tooltipText
+                </TooltipContent>
+                <ChildContent>
+                    <MudIcon Size="MudBlazor.Size.Small" Class="@iconClass" Icon="@Icons.Filled.Star" />
+                </ChildContent>
+            </MudTooltip>
+        };
+    }
+}

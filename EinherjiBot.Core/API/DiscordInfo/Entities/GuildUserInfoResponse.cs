@@ -14,8 +14,6 @@ namespace TehGM.EinherjiBot.API
         public string GuildAvatarHash { get; init; }
         [JsonProperty("guildID")]
         public ulong GuildID { get; init; }
-        [JsonProperty("bot")]
-        public bool IsBot { get; init; }
         [JsonProperty("admin")]
         public bool IsAdmin { get; init; }
         [JsonProperty("owner")]

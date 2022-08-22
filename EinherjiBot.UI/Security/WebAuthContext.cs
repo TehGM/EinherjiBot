@@ -18,6 +18,7 @@ namespace TehGM.EinherjiBot.UI.Security
         // web auth context will never have banned flag, as they'll simply not get authed by backend
         bool IAuthContext.IsBanned => false;
         string IDiscordEntityInfo.Name => this.Username;
+        bool IDiscordUserInfo.IsBot => false;
 
         public IEnumerable<string> BotFeatures { get; }
         public IEnumerable<ulong> KnownDiscordGuildIDs { get; }
