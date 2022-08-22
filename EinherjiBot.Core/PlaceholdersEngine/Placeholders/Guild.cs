@@ -30,7 +30,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
                 IDiscordGuildInfo guild = await this._provider.GetGuildInfoAsync(placeholder.GuildID, cancellationToken).ConfigureAwait(false);
                 if (guild == null)
-                    throw new InvalidOperationException($"Discord guild with ID {placeholder.GuildID} not found");
+                    throw new PlaceholderConvertException($"Discord guild with ID {placeholder.GuildID} not found, or is not visible by {EinherjiInfo.Name}");
 
                 return guild.Name;
             }

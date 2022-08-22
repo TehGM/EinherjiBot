@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
             {
                 IDiscordUserInfo user = await this._provider.GetUserInfoAsync(placeholder.UserID, cancellationToken).ConfigureAwait(false);
                 if (user == null)
-                    throw new InvalidOperationException($"Discord user with ID {placeholder.UserID} not found");
+                    throw new PlaceholderConvertException($"Discord user with ID {placeholder.UserID} not found");
 
                 switch (placeholder.DisplayMode)
                 {

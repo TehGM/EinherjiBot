@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
             {
                 RoleInfoResponse role = await this._provider.GetRoleInfoAsync(placeholder.RoleID, cancellationToken).ConfigureAwait(false);
                 if (role == null)
-                    throw new InvalidOperationException($"Discord role with ID {placeholder.RoleID} not found, or is not visible by {EinherjiInfo.Name}");
+                    throw new PlaceholderConvertException($"Discord role with ID {placeholder.RoleID} not found, or is not visible by {EinherjiInfo.Name}");
 
                 switch (placeholder.DisplayMode)
                 {

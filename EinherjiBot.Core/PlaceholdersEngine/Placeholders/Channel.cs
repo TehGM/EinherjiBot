@@ -29,7 +29,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
             {
                 ChannelInfoResponse channel = await this._provider.GetChannelInfoAsync(placeholder.ChannelID, cancellationToken).ConfigureAwait(false);
                 if (channel == null)
-                    throw new InvalidOperationException($"Discord channel with ID {placeholder.ChannelID} not found, or is not visible by {EinherjiInfo.Name}");
+                    throw new PlaceholderConvertException($"Discord channel with ID {placeholder.ChannelID} not found, or is not visible by {EinherjiInfo.Name}");
 
                 switch (placeholder.DisplayMode)
                 {

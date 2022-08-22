@@ -14,7 +14,7 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
         protected override Task<string> GetReplacementAsync(CurrentGuildPlaceholder placeholder, CancellationToken cancellationToken = default)
         {
             if (this._message.Channel is not IGuildChannel channel)
-                throw new InvalidOperationException($"{nameof(CurrentGuildPlaceholder)} can only be used for guild messages");
+                throw new PlaceholderConvertException($"{nameof(CurrentGuildPlaceholder)} can only be used for guild messages");
             return Task.FromResult(channel.Guild.Name);
         }
     }

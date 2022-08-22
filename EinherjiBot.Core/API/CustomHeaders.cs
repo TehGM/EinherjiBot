@@ -4,5 +4,6 @@
     {
         public const string ClientVersion = "Client-Version";
         public const string ExpectedClientVersion = "Expected-Client-Version";
+        public const string ExceptionType = "Exception-Type";
     }
 }
