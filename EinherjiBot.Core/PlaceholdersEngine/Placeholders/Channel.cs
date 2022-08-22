@@ -1,4 +1,7 @@
-﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
+﻿using Discord;
+using TehGM.EinherjiBot.API;
+
+namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [Placeholder("Channel", PlaceholderUsage.Any)]
     [Description("Is replaced with name/mention of a specific channel.")]
@@ -12,5 +15,32 @@
         [DisplayName("Display Mode")]
         [Description("Determines how the channel will be displayed.")]
         public ChannelDisplayMode DisplayMode { get; init; } = ChannelDisplayMode.Mention;
+
+        public class ChannelPlaceholderHandler : PlaceholderHandler<ChannelPlaceholder>
+        {
+            private readonly IDiscordEntityInfoService _provider;
+
+            public ChannelPlaceholderHandler(IDiscordEntityInfoService provider)
+            {
+                this._provider = provider;
+            }
+
+            protected override async Task<string> GetReplacementAsync(ChannelPlaceholder placeholder, CancellationToken cancellationToken = default)
+            {
+                ChannelInfoResponse channel = await this._provider.GetChannelInfoAsync(placeholder.ChannelID, cancellationToken).ConfigureAwait(false);
+                if (channel == null)
+                    throw new InvalidOperationException($"Discord channel with ID {placeholder.ChannelID} not found, or is not visible by {EinherjiInfo.Name}");
+
+                switch (placeholder.DisplayMode)
+                {
+                    case ChannelDisplayMode.Mention:
+                        return MentionUtils.MentionChannel(placeholder.ChannelID);
+                    case ChannelDisplayMode.Name:
+                        return channel.Name;
+                    default:
+                        throw new ArgumentException($"Unsupported display mode {placeholder.DisplayMode}", nameof(placeholder.DisplayMode));
+                }
+            }
+        }
     }
 }
