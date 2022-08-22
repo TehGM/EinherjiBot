@@ -9,7 +9,7 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
         bool IsError => !this.IsEmpty && !this.IsValid;
     }
 
-    public abstract class EntityIdListItemBase<TEntity> : ComponentBase, IEntityValidatingField where TEntity : class
+    public abstract class EntityIdFieldBase<TEntity> : ComponentBase, IEntityValidatingField where TEntity : class
     {
         [Parameter]
         public bool ReadOnly { get; set; }

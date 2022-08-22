@@ -22,19 +22,19 @@
     {
         if (this.Descriptor.PropertyAttribute.IDType == IDType.User)
         {
-            <UserIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+            <UserIdField @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
         }
         else if (this.Descriptor.PropertyAttribute.IDType == IDType.Guild)
         {
-            <GuildIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+            <GuildIdField @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
         }
         else if (this.Descriptor.PropertyAttribute.IDType == IDType.Channel)
         {
-            <ChannelIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+            <ChannelIdField @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
         }
         else if (this.Descriptor.PropertyAttribute.IDType == IDType.Role)
         {
-            <RoleIdListItem @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
+            <RoleIdField @ref="this._entityField" Label="@this.Descriptor.DisplayName" Value="@((ulong?)this.Value)" ValueChanged="e => this.OnPropertyValueChangedAsync(e.NewValue, e.IsValid)" />
         }
         else
         {

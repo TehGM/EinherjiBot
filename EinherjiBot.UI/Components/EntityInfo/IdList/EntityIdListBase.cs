@@ -16,10 +16,10 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
 
         public bool AllValuesValid => this.InvalidValues?.Any() != true && this.NewItemField?.IsError != true;
 
-        protected EntityIdListItemBase<TEntity> NewItemField { get; set; }
+        protected EntityIdFieldBase<TEntity> NewItemField { get; set; }
         protected HashSet<ulong> InvalidValues { get; } = new HashSet<ulong>();
 
-        protected virtual async Task OnValueChangedAsync(EntityIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
+        protected virtual async Task OnValueChangedAsync(EntityIdFieldBase<TEntity>.ValueChangedEventArgs<ulong?> e)
         {
             int index = -1;
             bool anythingChanged = false;
@@ -49,7 +49,7 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
                 await this.ValuesChanged.InvokeAsync(this.Values);
         }
 
-        protected virtual async Task OnNewValueInputAsync(EntityIdListItemBase<TEntity>.ValueChangedEventArgs<ulong?> e)
+        protected virtual async Task OnNewValueInputAsync(EntityIdFieldBase<TEntity>.ValueChangedEventArgs<ulong?> e)
         {
             if (e.IsValid)
             {

@@ -3,11 +3,11 @@
 <div class="id-list d-flex flex-column">
     @foreach (ulong id in base.Values)
     {
-        <GuildIdListItem @key="id" AllowNone="this.AllowNone" Value="id" ReadOnly="base.ReadOnly" ValueChanged="base.OnValueChangedAsync" />
+        <GuildIdField @key="id" AllowNone="this.AllowNone" Value="id" ReadOnly="base.ReadOnly" ValueChanged="base.OnValueChangedAsync" />
     }
     @if (this.AllowNewValues && !base.ReadOnly)
     {
-        <GuildIdListItem @ref="base.NewItemField" AllowNone="this.AllowNone" ReadOnly="base.ReadOnly" ValueChanged="base.OnNewValueInputAsync" />
+        <GuildIdField @ref="base.NewItemField" AllowNone="this.AllowNone" ReadOnly="base.ReadOnly" ValueChanged="base.OnNewValueInputAsync" />
     }
 </div>
 
