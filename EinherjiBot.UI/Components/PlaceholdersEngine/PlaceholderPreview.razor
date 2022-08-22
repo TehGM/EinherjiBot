@@ -80,7 +80,9 @@
             if (_roleMentionRegex.IsMatch(preview))
             {
                 RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this._entityID.Value);
-                return @<span class="mention-preview">@@@role.Name</span>;
+                string style = role.Color == 0 ? null
+                    : $"background-color: {role.GetHtmlColor(0.1)}; color: {role.GetHtmlColor()};";
+                return @<span class="mention-preview" style="@style">@@@role.Name</span>;
             }
         }
         return @<text>@preview</text>;
