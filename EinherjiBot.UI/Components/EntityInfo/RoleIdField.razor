@@ -1,4 +1,6 @@
-﻿@inherits EntityIdFieldBase<RoleInfoResponse>
+﻿@using TehGM.EinherjiBot.UI.Components.EntityInfo.Pickers
+
+@inherits EntityIdFieldBase<RoleInfoResponse>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
     <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"

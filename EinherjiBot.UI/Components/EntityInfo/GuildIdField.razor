@@ -1,19 +1,20 @@
-﻿@inherits EntityIdFieldBase<IDiscordUserInfo>
+﻿@using TehGM.EinherjiBot.UI.Components.EntityInfo.Pickers
+
+@inherits EntityIdFieldBase<IDiscordGuildInfo>
 
 <MudItem xs="12" Class="d-flex flex-row align-center id-list-item">
     <MudTextField T="ulong?" Value="@base.Value" ValueChanged="base.OnValueChangedAsync" Clearable="!base.ReadOnly" ReadOnly="base.ReadOnly"
-        Label="@this.Label" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1"
-        Error="base.IsError" ErrorText="Not a valid Discord User ID." />
-    @if (base.FoundEntity != null)
+        Label="@this.Label" Variant="Variant.Filled" Margin="Margin.Dense" Class="flex-grow-1" 
+        Error="this.IsError" ErrorText="Not a valid Discord Guild ID." />
+    @if (base.FoundEntity.IsFound())
     {
         <MudTooltip Delay="300" Placement="Placement.Top">
             <TooltipContent>
-                <DiscordUserPreview User="base.FoundEntity" 
-                    UseGuildAvatar="false" UseGuildNickname="false" UseGuildRoleColor="false" ShowAdminIcon="false" />
+                @this.FoundEntity.Name
             </TooltipContent>
             <ChildContent>
                 <MudItem xs="1" Class="d-flex flex-row flex-grow-1 ml-2 user-preview">
-                    <MudAvatar Size="Size.Medium" Image="@base.FoundEntity.GetAvatarURL(64)" Class="mr-1" />
+                    <MudAvatar Size="Size.Medium" Image="@base.FoundEntity.GetIconURL(64)" Class="mr-1" />
                 </MudItem>
             </ChildContent>
         </MudTooltip>
@@ -27,16 +28,23 @@
 
 @code {
     [CascadingParameter]
-    private UserPicker Picker { get; set; }
+    private GuildPicker Picker { get; set; }
     [Parameter]
-    public string Label { get; set; } = "User ID";
+    public bool AllowNone { get; set; }
+    [Parameter]
+    public string Label { get; set; } = "Guild ID";
 
-    protected override async Task<IDiscordUserInfo> FindEntityAsync(ulong id)
-        => await this.EntityInfoProvider.GetUserInfoAsync(id);
+    protected override async Task<IDiscordGuildInfo> FindEntityAsync(ulong id)
+    {
+        IDiscordGuildInfo result = await this.EntityInfoProvider.GetGuildInfoAsync(id);
+        if (result == null && this.AllowNone)
+            result = GuildInfoResponse.None;
+        return result;
+    }
 
     private async Task OnPickerClicked(MouseEventArgs e)
     {
-        GuildUserInfoResponse entity = await this.Picker.OpenAsync();
+        IDiscordGuildInfo entity = await this.Picker.OpenAsync();
         if (entity != null)
             await base.SetValueAsync(entity.ID);
     }

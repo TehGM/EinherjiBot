@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace TehGM.EinherjiBot.UI.Components.EntityInfo.Picker
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo.Pickers
 {
     public abstract class DiscordEntityPickerBase<TEntity> : ComponentBase where TEntity : class
     {

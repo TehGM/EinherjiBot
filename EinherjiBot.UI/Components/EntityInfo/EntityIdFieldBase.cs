@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdList
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo
 {
     public interface IEntityValidatingField
     {

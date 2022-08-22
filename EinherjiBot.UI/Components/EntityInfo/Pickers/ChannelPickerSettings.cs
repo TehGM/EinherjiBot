@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace TehGM.EinherjiBot.UI.Components.EntityInfo.Picker
+namespace TehGM.EinherjiBot.UI.Components.EntityInfo.Pickers
 {
     public class ChannelPickerSettings : EntityPickerSettings
     {
