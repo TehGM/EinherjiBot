@@ -107,7 +107,7 @@ hr {
     }
 }
 
-.nav-item {
+.nav-item, ::deep .nav-item {
     transition: background-color 0.3s;
     transition: color 0.3s;
     font-size: 16px;
@@ -146,7 +146,7 @@ hr {
         max-height: unset;
     }
 
-    ::deep a {
+    a {
         transition: background-color 0.3s;
         transition: color 0.3s;
         border-radius: 4px;
@@ -176,6 +176,10 @@ hr {
     }
 }
 
+::deep .mud-input-control {
+    color: var(--menu-text-input-color);
+}
+
 .collapse, ::deep .user-panel.collapse {
     display: none;
 }
@@ -189,6 +193,10 @@ hr {
     height: 35px;
     display: block;
     border-radius: 50%;
+}
+
+::deep .mud-input-label {
+    background-color: var(--menu-background-color);
 }
 
 @media (min-width: 800px) {

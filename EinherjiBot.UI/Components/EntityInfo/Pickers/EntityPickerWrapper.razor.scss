@@ -1,6 +1,10 @@
 .entity-picker {
-    ::deep .mud-drawer {
+    ::deep .mud-drawer, ::deep .mud-input-label {
         background-color: var(--menu-background-color);
+    }
+
+    ::deep .mud-input-control {
+        color: var(--menu-text-input-color);
     }
 
     ::deep .picker-header {
