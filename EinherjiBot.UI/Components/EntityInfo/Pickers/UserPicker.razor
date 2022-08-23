@@ -1,19 +1,18 @@
-﻿@using System.Drawing
-@inherits DiscordEntityPickerBase<GuildUserInfoResponse>
+﻿@inherits DiscordEntityPickerBase<GuildUserInfoResponse>
 
 <EntityPickerWrapper Open="base.IsOpen" CssClass="user-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
     DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find User by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
     <HeaderContent>
-        <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">User Picker</MudText>
+        <MudText Color="Color.Primary" Typo="Typo.h6">User Picker</MudText>
     </HeaderContent>
     <ChildContent>
 
         <MudItem xs="12" Class="d-flex flex-row mx-2 mt-1 mb-4 justify-space-around">
             <MudItem Class="flex-shrink-1 flex-grow-1">
-                <MudSwitch T="bool" Color="MudBlazor.Color.Tertiary" Checked="@this._showBots" Label="Show Bots" CheckedChanged="this.OnShowBotsChanged" />
+                <MudSwitch T="bool" Color="Color.Tertiary" Checked="@this._showBots" Label="Show Bots" CheckedChanged="this.OnShowBotsChanged" />
             </MudItem>
             <MudItem Class="flex-shrink-1 flex-grow-1">
-                <MudSwitch T="bool" Color="MudBlazor.Color.Tertiary" Checked="@this._adminsOnly" Label="Admins Only" CheckedChanged="this.OnAdminsOnlyChanged" />
+                <MudSwitch T="bool" Color="Color.Tertiary" Checked="@this._adminsOnly" Label="Admins Only" CheckedChanged="this.OnAdminsOnlyChanged" />
             </MudItem>
         </MudItem>
 
@@ -131,7 +130,7 @@
                     @tooltipText
                 </TooltipContent>
                 <ChildContent>
-                    <MudIcon Size="MudBlazor.Size.Small" Class="@iconClass" Icon="@Icons.Filled.Star" />
+                    <MudIcon Size="Size.Small" Class="@iconClass" Icon="@Icons.Filled.Star" />
                 </ChildContent>
             </MudTooltip>
         };

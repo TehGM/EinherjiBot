@@ -1,10 +1,9 @@
-﻿@using System.Drawing
-@inherits DiscordEntityPickerBase<IDiscordGuildInfo>
+﻿@inherits DiscordEntityPickerBase<IDiscordGuildInfo>
 
 <EntityPickerWrapper Open="base.IsOpen" CssClass="guild-picker" OpenChanged="base.OnDrawerOpenChanged" EnablePrivacyAlert="true"
     DefaultFilterValue="@this._filter" DefaultFilterHelperText="Find User by Name" DefaultFilterValueChanged="this.OnFilterTextChanged">
     <HeaderContent>
-        <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">Guild Picker</MudText>
+        <MudText Color="Color.Primary" Typo="Typo.h6">Guild Picker</MudText>
     </HeaderContent>
     <ChildContent>
         @if (this._filteredGuilds != null)
