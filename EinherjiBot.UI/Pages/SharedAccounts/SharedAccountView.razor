@@ -28,13 +28,14 @@
                     <SharedAccountImage AccountType="this._type" />
                     <MudItem xs="10" Class="d-flex flex-column">
                         <MudItem xs="12" Class="d-flex flex-row justify-space-between gap-3">
-                            <MudSelect Class="flex-grow-1" Dense=true T="SharedAccountType" @bind-Value="this._type" Label="Type" Disabled="!this.IsNew">
+                            <MudSelect Class="flex-grow-1" Dense=true T="SharedAccountType" @bind-Value="this._type" Label="Type" 
+                                Disabled="!this.IsNew && this.CanModify" ReadOnly="!this.CanModify">
                                 @foreach (SharedAccountType type in Enum.GetValues<SharedAccountType>())
                                 {
                                     <MudSelectItem Value="type">@type.ToString()</MudSelectItem>
                                 }
                             </MudSelect>
-                            @if (!this.IsNew)
+                            @if (!this.IsNew && this.CanModify)
                             {
                                 <MudItem xs="2" md="6" lg="4" Class="align-self-end">
                                     <MudTooltip Delay="0" Class="d-md-none" Placement="Placement.Top">
@@ -49,10 +50,12 @@
                             }
                         </MudItem>
                         <MudTextField @ref=this._loginField @bind-Value="@this._login" Label="Login" Variant="Variant.Text" Class="mt-5"
-                            Counter="@SharedAccountRequest.LoginMaxLength" Validation="this.LoginValidationDelegate" Immediate="true" />
+                            Counter="@SharedAccountRequest.LoginMaxLength" Validation="this.LoginValidationDelegate" Immediate="true"
+                            ReadOnly="!this.CanModify" />
                         <MudTextField @bind-Value="@this._password" Label="Password" Variant="Variant.Text" InputType="this.PasswordInputType" Class="mt-0"
                             Counter="@SharedAccountRequest.PasswordMaxLength" Validation="this.PasswordValidationDelegate" Immediate="true"
-                            Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" />
+                            Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" 
+                            ReadOnly="!this.CanModify"/>
                         @if (this._modifiedByUser != null)
                         {
                             <MudItem xs="12" Class="d-flex flex-row">
@@ -73,67 +76,70 @@ else
 
 @if ((this._account != null || this.IsNew) && this._authorizedUsers != null && this._authorizedRoles != null && this._modUsers != null)
 {
-    <div class="spaced-card">
-        <MudCard Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h4">Authorization</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent Class="d-flex d-row flex-wrap flex-lg-nowrap gap-4 gap-lg-1">
-                <MudItem xs="12" lg="4">
-                    <MudText Typo="Typo.h6">
-                        Authorized Users
-                        <MudTooltip Delay="0" Placement="Placement.Top">
-                            <TooltipContent>These users will be able to get Login and Password.</TooltipContent>
-                            <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
-                        </MudTooltip>
-                    </MudText>
-                    <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._authorizedUsers" AllowNewValues="true" />
-                </MudItem>
-                <MudItem xs="12" lg="4">
-                    <MudText Typo="Typo.h6">
-                        Authorized Roles
-                        <MudTooltip Delay="0" Placement="Placement.Top">
-                            <TooltipContent>These roles will be able to get Login and Password.<br/>Note that the bot must be present in the guild to check the role.</TooltipContent>
-                            <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
-                        </MudTooltip>
-                    </MudText>
-                    <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNone="true" AllowNewValues="true" />
-                    @if (this._authorizedRoles?.Any() == true)
-                    {
-                        <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
-                            The bot must be present in the same guild as the role in order to recognize it.
-                        </MudAlert>
-                    }
-                </MudItem>
-                <MudItem xs="12" lg="4">
-                    <MudText Typo="Typo.h6">
-                        Mods
-                        <MudTooltip Delay="0" Placement="Placement.Top">
-                            <TooltipContent>Mods can edit and even delete this account.</TooltipContent>
-                            <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
-                        </MudTooltip>
-                    </MudText>
-                    <UserIdList @ref="this._modUsersComponent" @bind-Values="this._modUsers" AllowNewValues="true" />
-                    @if (!this.IsSelfAdded)
-                    {
-                        <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true">
-                            If you don't add yourself as a mod, you'll lose ability to edit this account.<br/>
-                            Click <span @onclick="this.OnAddSelfClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
-                        </MudAlert>
-                    }
-                    @if (!this.AreModsSubset)
-                    {
-                        <MudAlert Severity="Severity.Error" Variant="Variant.Text" Dense="true">
-                            All mods must also be authorized in order to access the account's credentials.<br/>
-                            Click <span @onclick="this.OnAddModsClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
-                        </MudAlert>
-                    }
-                </MudItem>
-            </MudCardContent>
-        </MudCard>
-    </div>
+    @if (this.CanModify)
+    {
+        <div class="spaced-card">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Authorization</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex d-row flex-wrap flex-lg-nowrap gap-4 gap-lg-1">
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Authorized Users
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>These users will be able to get Login and Password.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._authorizedUsers" AllowNewValues="true" />
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Authorized Roles
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>These roles will be able to get Login and Password.<br/>Note that the bot must be present in the guild to check the role.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNone="true" AllowNewValues="true" />
+                        @if (this._authorizedRoles?.Any() == true)
+                        {
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
+                                The bot must be present in the same guild as the role in order to recognize it.
+                            </MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudText Typo="Typo.h6">
+                            Mods
+                            <MudTooltip Delay="0" Placement="Placement.Top">
+                                <TooltipContent>Mods can edit and even delete this account.</TooltipContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                            </MudTooltip>
+                        </MudText>
+                        <UserIdList @ref="this._modUsersComponent" @bind-Values="this._modUsers" AllowNewValues="true" />
+                        @if (!this.IsSelfAdded)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true">
+                                If you don't add yourself as a mod, you'll lose ability to edit this account.<br/>
+                                Click <span @onclick="this.OnAddSelfClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
+                            </MudAlert>
+                        }
+                        @if (!this.AreModsSubset)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Text" Dense="true">
+                                All mods must also be authorized in order to access the account's credentials.<br/>
+                                Click <span @onclick="this.OnAddModsClicked" Class="mud-secondary-text cursor-pointer">HERE</span> to fix it!
+                            </MudAlert>
+                        }
+                    </MudItem>
+                </MudCardContent>
+            </MudCard>
+        </div>
+    }
 }
 else
 {
@@ -189,10 +195,10 @@ else
         && this._modUsersComponent?.AllValuesValid == true
         && this.AreModsSubset;
     private bool IsNew => string.IsNullOrWhiteSpace(this.ID) || this.ID.Equals("new", StringComparison.OrdinalIgnoreCase);
-    private bool CanModify => this._canEdit || this._canCreate;
+    private bool CanModify => this._canEdit || (this._canCreate && this.IsNew);
     private InputType PasswordInputType => this._showPassword ? InputType.Text : InputType.Password;
     private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
-    private string Title => this.IsNew ? "New Shared Account" : "Edit Shared Account";
+    private string Title => this.CanModify ? (this.IsNew ? "New Shared Account" : "Edit Shared Account") : "View Shared Account";
     private bool IsSelfAdded => this.AuthProvider.User.IsLoggedIn() && this._modUsers?.Contains(this.AuthProvider.User.ID) == true;
     private bool AreModsSubset => !this._modUsers.Except(this._authorizedUsers).Any();
 
@@ -228,7 +234,7 @@ else
         this._canEdit = canEditResult.Succeeded;
         this._canDelete = canDeleteResult.Succeeded;
 
-        if (!this.CanModify && !this._canDelete)
+        if (!this._canCreate && this.IsNew)
         {
             this.GoBack();
             return;
@@ -266,6 +272,9 @@ else
 
     private bool HasPendingChanges()
     {
+        if (!this.CanModify)
+            return false;
+
         if (this._id == null)
         {
             return !string.IsNullOrEmpty(this._login)
