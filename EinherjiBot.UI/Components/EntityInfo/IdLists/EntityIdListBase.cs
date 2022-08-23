@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.UI.Components.EntityInfo.Fields;
 
 namespace TehGM.EinherjiBot.UI.Components.EntityInfo.IdLists
 {
