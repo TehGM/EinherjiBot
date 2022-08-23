@@ -12,25 +12,25 @@ namespace TehGM.EinherjiBot.SharedAccounts
         public string Login { get; set; }
         [BsonElement("password")]
         public string Password { get; set; }
-        [BsonElement("allowedUsers")]
+        [BsonElement("authorizedUsers")]
         public IEnumerable<ulong> AuthorizedUserIDs { get; set; }
-        [BsonElement("allowedRoles")]
+        [BsonElement("authorizedRoles")]
         public IEnumerable<ulong> AuthorizedRoleIDs { get; set; }
         [BsonElement("modUsers")]
         public IEnumerable<ulong> ModUserIDs { get; set; }
 
-        [BsonElement("modifiedByID")]
+        [BsonElement("modifiedBy")]
         public ulong? ModifiedByID { get; set; }
         [BsonElement("modifiedTimestamp")]
         public DateTime? ModifiedTimestamp { get; set; }
 
         [BsonConstructor(nameof(ID), nameof(AccountType), nameof(AuthorizedUserIDs), nameof(AuthorizedRoleIDs), nameof(ModUserIDs))]
-        private SharedAccount(Guid id, SharedAccountType accountType, IEnumerable<ulong> allowedUserIDs, IEnumerable<ulong> allowedRoleIDs, IEnumerable<ulong> modUserIDs)
+        private SharedAccount(Guid id, SharedAccountType accountType, IEnumerable<ulong> authorizedUserIDs, IEnumerable<ulong> authorizedRoleIDs, IEnumerable<ulong> modUserIDs)
         {
             this.ID = id;
             this.AccountType = accountType;
-            this.AuthorizedUserIDs = new HashSet<ulong>(allowedUserIDs ?? Enumerable.Empty<ulong>());
-            this.AuthorizedRoleIDs = new HashSet<ulong>(allowedRoleIDs ?? Enumerable.Empty<ulong>());
+            this.AuthorizedUserIDs = new HashSet<ulong>(authorizedUserIDs ?? Enumerable.Empty<ulong>());
+            this.AuthorizedRoleIDs = new HashSet<ulong>(authorizedRoleIDs ?? Enumerable.Empty<ulong>());
             this.ModUserIDs = new HashSet<ulong>(modUserIDs ?? Enumerable.Empty<ulong>());
         }
 
