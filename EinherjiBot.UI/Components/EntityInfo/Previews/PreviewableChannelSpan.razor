@@ -1,0 +1,117 @@
+﻿@inherits PreviewableEntitySpan<ChannelInfoResponse>
+
+@base.Render()
+
+@code {
+    [Parameter]
+    public bool ShowTypeIcon { get; set; } = true;
+    [Parameter]
+    public bool TypeIconMatchDiscord { get; set; } = false;
+    [Parameter]
+    public bool PreviewShowParents { get; set; } = true;
+    [Parameter]
+    public bool PreviewShowTypeIcons { get; set; } = true;
+    [Parameter]
+    public bool PreviewShowGuildName { get; set; } = true;
+
+    private ICollection<ChannelInfoResponse> _parents;
+    private ChannelInfoResponse _lastEntity = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (this._lastEntity == base.Entity || !this.PreviewShowParents)
+            return;
+
+        this._parents = new List<ChannelInfoResponse>();
+        ulong? parentID = base.Entity.ParentID;
+        while (parentID != null)
+        {
+            ChannelInfoResponse parent = await this.EntityInfoProvider.GetChannelInfoAsync(parentID.Value);
+            this._parents.Add(parent);
+            parentID = parent.ParentID;
+        }
+        this._lastEntity = base.Entity;
+    }
+
+    protected override string GetText()
+    {
+        string text = base.Entity.Name;
+        if (!base.ShowAsMention && this.ShowTypeIcon)
+            text = $"#{text}";
+        return text;
+    }
+
+    protected override RenderFragment RenderTooltipPreview()
+    {
+        return __builder =>
+        {
+            <span>
+                @this.RenderChannel(base.Entity)
+                @if (this.PreviewShowParents)
+                {
+                    @this.RenderParents()
+                }
+            </span>
+            @if (this.PreviewShowGuildName)
+            {
+                <br/>
+                <span>@base.Entity.GuildName</span>
+            }
+        };
+    }
+
+    protected override RenderFragment RenderPopoverPreview()
+        => this.RenderTooltipPreview();
+
+    protected override RenderFragment RenderInlineSpan(string text, string cssClass, string style = null)
+    {
+        return __builder =>
+        {
+            <span class="@cssClass" style="@style" @onclick="this.OnClickedAsync">
+                @this.RenderChannel(base.Entity)
+            </span>
+        };
+    }
+
+    private RenderFragment RenderChannel(ChannelInfoResponse channel)
+    {
+        return __builder =>
+        {
+            @if (this.PreviewShowTypeIcons)
+            {
+                @RenderIcon(channel)
+            }
+            @channel.Name
+        };
+    }
+
+    private RenderFragment RenderParents()
+    {
+        if (this._parents?.Any() != true)
+            return null;
+
+        return __builder =>
+        {
+            <text>(</text>
+            @foreach (ChannelInfoResponse parent in this._parents)
+            {
+                <MudIcon Icon="@Icons.Filled.ArrowRightAlt" Size="Size.Small" /> 
+                @this.RenderChannel(parent)
+            }
+            <text>)</text>
+        };
+    }
+
+    private RenderFragment RenderIcon(ChannelInfoResponse channel)
+    {
+        if (this.TypeIconMatchDiscord && (channel.Type != Discord.ChannelType.Text && channel.Type != Discord.ChannelType.Voice))
+            return null;
+
+        string icon = ChannelIcon.GetForChannel(channel);
+        if (string.IsNullOrWhiteSpace(icon))
+            return null;
+        return @<MudIcon Icon="@icon" Size="Size.Small" />;
+    }
+}

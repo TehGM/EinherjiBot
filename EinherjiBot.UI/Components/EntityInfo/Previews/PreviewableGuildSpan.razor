@@ -1,0 +1,30 @@
+﻿@inherits PreviewableEntitySpan<IDiscordGuildInfo>
+
+@base.Render()
+
+@code {
+    [Parameter]
+    public ushort PreviewIconSize { get; set; } = 32;
+    [Parameter]
+    public bool PreviewShowIcon { get; set; } = true;
+
+    protected override void OnParametersSet()
+    {
+        // guilds are not mentionable, so there's that
+        base.ShowAsMention = false;
+    }
+
+    protected override string GetText()
+        => base.Entity.Name;
+
+    protected override RenderFragment RenderTooltipPreview()
+    {
+        return __builder =>
+        {
+            <DiscordGuildPreview Guild="base.Entity" ShowIcon="this.PreviewShowIcon" IconSize="this.PreviewIconSize" />
+        };
+    }
+
+    protected override RenderFragment RenderPopoverPreview()
+        => this.RenderTooltipPreview();
+}

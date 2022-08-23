@@ -1,0 +1,56 @@
+﻿@inherits PreviewableEntitySpan<RoleInfoResponse>
+
+@base.Render()
+
+@code {
+    [Parameter]
+    public bool UseRoleColor { get; set; } = true;
+    [Parameter]
+    public bool ShowMentionSymbol { get; set; } = false;
+    [Parameter]
+    public bool PreviewUseRoleColor { get; set; } = false;
+    [Parameter]
+    public bool PreviewShowGuildName { get; set; } = true;
+
+    protected override string GetText()
+    {
+        string text = base.Entity.Name;
+        if (base.ShowAsMention || this.ShowMentionSymbol)
+            text = $"@{text}";
+        return text;
+    }
+
+    protected override RenderFragment RenderTooltipPreview()
+    {
+        string text = $"@{base.Entity.Name}";
+        string style = this.PreviewUseRoleColor ? this.GetStyle() : null;
+
+        return __builder =>
+        {
+            <span style="@style">@text</span>
+            @if (this.PreviewShowGuildName)
+            {
+                <br/>
+                @base.Entity.GuildName
+            }
+        };
+    }
+
+    protected override RenderFragment RenderPopoverPreview()
+        => this.RenderTooltipPreview();
+
+    protected override RenderFragment RenderInlineSpan(string text, string cssClass, string style = null)
+    {
+        style = this.UseRoleColor ? this.GetStyle() : null;
+        return base.RenderInlineSpan(text, cssClass, style);
+    }
+
+    private string GetStyle()
+    {
+        if (!this.ShowAsMention)
+            return $"color: {base.Entity.GetHtmlColorOrDefault()};";
+        else
+            return base.Entity.Color == 0 ? null
+                : $"background-color: {base.Entity.GetHtmlColor(0.1)}; color: {base.Entity.GetHtmlColor()};";
+    }
+}

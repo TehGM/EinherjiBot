@@ -63,3 +63,17 @@
         color: rgb(250, 166, 26);
     }
 }
+
+.discord-mention {
+    border-radius: 3px;
+    padding: 0 2px;
+    transition: background-color 50ms ease-out,color 50ms ease-out;
+    font-weight: 500;
+    background-color: rgba(88, 101, 242, .3);
+    color: #e3e3e3;
+
+    &:hover, &.clickable:hover {
+        background-color: rgb(88, 101, 242);
+        color: white;
+    }
+}

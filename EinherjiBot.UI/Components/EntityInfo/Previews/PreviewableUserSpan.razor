@@ -1,0 +1,53 @@
+﻿@inherits PreviewableEntitySpan<IDiscordUserInfo>
+
+@base.Render()
+
+@code {
+    [Parameter]
+    public bool ShowDiscriminator { get; set; } = true;
+
+    [Parameter]
+    public ushort PreviewAvatarSize { get; set; } = 32;
+    [Parameter]
+    public string PreviewCustomNameText { get; set; } = null;
+    [Parameter]
+    public string PreviewCustomStatusText { get; set; } = null;
+
+    [Parameter]
+    public bool PreviewShowAvatar { get; set; } = true;
+    [Parameter]
+    public bool PreviewShowAdminIcon { get; set; } = false;
+    [Parameter]
+    public bool PreviewShowBotTag { get; set; } = true;
+
+    [Parameter]
+    public bool PreviewUseGuildNickname { get; set; } = false;
+    [Parameter]
+    public bool PreviewUseGuildRoleColor { get; set; } = false;
+    [Parameter]
+    public bool PreviewUseGuildAvatar { get; set; } = false;
+
+    protected override string GetText()
+    {
+        string text = this.ShowDiscriminator && !base.ShowAsMention
+            ? base.Entity.GetUsernameWithDiscriminator()
+            : base.Entity.Username;
+        if (base.ShowAsMention)
+            text = $"@{text}";
+        return text;
+    }
+
+    protected override RenderFragment RenderTooltipPreview()
+    {
+        return __builder =>
+        {
+            <DiscordUserPreview User="base.Entity" 
+                AvatarSize="this.PreviewAvatarSize" CustomNameText="@this.PreviewCustomNameText" CustomStatusText="@this.PreviewCustomStatusText"
+                ShowAvatar="this.PreviewShowAvatar" ShowAdminIcon="this.PreviewShowAdminIcon" ShowBotTag="this.PreviewShowBotTag"
+                UseGuildNickname="this.PreviewUseGuildNickname" UseGuildRoleColor="this.PreviewUseGuildRoleColor" UseGuildAvatar="this.PreviewUseGuildAvatar" />
+        };
+    }
+
+    protected override RenderFragment RenderPopoverPreview()
+        => this.RenderTooltipPreview();
+}

@@ -1,0 +1,25 @@
+﻿<div class="d-flex flex-row gap-2 align-center discord-guild-preview @this.CssClass" @onclick="e => this.Clicked.InvokeAsync(e)">
+    @if (this.ShowIcon)
+    {
+        <MudAvatar Image="@this.Guild.GetIconURL(this.IconSize)" Class="discord-avatar inline"/>
+    }
+    <MudText Class="text-cutoff">@this.NameText</MudText>
+</div>
+
+@code {
+    [Parameter]
+    public string CssClass { get; set; }
+    [Parameter, EditorRequired]
+    public IDiscordGuildInfo Guild { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> Clicked { get; set; }
+
+    [Parameter]
+    public ushort IconSize { get; set; } = 32;
+    [Parameter]
+    public bool ShowIcon { get; set; } = true;
+    [Parameter]
+    public string CustomNameText { get; set; } = null;
+
+    private string NameText => this.CustomNameText ?? this.Guild.Name;
+}

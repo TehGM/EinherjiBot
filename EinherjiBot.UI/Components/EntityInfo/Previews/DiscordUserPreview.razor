@@ -1,4 +1,4 @@
-﻿<div class="d-flex flex-row gap-2 discord-user-preview @this.CssClass" @onclick="e => this.Clicked.InvokeAsync(e)">
+﻿<div class="d-flex flex-row gap-2 align-center discord-user-preview @this.CssClass" @onclick="e => this.Clicked.InvokeAsync(e)">
     @if (this.ShowAvatar)
     {
         <MudAvatar Image="@this.GetUserAvatarURL(this.AvatarSize)" Class="discord-avatar inline"/>
@@ -36,16 +36,16 @@
     [Parameter]
     public bool ShowAvatar { get; set; } = true;
     [Parameter]
-    public bool ShowAdminIcon { get; set; } = true;
+    public bool ShowAdminIcon { get; set; } = false;
     [Parameter]
     public bool ShowBotTag { get; set; } = true;
 
     [Parameter]
-    public bool UseGuildNickname { get; set; } = true;
+    public bool UseGuildNickname { get; set; } = false;
     [Parameter]
-    public bool UseGuildRoleColor { get; set; } = true;
+    public bool UseGuildRoleColor { get; set; } = false;
     [Parameter]
-    public bool UseGuildAvatar { get; set; } = true;
+    public bool UseGuildAvatar { get; set; } = false;
 
     private string StatusText => this.CustomStatusText ?? this.User.GetUsernameWithDiscriminator();
 

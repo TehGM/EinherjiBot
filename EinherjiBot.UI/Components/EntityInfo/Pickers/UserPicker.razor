@@ -23,7 +23,9 @@
                 <EntityPickerGuildSection @key="@guild.Key.ID" Guild="guild.Key" InitiallyExpanded="this._allGuilds.Count == 1">
                     @foreach (GuildUserInfoResponse user in guild.Value)
                     {
-                        <DiscordUserPreview @key="user" User="user" CssClass="picker-item gap-2" Clicked="_ => base.PickEntity(user)" />
+                        <DiscordUserPreview @key="user" User="user" CssClass="picker-item gap-2" Clicked="_ => base.PickEntity(user)" 
+                            UseGuildAvatar="true" UseGuildNickname="true" ShowAdminIcon="true" UseGuildRoleColor="true"
+                            ShowAvatar="true" AvatarSize="32" ShowBotTag="true" />
                     }
                 </EntityPickerGuildSection>
             }

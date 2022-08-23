@@ -10,7 +10,7 @@
     {
         <MudTooltip Delay="300" Placement="Placement.Top">
             <TooltipContent>
-                @this.FoundEntity.Name
+                <DiscordGuildPreview Guild="base.FoundEntity" ShowIcon="true" IconSize="32" />
             </TooltipContent>
             <ChildContent>
                 <MudItem xs="1" Class="d-flex flex-row flex-grow-1 ml-2 user-preview">

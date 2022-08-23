@@ -1,0 +1,63 @@
+﻿@typeparam TEntity
+
+@code {
+    protected virtual RenderFragment Render()
+    {
+        if (this.Entity == null)
+            return null;
+
+        return __builder =>
+        {
+            @if (this.EnableTooltip)
+            {
+                @this.RenderTooltip()
+            }
+            else
+            {
+                @this.RenderInlineSpan(this.GetText(), this.BuildCssClass())
+                @if (this.EnablePopover)
+                {
+                    @this.RenderPopover()
+                }
+            }
+        };
+    }
+
+    protected virtual RenderFragment RenderTooltip()
+    {
+        string text = this.GetText();
+        string cssClass = this.BuildCssClass();
+
+        return __builder =>
+        {
+            <MudTooltip Delay="300" Placement="Placement.Top" Color="Color.Dark">
+                <TooltipContent>
+                    @this.RenderTooltipPreview()
+                </TooltipContent>
+                <ChildContent>
+                    @this.RenderInlineSpan(this.GetText(), this.BuildCssClass())
+                </ChildContent>
+            </MudTooltip>
+        };
+    }
+
+    protected virtual RenderFragment RenderPopover()
+    {
+        return __builder =>
+        {
+            <MudPopover Open="this.IsPopoverOpen" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
+                @this.RenderPopoverPreview()
+                <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Filled.Close" Size="Size.Small" OnClick="_ => this.IsPopoverOpen = false" />
+            </MudPopover>
+            <MudOverlay DarkBackground="true" Visible="this.IsPopoverOpen" OnClick="_ => this.IsPopoverOpen = false" />
+        };
+    }
+
+    protected virtual RenderFragment RenderInlineSpan(string text, string cssClass, string style = null)
+    {
+        return __builder =>
+        {
+            <span class="@cssClass" style="@style" @onclick="this.OnClickedAsync">@text</span>
+        };
+    }
+}

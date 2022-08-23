@@ -9,7 +9,9 @@
     @if (base.FoundEntity != null)
     {
         <MudItem xs="3" Class="d-flex flex-row flex-grow-1 ml-2 role-preview">
-            <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
+            <PreviewableChannelSpan Entity="base.FoundEntity" EnableTooltip="true" EnablePopover="false" ShowAsMention="false" ShowTypeIcon="true" TypeIconMatchDiscord="false"
+                PreviewShowGuildName="true" PreviewShowParents="true" PreviewShowTypeIcons="true" />
+@*            <MudTooltip Delay="300" Placement="Placement.Top" Class="d-flex flex-grow-1">
                 <TooltipContent>
                     <MudItem xs="12" Class="d-flex flex-column flex-shrink-1">
                         <span>@this.RenderIcon(base.FoundEntity, Size.Small) @base.FoundEntity.Name @this.RenderParents(Size.Small)</span>
@@ -19,7 +21,7 @@
                 <ChildContent>
                     <MudText Class="text-cutoff">@this.RenderIcon(base.FoundEntity, Size.Medium) @base.FoundEntity.Name</MudText>
                 </ChildContent>
-            </MudTooltip>
+            </MudTooltip>*@
         </MudItem>
     }
     @if (!base.ReadOnly)

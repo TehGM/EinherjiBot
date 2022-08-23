@@ -70,19 +70,17 @@
             if (_userMentionRegex.IsMatch(preview))
             {
                 IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(this._entityID.Value);
-                return @<span class="mention-preview">@@@user.Username</span>;
+                return @<PreviewableUserSpan Entity="user" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
             }
             if (_channelMentionRegex.IsMatch(preview))
             {
                 ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(this._entityID.Value);
-                return @<span class="mention-preview">#@channel.Name</span>;
+                return @<PreviewableChannelSpan Entity="channel" EnablePopover="false" EnableTooltip="false" ShowTypeIcon="true" ShowAsMention="true" TypeIconMatchDiscord="true" />;
             }
             if (_roleMentionRegex.IsMatch(preview))
             {
                 RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this._entityID.Value);
-                string style = role.Color == 0 ? null
-                    : $"background-color: {role.GetHtmlColor(0.1)}; color: {role.GetHtmlColor()};";
-                return @<span class="mention-preview" style="@style">@@@role.Name</span>;
+                return @<PreviewableRoleSpan Entity="role" UseRoleColor="true" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
             }
         }
         return @<text>@preview</text>;

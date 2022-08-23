@@ -10,10 +10,7 @@
         {
             @foreach (IDiscordGuildInfo guild in this._filteredGuilds)
             {
-                <div @key="@guild.ID" class="picker-item gap-2 px-3 py-1" @onclick="_ => base.PickEntity(guild)">
-                    <MudAvatar Image="@guild.GetIconURL(32)" Class="discord-avatar inline"/>
-                    <MudText Class="text-cutoff">@guild.Name</MudText>
-                </div>
+                <DiscordGuildPreview @key="guild.ID" Guild="guild" CssClass="picker-item px-3 py-1" ShowIcon="true" IconSize="32" Clicked="_ => base.PickEntity(guild)" />
             }
         }
     </ChildContent>
