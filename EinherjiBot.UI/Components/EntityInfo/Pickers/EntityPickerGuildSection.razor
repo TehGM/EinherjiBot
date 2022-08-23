@@ -35,7 +35,7 @@
     private string ArrowIcon => this.IsExpanded ? this.ExpandedIcon : this.CollapsedIcon;
     private string ExpandedClass => this.IsExpanded ? "expanded" : string.Empty;
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         this.IsExpanded = this.InitiallyExpanded;
     }
