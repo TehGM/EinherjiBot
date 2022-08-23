@@ -6,7 +6,7 @@
         <MudText Color="Color.Primary" Typo="Typo.h6">Role Picker</MudText>
     </HeaderContent>
     <ChildContent>
-        @if (this._filteredGuilds != null)
+        @if (this._filteredGuilds?.Any() == true)
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<RoleInfoResponse>> guild in this._filteredGuilds)
             {
@@ -19,6 +19,10 @@
                     }
                 </EntityPickerGuildSection>
             }
+        }
+        else
+        {
+            <NothingFoundMessage />
         }
     </ChildContent>
 </EntityPickerWrapper>

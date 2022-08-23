@@ -6,7 +6,7 @@
         <MudText Color="MudBlazor.Color.Primary" Typo="Typo.h6">Channel Picker</MudText>
     </HeaderContent>
     <ChildContent>
-        @if (this._filteredGuilds != null)
+        @if (this._filteredGuilds?.Any() == true)
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<ChannelSorting>> guild in this._filteredGuilds)
             {
@@ -17,6 +17,10 @@
                     }
                 </EntityPickerGuildSection>
             }
+        }
+        else
+        {
+                <NothingFoundMessage />
         }
     </ChildContent>
 </EntityPickerWrapper>

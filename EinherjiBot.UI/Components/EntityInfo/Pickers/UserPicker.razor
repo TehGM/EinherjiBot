@@ -21,7 +21,7 @@
             </MudItem>
         </MudItem>
 
-        @if (this._filteredGuilds != null)
+        @if (this._filteredGuilds?.Any() == true)
         {
             @foreach (KeyValuePair<GuildInfoResponse, IEnumerable<GuildUserInfoResponse>> guild in this._filteredGuilds)
             {
@@ -34,6 +34,10 @@
                     }
                 </EntityPickerGuildSection>
             }
+        }
+        else
+        {
+                <NothingFoundMessage />
         }
     </ChildContent>
 </EntityPickerWrapper>

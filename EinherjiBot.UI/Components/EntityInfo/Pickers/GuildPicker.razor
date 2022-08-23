@@ -6,12 +6,16 @@
         <MudText Color="Color.Primary" Typo="Typo.h6">Guild Picker</MudText>
     </HeaderContent>
     <ChildContent>
-        @if (this._filteredGuilds != null)
+        @if (this._filteredGuilds?.Any() == true)
         {
             @foreach (IDiscordGuildInfo guild in this._filteredGuilds)
             {
                 <DiscordGuildPreview @key="guild.ID" Guild="guild" CssClass="picker-item px-3 py-1" ShowIcon="true" IconSize="32" Clicked="_ => base.PickEntity(guild)" />
             }
+        }
+        else
+        {
+                <NothingFoundMessage />
         }
     </ChildContent>
 </EntityPickerWrapper>
