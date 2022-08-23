@@ -4,6 +4,6 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine
 {
     public interface IPlaceholdersBuilder
     {
-        Task<PlaceholderBuilderResult> OpenAsync(PlaceholderUsage context);
+        Task<PlaceholderBuilderResult> OpenAsync(PlaceholderUsage context, bool allowAdminContext = true);
     }
 }
