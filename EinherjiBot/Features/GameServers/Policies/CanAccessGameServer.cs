@@ -13,7 +13,7 @@
         {
             if (this._auth.IsAdmin() || resource.IsPublic
                 || resource.AuthorizedUserIDs.Contains(this._auth.ID)
-                || resource.AuthorizedRoleIDs.Intersect(this._auth.KnownDiscordRoleIDs).Any())
+                || resource.AuthorizedRoleIDs.Intersect(this._auth.RecognizedDiscordRoleIDs).Any())
                 return Task.FromResult(BotAuthorizationResult.Success);
             return Task.FromResult(BotAuthorizationResult.Fail("You have no permission to access this game server."));
         }

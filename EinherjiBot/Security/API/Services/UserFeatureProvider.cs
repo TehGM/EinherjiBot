@@ -38,7 +38,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
         {
             if (context.IsAdmin() || context.HasRole(UserRole.SharedAccountCreator))
                 return true;
-            IEnumerable<SharedAccount> foundResources = await this._sharedAccounts.FindAsync(null, context.ID, context.KnownDiscordRoleIDs, false, cancellationToken).ConfigureAwait(false);
+            IEnumerable<SharedAccount> foundResources = await this._sharedAccounts.FindAsync(null, context.ID, context.RecognizedDiscordRoleIDs, false, cancellationToken).ConfigureAwait(false);
             return foundResources?.Any() == true;
         }
 
@@ -46,7 +46,7 @@ namespace TehGM.EinherjiBot.Security.API.Services
         {
             if (context.IsAdmin() || context.HasRole(UserRole.GameServerCreator))
                 return true;
-            IEnumerable<GameServer> foundResources = await this._gameServers.FindAsync(null, context.ID, context.KnownDiscordRoleIDs, cancellationToken).ConfigureAwait(false);
+            IEnumerable<GameServer> foundResources = await this._gameServers.FindAsync(null, context.ID, context.RecognizedDiscordRoleIDs, cancellationToken).ConfigureAwait(false);
             return foundResources?.Any() == true;
         }
     }

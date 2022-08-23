@@ -21,12 +21,12 @@ namespace TehGM.EinherjiBot.UI.Security
         bool IDiscordUserInfo.IsBot => false;
 
         public IEnumerable<string> BotFeatures { get; }
-        public IEnumerable<ulong> KnownDiscordGuildIDs { get; }
-        public IEnumerable<ulong> KnownDiscordRoleIDs { get; }
+        public IEnumerable<ulong> RecognizedDiscordGuildIDs { get; }
+        public IEnumerable<ulong> RecognizedDiscordRoleIDs { get; }
 
 
         public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, 
-            IEnumerable<string> roles, IEnumerable<string> botFeatures, IEnumerable<ulong> knownGuilds, IEnumerable<ulong> knownRoles)
+            IEnumerable<string> roles, IEnumerable<string> botFeatures, IEnumerable<ulong> recognizedGuilds, IEnumerable<ulong> recognizedRoles)
         {
             this.ID = id;
             this.Username = username;
@@ -34,14 +34,14 @@ namespace TehGM.EinherjiBot.UI.Security
             this.AvatarHash = avatarHash;
             this.BotRoles = new HashSet<string>(roles ?? Enumerable.Empty<string>());
             this.BotFeatures = botFeatures;
-            this.KnownDiscordGuildIDs = knownGuilds;
-            this.KnownDiscordRoleIDs = knownRoles;
+            this.RecognizedDiscordGuildIDs = recognizedGuilds;
+            this.RecognizedDiscordRoleIDs = recognizedRoles;
         }
 
         private WebAuthContext() { }
 
         public static WebAuthContext FromLoginResponse(LoginResponse response)
-            => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features, response.KnownDiscordGuildIDs, response.KnownDiscordRoleIDs);
+            => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features, response.RecognizedDiscordGuildIDs, response.RecognizedDiscordRoleIDs);
 
         public override string ToString()
             => this.GetUsernameWithDiscriminator();

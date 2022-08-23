@@ -10,9 +10,9 @@
         bool IsBanned { get; }
 
         /// <summary>User's guilds that bot can track.</summary>
-        IEnumerable<ulong> KnownDiscordGuildIDs { get; }
+        IEnumerable<ulong> RecognizedDiscordGuildIDs { get; }
         /// <summary>User's roles that bot can track.</summary>
-        IEnumerable<ulong> KnownDiscordRoleIDs { get; }
+        IEnumerable<ulong> RecognizedDiscordRoleIDs { get; }
 
         string GetUsernameWithDiscriminator()
             => $"{this.Username}#{this.Discriminator}";

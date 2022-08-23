@@ -14,14 +14,14 @@ namespace TehGM.EinherjiBot.API.Policies
 
         public Task<BotAuthorizationResult> EvaluateAsync(GuildInfoResponse resource, CancellationToken cancellationToken = default)
         {
-            if (this._auth.User.IsAdmin() || this._auth.User.KnownDiscordGuildIDs?.Contains(resource.ID) == true)
+            if (this._auth.User.IsAdmin() || this._auth.User.RecognizedDiscordGuildIDs?.Contains(resource.ID) == true)
                 return Task.FromResult(BotAuthorizationResult.Success);
             return Task.FromResult(BotAuthorizationResult.Fail($"You have no permission to access guild {resource.ID}."));
         }
 
         public Task<BotAuthorizationResult> EvaluateAsync(IGuild resource, CancellationToken cancellationToken = default)
         {
-            if (this._auth.User.IsAdmin() || this._auth.User.KnownDiscordGuildIDs?.Contains(resource.Id) == true)
+            if (this._auth.User.IsAdmin() || this._auth.User.RecognizedDiscordGuildIDs?.Contains(resource.Id) == true)
                 return Task.FromResult(BotAuthorizationResult.Success);
             return Task.FromResult(BotAuthorizationResult.Fail($"You have no permission to access guild {resource.Id}."));
         }

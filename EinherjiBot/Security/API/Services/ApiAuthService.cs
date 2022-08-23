@@ -57,8 +57,8 @@ namespace TehGM.EinherjiBot.Security.API.Services
             return new LoginResponse(jwt, refreshToken.Token, this._options.Lifetime, currentUser, context.BotRoles, featuresTask.Result)
             {
                 Guilds = guildsTask.Result,
-                KnownDiscordGuildIDs = context.KnownDiscordGuildIDs,
-                KnownDiscordRoleIDs = context.KnownDiscordRoleIDs
+                RecognizedDiscordGuildIDs = context.RecognizedDiscordGuildIDs,
+                RecognizedDiscordRoleIDs = context.RecognizedDiscordRoleIDs
             };
         }
 

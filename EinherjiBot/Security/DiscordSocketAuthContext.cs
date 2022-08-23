@@ -12,8 +12,8 @@ namespace TehGM.EinherjiBot.Security
         public IUser DiscordUser { get; }
         public IGuild DiscordGuild { get; }
         public IGuildUser DiscordGuildUser { get; }
-        public IEnumerable<ulong> KnownDiscordGuildIDs { get; }
-        public IEnumerable<ulong> KnownDiscordRoleIDs { get; }
+        public IEnumerable<ulong> RecognizedDiscordGuildIDs { get; }
+        public IEnumerable<ulong> RecognizedDiscordRoleIDs { get; }
 
         public ulong ID => this.DiscordUser?.Id ?? default;
         public IEnumerable<string> BotRoles => this._data?.Roles;
@@ -30,13 +30,13 @@ namespace TehGM.EinherjiBot.Security
 
         private readonly UserSecurityData _data;
 
-        public DiscordSocketAuthContext(IUser discordUser, IGuild discordGuild, IGuildUser discordGuildUser, IEnumerable<ulong> knownGuildIDs, IEnumerable<ulong> knownRoleIDs, UserSecurityData securityData)
+        public DiscordSocketAuthContext(IUser discordUser, IGuild discordGuild, IGuildUser discordGuildUser, IEnumerable<ulong> recognizedGuildIDs, IEnumerable<ulong> recognizedRoleIDs, UserSecurityData securityData)
         {
             this.DiscordUser = discordUser ?? throw new ArgumentNullException(nameof(discordUser));
             this.DiscordGuild = discordGuild;
             this.DiscordGuildUser = discordGuildUser;
-            this.KnownDiscordGuildIDs = new HashSet<ulong>(knownGuildIDs ?? Enumerable.Empty<ulong>());
-            this.KnownDiscordRoleIDs = new HashSet<ulong>(knownRoleIDs ?? Enumerable.Empty<ulong>());
+            this.RecognizedDiscordGuildIDs = new HashSet<ulong>(recognizedGuildIDs ?? Enumerable.Empty<ulong>());
+            this.RecognizedDiscordRoleIDs = new HashSet<ulong>(recognizedRoleIDs ?? Enumerable.Empty<ulong>());
             this._data = securityData ?? throw new ArgumentNullException(nameof(securityData));
         }
 
