@@ -74,11 +74,11 @@ namespace TehGM.EinherjiBot.API.Services
             List<GuildInfoResponse> results = new List<GuildInfoResponse>(guilds.Count());
             foreach (IGuild guild in guilds)
             {
-                // only throw if ids is not null, cause it means client explicitly requested guilds that user has no permissions to
-                // if it is null, it means that client simply requested guilds that user can view - so we just skip those that they can't
                 BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(guild, typeof(CanAccessGuildInfo), cancellationToken).ConfigureAwait(false);
                 if (!authorization.Succeeded)
                 {
+                    // only throw if ids is not null, cause it means client explicitly requested guilds that user has no permissions to
+                    // if it is null, it means that client simply requested guilds that user can view - so we just skip those that they can't
                     if (ids != null)
                         throw new AccessForbiddenException($"You have no access to Discord guild {guild.Id}");
                     continue;

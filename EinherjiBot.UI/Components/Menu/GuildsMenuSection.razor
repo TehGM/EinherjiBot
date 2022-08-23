@@ -1,7 +1,7 @@
 ﻿@using TehGM.EinherjiBot.Security
 @using TehGM.EinherjiBot.UI.Security
 
-@if (this.Guilds?.Any() != true)
+@if (this.Guilds?.Any() != true && !this._isAdmin)
 {
     return;
 }
@@ -14,18 +14,18 @@
             <MudIcon Size="Size.Small" Icon="@(this._filtersOpen ? Icons.Filled.FilterAlt : Icons.TwoTone.FilterAlt)" Color="@(this._filtersOpen ? Color.Secondary : Color.Default)" />
         </div>
         <MudCollapse Class="mx-3" Expanded="this._filtersOpen">
-            <MudCheckBox @bind-Checked="this._showAll" Dense="true" Class="no-select"
+            <MudCheckBox T="bool" Checked="this._showAll" Dense="true" Class="no-select" CheckedChanged="this.OnShowAllFilterChanged"
                 UnCheckedColor="Color.Default" Color="Color.Tertiary">
                     @($"Guilds without {EinherjiInfo.Name}")
             </MudCheckBox>
             @if (this._isAdmin)
             {
-                <MudCheckBox @bind-Checked="this._adminView" Dense="true" Class="no-select"
+                <MudCheckBox T="bool" Checked="this._adminView" Dense="true" Class="no-select" CheckedChanged="this.OnAdminViewFilterChanged"
                     UnCheckedColor="Color.Default" Color="Color.Tertiary">
                     Admin View
                 </MudCheckBox>
             }
-            <MudTextField T="string" @bind-Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Search" Class="mx-2"
+            <MudTextField T="string" Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Search" Class="mx-2" ValueChanged="this.OnNameFilterChanged"
                 Clearable="true" DebounceInterval="200" MaxLength="128" Adornment="Adornment.End" AdornmentIcon="@Icons.Outlined.Search" />
             <MudDivider Class="mt-2 mb-1" DividerType="DividerType.Middle" />
         </MudCollapse>
@@ -34,7 +34,7 @@
 
     @if (this._filteredGuilds?.Any() == true)
     {
-        @foreach (OAuthGuildInfoResponse guild in this._filteredGuilds)
+        @foreach (IDiscordGuildInfo guild in this._filteredGuilds)
         {
             <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(this.IconSize)" 
             OnClick=@this.CategoryClicked IsOpen=@(this.CurrentCategoryIdentifier == guild.ID)>
@@ -69,29 +69,73 @@
     [Parameter]
     public EventCallback<NavLinkCategory> CategoryClicked { get; set; }
 
-    private IEnumerable<OAuthGuildInfoResponse> _filteredGuilds;
+    private IEnumerable<IDiscordGuildInfo> _filteredGuilds;
     private bool _showAll = false;
     private bool _adminView = true;
     private bool _isAdmin = false;
     private bool _filtersOpen = false;
     private string _nameFilter = null;
 
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
+    private IEnumerable<OAuthGuildInfoResponse> _processedGuilds;
+    private bool AdminViewActive => this._isAdmin && this._adminView;
 
+    protected override async Task OnParametersSetAsync()
+    {
         if (this.RenderLocation.IsServer)
             return;
 
-        IAuthContext user = (this.AuthProvider as IWebAuthProvider)?.User;
-        if (!user.IsLoggedIn())
+        if (this._processedGuilds == this.Guilds)
             return;
 
+        this._processedGuilds = this.Guilds;
+        await this.ApplyFiltersAsync();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        IAuthContext user = (this.AuthProvider as IWebAuthProvider)?.User;
         this._isAdmin = user.IsAdmin();
-        this._filteredGuilds = this.Guilds.Where(g =>
-            (this._showAll || user.RecognizedDiscordGuildIDs.Contains(g.ID)) &&
-            ((this._adminView && this._isAdmin) || g.CanManage) &&
-            (string.IsNullOrEmpty(this._nameFilter) || g.Name.Contains(this._nameFilter, StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(g => g.Name);
+        if (!user.IsLoggedIn())
+        {
+            this._filteredGuilds = null;
+            return;
+        }
+
+        this._filteredGuilds = this.Guilds;
+        IEnumerable<ulong> botGuildIDs = user.RecognizedDiscordGuildIDs;
+        if (this.AdminViewActive)
+        {
+            IEnumerable<IDiscordGuildInfo> botGuilds = await this.EntityInfoProvider.GetGuildInfosAsync();
+            this._filteredGuilds = this._filteredGuilds.UnionBy(botGuilds, g => g.ID);
+            botGuildIDs = botGuilds.Select(g => g.ID);
+        }
+
+        // one
+        if (!this._showAll)
+            this._filteredGuilds = this._filteredGuilds.Where(g => botGuildIDs.Contains(g.ID));
+        if (!this.AdminViewActive)
+            this._filteredGuilds = this._filteredGuilds.Where(g => (g as OAuthGuildInfoResponse)?.CanManage == true);
+        if (!string.IsNullOrEmpty(this._nameFilter))
+            this._filteredGuilds = this._filteredGuilds.Where(g => g.Name.Contains(this._nameFilter, StringComparison.OrdinalIgnoreCase));
+        this._filteredGuilds = this._filteredGuilds.OrderBy(g => g.Name);
+    }
+
+    private Task OnShowAllFilterChanged(bool value)
+    {
+        this._showAll = value;
+        return this.ApplyFiltersAsync();
+    }
+
+    private Task OnAdminViewFilterChanged(bool value)
+    {
+        this._adminView = value;
+        return this.ApplyFiltersAsync();
+    }
+
+    private Task OnNameFilterChanged(string value)
+    {
+        this._nameFilter = value;
+        return this.ApplyFiltersAsync();
     }
 }
