@@ -7,6 +7,8 @@
     OnClick="this.OnPlaceholdersDialogClickedAsync" />
 
 @code {
+    [Parameter, EditorRequired]
+    public PlaceholderUsage PlaceholderContext { get; set; }
     [Parameter]
     public EventCallback<PlaceholderBuilderResult> Closed { get; set; }
 
