@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.API;
+using TehGM.EinherjiBot.UI.API;
 using TehGM.EinherjiBot.UI.API.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -13,6 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddLocking();
             services.TryAddScoped<IDiscordEntityInfoService, WebDiscordEntityInfoService>();
+            services.TryAddScoped<IDiscordEntityInfoCache, WebDiscordEntityInfoCache>();
 
             return services;
         }

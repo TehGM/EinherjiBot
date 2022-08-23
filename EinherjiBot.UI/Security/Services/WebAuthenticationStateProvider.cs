@@ -4,6 +4,7 @@ using System.Security.Claims;
 using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Security;
 using TehGM.EinherjiBot.Security.API;
+using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.Security.Services
 {
@@ -20,11 +21,13 @@ namespace TehGM.EinherjiBot.UI.Security.Services
 
         private readonly IAuthService _authService;
         private readonly IRefreshTokenProvider _tokenProvider;
+        private readonly IDiscordEntityInfoCache _entityCache;
 
-        public WebAuthenticationStateProvider(IAuthService authService, IRefreshTokenProvider tokenProvider)
+        public WebAuthenticationStateProvider(IAuthService authService, IRefreshTokenProvider tokenProvider, IDiscordEntityInfoCache entityCache)
         {
             this._authService = authService;
             this._tokenProvider = tokenProvider;
+            this._entityCache = entityCache;
         }
 
         public async Task LoginAsync(LoginResponse response, CancellationToken cancellationToken = default)
@@ -50,6 +53,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             this.Guilds = null;
             this.UserFeatures = null;
             this._principal = new ClaimsPrincipal();
+            this._entityCache.ClearAll();
             string token = await this._tokenProvider.GetAsync(cancellationToken).ConfigureAwait(false);
             if (token != null)
             {
