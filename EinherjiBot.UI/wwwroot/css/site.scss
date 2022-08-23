@@ -1,6 +1,7 @@
 ﻿@import "_themes.scss";
 @import "_discord.scss";
 @import "_flex.scss";
+@import "_icons.scss";
 
 /*** GENERAL DEFAULTS ***/
 html {
@@ -37,6 +38,10 @@ img, svg {
     user-select: $select-mode;
     cursor: pointer;
     text-decoration: underline dotted gray;
+}
+
+.no-select {
+    user-select: none;
 }
 
 .spaced-card {

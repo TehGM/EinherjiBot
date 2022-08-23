@@ -90,19 +90,10 @@
                         </div>
                     </NavLinkCategory>
 
-                    <GuildsMenuSection Guilds="(this.AuthProvider as IWebAuthProvider)?.Guilds" Filter="g => g.CanManage"
+                    <GuildsMenuSection Guilds="(this.AuthProvider as IWebAuthProvider)?.Guilds"
                         IconSize="_avatarSize" @bind-Expanded="@this._guildsExpanded"
                         CurrentCategoryIdentifier="this._currentCategoryIdentifier" CategoryClicked="this.OnCategoryClick" />
-                    
-                    @*for administration purposes, admin can view all guilds*@
-                    @*TODO: even more valuably, should see bot's guilds*@
-                    <PolicyAuthorizeView PolicyType="typeof(AuthorizeAdmin)">
-                        <Authorized Context="AuthorizeAdmin">
-                        <GuildsMenuSection Guilds="(this.AuthProvider as IWebAuthProvider)?.Guilds" Filter="g => !g.CanManage"
-                            IconSize="_avatarSize" @bind-Expanded="@this._adminGuildsExpanded"
-                            CurrentCategoryIdentifier="this._currentCategoryIdentifier" CategoryClicked="this.OnCategoryClick" />
-                        </Authorized>
-                    </PolicyAuthorizeView>
+
                 </Authorized>
                 <Authorizing>
                     @this.RenderItemLoading()

@@ -1,29 +1,61 @@
-﻿@if (this._filteredGuilds?.Any() != true)
+﻿@using TehGM.EinherjiBot.Security
+@using TehGM.EinherjiBot.UI.Security
+
+@if (this.Guilds?.Any() != true)
 {
     return;
 }
 
 <MenuExpanderBar Expanded="@this.Expanded" ExpandedChanged="this.ExpandedChanged" Light="true" CssClass="my-3" />
 <MudCollapse Expanded="@this.Expanded">
-    @foreach (OAuthGuildInfoResponse guild in this._filteredGuilds)
+    <div class="menu-guild-filters">
+        <div class="d-flex flex-row justify-center cursor-pointer mr-3 no-select" @onclick="_ => this._filtersOpen = !this._filtersOpen">
+            <MudText Color="@(this._filtersOpen ? Color.Tertiary : Color.Default)" Typo="Typo.body2">Guilds</MudText>
+            <MudIcon Size="Size.Small" Icon="@(this._filtersOpen ? Icons.Filled.FilterAlt : Icons.TwoTone.FilterAlt)" Color="@(this._filtersOpen ? Color.Secondary : Color.Default)" />
+        </div>
+        <MudCollapse Class="mx-3" Expanded="this._filtersOpen">
+            <MudCheckBox @bind-Checked="this._showAll" Dense="true" Class="no-select"
+                UnCheckedColor="Color.Default" Color="Color.Tertiary">
+                    @($"Guilds without {EinherjiInfo.Name}")
+            </MudCheckBox>
+            @if (this._isAdmin)
+            {
+                <MudCheckBox @bind-Checked="this._adminView" Dense="true" Class="no-select"
+                    UnCheckedColor="Color.Default" Color="Color.Tertiary">
+                    Admin View
+                </MudCheckBox>
+            }
+            <MudTextField T="string" @bind-Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="By Name" Class="mx-2"
+                Clearable="true" DebounceInterval="200" MaxLength="128" />
+            <MudDivider Class="mt-2 mb-1" DividerType="DividerType.Middle" />
+        </MudCollapse>
+    </div>
+
+
+    @if (this._filteredGuilds?.Any() == true)
     {
-        <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(this.IconSize)" 
+        @foreach (OAuthGuildInfoResponse guild in this._filteredGuilds)
+        {
+            <NavLinkCategory Identifier="guild.ID" Text="@guild.Name" ImageURL="@guild.GetIconURL(this.IconSize)" 
             OnClick=@this.CategoryClicked IsOpen=@(this.CurrentCategoryIdentifier == guild.ID)>
-            <div class="nav-item">
-                <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
-                    <span class="oi oi-bolt" aria-hidden="true"></span>
-                    <span class="text">Message Triggers</span>
-                </NavLink>
-            </div>
-        </NavLinkCategory>
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="@($"/guild/{guild.ID}/message-triggers")" Match="NavLinkMatch.Prefix">
+                        <span class="oi oi-bolt" aria-hidden="true"></span>
+                        <span class="text">Message Triggers</span>
+                    </NavLink>
+                </div>
+            </NavLinkCategory>
+        }
+    }
+    else
+    {
+        <NothingFoundMessage />
     }
 </MudCollapse>
 
 @code {
     [Parameter, EditorRequired]
     public IEnumerable<OAuthGuildInfoResponse> Guilds { get; set; }
-    [Parameter]
-    public Func<OAuthGuildInfoResponse, bool> Filter { get; set; } = _ => true;
     [Parameter]
     public ushort IconSize { get; set; } = 32;
 
@@ -38,20 +70,28 @@
     public EventCallback<NavLinkCategory> CategoryClicked { get; set; }
 
     private IEnumerable<OAuthGuildInfoResponse> _filteredGuilds;
-
-    private IEnumerable<OAuthGuildInfoResponse> _allGuilds;
-    private Func<OAuthGuildInfoResponse, bool> _filter;
+    private bool _showAll = false;
+    private bool _adminView = true;
+    private bool _isAdmin = false;
+    private bool _filtersOpen = false;
+    private string _nameFilter = null;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        // check if params changed to prevent re-filtering when not necessary
-        if (this.Guilds == this._allGuilds && this.Filter == this._filter)
+        if (this.RenderLocation.IsServer)
             return;
 
-        this._allGuilds = this.Guilds;
-        this._filter = this.Filter;
-        this._filteredGuilds = this._allGuilds.Where(this._filter).OrderBy(g => g.Name);
+        IAuthContext user = (this.AuthProvider as IWebAuthProvider)?.User;
+        if (!user.IsLoggedIn())
+            return;
+
+        this._isAdmin = user.IsAdmin();
+        this._filteredGuilds = this.Guilds.Where(g =>
+            (this._showAll || user.RecognizedDiscordGuildIDs.Contains(g.ID)) &&
+            ((this._adminView && this._isAdmin) || g.CanManage) &&
+            (string.IsNullOrEmpty(this._nameFilter) || g.Name.Contains(this._nameFilter, StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(g => g.Name);
     }
 }
