@@ -1,6 +1,7 @@
 ﻿using System.Web;
 using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Caching;
+using TehGM.EinherjiBot.Caching.Services;
 
 namespace TehGM.EinherjiBot.UI.API.Services
 {
@@ -99,16 +100,21 @@ namespace TehGM.EinherjiBot.UI.API.Services
                     List<GuildInfoResponse> results = new List<GuildInfoResponse>(ids.Count());
 
                     // if some are cached, we don't need to retrieve them from server, eh?
-                    results.AddRange(this._guildCache.Find(g => ids.Contains(g.ID)));
-                    IEnumerable<ulong> remaining = ids.Except(results.Select(g => g.ID));
+                    IEnumerable<CachedEntity<ulong, GuildInfoResponse>> cachedGuilds = this._guildCache.Scan(g => ids.Contains(g.Key));
+                    foreach (GuildInfoResponse cached in cachedGuilds.Select(g => g.Entity))
+                        results.Add(cached);
+                    IEnumerable<ulong> remaining = ids.Except(cachedGuilds.Select(g => g.Key));
 
                     if (remaining.Any())
                     {
                         url = BuildWithArrayQuery(url, "guild", remaining);
                         IEnumerable<GuildInfoResponse> response = await this._client.GetJsonAsync<IEnumerable<GuildInfoResponse>>(url, cancellationToken).ConfigureAwait(false);
-                        results.AddRange(response);
-                        foreach (GuildInfoResponse guild in response)
-                            this.CacheGuild(guild.ID, guild);
+                        foreach (ulong id in remaining)
+                        {
+                            GuildInfoResponse guild = response?.FirstOrDefault(g => g.ID == id);
+                            results.Add(guild);
+                            this.CacheGuild(id, guild);
+                        }
                     }
 
                     return results.ToArray();
