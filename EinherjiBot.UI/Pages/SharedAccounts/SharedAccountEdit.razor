@@ -53,6 +53,12 @@
                         <MudTextField @bind-Value="@this._password" Label="Password" Variant="Variant.Text" InputType="this.PasswordInputType" Class="mt-0"
                             Counter="@SharedAccountRequest.PasswordMaxLength" Validation="this.PasswordValidationDelegate" Immediate="true"
                             Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" />
+                        @if (this._modifiedByUser != null)
+                        {
+                            <MudItem xs="12" Class="d-flex flex-row">
+                                Last edited @this._account.ModifiedTimestamp.ToString() by <PreviewableUserSpan EnablePopover="false" EnableTooltip="true" Entity="this._modifiedByUser" />
+                            </MudItem>
+                        }
                     </MudItem>
                 </MudItem>
             </MudCardContent>
@@ -162,6 +168,7 @@ else
 
     private Guid? _id;
     private SharedAccountType _type;
+    private IDiscordUserInfo _modifiedByUser;
     private string _login;
     private string _password;
 
@@ -201,7 +208,7 @@ else
             {
                 Base64Guid id = new Base64Guid(this.ID);
                 ISharedAccount account = await this.Service.GetAsync(id);
-                this.LoadAccount(account);
+                await this.LoadAccountAsync(account);
             }
             catch (Exception ex)
             {
@@ -212,7 +219,7 @@ else
             }
         }
         else 
-            this.LoadAccount(null);
+            await this.LoadAccountAsync(null);
 
         BotAuthorizationResult canCreateResult = !this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(typeof(CanCreateSharedAccount));
         BotAuthorizationResult canEditResult = this.IsNew ? BotAuthorizationResult.Fail() : await this.Auth.AuthorizeAsync(this._account, typeof(CanEditSharedAccount));
@@ -244,7 +251,7 @@ else
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private void LoadAccount(ISharedAccount account)
+    private async Task LoadAccountAsync(ISharedAccount account)
     {
         this._account = account;
         this._id = this._account?.ID;
@@ -254,6 +261,7 @@ else
         this._authorizedUsers = new List<ulong>(this._account?.AuthorizedUserIDs ?? Enumerable.Empty<ulong>());
         this._authorizedRoles = new List<ulong>(this._account?.AuthorizedRoleIDs ?? Enumerable.Empty<ulong>());
         this._modUsers = new List<ulong>(this._account?.ModUserIDs ?? Enumerable.Empty<ulong>());
+        this._modifiedByUser = this._account?.ModifiedByID != null ? await this.EntityInfoProvider.GetUserInfoAsync(this._account.ModifiedByID.Value) : null;
     }
 
     private bool HasPendingChanges()
