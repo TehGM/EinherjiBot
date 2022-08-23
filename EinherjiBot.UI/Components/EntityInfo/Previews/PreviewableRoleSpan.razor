@@ -12,6 +12,8 @@
     [Parameter]
     public bool PreviewShowGuildName { get; set; } = true;
 
+    private bool _isHovered = false;
+
     protected override string GetText()
     {
         string text = base.Entity.Name;
@@ -42,7 +44,14 @@
     protected override RenderFragment RenderInlineSpan(string text, string cssClass, string style = null)
     {
         style = this.UseRoleColor ? this.GetStyle() : null;
-        return base.RenderInlineSpan(text, cssClass, style);
+        return __builder =>
+        {
+            <span class="@cssClass" style="@style" @onclick="this.OnClickedAsync" 
+                @onmouseover="_ => this._isHovered = true"
+                @onmouseout="_ => this._isHovered = false">
+                @text
+            </span>
+        };
     }
 
     private string GetStyle()
@@ -50,7 +59,10 @@
         if (!this.ShowAsMention)
             return $"color: {base.Entity.GetHtmlColorOrDefault()};";
         else
+        {
+            double transparency = this._isHovered ? 0.3 : 0.1;
             return base.Entity.Color == 0 ? null
-                : $"background-color: {base.Entity.GetHtmlColor(0.1)}; color: {base.Entity.GetHtmlColor()};";
+                : $"background-color: {base.Entity.GetHtmlColor(transparency)}; color: {base.Entity.GetHtmlColor()};";
+        }
     }
 }
