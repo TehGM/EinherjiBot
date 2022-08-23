@@ -25,8 +25,8 @@
                     Admin View
                 </MudCheckBox>
             }
-            <MudTextField T="string" @bind-Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="By Name" Class="mx-2"
-                Clearable="true" DebounceInterval="200" MaxLength="128" />
+            <MudTextField T="string" @bind-Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Search" Class="mx-2"
+                Clearable="true" DebounceInterval="200" MaxLength="128" Adornment="Adornment.End" AdornmentIcon="@Icons.Outlined.Search" />
             <MudDivider Class="mt-2 mb-1" DividerType="DividerType.Middle" />
         </MudCollapse>
     </div>
