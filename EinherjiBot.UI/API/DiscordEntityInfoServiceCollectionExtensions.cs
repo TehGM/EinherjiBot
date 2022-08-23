@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
 
             services.AddLocking();
-            services.TryAddTransient<IDiscordEntityInfoService, WebDiscordEntityInfoService>();
+            services.TryAddScoped<IDiscordEntityInfoService, WebDiscordEntityInfoService>();
 
             return services;
         }
