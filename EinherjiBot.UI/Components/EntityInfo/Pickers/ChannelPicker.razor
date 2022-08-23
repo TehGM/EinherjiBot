@@ -61,7 +61,9 @@
         {
             this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value
                 .Select(ch => ch.AsFiltered(this._filter))
-                .Where(ch => ch is not null));
+                .Where(ch => ch is not null))
+                .Where(g => g.Value.Any())
+                .ToDictionary(g => g.Key, g => g.Value);
         }
     }
 

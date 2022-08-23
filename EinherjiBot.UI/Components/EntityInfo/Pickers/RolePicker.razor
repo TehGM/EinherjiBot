@@ -67,7 +67,9 @@
             this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(r => r.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)));
         }
 
-        this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.OrderByDescending(r => r.Position).AsEnumerable());
+        this._filteredGuilds = this._filteredGuilds
+            .Where(g => g.Value.Any())
+            .ToDictionary(g => g.Key, g => g.Value.OrderByDescending(r => r.Position).AsEnumerable());
     }
 
     private string GetRoleText(RoleInfoResponse role)
