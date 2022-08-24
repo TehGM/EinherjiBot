@@ -59,7 +59,7 @@
                         @if (this._modifiedByUser != null)
                         {
                             <MudItem xs="12" Class="d-flex flex-row">
-                                Last edited <InlineTimestamp Timestamp="this._account.ModifiedTimestamp.Value" EnableTooltip="true" TooltipFormat="TimestampFormat.RelativeMediumPrecision" />
+                                Last edited <InlineTimestamp Timestamp="this._account.ModifiedTimestamp.Value" EnableTooltip="true" Format="TimestampFormat.RelativeLowPrecision" TooltipFormat="TimestampFormat.FullDateTimeWithSeconds" />
                                 by <PreviewableUserSpan EnablePopover="false" EnableTooltip="true" Entity="this._modifiedByUser" />
                             </MudItem>
                         }
