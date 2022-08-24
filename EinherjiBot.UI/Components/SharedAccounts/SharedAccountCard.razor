@@ -23,7 +23,8 @@
                     @if (this._modifiedByUser != null)
                     {
                         <MudItem xs="8" Class="align-self-center">
-                            Last edited @this.Account.ModifiedTimestamp.ToString() by <PreviewableUserSpan EnablePopover="false" EnableTooltip="true" Entity="this._modifiedByUser" />
+                            Last edited <InlineTimestamp Timestamp="this.Account.ModifiedTimestamp.Value" EnableTooltip="true" TooltipFormat="TimestampFormat.RelativeHighPrecision" />
+                            by <PreviewableUserSpan EnablePopover="false" EnableTooltip="true" Entity="this._modifiedByUser" />
                         </MudItem>
                     }
                     <MudItem xs="4" Class="d-flex justify-end">

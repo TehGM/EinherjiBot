@@ -1,0 +1,85 @@
+﻿@implements IDisposable
+@inject ITimestampFormatter Formatter
+
+@if (this.EnableTooltip)
+{
+    <MudTooltip Delay="300" Placement="Placement.Top" Color="Color.Dark">
+        <TooltipContent>
+            <InlineTimestamp Timestamp="this.Timestamp" Format="this.TooltipFormat" EnableTooltip="false" />
+        </TooltipContent>
+        <ChildContent>
+            @this.Render()
+        </ChildContent>
+    </MudTooltip>
+}
+else
+{
+    @this.Render()
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public DateTime Timestamp { get; set; }
+
+    [Parameter]
+    public TimestampFormat Format { get; set; } = TimestampFormat.ShortDateTime;
+    [Parameter]
+    public TimestampFormat TooltipFormat { get; set; } = TimestampFormat.FullDateTimeWithSeconds;
+
+    [Parameter]
+    public bool EnableTooltip { get; set; } = false;
+
+    private CancellationTokenSource _cts;
+
+    protected override void OnParametersSet()
+    {
+        if (this.Format == TimestampFormat.RelativeLowPrecision
+            || this.Format == TimestampFormat.RelativeMediumPrecision
+            || this.Format == TimestampFormat.RelativeHighPrecision)
+            this.StartUpdateLoop();
+
+        base.OnParametersSet();
+    }
+
+    private void StartUpdateLoop()
+    {
+        if (this.RenderLocation.IsServer)
+            return;
+
+        lock (this)
+        {
+            this.Dispose();
+            this._cts = new CancellationTokenSource();
+
+            int secondsDelay = this.Format == TimestampFormat.RelativeMediumPrecision || this.Format == TimestampFormat.RelativeLowPrecision
+                ? 60 : 1;
+            int delay = secondsDelay * 1000 - 5;
+            _ = this.RelativeUpdateLoop(delay, this._cts.Token);
+        }
+    }
+
+    private async Task RelativeUpdateLoop(int tickDelay, CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await this.InvokeAsync(base.StateHasChanged);
+                await Task.Delay(tickDelay, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private RenderFragment Render()
+    {
+        string text = this.Formatter.Format(this.Timestamp, this.Format);
+        return @<span>@text</span>;
+    }
+
+    public void Dispose()
+    {
+        try { this._cts?.Cancel(); } catch (ObjectDisposedException) { }
+        try { this._cts?.Dispose(); } catch (ObjectDisposedException) { }
+    }
+}
