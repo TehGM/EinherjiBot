@@ -1,0 +1,9 @@
+::deep :not(mud-tooltip-root) .inline-timestamp {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px;
+    text-decoration: dotted underline 1px rgba(255, 255, 255, 0.6);
+/*    background-image: linear-gradient(to right, white 15%, rgba(255,255,255,0) 0%);
+    background-position: bottom;
+    background-size: 5px 1px;
+    background-repeat: repeat-x;*/
+}

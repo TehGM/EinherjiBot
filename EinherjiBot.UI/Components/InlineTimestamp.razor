@@ -1,21 +1,23 @@
 ﻿@implements IDisposable
 @inject ITimestampFormatter Formatter
 
-@if (this.EnableTooltip)
-{
-    <MudTooltip Delay="300" Placement="Placement.Top" Color="Color.Dark">
-        <TooltipContent>
-            <InlineTimestamp Timestamp="this.Timestamp" Format="this.TooltipFormat" EnableTooltip="false" />
-        </TooltipContent>
-        <ChildContent>
-            @this.Render()
-        </ChildContent>
-    </MudTooltip>
-}
-else
-{
-    @this.Render()
-}
+<span>
+    @if (this.EnableTooltip)
+    {
+        <MudTooltip Delay="300" Placement="Placement.Top" Color="Color.Dark">
+            <TooltipContent>
+                <InlineTimestamp Timestamp="this.Timestamp" Format="this.TooltipFormat" EnableTooltip="false" />
+            </TooltipContent>
+            <ChildContent>
+                @this.Render()
+            </ChildContent>
+        </MudTooltip>
+    }
+    else
+    {
+        @this.Render()
+    }
+</span>
 
 @code {
     [Parameter, EditorRequired]
@@ -74,7 +76,7 @@ else
     private RenderFragment Render()
     {
         string text = this.Formatter.Format(this.Timestamp, this.Format);
-        return @<span>@text</span>;
+        return @<span class="inline-timestamp">@text</span>;
     }
 
     public void Dispose()
