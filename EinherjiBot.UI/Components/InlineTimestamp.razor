@@ -6,7 +6,8 @@
     {
         <MudTooltip Delay="300" Placement="Placement.Top" Color="Color.Dark">
             <TooltipContent>
-                <InlineTimestamp Timestamp="this.Timestamp" Format="this.TooltipFormat" EnableTooltip="false" />
+                <InlineTimestamp Timestamp="this.Timestamp" Format="this.TooltipFormat" EnableTooltip="false" 
+                    Style="@this.TooltipStyle" CssClass="@this.TooltipCssClass" DisableHighlight="true" />
             </TooltipContent>
             <ChildContent>
                 @this.Render()
@@ -22,24 +23,31 @@
 @code {
     [Parameter, EditorRequired]
     public DateTime Timestamp { get; set; }
-
     [Parameter]
-    public TimestampFormat Format { get; set; } = TimestampFormat.ShortDateTime;
+    public bool EnableTooltip { get; set; } = false;
+    [Parameter]
+    public TimestampFormat Format { get; set; } = TimestampFormat.RelativeLowPrecision;
     [Parameter]
     public TimestampFormat TooltipFormat { get; set; } = TimestampFormat.FullDateTimeWithSeconds;
 
     [Parameter]
-    public bool EnableTooltip { get; set; } = false;
+    public bool DisableHighlight { get; set; } = false;
+    [Parameter]
+    public string Style { get; set; }
+    [Parameter]
+    public string CssClass { get; set; }
+    [Parameter]
+    public string TooltipStyle { get; set; }
+    [Parameter]
+    public string TooltipCssClass { get; set; }
 
     private CancellationTokenSource _cts;
+    private string _computedCssClass;
 
     protected override void OnParametersSet()
     {
-        if (this.Format == TimestampFormat.RelativeLowPrecision
-            || this.Format == TimestampFormat.RelativeMediumPrecision
-            || this.Format == TimestampFormat.RelativeHighPrecision)
-            this.StartUpdateLoop();
-
+        this._computedCssClass = $"inline-timestamp {(this.DisableHighlight ? "no-highlight" : null)} {this.CssClass}";
+        this.StartUpdateLoop();
         base.OnParametersSet();
     }
 
@@ -51,32 +59,39 @@
         lock (this)
         {
             this.Dispose();
-            this._cts = new CancellationTokenSource();
 
-            int secondsDelay = this.Format == TimestampFormat.RelativeMediumPrecision || this.Format == TimestampFormat.RelativeLowPrecision
-                ? 60 : 1;
-            int delay = secondsDelay * 1000 - 5;
-            _ = this.RelativeUpdateLoop(delay, this._cts.Token);
+            if (this.Format != TimestampFormat.RelativeLowPrecision
+                && this.Format != TimestampFormat.RelativeMediumPrecision
+                && this.Format != TimestampFormat.RelativeHighPrecision)
+                return;
+
+            this._cts = new CancellationTokenSource();
+            int delay = this.Format == TimestampFormat.RelativeHighPrecision ? 1 : 60;
+            int firstDelay = this.Format == TimestampFormat.RelativeLowPrecision ? 10 : 1;
+            _ = this.RelativeUpdateLoop(firstDelay, delay, this._cts.Token);
         }
     }
 
-    private async Task RelativeUpdateLoop(int tickDelay, CancellationToken cancellationToken)
+    private async Task RelativeUpdateLoop(int firstDelay, int delay, CancellationToken cancellationToken)
     {
+        firstDelay = firstDelay * 1000 - 5;
+        delay = delay * 1000 - 5;
         try
         {
+            await Task.Delay(firstDelay, cancellationToken);
             while (!cancellationToken.IsCancellationRequested)
             {
                 await this.InvokeAsync(base.StateHasChanged);
-                await Task.Delay(tickDelay, cancellationToken);
+                await Task.Delay(delay, cancellationToken);
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException) { }6
     }
 
     private RenderFragment Render()
     {
         string text = this.Formatter.Format(this.Timestamp, this.Format);
-        return @<span class="inline-timestamp">@text</span>;
+        return @<span class="@this._computedCssClass" style="@this.Style">@text</span>;
     }
 
     public void Dispose()

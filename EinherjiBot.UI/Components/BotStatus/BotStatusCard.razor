@@ -60,6 +60,7 @@
                 {
                     <MudItem xs="12">
                         <MudAlert Severity="Severity.Error">
+                            <InlineTimestamp Timestamp="this._error.Timestamp.Value.ToDateTime()" Style="font-weight: 600;" DisableHighlight="true" />:
                             @this._error.Message
                         </MudAlert>
                     </MudItem>
