@@ -4,7 +4,7 @@ using TehGM.EinherjiBot.Caching;
 namespace TehGM.EinherjiBot.UI.API.Services
 {
     // because auth is hard, currently using entity info provider from auth services results in circular dependencies
-    // this prevents caching on logout. This service is meant to address that until a better approach is found
+    // this prevents clearing cache on logout. This service is meant to address that until a better approach is found
     public class WebDiscordEntityInfoCache : IDiscordEntityInfoCache, IDisposable
     {
         public IEntityCache<ulong, UserInfoResponse> UsersCache { get; }
