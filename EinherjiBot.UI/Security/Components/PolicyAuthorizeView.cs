@@ -63,7 +63,7 @@ namespace TehGM.EinherjiBot.UI.Security.Components
         protected BotAuthorizationResult AuthorizationResult { get; set; }
         protected IEnumerable<Type> AllPolicies { get; private set; }
 
-        protected bool IsAuthorized => this.AuthorizationResult?.Succeeded == true;
+        protected bool IsAuthorized => this.AuthorizationResult.Succeeded;
 
         private IEnumerable<Type> GetPolicies()
         {

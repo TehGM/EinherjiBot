@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.Security
 {
-    public class BotAuthorizationResult
+    public struct BotAuthorizationResult
     {
         public bool Succeeded { get; }
         public string Reason { get; }
