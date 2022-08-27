@@ -52,7 +52,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, typeof(CanAccessSharedAccount), cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to access shared account {new Base64Guid(id)}.");
+                throw new AccessForbiddenException($"No permissions to access shared account {(Base64Guid)id}.");
 
             await this.AuditAsync(SharedAccountAuditEntry.Retrieved(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
             return await this.CreateResponseAsync(account, cancellationToken).ConfigureAwait(false);
@@ -84,7 +84,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<ISharedAccount>(account, new[] { typeof(CanAccessSharedAccount), typeof(CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to edit shared account {new Base64Guid(account.ID)}.");
+                throw new AccessForbiddenException($"No permissions to edit shared account {(Base64Guid)account.ID}.");
 
             if (account.HasChanges(request))
             {
@@ -109,7 +109,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, typeof(CanDeleteSharedAccount) , cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to delete shared account {id}.");
+                throw new AccessForbiddenException($"No permissions to delete shared account {(Base64Guid)id}.");
 
             await this._provider.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
             await this.AuditAsync(SharedAccountAuditEntry.Deleted(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
