@@ -24,10 +24,10 @@
             </MudCardHeader>
             <MudCardContent Class="d-flex flex-column">
                 <MudItem xs="12" Class="d-flex flex-row gap-3">
-                    <SharedAccountImage AccountType="this._type" />
+                    <SharedAccountImage AccountType="this._request.AccountType" />
                     <MudItem xs="10" Class="d-flex flex-column">
                         <MudItem xs="12" Class="d-flex flex-row justify-space-between gap-3">
-                            <MudSelect Class="flex-grow-1" Dense=true T="SharedAccountType" @bind-Value="this._type" Label="Type" 
+                            <MudSelect Class="flex-grow-1" Dense=true T="SharedAccountType" @bind-Value="this._request.AccountType" Label="Type" 
                                 Disabled="!this.IsNew && this.CanModify" ReadOnly="!this.CanModify">
                                 @foreach (SharedAccountType type in Enum.GetValues<SharedAccountType>())
                                 {
@@ -48,10 +48,10 @@
                                 </MudItem>
                             }
                         </MudItem>
-                        <MudTextField @ref=this._loginField @bind-Value="@this._login" Label="Login" Variant="Variant.Text" Class="mt-5"
+                        <MudTextField @ref="this._loginField" @bind-Value="@this._request.Login" Label="Login" Variant="Variant.Text" Class="mt-5"
                             Counter="@SharedAccountRequest.LoginMaxLength" Validation="this.LoginValidationDelegate" Immediate="true"
                             ReadOnly="!this.CanModify" />
-                        <MudTextField @bind-Value="@this._password" Label="Password" Variant="Variant.Text" InputType="this.PasswordInputType" Class="mt-0"
+                        <MudTextField @bind-Value="@this._request.Password" Label="Password" Variant="Variant.Text" InputType="this.PasswordInputType" Class="mt-0"
                             Counter="@SharedAccountRequest.PasswordMaxLength" Validation="this.PasswordValidationDelegate" Immediate="true"
                             Adornment="Adornment.Start" AdornmentIcon="@this.PasswordShowIcon" OnAdornmentClick="this.OnPasswordShowClicked" 
                             ReadOnly="!this.CanModify"/>
@@ -74,7 +74,7 @@ else
 }
 
 
-@if ((this._account != null || this.IsNew) && this._authorizedUsers != null && this._authorizedRoles != null && this._modUsers != null)
+@if ((this._account != null || this.IsNew) && this._request != null)
 {
     @if (this.CanModify)
     {
@@ -94,7 +94,7 @@ else
                                 <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
-                        <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._authorizedUsers" AllowNewValues="true" />
+                        <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._request.AuthorizedUserIDs" AllowNewValues="true" />
                     </MudItem>
                     <MudItem xs="12" lg="4">
                         <MudText Typo="Typo.h6">
@@ -104,8 +104,8 @@ else
                                 <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
-                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._authorizedRoles" AllowNone="true" AllowNewValues="true" />
-                        @if (this._authorizedRoles?.Any() == true)
+                        <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._request.AuthorizedRoleIDs" AllowNone="true" AllowNewValues="true" />
+                        @if (this._request.AuthorizedRoleIDs?.Any() == true)
                         {
                             <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
                                 The bot must be present in the same guild as the role in order to recognize it.
@@ -120,7 +120,7 @@ else
                                 <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
-                        <UserIdList @ref="this._modUsersComponent" @bind-Values="this._modUsers" AllowNewValues="true" />
+                        <UserIdList @ref="this._modUsersComponent" @bind-Values="this._request.ModUserIDs" AllowNewValues="true" />
                         @if (!this.IsSelfAdded)
                         {
                             <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Dense="true">
@@ -167,40 +167,33 @@ else
     private Task<AuthenticationState> _authTask { get; set; }
 
     private ISharedAccount _account;
+    private SharedAccountRequest _request;
     private MudTextField<string> _loginField;
     private EntityIdListBase<IDiscordUserInfo> _authorizedUsersComponent;
     private EntityIdListBase<RoleInfoResponse> _authorizedRolesComponent;
     private EntityIdListBase<IDiscordUserInfo> _modUsersComponent;
 
     private Guid? _id;
-    private SharedAccountType _type;
     private IDiscordUserInfo _modifiedByUser;
-    private string _login;
-    private string _password;
 
     private bool _processing;
     private bool _canEdit = false;
     private bool _canCreate = false;
     private bool _canDelete = false;
     private bool _showPassword = false;
-    private IList<ulong> _authorizedUsers;
-    private IList<ulong> _authorizedRoles;
-    private IList<ulong> _modUsers;
 
     private bool IsValid
-        => !this.LoginValidationDelegate(this._login).Any()
-        && !this.PasswordValidationDelegate(this._password).Any()
+        => this.IsNew ? !this._request.ValidateForCreation().Any() : !this._request.ValidateForUpdate(this._account).Any()
         && this._authorizedUsersComponent?.AllValuesValid == true
         && this._authorizedRolesComponent?.AllValuesValid == true
-        && this._modUsersComponent?.AllValuesValid == true
-        && this.AreModsSubset;
+        && this._modUsersComponent?.AllValuesValid == true;
     private bool IsNew => string.IsNullOrWhiteSpace(this.ID) || this.ID.Equals("new", StringComparison.OrdinalIgnoreCase);
     private bool CanModify => this._canEdit || (this._canCreate && this.IsNew);
     private InputType PasswordInputType => this._showPassword ? InputType.Text : InputType.Password;
     private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
     private string Title => this.CanModify ? (this.IsNew ? "New Shared Account" : "Edit Shared Account") : "View Shared Account";
-    private bool IsSelfAdded => this.AuthProvider.User.IsLoggedIn() && this._modUsers?.Contains(this.AuthProvider.User.ID) == true;
-    private bool AreModsSubset => this._modUsers.IsSubsetOf(this._authorizedUsers);
+    private bool IsSelfAdded => this.AuthProvider.User.IsLoggedIn() && this._request.ModUserIDs?.Contains(this.AuthProvider.User.ID) == true;
+    private bool AreModsSubset => this._request.ModUserIDs.IsSubsetOf(this._request.AuthorizedUserIDs);
 
     protected override async Task OnInitializedAsync()
     {
@@ -261,13 +254,8 @@ else
     {
         this._account = account;
         this._id = this._account?.ID;
-        this._type = this._account?.AccountType ?? SharedAccountType.Netflix;
-        this._login = this._account?.Login;
-        this._password = this._account?.Password;
-        this._authorizedUsers = new List<ulong>(this._account?.AuthorizedUserIDs ?? Enumerable.Empty<ulong>());
-        this._authorizedRoles = new List<ulong>(this._account?.AuthorizedRoleIDs ?? Enumerable.Empty<ulong>());
-        this._modUsers = new List<ulong>(this._account?.ModUserIDs ?? Enumerable.Empty<ulong>());
         this._modifiedByUser = this._account?.ModifiedByID != null ? await this.EntityInfoProvider.GetUserInfoAsync(this._account.ModifiedByID.Value) : null;
+        this._request = account != null ? SharedAccountRequest.FromAccount(account) : new SharedAccountRequest();
     }
 
     private bool HasPendingChanges()
@@ -277,28 +265,17 @@ else
 
         if (this._id == null)
         {
-            return !string.IsNullOrEmpty(this._login)
-                || this._authorizedUsers?.Any() == true
-                || this._authorizedRoles?.Any() == true
-                || this._modUsers?.Any() == true;
+            return !string.IsNullOrEmpty(this._request.Login)
+                || this._request.AuthorizedUserIDs?.Any() == true
+                || this._request.AuthorizedRoleIDs?.Any() == true
+                || this._request.ModUserIDs?.Any() == true;
         }
 
-        return this._account.HasChanges(this.BuildAccount());
+        return this._account.HasChanges(this._request);
     }
 
     private void OnPasswordShowClicked(MouseEventArgs e)
         => this._showPassword = !this._showPassword;
-
-    public SharedAccountRequest BuildAccount()
-    {
-        SharedAccountRequest result = new SharedAccountRequest(this._type, this._login, this._password)
-        {
-            AuthorizedUserIDs = this._authorizedUsers,
-            AuthorizedRoleIDs = this._authorizedRoles,
-            ModUserIDs = this._modUsers
-        };
-        return result;
-    }
 
     private async Task OnSaveClickedAsync(MouseEventArgs e)
     {
@@ -308,12 +285,12 @@ else
             SharedAccountResponse response;
             if (this._id != null)
             {
-                response = await this.Service.UpdateAsync(this._id.Value, this.BuildAccount());
+                response = await this.Service.UpdateAsync(this._id.Value, this._request);
                 this.Notifications.Add($"Shared {response.AccountType} account {response.Login} updated.", Severity.Success);
             }
             else
             {
-                response = await this.Service.CreateAsync(this.BuildAccount());
+                response = await this.Service.CreateAsync(this._request);
                 this.Notifications.Add($"Shared {response.AccountType} account {response.Login} created.", Severity.Success);
             }
         }
@@ -325,7 +302,7 @@ else
         if (!this.IsNew)
         {
             bool? promptResult = await this.Dialogs.ShowMessageBox("Deleting Account",
-                $"Are you sure you want to permanently delete {this._type} account {this._login}?",
+                $"Are you sure you want to permanently delete {this._request.AccountType} account {this._request.Login}?",
                 yesText: "Delete", cancelText: "Cancel");
             if (promptResult != true)
                 return;
@@ -357,17 +334,17 @@ else
     private void OnAddSelfClicked(MouseEventArgs e)
     {
         ulong id = this.AuthProvider.User.ID;
-        if (!this._authorizedUsers.Contains(id))
-            this._authorizedUsers.Add(id);
-        if (!this._modUsers.Contains(id))
-            this._modUsers.Add(id);
+        if (!this._request.AuthorizedUserIDs.Contains(id))
+            this._request.AuthorizedUserIDs.Add(id);
+        if (!this._request.ModUserIDs.Contains(id))
+            this._request.ModUserIDs.Add(id);
     }
 
     private void OnAddModsClicked(MouseEventArgs e)
     {
-        IEnumerable<ulong> missing = this._modUsers.Except(this._authorizedUsers);
+        IEnumerable<ulong> missing = this._request.ModUserIDs.Except(this._request.AuthorizedUserIDs);
         foreach (ulong id in missing)
-            this._authorizedUsers.Add(id);
+            this._request.AuthorizedUserIDs.Add(id);
     }
 
     private void GoBack()

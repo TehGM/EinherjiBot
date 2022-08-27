@@ -10,20 +10,20 @@ namespace TehGM.EinherjiBot.SharedAccounts
         public const int PasswordMaxLength = 128;
 
         [JsonProperty("type")]
-        public SharedAccountType AccountType { get; init; }
+        public SharedAccountType AccountType { get; set; }
         [JsonProperty("login", Required = Required.Always)]
-        public string Login { get; init; }
+        public string Login { get; set; }
         [JsonProperty("password", Required = Required.AllowNull)]
-        public string Password { get; init; }
+        public string Password { get; set; }
         [JsonProperty("allowedUsers")]
-        public ICollection<ulong> AuthorizedUserIDs { get; init; } = new List<ulong>();
+        public IList<ulong> AuthorizedUserIDs { get; set; } = new List<ulong>();
         [JsonProperty("allowedRoles")]
-        public ICollection<ulong> AuthorizedRoleIDs { get; init; } = new List<ulong>();
+        public IList<ulong> AuthorizedRoleIDs { get; set; } = new List<ulong>();
         [JsonProperty("modUsers")]
-        public ICollection<ulong> ModUserIDs { get; init; } = new List<ulong>();
+        public IList<ulong> ModUserIDs { get; set; } = new List<ulong>();
 
         [JsonConstructor]
-        private SharedAccountRequest() { }
+        public SharedAccountRequest() { }
 
         public SharedAccountRequest(SharedAccountType accountType, string login, string password)
         {
@@ -32,15 +32,17 @@ namespace TehGM.EinherjiBot.SharedAccounts
             this.Password = password;
         }
 
-        public SharedAccountRequest(ISharedAccount account)
-            : this(account.AccountType, account.Login, account.Password)
+        public static SharedAccountRequest FromAccount(ISharedAccount account)
         {
             if (account == null)
                 throw new ArgumentNullException(nameof(account));
 
-            this.AuthorizedUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.AuthorizedUserIDs) : new List<ulong>();
-            this.AuthorizedRoleIDs = account.AuthorizedRoleIDs != null ? new List<ulong>(account.AuthorizedRoleIDs) : new List<ulong>();
-            this.ModUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.ModUserIDs) : new List<ulong>();
+            return new SharedAccountRequest(account.AccountType, account.Login, account.Password)
+            {
+                AuthorizedUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.AuthorizedUserIDs) : new List<ulong>(),
+                AuthorizedRoleIDs = account.AuthorizedRoleIDs != null ? new List<ulong>(account.AuthorizedRoleIDs) : new List<ulong>(),
+                ModUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.ModUserIDs) : new List<ulong>()
+            };
         }
 
         public IEnumerable<string> ValidateForCreation()

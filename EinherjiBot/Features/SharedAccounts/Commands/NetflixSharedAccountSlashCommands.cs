@@ -54,11 +54,9 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                     return;
                 }
 
-                SharedAccountRequest request = new SharedAccountRequest(account)
-                {
-                    Login = changingEmail ? email?.Trim() : account.Login,
-                    Password = changingPassword ? password?.Trim() : account.Password,
-                };
+                SharedAccountRequest request = SharedAccountRequest.FromAccount(account);
+                request.Login = changingEmail ? email?.Trim() : account.Login;
+                request.Password = changingPassword ? password?.Trim() : account.Password;
                 if (!account.HasChanges(request))
                 {
                     await base.RespondAsync($"{EinherjiEmote.FacepalmOutline} Nothing to change.", ephemeral: true, options: base.GetRequestOptions());
