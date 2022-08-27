@@ -122,20 +122,55 @@ namespace TehGM.EinherjiBot.DiscordClient
             {
                 await this._interactions.ExecuteCommandAsync(ctx, scope.ServiceProvider);
             }
-            catch (HttpException ex) when (ex.IsMissingPermissions())
+            catch (Exception ex)
             {
                 try
                 {
-                    await interaction.RespondAsync(
-                        text: $"Bot missing permissions. Please contact guild admin.",
-                        ephemeral: true,
-                        options: ctx.CancellationToken.ToRequestOptions())
-                        .ConfigureAwait(false);
+                    await HandleExceptionAsync(ex).ConfigureAwait(false);
                 }
                 catch { }
                 throw;
             }
+
+            Task HandleExceptionAsync(Exception exception)
+            {
+                string text = null;
+                if ((exception as HttpException).IsMissingPermissions())
+                    text = $"{EinherjiEmote.FailureSymbol} **Error**: Bot missing permissions. Please contact guild admin.";
+                else if (exception is API.ApiException)
+                {
+                    if (!string.IsNullOrWhiteSpace(exception.Message))
+                        text = $"{EinherjiEmote.FailureSymbol} **Error**: {exception.Message}";
+                    else if (exception is API.BadRequestException)
+                        text = $"{EinherjiEmote.FailureSymbol} **Damn.** Seems your command was malformed... somehow. {EinherjiEmote.BuzzHmm}";
+                    else if (exception is API.AccessForbiddenException)
+                        text = $"{EinherjiEmote.FailureSymbol} **Oof!** You have no permission to do that! {EinherjiEmote.GuyFawkes}";
+                    else
+                        text = $"{EinherjiEmote.FailureSymbol} **Oopsies!** Something was wrong with your command. {EinherjiEmote.FacepalmOutline}";
+                }
+                // for unknown exceptions, we want the Discord's default error behaviour
+                else
+                    return Task.CompletedTask;
+
+                if (!interaction.HasResponded)
+                    return interaction.RespondAsync(
+                        text: text,
+                        ephemeral: true,
+                        options: ctx.CancellationToken.ToRequestOptions());
+                else
+                    return interaction.ModifyOriginalResponseAsync(msg =>
+                    {
+                        msg.Components = null;
+                        msg.Embed = null;
+                        msg.AllowedMentions = null;
+                        msg.Embeds = null;
+                        msg.Flags = new Optional<MessageFlags?>(MessageFlags.None);
+                        msg.Content = text;
+                    },
+                    ctx.CancellationToken.ToRequestOptions());
+            }
         }
+
 
         public IDisposable BeginCommandScope(IInteractionContext context, Type handlerType = null, [CallerMemberName] string cmdName = null)
         {
