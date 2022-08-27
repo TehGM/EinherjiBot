@@ -8,7 +8,7 @@
 @using TehGM.EinherjiBot.UI.Components.EntityInfo.IdLists
 @attribute [Authorize]
 @inject IBotAuthorizationService Auth
-@inject ISharedAccountHandler Service
+@inject ISharedAccountHandler Handler
 
 <PageTitle>@this.Title</PageTitle>
 <PageHeader Text="@this.Title" />
@@ -206,7 +206,7 @@ else
             try
             {
                 Base64Guid id = new Base64Guid(this.ID);
-                ISharedAccount account = await this.Service.GetAsync(id);
+                ISharedAccount account = await this.Handler.GetAsync(id);
                 await this.LoadAccountAsync(account);
             }
             catch (Exception ex)
@@ -285,12 +285,12 @@ else
             SharedAccountResponse response;
             if (this._id != null)
             {
-                response = await this.Service.UpdateAsync(this._id.Value, this._request);
+                response = await this.Handler.UpdateAsync(this._id.Value, this._request);
                 this.Notifications.Add($"Shared {response.AccountType} account {response.Login} updated.", Severity.Success);
             }
             else
             {
-                response = await this.Service.CreateAsync(this._request);
+                response = await this.Handler.CreateAsync(this._request);
                 this.Notifications.Add($"Shared {response.AccountType} account {response.Login} created.", Severity.Success);
             }
         }
@@ -310,7 +310,7 @@ else
             this._processing = true;
             if (this._id != null)
             {
-                await this.Service.DeleteAsync(this._id.Value);
+                await this.Handler.DeleteAsync(this._id.Value);
                 this.Notifications.Add($"Shared {this._account.AccountType} account {this._account.Login} deleted.", Severity.Success);
             }
         }
