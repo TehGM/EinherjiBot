@@ -33,5 +33,20 @@
 
         public static bool Same<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, bool ignoreElementsOrder = false)
             => Same(first, second, null, ignoreElementsOrder);
+
+        public static bool IsSubsetOf<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
+        {
+            if (first?.Any() != true)
+                return true;
+
+            if (second == null)
+                return false;
+
+            comparer = EqualityComparer<TSource>.Default;
+            return !first.Except(second, comparer).Any();
+        }
+
+        public static bool IsSubsetOf<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
+            => IsSubsetOf(first, second, null);
     }
 }

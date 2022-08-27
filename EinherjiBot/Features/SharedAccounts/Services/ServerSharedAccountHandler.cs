@@ -60,6 +60,8 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task<SharedAccountResponse> CreateAsync(SharedAccountRequest request, CancellationToken cancellationToken = default)
         {
+            request.ThrowValidateForCreation();
+
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(new[] { typeof(CanCreateSharedAccount) }, cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException($"No permissions to create shared accounts.");
@@ -78,12 +80,11 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             if (account == null)
                 return null;
 
+            request.ThrowValidateForUpdate(account);
+
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<ISharedAccount>(account, new[] { typeof(CanAccessSharedAccount), typeof(CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException($"No permissions to edit shared account {new Base64Guid(account.ID)}.");
-
-            if (account.AccountType != request.AccountType)
-                throw new BadRequestException("Cannot change type of an existing shared account");
 
             if (account.HasChanges(request))
             {

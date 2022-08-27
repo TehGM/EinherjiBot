@@ -200,7 +200,7 @@ else
     private string PasswordShowIcon => this._showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
     private string Title => this.CanModify ? (this.IsNew ? "New Shared Account" : "Edit Shared Account") : "View Shared Account";
     private bool IsSelfAdded => this.AuthProvider.User.IsLoggedIn() && this._modUsers?.Contains(this.AuthProvider.User.ID) == true;
-    private bool AreModsSubset => !this._modUsers.Except(this._authorizedUsers).Any();
+    private bool AreModsSubset => this._modUsers.IsSubsetOf(this._authorizedUsers);
 
     protected override async Task OnInitializedAsync()
     {
