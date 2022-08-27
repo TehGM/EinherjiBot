@@ -1,19 +1,18 @@
 ﻿using TehGM.EinherjiBot.SharedAccounts;
-using TehGM.EinherjiBot.SharedAccounts.API;
 using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.SharedAccounts
 {
-    public class WebSharedAccountsService : ISharedAccountsService
+    public class WebSharedAccountHandler : ISharedAccountHandler
     {
         private readonly IApiClient _client;
 
-        public WebSharedAccountsService(IApiClient client)
+        public WebSharedAccountHandler(IApiClient client)
         {
             this._client = client;
         }
 
-        public Task<IEnumerable<SharedAccountResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<SharedAccountResponse>> GetAllAsync(SharedAccountFilter filter, bool skipAudit, CancellationToken cancellationToken = default)
             => this._client.GetJsonAsync<IEnumerable<SharedAccountResponse>>("shared-accounts", cancellationToken);
 
         public Task<SharedAccountResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
@@ -22,8 +21,11 @@ namespace TehGM.EinherjiBot.UI.SharedAccounts
         public Task<SharedAccountResponse> CreateAsync(SharedAccountRequest request, CancellationToken cancellationToken = default)
             => this._client.PostJsonAsync<SharedAccountResponse>("shared-accounts", request, cancellationToken);
 
-        public Task<SharedAccountResponse> UpdateAsync(Guid id, SharedAccountRequest request, CancellationToken cancellationToken = default)
-            => this._client.PutJsonAsync<SharedAccountResponse>($"shared-accounts/{id}", request, cancellationToken);
+        public async Task<EntityUpdateResult<SharedAccountResponse>> UpdateAsync(Guid id, SharedAccountRequest request, CancellationToken cancellationToken = default)
+        {
+            SharedAccountResponse response = await this._client.PutJsonAsync<SharedAccountResponse>($"shared-accounts/{id}", request, cancellationToken);
+            return IEntityUpdateResult.Saved(response);
+        }
 
         public Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
             => this._client.DeleteAsync($"shared-accounts/{id}", null, cancellationToken);

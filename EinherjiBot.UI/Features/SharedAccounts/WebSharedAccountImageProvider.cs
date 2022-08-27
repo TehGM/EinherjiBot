@@ -1,16 +1,15 @@
 ﻿using TehGM.EinherjiBot.SharedAccounts;
-using TehGM.EinherjiBot.SharedAccounts.API;
 
 namespace TehGM.EinherjiBot.UI.SharedAccounts
 {
     public class WebSharedAccountImageProvider : ISharedAccountImageProvider
     {
-        private readonly ISharedAccountsService _service;
+        private readonly ISharedAccountHandler _service;
         private readonly ILockProvider _lock;
 
         private IDictionary<SharedAccountType, string> _images;
 
-        public WebSharedAccountImageProvider(ISharedAccountsService service, ILockProvider<WebSharedAccountImageProvider> lockProvider)
+        public WebSharedAccountImageProvider(ISharedAccountHandler service, ILockProvider<WebSharedAccountImageProvider> lockProvider)
         {
             this._service = service;
             this._lock = lockProvider;

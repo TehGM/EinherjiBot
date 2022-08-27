@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace TehGM.EinherjiBot.SharedAccounts.API
+namespace TehGM.EinherjiBot.SharedAccounts
 {
     public class SharedAccountResponse : ICacheableEntity<Guid>, ISharedAccount
     {

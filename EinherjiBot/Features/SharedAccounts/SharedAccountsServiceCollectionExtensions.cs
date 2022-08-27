@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.SharedAccounts;
-using TehGM.EinherjiBot.SharedAccounts.API;
-using TehGM.EinherjiBot.SharedAccounts.API.Services;
 using TehGM.EinherjiBot.SharedAccounts.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -24,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<ISharedAccountStore, MongoSharedAccountStore>();
             services.TryAddScoped<ISharedAccountProvider, SharedAccountProvider>();
             services.TryAddTransient<ISharedAccountImageProvider, SharedAccountImageProvider>();
-            services.TryAddTransient<ISharedAccountsService, ApiSharedAccountsService>();
+            services.TryAddTransient<ISharedAccountHandler, ServerSharedAccountHandler>();
 
             return services;
         }

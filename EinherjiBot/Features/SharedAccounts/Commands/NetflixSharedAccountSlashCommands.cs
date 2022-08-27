@@ -1,7 +1,5 @@
 ﻿using Discord;
 using Discord.Interactions;
-using TehGM.EinherjiBot.Auditing;
-using TehGM.EinherjiBot.Auditing.SharedAccounts;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Commands
 {
@@ -11,32 +9,26 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
         [Group("account", "Gives access to a shared Netflix account")]
         public class AccountCommands : EinherjiInteractionModule
         {
-            private readonly ISharedAccountProvider _provider;
+            private readonly ISharedAccountHandler _handler;
             private readonly ISharedAccountImageProvider _imageProvider;
-            private readonly IBotAuthorizationService _auth;
-            private readonly IAuditStore<SharedAccountAuditEntry> _audit;
 
-            public AccountCommands(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, 
-                IBotAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit)
+            public AccountCommands(ISharedAccountHandler handler, ISharedAccountImageProvider imageProvider)
             {
-                this._provider = provider;
+                this._handler = handler;
                 this._imageProvider = imageProvider;
-                this._auth = auth;
-                this._audit = audit;
             }
 
             [SlashCommand("get", "Gets netflix account credentials", runMode: RunMode.Sync)]
             public async Task CmdGetAsync(
                 [Summary("Account", "Account to get credentials for"), Autocomplete(typeof(NetflixSharedAccountAutocompleteHandler))] Guid id)
             {
-                SharedAccount account = await this._provider.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
+                ISharedAccount account = await this._handler.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
                 if (account == null)
                 {
                     await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested shared account not found.", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
 
-                await this._audit.AddAuditAsync(SharedAccountAuditEntry.Retrieved(base.Context.User.Id, account.ID, base.Context.Interaction.CreatedAt.UtcDateTime));
                 EmbedBuilder embed = await this.CreateAccountEmbedAsync(account).ConfigureAwait(false);
                 await base.RespondAsync(embed: embed.Build(), ephemeral: true, options: base.GetRequestOptions()).ConfigureAwait(false);
             }
@@ -55,52 +47,36 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                     return;
                 }
 
-                SharedAccount account = await this._provider.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
+                ISharedAccount account = await this._handler.GetAsync(id, base.CancellationToken).ConfigureAwait(false);
                 if (account == null)
                 {
                     await base.RespondAsync($"{EinherjiEmote.FailureSymbol} Requested shared account not found.", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
-                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, 
-                    new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) }, base.CancellationToken).ConfigureAwait(false);
-                if (!authorization.Succeeded)
-                {
-                    await base.RespondAsync($"{EinherjiEmote.FailureSymbol} {authorization.Reason}", ephemeral: true, options: base.GetRequestOptions());
-                    return;
-                }
 
-                email = email?.Trim();
-                password = password?.Trim();
-
-                bool anythingChanged = false;
-                if (changingEmail && account.Login != email)
+                SharedAccountRequest request = new SharedAccountRequest(account)
                 {
-                    account.Login = email;
-                    anythingChanged = true;
-                }
-                if (changingPassword && account.Password != password)
-                {
-                    account.Password = password;
-                    anythingChanged = true;
-                }
-
-                if (!anythingChanged)
+                    Login = changingEmail ? email?.Trim() : account.Login,
+                    Password = changingPassword ? password?.Trim() : account.Password,
+                };
+                if (!account.HasChanges(request))
                 {
                     await base.RespondAsync($"{EinherjiEmote.FacepalmOutline} Nothing to change.", ephemeral: true, options: base.GetRequestOptions());
                     return;
                 }
 
-                account.ModifiedByID = base.Context.User.Id;
-                account.ModifiedTimestamp = base.Context.Interaction.CreatedAt.UtcDateTime;
-                await this._provider.AddOrUpdateAsync(account, base.CancellationToken).ConfigureAwait(false);
-
-                await this._audit.AddAuditAsync(SharedAccountAuditEntry.Updated(base.Context.User.Id, account.ID, base.Context.Interaction.CreatedAt.UtcDateTime), base.CancellationToken).ConfigureAwait(false);
-                EmbedBuilder embed = await this.CreateAccountEmbedAsync(account).ConfigureAwait(false);
-                await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
+                IEntityUpdateResult<ISharedAccount> result = await this._handler.UpdateAsync(account.ID, request, base.CancellationToken).ConfigureAwait(false);
+                if (result.Saved())
+                {
+                    EmbedBuilder embed = await this.CreateAccountEmbedAsync(result.Entity).ConfigureAwait(false);
+                    await base.RespondAsync(null, embed.Build()).ConfigureAwait(false);
+                }
+                else if (result.NoChanges())
+                    await base.RespondAsync($"{EinherjiEmote.FacepalmOutline} Nothing to change.", ephemeral: true, options: base.GetRequestOptions());
             }
 
 
-            private async Task<EmbedBuilder> CreateAccountEmbedAsync(SharedAccount account)
+            private async Task<EmbedBuilder> CreateAccountEmbedAsync(ISharedAccount account)
             {
                 EmbedBuilder embed = new EmbedBuilder()
                     .AddField("Login", account.Login)

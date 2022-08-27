@@ -4,6 +4,7 @@ namespace TehGM.EinherjiBot.Auditing
 {
     public abstract class BotAuditEntry
     {
+        public const string CreateAction = "Create";
         public const string RetrieveAction = "Retrieve";
         public const string UpdateAction = "Update";
         public const string DeleteAction = "Delete";

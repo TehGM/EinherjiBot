@@ -3,7 +3,7 @@
     public interface ISharedAccountStore
     {
         Task<SharedAccount> GetAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<SharedAccount>> FindAsync(SharedAccountType? type, ulong? userID, IEnumerable<ulong> roleIDs, bool forModeration, CancellationToken cancellationToken = default);
+        Task<IEnumerable<SharedAccount>> FindAsync(SharedAccountFilter filter, CancellationToken cancellationToken = default);
 
         Task UpdateAsync(SharedAccount account, CancellationToken cancellationToken = default);
 

@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
-namespace TehGM.EinherjiBot.SharedAccounts.API
+namespace TehGM.EinherjiBot.SharedAccounts
 {
-    public class SharedAccountRequest
+    public class SharedAccountRequest : IValidatableObject
     {
         public const int LoginMaxLength = 64;
         public const int PasswordMaxLength = 128;
@@ -23,11 +23,30 @@ namespace TehGM.EinherjiBot.SharedAccounts.API
         [JsonProperty("modUsers")]
         public ICollection<ulong> ModUserIDs { get; init; } = new List<ulong>();
 
+        [JsonConstructor]
+        private SharedAccountRequest() { }
+
         public SharedAccountRequest(SharedAccountType accountType, string login, string password)
         {
             this.AccountType = accountType;
             this.Login = login;
             this.Password = password;
+        }
+
+        public SharedAccountRequest(ISharedAccount account)
+            : this(account.AccountType, account.Login, account.Password)
+        {
+            if (account == null)
+                throw new ArgumentNullException(nameof(account));
+
+            this.AuthorizedUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.AuthorizedUserIDs) : new List<ulong>();
+            this.AuthorizedRoleIDs = account.AuthorizedRoleIDs != null ? new List<ulong>(account.AuthorizedRoleIDs) : new List<ulong>();
+            this.ModUserIDs = account.AuthorizedUserIDs != null ? new List<ulong>(account.ModUserIDs) : new List<ulong>();
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            throw new NotImplementedException();
         }
     }
 }

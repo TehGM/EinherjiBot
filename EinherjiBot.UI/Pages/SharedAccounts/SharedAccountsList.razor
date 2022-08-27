@@ -1,11 +1,10 @@
 ﻿@page "/shared-accounts"
 @using TehGM.EinherjiBot.SharedAccounts
-@using TehGM.EinherjiBot.SharedAccounts.API
 @using TehGM.EinherjiBot.SharedAccounts.Policies
 @using TehGM.EinherjiBot.UI.Components.SharedAccounts
 @attribute [HasSharedAccountsFeature]
 
-@inject ISharedAccountsService Service
+@inject ISharedAccountHandler Handler
 
 <PageTitle>Shared Accounts</PageTitle>
 <PageHeader Text="Shared Accounts" />
@@ -45,7 +44,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        IEnumerable<SharedAccountResponse> accounts = await this.Service.GetAllAsync().ConfigureAwait(false);
+        IEnumerable<SharedAccountResponse> accounts = await this.Handler.GetAllAsync().ConfigureAwait(false);
         this._accounts = accounts.ToDictionary(a => a.ID);
     }
 

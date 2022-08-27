@@ -23,22 +23,24 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));
         }
 
-        public async Task<IEnumerable<SharedAccount>> GetAllAuthorizedAsync(bool forModeration, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<SharedAccount>> FindAsync(SharedAccountFilter filter, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
+                using IDisposable logScope = this._log.BeginScope(new Dictionary<string, object>()
+                {
+                    { nameof(filter.AccountType), filter.AccountType },
+                    { nameof(filter.LoginStartsWith), filter.LoginStartsWith },
+                    { nameof(filter.LoginContains), filter.LoginContains },
+                    { nameof(filter.AuthorizeUserID), filter.AuthorizeUserID },
+                    { nameof(filter.AuthorizeRoleIDs), string.Join(',', filter.AuthorizeRoleIDs ?? Enumerable.Empty<ulong>()) },
+                    { nameof(filter.ModUserID), filter.ModUserID },
+                });
+
                 await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
 
-                Type[] policies = forModeration ? new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) } : new[] { typeof(Policies.CanAccessSharedAccount) };
-                IEnumerable<SharedAccount> allAccounts = this._cache.Find(_ => true);
-                List<SharedAccount> results = new List<SharedAccount>(allAccounts.Count());
-                foreach (SharedAccount account in allAccounts)
-                {
-                    BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(account, policies, cancellationToken).ConfigureAwait(false);
-                    if (authorization.Succeeded)
-                        results.Add(account);
-                }
+                IEnumerable<SharedAccount> results = filter.Filter(this._cache.Find(_ => true)).Cast<SharedAccount>();
                 if (results.Any())
                     this._log.LogTrace("{Count} shared accounts found in cache", results.Count());
                 return results;
@@ -51,21 +53,10 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task<SharedAccount> GetAsync(Guid id, CancellationToken cancellationToken)
         {
-            SharedAccount result = await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
-
-            BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(result, typeof(Policies.CanAccessSharedAccount), cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to access shared account {result.ID}");
-            return result;
-        }
-
-        private async Task<SharedAccount> GetInternalAsync(Guid id, CancellationToken cancellationToken)
-        {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
-                return this._cache.Get(id);
+                return await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -73,55 +64,54 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             }
         }
 
-        public async Task<IEnumerable<SharedAccount>> GetAuthorizedOfTypeAsync(SharedAccountType type, bool forModeration, CancellationToken cancellationToken = default)
+        private async Task<SharedAccount> GetInternalAsync(Guid id, CancellationToken cancellationToken)
         {
-            IEnumerable<SharedAccount> results = await this.GetAllAuthorizedAsync(forModeration, cancellationToken).ConfigureAwait(false);
-            results = results.Where(a => a.AccountType == type);
-            return results;
+            await this.PopulateCacheAsync(cancellationToken).ConfigureAwait(false);
+            return this._cache.Get(id);
         }
 
         public async Task AddOrUpdateAsync(SharedAccount account, CancellationToken cancellationToken = default)
         {
-            SharedAccount existing = await this.GetInternalAsync(account.ID, cancellationToken).ConfigureAwait(false);
-            if (existing != null)
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing,
-                    new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
-                if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"No permissions to edit shared account {account.ID}.");
+                await this._store.UpdateAsync(account, cancellationToken).ConfigureAwait(false);
+                this._cache.AddOrReplace(account);
             }
-            else
+            finally
             {
-                BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(new[] { typeof(Policies.CanCreateSharedAccount) }, cancellationToken).ConfigureAwait(false);
-                if (!authorization.Succeeded)
-                    throw new AccessForbiddenException($"No permissions to create shared accounts.");
+                this._lock.Release();
             }
-            await this._store.UpdateAsync(account, cancellationToken).ConfigureAwait(false);
-            this._cache.AddOrReplace(account);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            SharedAccount existing = await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
-            if (existing == null)
-                return;
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                SharedAccount account = await this.GetInternalAsync(id, cancellationToken).ConfigureAwait(false);
+                if (account == null)
+                    return;
 
-            BotAuthorizationResult authorization = await this._authService.AuthorizeAsync(existing,
-                new[] { typeof(Policies.CanAccessSharedAccount), typeof(Policies.CanDeleteSharedAccount) }, cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to delete shared account {id}.");
-
-            await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
-            this._cache.Remove(id);
+                await this._store.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
+                this._cache.Remove(id);
+            }
+            finally
+            {
+                this._lock.Release();
+            }
         }
 
+        // to allow GetAll to work with cache, we need to always have cache populated with all entites
+        // this is not ideal, but in case of shared accounts, it's acceptable
+        // maybe later can make compound cache using the filter object?
         private async Task PopulateCacheAsync(CancellationToken cancellationToken)
         {
             this._cache.ClearExpired();
             if (this._cache.CachedCount != 0)
                 return;
 
-            IEnumerable<SharedAccount> results = await this._store.FindAsync(null, null, null, false, cancellationToken).ConfigureAwait(false);
+            IEnumerable<SharedAccount> results = await this._store.FindAsync(SharedAccountFilter.Empty, cancellationToken).ConfigureAwait(false);
             foreach (SharedAccount result in results)
                 this._cache.AddOrReplace(result);
         }

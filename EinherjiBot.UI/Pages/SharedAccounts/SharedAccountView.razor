@@ -3,13 +3,12 @@
 @using MudBlazor.Services
 @using TehGM.EinherjiBot.Security
 @using TehGM.EinherjiBot.SharedAccounts
-@using TehGM.EinherjiBot.SharedAccounts.API
 @using TehGM.EinherjiBot.SharedAccounts.Policies
 @using TehGM.EinherjiBot.UI.Components.SharedAccounts
 @using TehGM.EinherjiBot.UI.Components.EntityInfo.IdLists
 @attribute [Authorize]
 @inject IBotAuthorizationService Auth
-@inject ISharedAccountsService Service
+@inject ISharedAccountHandler Service
 
 <PageTitle>@this.Title</PageTitle>
 <PageHeader Text="@this.Title" />
@@ -284,11 +283,7 @@ else
                 || this._modUsers?.Any() == true;
         }
 
-        return this._account.Login != this._login
-            || this._account.Password != this._password
-            || this._account.AuthorizedUserIDs?.SequenceEqual(this._authorizedUsers ?? Enumerable.Empty<ulong>()) != true
-            || this._account.AuthorizedRoleIDs?.SequenceEqual(this._authorizedRoles ?? Enumerable.Empty<ulong>()) != true
-            || this._account.ModUserIDs?.SequenceEqual(this._modUsers ?? Enumerable.Empty<ulong>()) != true;
+        return this._account.HasChanges(this.BuildAccount());
     }
 
     private void OnPasswordShowClicked(MouseEventArgs e)
