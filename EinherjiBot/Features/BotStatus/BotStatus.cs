@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace TehGM.EinherjiBot.BotStatus
 {
     [DebuggerDisplay("{ToString(),nq} ({ID,nq})")]
-    public class Status : ICacheableEntity<Guid>
+    public class BotStatus : ICacheableEntity<Guid>, IBotStatus
     {
         [BsonId]
         public Guid ID { get; }
@@ -20,13 +20,15 @@ namespace TehGM.EinherjiBot.BotStatus
         [BsonElement("lastError"), BsonIgnoreIfNull]
         public ErrorInfo LastError { get; set; }
 
+        IErrorInfo IBotStatus.LastError => this.LastError;
+
         [BsonConstructor]
-        private Status(Guid id)
+        private BotStatus(Guid id)
         {
             this.ID = id;
         }
 
-        public Status(string text, string link, ActivityType activityType = ActivityType.Playing)
+        public BotStatus(string text, string link, ActivityType activityType = ActivityType.Playing)
             : this(Guid.NewGuid())
         {
             this.Text = text;
@@ -35,7 +37,7 @@ namespace TehGM.EinherjiBot.BotStatus
             this.IsEnabled = true;
         }
 
-        public Status(string text, ActivityType activityType = ActivityType.Playing)
+        public BotStatus(string text, ActivityType activityType = ActivityType.Playing)
             : this(text, null, activityType) { }
 
         public override string ToString()

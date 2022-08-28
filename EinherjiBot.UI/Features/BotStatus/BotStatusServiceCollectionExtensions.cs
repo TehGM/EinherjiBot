@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-using TehGM.EinherjiBot.BotStatus.API;
+using TehGM.EinherjiBot.BotStatus;
 using TehGM.EinherjiBot.UI.BotStatus.API;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            services.TryAddTransient<IBotStatusService, WebBotStatusService>();
+            services.TryAddTransient<IBotStatusHandler, WebBotStatusHandler>();
 
             return services;
         }

@@ -7,9 +7,9 @@ namespace TehGM.EinherjiBot.BotStatus.API.Controllers
     [ApiController]
     public class BotStatusController : ControllerBase
     {
-        private readonly IBotStatusService _service;
+        private readonly IBotStatusHandler _service;
 
-        public BotStatusController(IBotStatusService service)
+        public BotStatusController(IBotStatusHandler service)
         {
             this._service = service;
         }
@@ -56,6 +56,14 @@ namespace TehGM.EinherjiBot.BotStatus.API.Controllers
         public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
         {
             await this._service.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
+            return base.NoContent();
+        }
+
+        [HttpPost("current")]
+        [AuthorizeAdmin]
+        public async Task<IActionResult> SetCurrentAsync(BotStatusRequest request, CancellationToken cancellationToken)
+        {
+            await this._service.SetCurrentAsync(request, cancellationToken).ConfigureAwait(false);
             return base.NoContent();
         }
     }

@@ -1,8 +1,6 @@
 ﻿using TehGM.EinherjiBot.BotStatus;
 using TehGM.EinherjiBot.BotStatus.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using TehGM.EinherjiBot.BotStatus.API;
-using TehGM.EinherjiBot.BotStatus.API.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -19,11 +17,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddLocking();
             services.AddPlaceholdersEngineBackend();
             services.TryAddSingleton<IStatusStore, MongoStatusStore>();
-            services.TryAddScoped<IStatusProvider, StatusProvider>();
+            services.TryAddScoped<IBotStatusProvider, BotStatusProvider>();
             services.TryAddScoped<IBotStatusSetter, BotStatusSetter>();
             services.AddHostedService<AutoStatusService>();
 
-            services.TryAddTransient<IBotStatusService, ApiBotStatusService>();
+            services.TryAddTransient<IBotStatusHandler, ServerBotStatusHandler>();
 
             return services;
         }

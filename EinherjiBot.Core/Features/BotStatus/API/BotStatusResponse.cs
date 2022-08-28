@@ -2,9 +2,9 @@
 using Newtonsoft.Json;
 using TehGM.EinherjiBot.API;
 
-namespace TehGM.EinherjiBot.BotStatus.API
+namespace TehGM.EinherjiBot.BotStatus
 {
-    public class BotStatusResponse
+    public class BotStatusResponse : IBotStatus
     {
         [JsonProperty("id")]
         public Guid ID { get; init; }
@@ -18,6 +18,8 @@ namespace TehGM.EinherjiBot.BotStatus.API
         public bool IsEnabled { get; init; }
         [JsonProperty("lastError", NullValueHandling = NullValueHandling.Ignore)]
         public ErrorInfoResponse LastError { get; init; }
+
+        IErrorInfo IBotStatus.LastError => this.LastError;
 
         public BotStatusResponse(Guid id, string text, string link, ActivityType activityType, bool isEnabled)
         {

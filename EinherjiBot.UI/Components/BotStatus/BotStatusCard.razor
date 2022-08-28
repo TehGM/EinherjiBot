@@ -1,10 +1,10 @@
 ﻿@using Discord
-@using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.BotStatus
 @using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 @using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @using TehGM.EinherjiBot.Utilities
-@inject IBotStatusService Service
+@inject IBotStatusHandler Service
 @inject IPlaceholdersService Placeholders
 @inject IPlaceholdersBuilder PlaceholdersDialog
 
@@ -14,7 +14,7 @@
             <MudGrid Class="flex-wrap">
                 <MudItem xs="7" sm="6" md="8">
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing || !this.IsLinkValid" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
-                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._text)" OnClick="this.OnPreviewClickedAsync">
+                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._request.Text)" OnClick="this.OnPreviewClickedAsync">
                         Preview
                         <MudPopover Open="this._previewText != null" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
                             <DiscordUserPreview User="this.BotInfo" CustomStatusText="@this._previewText" ShowAdminIcon="false" />
@@ -28,7 +28,7 @@
                     {
                         <MudProgressCircular Class="ms-n1" Color="MudBlazor.Color.Primary" Size="Size.Small" Indeterminate="true"/>
                     }
-                    <MudSwitch @bind-Checked="this._enabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
+                    <MudSwitch @bind-Checked="this._request.IsEnabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
                     <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
                         Disabled="this._processing || !this.HasPendingChanges() || !this.IsLinkValid" 
                         OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
@@ -39,7 +39,7 @@
         <MudCardContent>
             <MudGrid>
                 <MudItem xs="12" md="3" lg="2">
-                    <MudSelect T="ActivityType" @bind-Value="this._activityType" Label="Activity" Disabled="this._processing">
+                    <MudSelect T="ActivityType" @bind-Value="this._request.ActivityType" Label="Activity" Disabled="this._processing">
                         <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Listening"><MudIcon Icon="@Icons.Filled.Headphones"/> Listening to</MudSelectItem>
@@ -47,12 +47,12 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="9" lg="10">
-                    <MudTextField @bind-Value="this._text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
+                    <MudTextField @bind-Value="this._request.Text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
                 @if (this.IsStreamingActivity)
                 {
                     <MudItem xs="12">
-                        <MudTextField @bind-Value="this._link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
+                        <MudTextField @bind-Value="this._request.Link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
                             Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" DebounceInterval="350" />
                     </MudItem>
                 }
@@ -60,7 +60,7 @@
                 {
                     <MudItem xs="12">
                         <MudAlert Severity="Severity.Error">
-                            <InlineTimestamp Timestamp="this._error.Timestamp.Value.ToDateTime()" Style="font-weight: 600;" DisableHighlight="true" />:
+                            <InlineTimestamp Timestamp="this._error.Timestamp.ToDateTime()" Style="font-weight: 600;" DisableHighlight="true" />:
                             @this._error.Message
                         </MudAlert>
                     </MudItem>
@@ -75,7 +75,7 @@
     public IDiscordUserInfo BotInfo { get; set; }
 
     [Parameter]
-    public BotStatusResponse ExistingStatus { get; set; }
+    public IBotStatus ExistingStatus { get; set; }
 
     [Parameter]
     public EventCallback<StatusEventArgs> Deleted { get; set; }
@@ -83,20 +83,17 @@
     public EventCallback<StatusEventArgs> Saved { get; set; }
 
     private Guid? _id;
-    private ActivityType _activityType;
-    private string _text;
-    private string _link;
-    private bool _enabled;
+    private BotStatusRequest _request;
 
     private string _previewText;
 
     private bool _processing;
-    private BotStatusResponse _savedStatus;
+    private IBotStatus _savedStatus;
     private ErrorInfoResponse _error;
 
     private bool IsNew => this._id == null;
-    private bool IsStreamingActivity => this._activityType == ActivityType.Streaming;
-    private bool IsLinkValid => !this.IsStreamingActivity || ActivityLinkValidator.IsLinkValid(this._link);
+    private bool IsStreamingActivity => this._request.ActivityType == ActivityType.Streaming;
+    private bool IsLinkValid => !this.IsStreamingActivity || ActivityLinkValidator.IsLinkValid(this._request.Link);
 
     private string SaveIcon => this.IsNew ? Icons.Filled.AddCircle : Icons.Material.Filled.Save;
     private string SaveText => this.IsNew ? "Add" : "Save";
@@ -111,21 +108,19 @@
 
     private bool HasPendingChanges()
         => this._id == null
-        || this.ExistingStatus.ActivityType != this._activityType
-        || this.ExistingStatus.Text != this._text
-        || this.ExistingStatus.Link != this._link
-        || this.ExistingStatus.IsEnabled != this._enabled;
+        || this.ExistingStatus.ActivityType != this._request.ActivityType
+        || this.ExistingStatus.Text != this._request.Text
+        || this.ExistingStatus.Link != this._request.Link
+        || this.ExistingStatus.IsEnabled != this._request.IsEnabled;
 
-    private void LoadStatus(BotStatusResponse status)
+    private void LoadStatus(IBotStatus status)
     {
         this._savedStatus = status;
         this.ExistingStatus = status;
         this._id = this.ExistingStatus?.ID;
-        this._activityType = this.ExistingStatus?.ActivityType ?? ActivityType.Playing;
-        this._text = this.ExistingStatus?.Text;
-        this._link = this.ExistingStatus?.Link;
-        this._enabled = this.ExistingStatus?.IsEnabled ?? false;
-        this._error = this.ExistingStatus?.LastError;
+        this._error = this.ExistingStatus?.LastError as ErrorInfoResponse;
+
+        this._request = status != null ? BotStatusRequest.FromStatus(status) : new BotStatusRequest();
     }
 
     public void ClearInputs()
@@ -134,17 +129,14 @@
         base.StateHasChanged();
     }
 
-    public BotStatusRequest BuildStatus()
-        => new BotStatusRequest(this._text, this.IsStreamingActivity ? this._link : null, this._activityType, this._enabled);
-
     private async Task OnDeleteClickedAsync(MouseEventArgs e)
     {
         if (this._id != null)
         {
-            string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
-            string message = !string.IsNullOrWhiteSpace(this._text)
+            string activity = this._request.ActivityType == ActivityType.Listening ? "Listening to" : this._request.ActivityType.ToString();
+            string message = !string.IsNullOrWhiteSpace(this._request.Text)
                 ? "Are you sure you want to permanently delete empty status?"
-                : $"Are you sure you want to permanently delete status \"{activity} {this._text}\"?";
+                : $"Are you sure you want to permanently delete status \"{activity} {this._request.Text}\"?";
             bool? result = await this.Dialogs.ShowMessageBox("Deleting Status", message,
                 yesText: "Delete", cancelText: "Cancel");
             if (result != true)
@@ -166,9 +158,9 @@
         this._processing = true;
         BotStatusResponse response;
         if (this._id != null)
-            response = await this.Service.UpdateAsync(this._id.Value, this.BuildStatus());
+            response = await this.Service.UpdateAsync(this._id.Value, this._request);
         else
-            response = await this.Service.CreateAsync(this.BuildStatus());
+            response = await this.Service.CreateAsync(this._request);
         this.LoadStatus(response);
         this.Notifications.Add("Status saved.", Severity.Success);
         await this.Saved.InvokeAsync(new StatusEventArgs(this._id, this.ExistingStatus));
@@ -181,7 +173,7 @@
         try
         {
             this._error = null;
-            await this.Service.SetCurrentAsync(this.BuildStatus());
+            await this.Service.SetCurrentAsync(this._request);
             this.Notifications.Add("Bot's current status changed", Severity.Success);
         }
         catch (PlaceholderException ex)
@@ -199,8 +191,8 @@
         this._processing = true;
         try
         {
-            PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._text, PlaceholderUsage.Status));
-            string activity = this._activityType == ActivityType.Listening ? "Listening to" : this._activityType.ToString();
+            PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._request.Text, PlaceholderUsage.Status));
+            string activity = this._request.ActivityType == ActivityType.Listening ? "Listening to" : this._request.ActivityType.ToString();
             this._previewText = $"{activity} {response.Result}";
         }
         catch (PlaceholderException ex)
@@ -213,5 +205,5 @@
         }
     }
 
-    public record StatusEventArgs(Guid? ID, BotStatusResponse Status);
+    public record StatusEventArgs(Guid? ID, IBotStatus Status);
 }

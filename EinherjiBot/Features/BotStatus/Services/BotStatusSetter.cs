@@ -11,12 +11,12 @@ namespace TehGM.EinherjiBot.BotStatus.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IRandomizer _randomizer;
-        private readonly IStatusProvider _provider;
+        private readonly IBotStatusProvider _provider;
         private readonly IPlaceholdersEngine _placeholders;
         private readonly IBotAuthorizationService _auth;
         private readonly ILogger _log;
 
-        public BotStatusSetter(DiscordSocketClient client, IRandomizer randomizer, IStatusProvider provider, IPlaceholdersEngine placeholders, 
+        public BotStatusSetter(DiscordSocketClient client, IRandomizer randomizer, IBotStatusProvider provider, IPlaceholdersEngine placeholders, 
             IBotAuthorizationService auth, ILogger<BotStatusSetter> log)
         {
             this._client = client;
@@ -27,21 +27,17 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             this._log = log;
         }
 
-        public async Task<Status> RandomizeStatusAsync(CancellationToken cancellationToken = default)
+        public async Task<BotStatus> RandomizeStatusAsync(CancellationToken cancellationToken = default)
         {
             if (this._client.CurrentUser == null || this._client.ConnectionState != ConnectionState.Connected)
                 return null;
 
-            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException("You are not authorized to change bot's status");
-
-            IEnumerable<Status> statuses = await this._provider.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            IEnumerable<BotStatus> statuses = await this._provider.GetAllAsync(cancellationToken).ConfigureAwait(false);
             statuses = statuses.Where(s => s.IsEnabled);
             if (!statuses.Any())
                 return null;
 
-            Status status = this._randomizer.GetRandomValue(statuses);
+            BotStatus status = this._randomizer.GetRandomValue(statuses);
             if (status == null)
                 return null;
 
@@ -62,7 +58,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             }
         }
 
-        public async Task SetStatusAsync(Status status, CancellationToken cancellationToken = default)
+        public async Task SetStatusAsync(BotStatus status, CancellationToken cancellationToken = default)
         {
             BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin), cancellationToken).ConfigureAwait(false);
             if (!authorization.Succeeded)

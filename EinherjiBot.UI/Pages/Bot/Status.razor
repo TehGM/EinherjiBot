@@ -1,13 +1,13 @@
 ﻿@page "/bot/status"
 @using Discord
-@using TehGM.EinherjiBot.BotStatus.API
+@using TehGM.EinherjiBot.BotStatus
 @using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.UI.Components.BotStatus
 @using TehGM.EinherjiBot.UI.Components.PlaceholdersEngine
 @using TehGM.EinherjiBot.UI.PlaceholdersEngine
 @attribute [AuthorizeAdmin]
 
-@inject IBotStatusService StatusService
+@inject IBotStatusHandler Handler
 
 <PageTitle>Bot Status Management</PageTitle>
 <PageHeader Text="Bot Status Management" />
@@ -18,7 +18,7 @@
 
     @if (this._existingStatuses != null)
     {
-        foreach (KeyValuePair<Guid, BotStatusResponse> status in this._existingStatuses)
+        foreach (KeyValuePair<Guid, IBotStatus> status in this._existingStatuses)
         {
             <BotStatusCard @key="status.Key" ExistingStatus="status.Value" Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved"/>
         }
@@ -40,7 +40,7 @@
 </FabContainer>
 
 @code {
-    private IDictionary<Guid, BotStatusResponse> _existingStatuses;
+    private IDictionary<Guid, IBotStatus> _existingStatuses;
     private BotStatusCard _newStatusCard;
 
     private bool DisplayExisting => this._existingStatuses == null || this._existingStatuses.Any();
@@ -49,7 +49,7 @@
     {
         if (firstRender)
         {
-            IEnumerable<BotStatusResponse> results = await this.StatusService.GetAllAsync().ConfigureAwait(false);
+            IEnumerable<IBotStatus> results = await this.Handler.GetAllAsync().ConfigureAwait(false);
             this._existingStatuses = results.ToDictionary(r => r.ID);
             base.StateHasChanged();
             return;

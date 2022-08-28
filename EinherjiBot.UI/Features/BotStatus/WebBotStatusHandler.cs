@@ -1,14 +1,14 @@
 ﻿using System.Net.Http;
-using TehGM.EinherjiBot.BotStatus.API;
+using TehGM.EinherjiBot.BotStatus;
 using TehGM.EinherjiBot.UI.API;
 
 namespace TehGM.EinherjiBot.UI.BotStatus.API
 {
-    public class WebBotStatusService : IBotStatusService
+    public class WebBotStatusHandler : IBotStatusHandler
     {
         private IApiClient _client;
 
-        public WebBotStatusService(IApiClient client)
+        public WebBotStatusHandler(IApiClient client)
         {
             this._client = client;
         }
@@ -25,8 +25,11 @@ namespace TehGM.EinherjiBot.UI.BotStatus.API
         public Task<BotStatusResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
             => this._client.GetJsonAsync<BotStatusResponse>($"bot/status/{id}", cancellationToken);
 
-        public Task<BotStatusResponse> UpdateAsync(Guid id, BotStatusRequest request, CancellationToken cancellationToken = default)
-            => this._client.PutJsonAsync<BotStatusResponse>($"bot/status/{id}", request, cancellationToken);
+        public async Task<EntityUpdateResult<BotStatusResponse>> UpdateAsync(Guid id, BotStatusRequest request, CancellationToken cancellationToken = default)
+        {
+            BotStatusResponse response = await this._client.PutJsonAsync<BotStatusResponse>($"bot/status/{id}", request, cancellationToken);
+            return IEntityUpdateResult.Saved(response);
+        }
 
         public Task SetCurrentAsync(BotStatusRequest request, CancellationToken cancellationToken = default)
             => this._client.PostAsync("bot/status/current", request, cancellationToken);
