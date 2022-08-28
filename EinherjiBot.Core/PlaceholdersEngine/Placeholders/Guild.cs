@@ -14,10 +14,10 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
         public class GuildPlaceholderHandler : PlaceholderHandler<GuildPlaceholder>
         {
-            private readonly IDiscordEntityInfoService _provider;
+            private readonly IDiscordEntityInfoProvider _provider;
             private readonly IAuthContext _auth;
 
-            public GuildPlaceholderHandler(IDiscordEntityInfoService provider, IAuthContext auth)
+            public GuildPlaceholderHandler(IDiscordEntityInfoProvider provider, IAuthContext auth)
             {
                 this._provider = provider;
                 this._auth = auth;

@@ -18,9 +18,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
         public class ChannelPlaceholderHandler : PlaceholderHandler<ChannelPlaceholder>
         {
-            private readonly IDiscordEntityInfoService _provider;
+            private readonly IDiscordEntityInfoProvider _provider;
 
-            public ChannelPlaceholderHandler(IDiscordEntityInfoService provider)
+            public ChannelPlaceholderHandler(IDiscordEntityInfoProvider provider)
             {
                 this._provider = provider;
             }

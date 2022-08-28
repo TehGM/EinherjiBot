@@ -7,9 +7,9 @@ namespace TehGM.EinherjiBot.API.Controllers
     [ApiController]
     public class DiscordEntityInfoController : ControllerBase
     {
-        private readonly IDiscordEntityInfoService _service;
+        private readonly IDiscordEntityInfoProvider _service;
 
-        public DiscordEntityInfoController(IDiscordEntityInfoService service)
+        public DiscordEntityInfoController(IDiscordEntityInfoProvider service)
         {
             this._service = service;
         }

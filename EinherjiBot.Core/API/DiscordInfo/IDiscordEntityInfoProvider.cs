@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.API
 {
-    public interface IDiscordEntityInfoService
+    public interface IDiscordEntityInfoProvider
     {
         // role
         /// <summary>Gets Role entity info for one specific role, with optional guilds restriction.</summary>

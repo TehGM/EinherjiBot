@@ -18,9 +18,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
         public class UserPlaceholderHandler : PlaceholderHandler<UserPlaceholder>
         {
-            private readonly IDiscordEntityInfoService _provider;
+            private readonly IDiscordEntityInfoProvider _provider;
 
-            public UserPlaceholderHandler(IDiscordEntityInfoService provider)
+            public UserPlaceholderHandler(IDiscordEntityInfoProvider provider)
             {
                 this._provider = provider;
             }

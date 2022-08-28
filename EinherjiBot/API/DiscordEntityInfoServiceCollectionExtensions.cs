@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddDiscordClient();
 
-            services.TryAddTransient<IDiscordEntityInfoService, ApiDiscordEntityInfoService>();
+            services.TryAddTransient<IDiscordEntityInfoProvider, ServerDiscordEntityInfoProvider>();
 
             return services;
         }

@@ -1,18 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Web;
+﻿using System.Web;
 using TehGM.EinherjiBot.API;
-using TehGM.EinherjiBot.Caching;
 using TehGM.EinherjiBot.Caching.Services;
 
 namespace TehGM.EinherjiBot.UI.API.Services
 {
-    public class WebDiscordEntityInfoService : IDiscordEntityInfoService
+    public class WebDiscordEntityInfoProvider : IDiscordEntityInfoProvider
     {
         private readonly IApiClient _client;
         private readonly IDiscordEntityInfoCache _caches;
         private readonly ILockProvider _lock;
 
-        public WebDiscordEntityInfoService(IApiClient client, ILockProvider<WebDiscordEntityInfoService> lockProvider, IDiscordEntityInfoCache caches)
+        public WebDiscordEntityInfoProvider(IApiClient client, ILockProvider<WebDiscordEntityInfoProvider> lockProvider, IDiscordEntityInfoCache caches)
         {
             this._client = client;
             this._caches = caches;

@@ -4,13 +4,13 @@ using TehGM.EinherjiBot.DiscordClient;
 
 namespace TehGM.EinherjiBot.API.Services
 {
-    public class ApiDiscordEntityInfoService : IDiscordEntityInfoService
+    public class ServerDiscordEntityInfoProvider : IDiscordEntityInfoProvider
     {
         private readonly IDiscordClient _client;
         private readonly IDiscordConnection _connection;
         private readonly IBotAuthorizationService _auth;
 
-        public ApiDiscordEntityInfoService(IDiscordClient client, IDiscordConnection connection, IBotAuthorizationService auth)
+        public ServerDiscordEntityInfoProvider(IDiscordClient client, IDiscordConnection connection, IBotAuthorizationService auth)
         {
             this._client = client;
             this._connection = connection;
