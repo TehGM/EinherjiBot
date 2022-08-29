@@ -1,23 +1,20 @@
-﻿using TehGM.EinherjiBot.API;
-using TehGM.EinherjiBot.Caching;
+﻿using TehGM.EinherjiBot.Caching;
 
 namespace TehGM.EinherjiBot.SharedAccounts.Services
 {
     public class SharedAccountProvider : ISharedAccountProvider
     {
-        private readonly IBotAuthorizationService _authService;
         private readonly ISharedAccountStore _store;
         private readonly IEntityCache<Guid, SharedAccount> _cache;
         private readonly ILogger _log;
         private readonly ILockProvider _lock;
 
         public SharedAccountProvider(ISharedAccountStore store, IEntityCache<Guid, SharedAccount> cache, 
-            IBotAuthorizationService authService, ILogger<SharedAccountProvider> log, ILockProvider<SharedAccountProvider> lockProvider)
+            ILogger<SharedAccountProvider> log, ILockProvider<SharedAccountProvider> lockProvider)
         {
             this._store = store;
             this._cache = cache;
             this._log = log;
-            this._authService = authService;
             this._lock = lockProvider;
 
             this._cache.DefaultExpiration = new TimeSpanEntityExpiration(TimeSpan.FromHours(1));

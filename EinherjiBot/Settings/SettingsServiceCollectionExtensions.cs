@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-using TehGM.EinherjiBot.Settings;
 using TehGM.EinherjiBot.Settings.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -17,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.AddBotAudits();
             services.TryAddSingleton<IGuildSettingsStore, MongoGuildSettingsStore>();
-            services.TryAddScoped<IGuildSettingsProvider, GuildSettingsProvider>();
+            services.TryAddTransient<IGuildSettingsProvider, GuildSettingsProvider>();
             services.TryAddTransient<IGuildSettingsHandler, ServerGuildSettingsHandler>();
 
             return services;

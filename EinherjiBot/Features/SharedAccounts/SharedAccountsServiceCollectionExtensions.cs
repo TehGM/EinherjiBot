@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddEntityCaching();
             services.AddBotAudits();
             services.TryAddSingleton<ISharedAccountStore, MongoSharedAccountStore>();
-            services.TryAddScoped<ISharedAccountProvider, SharedAccountProvider>();
+            services.TryAddTransient<ISharedAccountProvider, SharedAccountProvider>();
             services.TryAddTransient<ISharedAccountImageProvider, SharedAccountImageProvider>();
             services.TryAddTransient<ISharedAccountHandler, ServerSharedAccountHandler>();
 

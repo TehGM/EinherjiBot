@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
-using TehGM.EinherjiBot.Administration.Services;
+﻿using TehGM.EinherjiBot.Administration.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -11,6 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
 
             services.AddDiscordClient();
+            services.AddGuildSettingsBackend();
             services.AddHostedService<JoinLeaveNotifier>();
 
             return services;
