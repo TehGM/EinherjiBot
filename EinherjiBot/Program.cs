@@ -83,10 +83,12 @@ namespace TehGM.EinherjiBot
             services.AddDiscordClient();
             services.AddEntityCaching();
             services.AddAuthBackend();
-            services.AddBotAudits();
             services.AddRandomizer();
             services.AddLocking();
             services.AddPlaceholdersEngineBackend();
+
+            services.AddBotAudits();
+            services.AddGuildSettingsBackend();
 
             services.AddEntityInfoBackend();
             services.AddUserIntel();

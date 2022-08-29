@@ -16,6 +16,7 @@
         public string AuditCollectionName { get; set; } = "BotAudit";
         public string UserIntelCollectionName { get; set; } = "UserIntel";
         public string UserDataCollectionName { get; set; } = "UserData";
+        public string GuildSettingsCollectionName { get; set; } = "GuildSettings";
         public string RandomStatusCollectionName { get; set; } = "Statuses";
         public string SharedAccountsCollectionName { get; set; } = "SharedAccounts";
         public string GameServersCollectionName { get; set; } = "GameServers";

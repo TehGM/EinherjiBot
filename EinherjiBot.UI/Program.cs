@@ -98,6 +98,8 @@ namespace TehGM.EinherjiBot.UI
             services.AddEntityCaching();
             services.AddPlaceholdersEngineFrontend();
 
+            services.AddGuildSettingsFrontend();
+
             services.AddBotStatusFrontend();
             services.AddSharedAccountsFrontend();
             services.AddEntityInfoFrontend();
