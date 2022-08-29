@@ -8,6 +8,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using TehGM.Utilities;
 global using TehGM.EinherjiBot.Security;
+global using TehGM.EinherjiBot.Settings;
 global using AuthorizeAttribute = TehGM.EinherjiBot.Security.Policies.AuthorizeAttribute;
 
 using Microsoft.AspNetCore.Builder;
