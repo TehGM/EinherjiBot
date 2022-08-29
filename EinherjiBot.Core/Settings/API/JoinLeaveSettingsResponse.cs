@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Newtonsoft.Json;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Settings
 {
@@ -17,9 +18,13 @@ namespace TehGM.EinherjiBot.Settings
         public bool ShowUserAvatar { get; init; }
         [JsonProperty("color")]
         public uint EmbedColor { get; init; }
+        [JsonProperty("lastError", NullValueHandling = NullValueHandling.Ignore)]
+        public ErrorInfoResponse LastError { get; init; }
 
         [JsonIgnore]
         Color IJoinLeaveSettings.EmbedColor => this.EmbedColor;
+        [JsonIgnore]
+        IErrorInfo IJoinLeaveSettings.LastError => this.LastError;
 
         [JsonConstructor]
         private JoinLeaveSettingsResponse() { }

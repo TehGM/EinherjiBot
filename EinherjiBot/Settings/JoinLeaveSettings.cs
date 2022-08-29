@@ -17,6 +17,8 @@ namespace TehGM.EinherjiBot.Settings
         public bool ShowUserAvatar { get; set; }
         [BsonIgnore]
         public Color EmbedColor { get; set; }
+        [BsonElement("lastError"), BsonIgnoreIfNull]
+        public ErrorInfo LastError { get; set; }
 
         [BsonElement("color")]
         public uint RawEmbedColor
@@ -24,6 +26,9 @@ namespace TehGM.EinherjiBot.Settings
             get => this.EmbedColor;
             set => this.EmbedColor = value;
         }
+
+        [BsonIgnore]
+        IErrorInfo IJoinLeaveSettings.LastError => this.LastError;
 
         [BsonConstructor(nameof(MessageTemplate))]
         public JoinLeaveSettings(string messageTemplate)

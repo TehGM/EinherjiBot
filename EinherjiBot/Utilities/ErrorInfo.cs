@@ -25,5 +25,12 @@ namespace TehGM.EinherjiBot
                 new UnixTimestamp(error.Timestamp),
                 error.Message);
         }
+
+        public static explicit operator ErrorInfo(ErrorInfoResponse error)
+        {
+            if (error is null)
+                return null;
+            return new ErrorInfo(error.Timestamp.ToDateTime(), error.Message);
+        }
     }
 }

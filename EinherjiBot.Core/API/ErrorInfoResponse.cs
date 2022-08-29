@@ -21,5 +21,12 @@ namespace TehGM.EinherjiBot.API
             this.Timestamp = timestamp;
             this.Message = message;
         }
+
+        public static ErrorInfoResponse FromError(IErrorInfo error)
+        {
+            if (error == null)
+                return null;
+            return new ErrorInfoResponse(new UnixTimestamp(error.Timestamp), error.Message);
+        }
     }
 }

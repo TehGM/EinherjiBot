@@ -10,5 +10,6 @@ namespace TehGM.EinherjiBot.Settings
         string MessageTemplate { get; }
         bool ShowUserAvatar { get; }
         Color EmbedColor { get; }
+        IErrorInfo LastError { get; }
     }
 }

@@ -2,31 +2,21 @@
 using TehGM.EinherjiBot.Auditing;
 using TehGM.EinherjiBot.Settings.Policies;
 using TehGM.EinherjiBot.Auditing.Settings;
-using Discord;
-using TehGM.EinherjiBot.DiscordClient;
-using TehGM.EinherjiBot.PlaceholdersEngine;
-using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
 
 namespace TehGM.EinherjiBot.Settings.Services
 {
     public class ServerGuildSettingsHandler : IGuildSettingsHandler
     {
         private readonly IGuildSettingsProvider _provider;
-        private readonly IDiscordClient _client;
-        private readonly IDiscordConnection _connection;
-        private readonly IPlaceholderSerializer _placeholderSerializer;
         private readonly IAuthContext _user;
         private readonly IBotAuthorizationService _auth;
         private readonly IAuditStore<GuildSettingsAuditEntry> _audit;
         private readonly ILockProvider _lock;
 
-        public ServerGuildSettingsHandler(IGuildSettingsProvider provider, IDiscordClient client, IDiscordConnection connection, IPlaceholderSerializer placeholderSerializer,
+        public ServerGuildSettingsHandler(IGuildSettingsProvider provider,
             IAuthContext user, IBotAuthorizationService auth, IAuditStore<GuildSettingsAuditEntry> audit, ILockProvider<ServerGuildSettingsHandler> lockProvider)
         {
             this._provider = provider;
-            this._client = client;
-            this._connection = connection;
-            this._placeholderSerializer = placeholderSerializer;
             this._user = user;
             this._auth = auth;
             this._audit = audit;
@@ -35,7 +25,7 @@ namespace TehGM.EinherjiBot.Settings.Services
 
         public async Task<GuildSettingsResponse> GetAsync(ulong guildID, CancellationToken cancellationToken = default)
         {
-            IGuildSettings settings = await this.GetInternalAsync(guildID, cancellationToken).ConfigureAwait(false);
+            IGuildSettings settings = await this._provider.GetAsync(guildID, cancellationToken).ConfigureAwait(false);
             if (settings == null)
                 return null;
 
@@ -46,33 +36,12 @@ namespace TehGM.EinherjiBot.Settings.Services
             return this.CreateResponse(settings);
         }
 
-        private async Task<GuildSettings> GetInternalAsync(ulong guildID, CancellationToken cancellationToken = default)
-        {
-            GuildSettings settings = await this._provider.GetAsync(guildID, cancellationToken).ConfigureAwait(false);
-            if (settings == null)
-            {
-                await this._connection.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
-                IGuild guild = await this._client.GetGuildAsync(guildID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
-                if (guild == null)
-                    return null;
-
-                // create default
-                string userMention = this.BuildDefaultUserPlaceholder(UserDisplayMode.Mention);
-                string userName = this.BuildDefaultUserPlaceholder(UserDisplayMode.UsernameWithDiscriminator);
-                Color color = (Color)System.Drawing.Color.Cyan;
-                settings = new GuildSettings(guild.Id);
-                settings.JoinNotification = new JoinLeaveSettings($"**{userMention}** *(`{userName}`)* **has joined.**") { EmbedColor = color };
-                settings.LeaveNotification = new JoinLeaveSettings($"**{userMention}** *(`{userName}`)* **has left.**") { EmbedColor = color };
-            }
-            return settings;
-        }
-
         public async Task<EntityUpdateResult<GuildSettingsResponse>> UpdateAsync(ulong guildID, GuildSettingsRequest request, CancellationToken cancellationToken = default)
         {
             await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                GuildSettings settings = await this.GetInternalAsync(guildID, cancellationToken).ConfigureAwait(false);
+                GuildSettings settings = await this._provider.GetAsync(guildID, cancellationToken).ConfigureAwait(false);
                 if (settings == null)
                     return null;
 
@@ -118,7 +87,8 @@ namespace TehGM.EinherjiBot.Settings.Services
                     UseSystemChannel = r.UseSystemChannel,
                     NotificationChannelID = r.NotificationChannelID,
                     ShowUserAvatar = r.ShowUserAvatar,
-                    EmbedColor = r.EmbedColor
+                    EmbedColor = r.EmbedColor,
+                    LastError = null
                 };
             }
         }
@@ -138,19 +108,11 @@ namespace TehGM.EinherjiBot.Settings.Services
                     s.NotificationChannelID,
                     s.MessageTemplate,
                     s.ShowUserAvatar,
-                    s.EmbedColor);
+                    s.EmbedColor)
+                {
+                    LastError = ErrorInfoResponse.FromError(s.LastError)
+                };
             }
-        }
-
-        private string BuildDefaultUserPlaceholder(UserDisplayMode mode)
-        {
-            GuildUserDisplayMode guildMode = (GuildUserDisplayMode)(int)mode;
-            CurrentUserPlaceholder placeholder = new CurrentUserPlaceholder()
-            {
-                DisplayMode = guildMode,
-                FallbackDisplayMode = mode
-            };
-            return this._placeholderSerializer.Serialize(placeholder);
         }
     }
 }
