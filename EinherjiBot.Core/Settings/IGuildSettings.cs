@@ -3,8 +3,8 @@
     public interface IGuildSettings
     {
         public ulong GuildID { get; }
-        public ulong? JoinNotificationChannelID { get; }
-        public ulong? LeaveNotificationChannelID { get; }
+        public IJoinLeaveSettings JoinNotification { get; }
+        public IJoinLeaveSettings LeaveNotification { get; }
         public uint? MaxMessageTriggers { get; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Discord;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
 namespace TehGM.EinherjiBot.Settings
 {
@@ -8,25 +7,19 @@ namespace TehGM.EinherjiBot.Settings
         [BsonId]
         public ulong GuildID { get; }
         [BsonElement("joinNotificationChannel")]
-        public ulong? JoinNotificationChannelID { get; set; }
+        public JoinLeaveSettings JoinNotification { get; set; }
         [BsonElement("leaveNotificationChannel")]
-        public ulong? LeaveNotificationChannelID { get; set; }
+        public JoinLeaveSettings LeaveNotification { get; set; }
         [BsonElement("maxMessageTriggers")]
         public uint? MaxMessageTriggers { get; set; } = 7;
+
+        IJoinLeaveSettings IGuildSettings.JoinNotification => this.JoinNotification;
+        IJoinLeaveSettings IGuildSettings.LeaveNotification => this.LeaveNotification;
 
         [BsonConstructor(nameof(GuildID))]
         public GuildSettings(ulong guildID)
         {
             this.GuildID = guildID;
-        }
-
-        public static GuildSettings CreateDefault(IGuild guild)
-        {
-            return new GuildSettings(guild.Id)
-            {
-                JoinNotificationChannelID = guild.SystemChannelId,
-                LeaveNotificationChannelID = guild.SystemChannelId
-            };
         }
 
         public ulong GetCacheKey()

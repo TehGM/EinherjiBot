@@ -6,21 +6,24 @@ namespace TehGM.EinherjiBot.Settings
     {
         [JsonProperty("guildId")]
         public ulong GuildID { get; init; }
-        [JsonProperty("joinNotificationChannel")]
-        public ulong? JoinNotificationChannelID { get; init; }
-        [JsonProperty("leaveNotificationChannel")]
-        public ulong? LeaveNotificationChannelID { get; init; }
+        [JsonProperty("joinNotification")]
+        public JoinLeaveSettingsResponse JoinNotification { get; init; }
+        [JsonProperty("leaveNotification")]
+        public JoinLeaveSettingsResponse LeaveNotification { get; init; }
         [JsonProperty("maxMessageTriggers")]
         public uint? MaxMessageTriggers { get; init; }
+
+        IJoinLeaveSettings IGuildSettings.JoinNotification => this.JoinNotification;
+        IJoinLeaveSettings IGuildSettings.LeaveNotification => this.LeaveNotification;
 
         [JsonConstructor]
         private GuildSettingsResponse() { }
 
-        public GuildSettingsResponse(ulong guildID, ulong? joinNotificationChannelID, ulong? leaveNotificationChannelID, uint? maxMessageTriggers)
+        public GuildSettingsResponse(ulong guildID, JoinLeaveSettingsResponse joinNotification, JoinLeaveSettingsResponse leaveNotification, uint? maxMessageTriggers)
         {
             this.GuildID = guildID;
-            this.JoinNotificationChannelID = joinNotificationChannelID;
-            this.LeaveNotificationChannelID = leaveNotificationChannelID;
+            this.JoinNotification = joinNotification;
+            this.LeaveNotification = leaveNotification;
             this.MaxMessageTriggers = maxMessageTriggers;
         }
 

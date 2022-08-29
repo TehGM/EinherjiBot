@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using TehGM.EinherjiBot.Auditing;
 using TehGM.EinherjiBot.Auditing.Administration;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.Administration.Services
 {
@@ -32,25 +33,8 @@ namespace TehGM.EinherjiBot.Administration.Services
             using IServiceScope scope = await base.CreateBotUserScopeAsync(base.CancellationToken).ConfigureAwait(false);
             IGuildSettingsHandler settingsHandler = scope.ServiceProvider.GetRequiredService<IGuildSettingsHandler>();
             IGuildSettings settings = await settingsHandler.GetAsync(guild.Id, base.CancellationToken).ConfigureAwait(false);
-            if (settings.JoinNotificationChannelID != null)
-            {
-                ITextChannel channel = await guild.GetTextChannelAsync(settings.JoinNotificationChannelID.Value, CacheMode.AllowDownload, base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
-                if (channel == null)
-                    return;
 
-                IGuildUser currentUser = await guild.GetGuildUserAsync(this._client.CurrentUser.Id, base.CancellationToken).ConfigureAwait(false);
-                ChannelPermissions permissions = currentUser.GetPermissions(channel);
-                if (!permissions.SendMessages)
-                {
-                    this._log.LogDebug("No permissions to post in {Guild}'s ({GuildID}) channel {Channel} ({ChannelID}), skipping notification", guild.Name, guild.Id, channel.Name, channel.Id);
-                    return;
-                }
-
-                EmbedBuilder embed = new EmbedBuilder()
-                    .WithDescription($"**{user.Mention}** *(`{user.GetUsernameWithDiscriminator()}`)* **has joined.**")
-                    .WithColor((Color)System.Drawing.Color.Cyan);
-                await channel.SendMessageAsync(null, false, embed.Build(), base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
-            }
+            await this.SendNotificationAsync(settings.JoinNotification, user.Guild, user).ConfigureAwait(false);
         }
 
         protected async Task OnUserLeftAsync(SocketGuild guild, SocketUser user)
@@ -61,24 +45,64 @@ namespace TehGM.EinherjiBot.Administration.Services
             using IServiceScope scope = await base.CreateBotUserScopeAsync(base.CancellationToken).ConfigureAwait(false);
             IGuildSettingsHandler settingsHandler = scope.ServiceProvider.GetRequiredService<IGuildSettingsHandler>();
             IGuildSettings settings = await settingsHandler.GetAsync(guild.Id, base.CancellationToken).ConfigureAwait(false);
-            if (settings.LeaveNotificationChannelID != null)
+
+            await this.SendNotificationAsync(settings.LeaveNotification, guild, user).ConfigureAwait(false);
+        }
+
+        private static readonly Regex _placeholderCheckRegex = new Regex(@"{{.+}}", RegexOptions.Singleline);
+        private async Task SendNotificationAsync(IJoinLeaveSettings settings, IGuild guild, IUser user)
+        {
+            if (settings == null || !settings.IsEnabled)
+                return;
+            if (string.IsNullOrEmpty(settings.MessageTemplate))
+                return;
+            if (!settings.UseSystemChannel && settings.NotificationChannelID == null)
+                return;
+
+            ulong? channelID = settings.UseSystemChannel ? guild.SystemChannelId : settings.NotificationChannelID;
+            if (channelID == null)
+                return;
+            ITextChannel channel = await guild.GetTextChannelAsync(channelID.Value, CacheMode.AllowDownload, base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            if (channel == null)
+                return;
+
+            IGuildUser currentUser = await guild.GetGuildUserAsync(this._client.CurrentUser.Id, base.CancellationToken).ConfigureAwait(false);
+            ChannelPermissions permissions = currentUser.GetPermissions(channel);
+            if (!permissions.SendMessages)
             {
-                ITextChannel channel = guild.GetTextChannel(settings.LeaveNotificationChannelID.Value);
-                if (channel == null)
-                    return;
+                this._log.LogDebug("No permissions to post in {Guild}'s ({GuildID}) channel {Channel} ({ChannelID}), skipping notification", guild.Name, guild.Id, channel.Name, channel.Id);
+                return;
+            }
 
-                IGuildUser currentUser = await guild.GetGuildUserAsync(this._client.CurrentUser.Id, base.CancellationToken).ConfigureAwait(false);
-                ChannelPermissions permissions = currentUser.GetPermissions(guild.SystemChannel);
-                if (!permissions.SendMessages)
-                {
-                    this._log.LogDebug("No permissions to post in {Guild}'s ({GuildID}) channel {Channel} ({ChannelID}),, skipping notification", guild.Name, guild.Id, channel.Name, channel.Id);
-                    return;
-                }
-
+            try
+            {
+                string text = await GetTextAsync();
                 EmbedBuilder embed = new EmbedBuilder()
-                    .WithDescription($"**{user.Mention}** *(`{user.GetUsernameWithDiscriminator()}`)* **has left.**")
-                    .WithColor((Color)System.Drawing.Color.Cyan);
+                    .WithDescription(text)
+                    .WithColor(settings.EmbedColor);
+                if (settings.ShowUserAvatar)
+                    embed.WithThumbnailUrl(user.GetSafeAvatarUrl());
                 await channel.SendMessageAsync(null, false, embed.Build(), base.CancellationToken.ToRequestOptions()).ConfigureAwait(false);
+            }
+            catch (PlaceholderException ex)
+            {
+                return;
+            }
+
+            // to avoid unnecessarily requesting auth context, running placeholders engine etc, check if template even contains a placeholder
+            async Task<string> GetTextAsync()
+            {
+                bool containsPlaceholders = _placeholderCheckRegex.IsMatch(settings.MessageTemplate);
+                if (!containsPlaceholders)
+                    return settings.MessageTemplate;
+
+                using IServiceScope scope = base.CreateScope();
+                IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
+                IDiscordAuthContext authContext = await authProvider.GetAsync(user.Id, guild.Id, base.CancellationToken).ConfigureAwait(false);
+                authProvider.User = authContext;
+
+                IPlaceholdersEngine engine = scope.ServiceProvider.GetRequiredService<IPlaceholdersEngine>();
+                return await engine.ConvertPlaceholdersAsync(settings.MessageTemplate, PlaceholderUsage.GuildEvent | PlaceholderUsage.UserEvent, base.CancellationToken).ConfigureAwait(false);
             }
         }
 

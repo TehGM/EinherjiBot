@@ -4,6 +4,8 @@ using TehGM.EinherjiBot.Settings.Policies;
 using TehGM.EinherjiBot.Auditing.Settings;
 using Discord;
 using TehGM.EinherjiBot.DiscordClient;
+using TehGM.EinherjiBot.PlaceholdersEngine;
+using TehGM.EinherjiBot.PlaceholdersEngine.Placeholders;
 
 namespace TehGM.EinherjiBot.Settings.Services
 {
@@ -12,17 +14,19 @@ namespace TehGM.EinherjiBot.Settings.Services
         private readonly IGuildSettingsProvider _provider;
         private readonly IDiscordClient _client;
         private readonly IDiscordConnection _connection;
+        private readonly IPlaceholderSerializer _placeholderSerializer;
         private readonly IAuthContext _user;
         private readonly IBotAuthorizationService _auth;
         private readonly IAuditStore<GuildSettingsAuditEntry> _audit;
         private readonly ILockProvider _lock;
 
-        public ServerGuildSettingsHandler(IGuildSettingsProvider provider, IDiscordClient client, IDiscordConnection connection,
+        public ServerGuildSettingsHandler(IGuildSettingsProvider provider, IDiscordClient client, IDiscordConnection connection, IPlaceholderSerializer placeholderSerializer,
             IAuthContext user, IBotAuthorizationService auth, IAuditStore<GuildSettingsAuditEntry> audit, ILockProvider<ServerGuildSettingsHandler> lockProvider)
         {
             this._provider = provider;
             this._client = client;
             this._connection = connection;
+            this._placeholderSerializer = placeholderSerializer;
             this._user = user;
             this._auth = auth;
             this._audit = audit;
@@ -51,7 +55,14 @@ namespace TehGM.EinherjiBot.Settings.Services
                 IGuild guild = await this._client.GetGuildAsync(guildID, CacheMode.AllowDownload, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
                 if (guild == null)
                     return null;
-                settings = GuildSettings.CreateDefault(guild);
+
+                // create default
+                string userMention = this.BuildDefaultUserPlaceholder(UserDisplayMode.Mention);
+                string userName = this.BuildDefaultUserPlaceholder(UserDisplayMode.UsernameWithDiscriminator);
+                Color color = (Color)System.Drawing.Color.Cyan;
+                settings = new GuildSettings(guild.Id);
+                settings.JoinNotification = new JoinLeaveSettings($"**{userMention}** *(`{userName}`)* **has joined.**") { EmbedColor = color };
+                settings.LeaveNotification = new JoinLeaveSettings($"**{userMention}** *(`{userName}`)* **has left.**") { EmbedColor = color };
             }
             return settings;
         }
@@ -72,6 +83,8 @@ namespace TehGM.EinherjiBot.Settings.Services
                 if (!authorization.Succeeded)
                     throw new AccessForbiddenException(authorization.Reason);
 
+                request.ThrowValidateForUpdate(settings);
+
                 if (settings.HasChanges(request))
                 {
                     this.ApplyChanges(settings, request);
@@ -90,14 +103,54 @@ namespace TehGM.EinherjiBot.Settings.Services
 
         private void ApplyChanges(GuildSettings settings, GuildSettingsRequest request)
         {
-            settings.JoinNotificationChannelID = request.JoinNotificationChannelID;
-            settings.LeaveNotificationChannelID = request.LeaveNotificationChannelID;
+            settings.JoinNotification = ConvertJoinLeaveSettings(request.JoinNotification);
+            settings.LeaveNotification = ConvertJoinLeaveSettings(request.LeaveNotification);
             settings.MaxMessageTriggers = request.MaxMessageTriggers;
+
+            JoinLeaveSettings ConvertJoinLeaveSettings(JoinLeaveSettingsRequest r)
+            {
+                if (r == null)
+                    return null;
+
+                return new JoinLeaveSettings(r.MessageTemplate)
+                {
+                    IsEnabled = r.IsEnabled,
+                    UseSystemChannel = r.UseSystemChannel,
+                    NotificationChannelID = r.NotificationChannelID,
+                    ShowUserAvatar = r.ShowUserAvatar,
+                    EmbedColor = r.EmbedColor
+                };
+            }
         }
 
         private GuildSettingsResponse CreateResponse(IGuildSettings settings)
         {
-            return new GuildSettingsResponse(settings.GuildID, settings.JoinNotificationChannelID, settings.LeaveNotificationChannelID, settings.MaxMessageTriggers);
+            return new GuildSettingsResponse(settings.GuildID, ConvertJoinLeaveSettings(settings.JoinNotification), ConvertJoinLeaveSettings(settings.LeaveNotification), settings.MaxMessageTriggers);
+
+            JoinLeaveSettingsResponse ConvertJoinLeaveSettings(IJoinLeaveSettings s)
+            {
+                if (s == null)
+                    return null;
+
+                return new JoinLeaveSettingsResponse(
+                    s.IsEnabled,
+                    s.UseSystemChannel,
+                    s.NotificationChannelID,
+                    s.MessageTemplate,
+                    s.ShowUserAvatar,
+                    s.EmbedColor);
+            }
+        }
+
+        private string BuildDefaultUserPlaceholder(UserDisplayMode mode)
+        {
+            GuildUserDisplayMode guildMode = (GuildUserDisplayMode)(int)mode;
+            CurrentUserPlaceholder placeholder = new CurrentUserPlaceholder()
+            {
+                DisplayMode = guildMode,
+                FallbackDisplayMode = mode
+            };
+            return this._placeholderSerializer.Serialize(placeholder);
         }
     }
 }

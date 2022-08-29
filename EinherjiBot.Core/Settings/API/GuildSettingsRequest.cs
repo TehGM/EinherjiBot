@@ -1,23 +1,25 @@
 ﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
+using TehGM.EinherjiBot.API;
 
 namespace TehGM.EinherjiBot.Settings
 {
-    public class GuildSettingsRequest
+    public class GuildSettingsRequest : ICreateValidatable, IUpdateValidatable<IGuildSettings>, IValidatableObject
     {
-        [JsonProperty("joinNotificationChannel")]
-        public ulong? JoinNotificationChannelID { get; set; }
-        [JsonProperty("leaveNotificationChannel")]
-        public ulong? LeaveNotificationChannelID { get; set; }
+        [JsonProperty("joinNotification")]
+        public JoinLeaveSettingsRequest JoinNotification { get; set; }
+        [JsonProperty("leaveNotification")]
+        public JoinLeaveSettingsRequest LeaveNotification { get; set; }
         [JsonProperty("maxMessageTriggers")]
         public uint? MaxMessageTriggers { get; set; }
 
         [JsonConstructor]
         public GuildSettingsRequest() { }
 
-        public GuildSettingsRequest(ulong? joinNotificationChannelID, ulong? leaveNotificationChannelID, uint? maxMessageTriggers)
+        public GuildSettingsRequest(JoinLeaveSettingsRequest joinNotification, JoinLeaveSettingsRequest leaveNotification, uint? maxMessageTriggers)
         {
-            this.JoinNotificationChannelID = joinNotificationChannelID;
-            this.LeaveNotificationChannelID = leaveNotificationChannelID;
+            this.JoinNotification = joinNotification;
+            this.LeaveNotification = leaveNotification;
             this.MaxMessageTriggers = maxMessageTriggers;
         }
 
@@ -26,7 +28,30 @@ namespace TehGM.EinherjiBot.Settings
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            return new GuildSettingsRequest(settings.JoinNotificationChannelID, settings.LeaveNotificationChannelID, settings.MaxMessageTriggers);
+            return new GuildSettingsRequest(
+                JoinLeaveSettingsRequest.FromSettings(settings.JoinNotification),
+                JoinLeaveSettingsRequest.FromSettings(settings.LeaveNotification),
+                settings.MaxMessageTriggers);
         }
+
+        public IEnumerable<string> ValidateForCreation()
+        {
+            if (this.JoinNotification != null)
+            {
+                foreach (string error in this.JoinNotification.ValidateForCreation())
+                    yield return error;
+            }
+            if (this.LeaveNotification != null)
+            {
+                foreach (string error in this.LeaveNotification.ValidateForCreation())
+                    yield return error;
+            }
+        }
+
+        public IEnumerable<string> ValidateForUpdate(IGuildSettings existing)
+            => this.ValidateForCreation();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+            => this.ValidateForCreation().Select(e => new ValidationResult(e));
     }
 }
