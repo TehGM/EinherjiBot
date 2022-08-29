@@ -13,9 +13,10 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
         private readonly IBotAuthorizationService _auth;
         private readonly SharedAccountOptions _options;
         private readonly IAuditStore<SharedAccountAuditEntry> _audit;
+        private readonly ILockProvider _lock;
 
         public ServerSharedAccountHandler(ISharedAccountProvider provider, ISharedAccountImageProvider imageProvider, IOptionsSnapshot<SharedAccountOptions> options,
-            IAuthContext user, IBotAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit)
+            IAuthContext user, IBotAuthorizationService auth, IAuditStore<SharedAccountAuditEntry> audit, ILockProvider<ServerSharedAccountHandler> lockProvider)
         {
             this._provider = provider;
             this._imageProvider = imageProvider;
@@ -23,6 +24,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
             this._auth = auth;
             this._options = options.Value;
             this._audit = audit;
+            this._lock = lockProvider;
         }
 
         public async Task<IEnumerable<SharedAccountResponse>> GetAllAsync(SharedAccountFilter filter, bool skipAudit, CancellationToken cancellationToken = default)
@@ -76,43 +78,59 @@ namespace TehGM.EinherjiBot.SharedAccounts.Services
 
         public async Task<EntityUpdateResult<SharedAccountResponse>> UpdateAsync(Guid id, SharedAccountRequest request, CancellationToken cancellationToken = default)
         {
-            SharedAccount account = await this._provider.GetAsync(id, cancellationToken).ConfigureAwait(false);
-            if (account == null)
-                return null;
-
-            request.ThrowValidateForUpdate(account);
-
-            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<ISharedAccount>(account, new[] { typeof(CanAccessSharedAccount), typeof(CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to edit shared account {(Base64Guid)account.ID}.");
-
-            if (account.HasChanges(request))
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                this.ApplyChanges(account, request);
-                await this._provider.AddOrUpdateAsync(account, cancellationToken).ConfigureAwait(false);
-                await this.AuditAsync(SharedAccountAuditEntry.Updated(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
-                SharedAccountResponse response = await this.CreateResponseAsync(account, cancellationToken).ConfigureAwait(false);
-                return IEntityUpdateResult.Saved(response);
+                SharedAccount account = await this._provider.GetAsync(id, cancellationToken).ConfigureAwait(false);
+                if (account == null)
+                    return null;
+
+                request.ThrowValidateForUpdate(account);
+
+                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<ISharedAccount>(account, new[] { typeof(CanAccessSharedAccount), typeof(CanEditSharedAccount) }, cancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
+                    throw new AccessForbiddenException($"No permissions to edit shared account {(Base64Guid)account.ID}.");
+
+                if (account.HasChanges(request))
+                {
+                    this.ApplyChanges(account, request);
+                    await this._provider.AddOrUpdateAsync(account, cancellationToken).ConfigureAwait(false);
+                    await this.AuditAsync(SharedAccountAuditEntry.Updated(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
+                    SharedAccountResponse response = await this.CreateResponseAsync(account, cancellationToken).ConfigureAwait(false);
+                    return IEntityUpdateResult.Saved(response);
+                }
+                else
+                {
+                    SharedAccountResponse response = await this.CreateResponseAsync(account, cancellationToken).ConfigureAwait(false);
+                    return IEntityUpdateResult.NoChanges(response);
+                }
             }
-            else
+            finally
             {
-                SharedAccountResponse response = await this.CreateResponseAsync(account, cancellationToken).ConfigureAwait(false);
-                return IEntityUpdateResult.NoChanges(response);
+                this._lock.Release();
             }
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            ISharedAccount account = await this._provider.GetAsync(id, cancellationToken).ConfigureAwait(false);
-            if (account == null)
-                return; 
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                ISharedAccount account = await this._provider.GetAsync(id, cancellationToken).ConfigureAwait(false);
+                if (account == null)
+                    return;
 
-            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, typeof(CanDeleteSharedAccount) , cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException($"No permissions to delete shared account {(Base64Guid)id}.");
+                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(account, typeof(CanDeleteSharedAccount), cancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
+                    throw new AccessForbiddenException($"No permissions to delete shared account {(Base64Guid)id}.");
 
-            await this._provider.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
-            await this.AuditAsync(SharedAccountAuditEntry.Deleted(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
+                await this._provider.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
+                await this.AuditAsync(SharedAccountAuditEntry.Deleted(this._user.ID, account.ID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                this._lock.Release();
+            }
         }
 
         public Task<IDictionary<SharedAccountType, string>> GetImagesAsync(CancellationToken cancellationToken = default)

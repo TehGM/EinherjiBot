@@ -15,9 +15,10 @@ namespace TehGM.EinherjiBot.Settings.Services
         private readonly IAuthContext _user;
         private readonly IBotAuthorizationService _auth;
         private readonly IAuditStore<GuildSettingsAuditEntry> _audit;
+        private readonly ILockProvider _lock;
 
         public ServerGuildSettingsHandler(IGuildSettingsProvider provider, IDiscordClient client, IDiscordConnection connection,
-            IAuthContext user, IBotAuthorizationService auth, IAuditStore<GuildSettingsAuditEntry> audit)
+            IAuthContext user, IBotAuthorizationService auth, IAuditStore<GuildSettingsAuditEntry> audit, ILockProvider<ServerGuildSettingsHandler> lockProvider)
         {
             this._provider = provider;
             this._client = client;
@@ -25,6 +26,7 @@ namespace TehGM.EinherjiBot.Settings.Services
             this._user = user;
             this._auth = auth;
             this._audit = audit;
+            this._lock = lockProvider;
         }
 
         public async Task<GuildSettingsResponse> GetAsync(ulong guildID, CancellationToken cancellationToken = default)
@@ -56,26 +58,34 @@ namespace TehGM.EinherjiBot.Settings.Services
 
         public async Task<EntityUpdateResult<GuildSettingsResponse>> UpdateAsync(ulong guildID, GuildSettingsRequest request, CancellationToken cancellationToken = default)
         {
-            GuildSettings settings = await this.GetInternalAsync(guildID, cancellationToken).ConfigureAwait(false);
-            if (settings == null)
-                return null;
-
-            IEnumerable<Type> policies = request.MaxMessageTriggers == settings.MaxMessageTriggers
-                ? new[] { typeof(CanManageGuildSettings) }
-                : new[] { typeof(CanManageGuildSettings), typeof(CanChangeGuildLimits) };
-            BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<IGuildSettings>(settings, policies, cancellationToken).ConfigureAwait(false);
-            if (!authorization.Succeeded)
-                throw new AccessForbiddenException(authorization.Reason);
-
-            if (settings.HasChanges(request))
+            await this._lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                this.ApplyChanges(settings, request);
-                await this._provider.AddOrUpdateAsync(settings, cancellationToken).ConfigureAwait(false);
-                await this._audit.AddAuditAsync(GuildSettingsAuditEntry.Updated(this._user.ID, settings.GuildID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
-                return IEntityUpdateResult.Saved(this.CreateResponse(settings));
+                GuildSettings settings = await this.GetInternalAsync(guildID, cancellationToken).ConfigureAwait(false);
+                if (settings == null)
+                    return null;
+
+                IEnumerable<Type> policies = request.MaxMessageTriggers == settings.MaxMessageTriggers
+                    ? new[] { typeof(CanManageGuildSettings) }
+                    : new[] { typeof(CanManageGuildSettings), typeof(CanChangeGuildLimits) };
+                BotAuthorizationResult authorization = await this._auth.AuthorizeAsync<IGuildSettings>(settings, policies, cancellationToken).ConfigureAwait(false);
+                if (!authorization.Succeeded)
+                    throw new AccessForbiddenException(authorization.Reason);
+
+                if (settings.HasChanges(request))
+                {
+                    this.ApplyChanges(settings, request);
+                    await this._provider.AddOrUpdateAsync(settings, cancellationToken).ConfigureAwait(false);
+                    await this._audit.AddAuditAsync(GuildSettingsAuditEntry.Updated(this._user.ID, settings.GuildID, DateTime.UtcNow), cancellationToken).ConfigureAwait(false);
+                    return IEntityUpdateResult.Saved(this.CreateResponse(settings));
+                }
+                else
+                    return IEntityUpdateResult.NoChanges(this.CreateResponse(settings));
             }
-            else
-                return IEntityUpdateResult.NoChanges(this.CreateResponse(settings));
+            finally
+            {
+                this._lock.Release();
+            }
         }
 
         private void ApplyChanges(GuildSettings settings, GuildSettingsRequest request)
