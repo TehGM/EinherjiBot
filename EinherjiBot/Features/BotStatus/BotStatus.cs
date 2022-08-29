@@ -20,6 +20,7 @@ namespace TehGM.EinherjiBot.BotStatus
         [BsonElement("lastError"), BsonIgnoreIfNull]
         public ErrorInfo LastError { get; set; }
 
+        [BsonIgnore]
         IErrorInfo IBotStatus.LastError => this.LastError;
 
         [BsonConstructor]
