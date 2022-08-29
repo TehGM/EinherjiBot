@@ -42,6 +42,8 @@ namespace TehGM.EinherjiBot.SharedAccounts.Controllers
         public async Task<IActionResult> UpdateAsync(Guid id, SharedAccountRequest request, CancellationToken cancellationToken)
         {
             SharedAccountResponse result = await this._handler.UpdateAsync(id, request, cancellationToken).ConfigureAwait(false);
+            if (result == null)
+                return base.NotFound();
             return base.Ok(result);
         }
 
