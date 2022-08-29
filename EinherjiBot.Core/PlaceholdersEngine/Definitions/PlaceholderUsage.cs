@@ -15,6 +15,12 @@
         GlobalMessageTrigger = 1 << 3,
         /// <summary>Placeholder will be usable by admins regardless of the context.</summary>
         Admin = 1 << 4,
+        /// <summary>Placeholder will be usable in any event that involves an user (message, join, leave etc).</summary>
+        UserEvent = 1 << 5,
+        /// <summary>Placeholder will be usable in any event that occured in a guild.</summary>
+        GuildEvent = 1 << 6,
+        /// <summary>Placeholder will be usable in any event that occured in a channel.</summary>
+        ChannelEvent = 1 << 7,
 
         /// <summary>Placeholder can be used in any context that doesn't depend on any scoped services.</summary>
         StaticContext = Status,

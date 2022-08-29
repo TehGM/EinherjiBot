@@ -1,6 +1,6 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
-    [Placeholder("CurrentUser", PlaceholderUsage.AnyMessageContext)]
+    [Placeholder("CurrentUser", PlaceholderUsage.AnyMessageContext | PlaceholderUsage.UserEvent)]
     [DisplayName("Current User")]
     [Description("Is replaced with mention/name of the user that sent the message.")]
     public class CurrentUserPlaceholder
