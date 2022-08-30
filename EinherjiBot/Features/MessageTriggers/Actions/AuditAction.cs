@@ -30,7 +30,14 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
         public async Task ExecuteAsync(MessageTrigger trigger, IMessage message, IServiceProvider services, CancellationToken cancellationToken = default)
         {
             IPlaceholdersEngine placeholders = services.GetRequiredService<IPlaceholdersEngine>();
-            string text = await placeholders.ConvertPlaceholdersAsync(message.Content, trigger.PlaceholderContext, services, cancellationToken).ConfigureAwait(false);
+            PlaceholderConvertContext context = new PlaceholderConvertContext(trigger.PlaceholderContext)
+            {
+                CurrentUserID = message.Author.Id,
+                CurrentChannelID = message.Channel.Id,
+                CurrentGuildID = (message.Channel as IGuildChannel)?.GuildId,
+                MessageContent = message.Content
+            };
+            string text = await placeholders.ConvertPlaceholdersAsync(message.Content, context, services, cancellationToken).ConfigureAwait(false);
             MessageTriggerAuditEntry entry = new MessageTriggerAuditEntry(message, text, this.Lifetime);
 
             IAuditStore<MessageTriggerAuditEntry> audit = services.GetRequiredService<IAuditStore<MessageTriggerAuditEntry>>();

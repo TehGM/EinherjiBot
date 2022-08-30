@@ -17,13 +17,13 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
             this._auth = auth;
         }
 
-        public async Task<PlaceholderBuilderResult> OpenAsync(PlaceholderUsage context, bool allowAdminContext = true)
+        public async Task<PlaceholderBuilderResult> OpenAsync(PlaceholderConvertContext context, bool allowAdminContext = true)
         {
             if (allowAdminContext)
             {
                 BotAuthorizationResult authorization = await this._auth.AuthorizeAsync(typeof(AuthorizeBotOrAdmin));
                 if (authorization.Succeeded)
-                    context |= PlaceholderUsage.Admin;
+                    context.ContextType |= PlaceholderUsage.Admin;
             }
 
             DialogParameters parameters = new DialogParameters

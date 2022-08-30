@@ -31,6 +31,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IPlaceholderSerializer, PlaceholderSerializer>();
             services.TryAddTransient<IPlaceholdersBuilder, PlaceholdersBuilderOpener>();
 
+            services.TryAddScoped<IPlaceholderContextProvider, PlaceholderContextProvider>();
+            services.TryAddTransient<PlaceholderConvertContext>(s => s.GetRequiredService<IPlaceholderContextProvider>().Context ?? new PlaceholderConvertContext(PlaceholderUsage.None));
+
             return services;
         }
     }

@@ -1,4 +1,5 @@
 ﻿@using System.Text.RegularExpressions
+@using Discord
 @using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 
@@ -18,7 +19,7 @@
     [Parameter]
     public string SerializedPlaceholder { get; set; }
     [Parameter, EditorRequired]
-    public PlaceholderUsage Context { get; set; }
+    public PlaceholderConvertContext Context { get; set; }
     [Parameter]
     public bool Error { get; set; }
     [Parameter]
@@ -30,6 +31,7 @@
 
     private string _serializedPlaceholder;
     private ulong? _entityID;
+    private bool _error;
 
     private bool IsError => this.Error || string.IsNullOrEmpty(this.SerializedPlaceholder);
 
@@ -42,7 +44,10 @@
 
         if (!this.IsError)
         {
-            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._serializedPlaceholder, this.Context));
+            PlaceholdersConvertRequest request = new PlaceholdersConvertRequest(this._serializedPlaceholder, this.Context);
+            if (request.Context.MessageContent == null)
+                request.Context.MessageContent = "A cat is fine too. Desu desu desu";
+            PlaceholdersConvertResponse converted = await this.Placeholders.ConvertAsync(request);
             this._preview = await this.RenderPreviewAsync(converted?.Result);
         }
         else
@@ -51,11 +56,12 @@
 
     private bool CheckNeedsUpdate()
     {
-        bool dirty = this.SerializedPlaceholder != this._serializedPlaceholder || this.EntityID != this._entityID;
+        bool dirty = this.SerializedPlaceholder != this._serializedPlaceholder || this.EntityID != this._entityID || this.Error != this._error;
         if (dirty)
         {
             this._entityID = this.EntityID;
             this._serializedPlaceholder = this.SerializedPlaceholder;
+            this._error = this.Error;
         }
         return dirty;
     }

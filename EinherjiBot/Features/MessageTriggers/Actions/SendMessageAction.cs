@@ -40,10 +40,17 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
                 return;
 
             IPlaceholdersEngine placeholders = services.GetRequiredService<IPlaceholdersEngine>();
-            string text = await placeholders.ConvertPlaceholdersAsync(this.Text, trigger.PlaceholderContext, cancellationToken).ConfigureAwait(false);
+            PlaceholderConvertContext context = new PlaceholderConvertContext(trigger.PlaceholderContext)
+            {
+                CurrentUserID = message.Author.Id,
+                CurrentChannelID = message.Channel.Id,
+                CurrentGuildID = (message.Channel as IGuildChannel)?.GuildId,
+                MessageContent = message.Content
+            };
+            string text = await placeholders.ConvertPlaceholdersAsync(this.Text, context, cancellationToken).ConfigureAwait(false);
 
             Embed embed = this.Embed != null
-                ? await this.Embed.BuildAsync(message.Author, placeholders, trigger.PlaceholderContext, client, services, cancellationToken).ConfigureAwait(false)
+                ? await this.Embed.BuildAsync(message.Author, placeholders, context, client, services, cancellationToken).ConfigureAwait(false)
                 : null;
 
             AllowedMentions allowedMentions = this.DisableMentions ? AllowedMentions.None : AllowedMentions.All;
@@ -105,7 +112,7 @@ namespace TehGM.EinherjiBot.MessageTriggers.Actions
             public EmbedInfo()
                 : this(null) { }
 
-            public async Task<Embed> BuildAsync(IUser currentUser, IPlaceholdersEngine placeholders, PlaceholderUsage placeholderContext, IDiscordClient client, IServiceProvider services, CancellationToken cancellationToken = default)
+            public async Task<Embed> BuildAsync(IUser currentUser, IPlaceholdersEngine placeholders, PlaceholderConvertContext placeholderContext, IDiscordClient client, IServiceProvider services, CancellationToken cancellationToken = default)
             {
                 EmbedBuilder result = new EmbedBuilder();
                 if (!string.IsNullOrEmpty(this.Description))

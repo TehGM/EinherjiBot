@@ -92,7 +92,7 @@
     [CascadingParameter]
     private MudDialogInstance Dialog { get; set; }
     [Parameter]
-    public PlaceholderUsage Context { get; set; }
+    public PlaceholderConvertContext Context { get; set; }
 
     private bool AllPropertiesValid => this._invalidProperties?.Any() != true;
     private Color CopyButtonColor => this.AllPropertiesValid ? Color.Primary : Color.Default;
@@ -104,7 +104,7 @@
         IEnumerable<PlaceholderDescriptor> allPlaceholders = this.PlaceholdersProvider.GetRegisteredPlaceholders();
         List<PlaceholderDescriptor> placeholders = new List<PlaceholderDescriptor>(allPlaceholders.Count());
 
-        foreach (PlaceholderDescriptor placeholder in allPlaceholders.Where(p => p.AvailableInContext(this.Context)))
+        foreach (PlaceholderDescriptor placeholder in allPlaceholders.Where(p => p.AvailableInContext(this.Context.ContextType)))
         {
             if (placeholder.Policies?.Any() == true)
             {
@@ -127,11 +127,11 @@
         if (this._selectedPlaceholder?.Identifier == descriptor.Identifier)
             return;
 
-        this._selectedPlaceholder = descriptor;
-        this._placeholderValue = Activator.CreateInstance(descriptor.PlaceholderType, nonPublic: true);
         // fields will trigger their update event AFTER this method returns, so just add all as invalid initially
         // this will prevent API call when components are invalid just after placeholder type change, but the events haven't fired yet
         this._invalidProperties = new HashSet<PlaceholderPropertyDescriptor>(descriptor.Properties);
+        this._placeholderValue = Activator.CreateInstance(descriptor.PlaceholderType, nonPublic: true);
+        this._selectedPlaceholder = descriptor;
         this.SerializePlaceholder();
     }
 

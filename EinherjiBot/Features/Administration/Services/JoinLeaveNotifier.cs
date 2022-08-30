@@ -1,11 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
 using TehGM.EinherjiBot.Auditing;
 using TehGM.EinherjiBot.Auditing.Administration;
 using TehGM.EinherjiBot.PlaceholdersEngine;
-using TehGM.EinherjiBot.UI.Pages.Bot;
 
 namespace TehGM.EinherjiBot.Administration.Services
 {
@@ -118,7 +116,12 @@ namespace TehGM.EinherjiBot.Administration.Services
                 authProvider.User = authContext;
 
                 IPlaceholdersEngine engine = scope.ServiceProvider.GetRequiredService<IPlaceholdersEngine>();
-                return await engine.ConvertPlaceholdersAsync(notifSettings.MessageTemplate, PlaceholderUsage.GuildEvent | PlaceholderUsage.UserEvent, base.CancellationToken).ConfigureAwait(false);
+                PlaceholderConvertContext context = new PlaceholderConvertContext(PlaceholderUsage.GuildEvent | PlaceholderUsage.UserEvent)
+                {
+                    CurrentGuildID = guild.Id,
+                    CurrentUserID = user.Id
+                };
+                return await engine.ConvertPlaceholdersAsync(notifSettings.MessageTemplate, context, base.CancellationToken).ConfigureAwait(false);
             }
 
             Task SaveErrorAsync(string error)

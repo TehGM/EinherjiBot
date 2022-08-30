@@ -27,9 +27,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IDiscordConnection>(s => (IDiscordConnection)s.GetRequiredService<IHostedDiscordClient>());
             services.AddHostedService<DiscordCommandsService>();
 
-            services.TryAddScoped<IMessageContextProvider, DiscordMessageContextProvider>();
-            services.TryAddScoped<IMessage>(s => s.GetRequiredService<IMessageContextProvider>().Message);
-
             return services;
         }
     }

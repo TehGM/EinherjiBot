@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using TehGM.EinherjiBot.PlaceholdersEngine.Services;
 using TehGM.EinherjiBot.PlaceholdersEngine;
 using TehGM.EinherjiBot.PlaceholdersEngine.API.Services;
@@ -28,6 +27,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddTransient<IPlaceholdersService, ApiPlaceholdersService>();
             services.TryAddTransient<IPlaceholderSerializer, PlaceholderSerializer>();
+
+            services.TryAddScoped<IPlaceholderContextProvider, PlaceholderContextProvider>();
+            services.TryAddTransient<PlaceholderConvertContext>(s => s.GetRequiredService<IPlaceholderContextProvider>().Context ?? new PlaceholderConvertContext(PlaceholderUsage.None));
 
             return services;
         }

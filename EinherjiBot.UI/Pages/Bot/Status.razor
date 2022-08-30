@@ -2,6 +2,7 @@
 @using Discord
 @using TehGM.EinherjiBot.BotStatus
 @using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.PlaceholdersEngine.API
 @using TehGM.EinherjiBot.UI.Components.BotStatus
 @using TehGM.EinherjiBot.UI.Components.PlaceholdersEngine
 @using TehGM.EinherjiBot.UI.PlaceholdersEngine
@@ -36,7 +37,7 @@
 <BotStatusCard @ref=this._newStatusCard Deleted="this.OnStatusDeleted" Saved="this.OnStatusSaved" />
 
 <FabContainer>
-    <PlaceholderBuilderFab PlaceholderContext="PlaceholderUsage.Status" />
+    <PlaceholderBuilderFab PlaceholderContext="this._placeholdersContext" />
 </FabContainer>
 
 @code {
@@ -44,6 +45,7 @@
     private BotStatusCard _newStatusCard;
 
     private bool DisplayExisting => this._existingStatuses == null || this._existingStatuses.Any();
+    private PlaceholderConvertContext _placeholdersContext = new PlaceholderConvertContext(PlaceholderUsage.Status);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

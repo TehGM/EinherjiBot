@@ -1,5 +1,6 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using TehGM.EinherjiBot.PlaceholdersEngine;
 
 namespace TehGM.EinherjiBot.MessageTriggers.Services
 {
@@ -44,8 +45,6 @@ namespace TehGM.EinherjiBot.MessageTriggers.Services
                     return;
 
                 using IServiceScope scope = this._services.CreateScope();
-                IMessageContextProvider messageContext = scope.ServiceProvider.GetRequiredService<IMessageContextProvider>();
-                messageContext.Message = message;
                 IDiscordAuthProvider authProvider = scope.ServiceProvider.GetRequiredService<IDiscordAuthProvider>();
                 IDiscordAuthContext authContext = await authProvider.FromMessageAsync(message, base.CancellationToken).ConfigureAwait(false);
                 authProvider.User = authContext;
