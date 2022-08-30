@@ -9,6 +9,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
     /// <inheritdoc/>
     public class PlaceholdersEngineService : IPlaceholdersEngine
     {
+        private static readonly Regex _placeholderDetectRegex = new Regex(@"{{.+}}", RegexOptions.Singleline | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
         private readonly IPlaceholdersProvider _provider;
         private readonly IPlaceholderSerializer _serializer;
         private readonly IServiceProvider _services;
@@ -32,6 +34,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Services
         /// <inheritdoc/>
         public async Task<string> ConvertPlaceholdersAsync(string text, PlaceholderConvertContext context, IServiceProvider services, CancellationToken cancellationToken = default)
         {
+            if (!_placeholderDetectRegex.IsMatch(text))
+                return text;
+
             this._log.LogDebug("Running placeholders engine for text {Text}", text);
 
             IBotAuthorizationService authService = services.GetRequiredService<IBotAuthorizationService>();
