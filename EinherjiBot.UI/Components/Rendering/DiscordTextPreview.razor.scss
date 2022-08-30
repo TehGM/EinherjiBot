@@ -1,0 +1,33 @@
+.discord-message-preview {
+    ::deep code {
+        background: rgb(20, 20, 20);
+        font-family: Consolas,Andale Mono WT,Andale Mono,Lucida Console,Lucida Sans Typewriter,DejaVu Sans Mono,Bitstream Vera Sans Mono,Liberation Mono,Nimbus Mono L,Monaco,Courier New,Courier,monospace;
+        padding: .2em;
+        margin: -.2em 0;
+        border-radius: 3px;
+        border: none;
+    }
+
+    ::deep pre > code {
+        border: 1px solid rgb(10, 10, 10);
+        white-space: pre-wrap;
+        max-width: 90%;
+        width: 90%;
+        display: block;
+        padding: .5em;
+    }
+
+    ::deep blockquote {
+        padding: 0 8px 0 12px;
+
+        &::before {
+            width: 4px;
+            border-radius: 4px;
+            background-color: rgb(80, 80, 80);
+            position: absolute;
+            left: 12px;
+            height: 20px;
+            content: ' ';
+        }
+    }
+}

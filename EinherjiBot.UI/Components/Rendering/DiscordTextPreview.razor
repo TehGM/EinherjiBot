@@ -1,0 +1,209 @@
+﻿@using System.Text
+@using Ganss.XSS
+@using TehGM.EinherjiBot.PlaceholdersEngine
+@using TehGM.EinherjiBot.PlaceholdersEngine.API
+@inject IPlaceholdersService Placeholders
+@inject IMarkdownRenderer MarkdownRenderer
+
+@if (this._output != null)
+{
+    <span class="discord-message-preview">
+        @this._output
+    </span>
+}
+@if (this._roleColors?.Any() == true)
+{
+    @foreach (KeyValuePair<uint, RoleInfoResponse> roleColor in this._roleColors)
+    {
+        <style @key="roleColor.Key">
+            .role-color-@roleColor.Key {
+                background-color: @roleColor.Value.GetHtmlColor(0.1);
+                color: @roleColor.Value.GetHtmlColor();
+            }
+            .role-color-@(roleColor.Key):hover {
+                background-color: @roleColor.Value.GetHtmlColor(0.3);
+                color: @roleColor.Value.GetHtmlColor();
+            }
+        </style>
+    }
+}
+
+@code {
+    // when processing markdown, the sanitizing library will replace <, > etc - so the regex needs to take that into account
+    private static Regex _userMentionRegex = new Regex(@"(?:<|&lt;)@!?(\d{17,20})(?:>|&gt;)", RegexOptions.CultureInvariant | RegexOptions.Singleline);
+    private static Regex _channelMentionRegex = new Regex(@"(?:<|&lt;)#(\d{17,20})(?:>|&gt;)", RegexOptions.CultureInvariant | RegexOptions.Singleline);
+    private static Regex _roleMentionRegex = new Regex(@"(?:<|&lt;)@(?:&|&amp;)(\d{17,20})(?:>|&gt;)", RegexOptions.CultureInvariant | RegexOptions.Singleline);
+
+    [Parameter, EditorRequired]
+    public string Text { get; set; }
+    [Parameter]
+    public PlaceholderConvertContext Context { get; set; } = new PlaceholderConvertContext(PlaceholderUsage.StaticContext);
+
+    [Parameter]
+    public bool EnableMentionTooltips { get; set; } = true;
+
+    [Parameter]
+    public bool ProcessPlaceholders { get; set; } = true;
+    [Parameter]
+    public bool ProcessMarkdown { get; set; } = true;
+    [Parameter]
+    public bool ProcessMentions { get; set; } = true;
+
+    private bool _dirty = false;
+    private RenderFragment _output;
+    private IDictionary<uint, RoleInfoResponse> _roleColors;
+
+    // since previewing text with all stuff involved is potentially expensive, we only want to render it on demand
+    protected override bool ShouldRender()
+    {
+        bool render = this._dirty;
+        this._dirty = false;
+        return render;
+    }
+
+    public async Task UpdateAsync()
+    {
+        string text = this.Text;
+        this._roleColors?.Clear();
+        if (this.ProcessPlaceholders)
+        {
+            PlaceholdersConvertRequest request = new PlaceholdersConvertRequest(text, this.Context);
+            PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(request);
+            text = response.Result;
+        }
+
+        if (this.ProcessMarkdown)
+            text = this.MarkdownRenderer.RenderDiscordText(text);
+
+        if (!this.ProcessMentions)
+            this._output = TextAsFragment(text);
+        else
+        {
+            List<RenderSlice> mentionSlices = new List<RenderSlice>();
+            mentionSlices.AddRange(_userMentionRegex.Matches(text).Select(m => new RenderSlice(RenderSliceType.User, m.Index, m.Index + m.Length, ulong.Parse(m.Groups[1].Value))));
+            mentionSlices.AddRange(_channelMentionRegex.Matches(text).Select(m => new RenderSlice(RenderSliceType.Channel, m.Index, m.Index + m.Length, ulong.Parse(m.Groups[1].Value))));
+            mentionSlices.AddRange(_roleMentionRegex.Matches(text).Select(m => new RenderSlice(RenderSliceType.Role, m.Index, m.Index + m.Length, ulong.Parse(m.Groups[1].Value))));
+
+            if (!mentionSlices.Any())
+                this._output = this.TextAsFragment(text);
+            else
+            {
+                IEnumerable<RenderSlice> slices = this.AddRawSlices(mentionSlices, text);
+                slices = slices.OrderBy(s => s.Start);
+
+                // using existing components is ideal as it allows for more functionality, and more consistency
+                // however browsers are plain-stupid and aggressively close tags. This causes markdown-rendered stuff to break when we use components
+                // when markown is used, unfortunately we have to fallback to simple <span>
+                // sigh, this is far from great, but has to do until I find a better solution
+                if (!this.ProcessMarkdown)
+                    this.RenderWithComponents(slices, text);
+                else
+                    await this.RenderWithRegexAsync(slices, text);
+            }
+        }
+
+        this._dirty = true;
+    }
+
+    private async Task RenderWithRegexAsync(IEnumerable<RenderSlice> slices, string text)
+    {
+        this._roleColors ??= new Dictionary<uint, RoleInfoResponse>();
+        HtmlSanitizer sanitizer = new HtmlSanitizer();
+        StringBuilder builder = new StringBuilder();
+        foreach (RenderSlice slice in slices)
+        {
+            if (slice.SliceType == RenderSliceType.Raw)
+                builder.Append(text[slice.Start..slice.End]);
+            else if (slice.SliceType == RenderSliceType.User)
+            {
+                IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(slice.EntityID.Value);
+                builder.AppendFormat(@"<span class=""discord-mention"">@{0}</span>", sanitizer.Sanitize(user.Username));
+            }
+            else if (slice.SliceType == RenderSliceType.Channel)
+            {
+                ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(slice.EntityID.Value);
+                builder.AppendFormat(@"<span class=""discord-mention"">#{0}</span>", sanitizer.Sanitize(channel.Name));
+            }
+            else if (slice.SliceType == RenderSliceType.Role)
+            {
+                RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(slice.EntityID.Value);
+                if (role.Color != 0)
+                {
+                    this._roleColors.TryAdd(role.Color, role);
+                    builder.AppendFormat(@"<span class=""discord-mention role-color-{1}"">@{0}</span>", sanitizer.Sanitize(role.Name), role.Color);
+                }
+                else
+                    builder.AppendFormat(@"<span class=""discord-mention"">@{0}</span>", sanitizer.Sanitize(role.Name));
+            }
+        }
+
+        this._output = this.TextAsFragment(builder.ToString());
+    }
+
+    private void RenderWithComponents(IEnumerable<RenderSlice> slices, string text)
+    {
+        this._output = async __builder =>
+        {
+            foreach (RenderSlice slice in slices)
+            {
+                if (slice.SliceType == RenderSliceType.Raw)
+                    @(this.TextAsFragment(text[slice.Start..slice.End]))
+                else if (slice.SliceType == RenderSliceType.User)
+                {
+                    IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(slice.EntityID.Value);
+                    <PreviewableUserSpan Entity="user" EnableTooltip="this.EnableMentionTooltips" ShowAsMention="true" /> 
+                }
+                else if (slice.SliceType == RenderSliceType.Channel)
+                {
+                    ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(slice.EntityID.Value);
+                    <PreviewableChannelSpan Entity="channel" EnableTooltip="this.EnableMentionTooltips" ShowAsMention="true" /> 
+                }
+                else if (slice.SliceType == RenderSliceType.Role)
+                {
+                    RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(slice.EntityID.Value);
+                    <PreviewableRoleSpan Entity="role" EnableTooltip="this.EnableMentionTooltips" ShowAsMention="true" />
+                }
+            }
+        };
+    }
+
+    private IEnumerable<RenderSlice> AddRawSlices(IEnumerable<RenderSlice> entitySlices, string text)
+    {
+        RenderSlice[] ordered = entitySlices.OrderBy(s => s.Start).ToArray();
+        List<RenderSlice> results = new List<RenderSlice>();
+        if (ordered[0].Start != 0)
+            results.Add(new RenderSlice(RenderSliceType.Raw, 0, ordered[0].Start, null));
+        for (int i = 1; i < ordered.Length; i++)
+        {
+            RenderSlice previousSlice = ordered[i - 1];
+            RenderSlice currentSlice = ordered[i];
+            if (currentSlice.Start - previousSlice.End <= 1)
+                continue;
+            results.Add(new RenderSlice(RenderSliceType.Raw, previousSlice.End, currentSlice.Start, null));
+        }
+        RenderSlice lastSlice = ordered.Last();
+        if (lastSlice.End < text.Length)
+            results.Add(new RenderSlice(RenderSliceType.Raw, lastSlice.End, text.Length, null));
+
+        results.AddRange(entitySlices);
+        return results;
+    }
+
+    private RenderFragment TextAsFragment(string text)
+    {
+        return __builder =>
+        { 
+            @((MarkupString)text) 
+        };
+    }
+
+    private record struct RenderSlice(RenderSliceType SliceType, int Start, int End, ulong? EntityID);
+
+    private enum RenderSliceType
+    {
+        Raw,
+        User,
+        Channel,
+        Role
+    }
+}
