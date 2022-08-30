@@ -1,6 +1,7 @@
 ﻿namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 {
     [Placeholder("CurrentChannel", PlaceholderUsage.GuildMessageContext | PlaceholderUsage.ChannelEvent)]
+    [DisplayName("Current Channel")]
     [Description("Is replaced with name/mention of channel the message was sent in.")]
     public class CurrentChannelPlaceholder
     {
