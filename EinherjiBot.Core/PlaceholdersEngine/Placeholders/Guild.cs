@@ -15,9 +15,9 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
         public class GuildPlaceholderHandler : PlaceholderHandler<GuildPlaceholder>
         {
             private readonly IDiscordEntityInfoProvider _provider;
-            private readonly IAuthContext _auth;
+            private readonly IAuthProvider _auth;
 
-            public GuildPlaceholderHandler(IDiscordEntityInfoProvider provider, IAuthContext auth)
+            public GuildPlaceholderHandler(IDiscordEntityInfoProvider provider, IAuthProvider auth)
             {
                 this._provider = provider;
                 this._auth = auth;
@@ -25,8 +25,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
 
             protected async override Task<string> GetReplacementAsync(GuildPlaceholder placeholder, CancellationToken cancellationToken = default)
             {
-                if (!this._auth.IsAdmin() && !this._auth.IsEinherji())
-                    throw new AccessForbiddenException("You're not authorized to use one or more placeholders");
+                if (!this._auth.User.IsAdmin() && !this._auth.User.IsEinherji())
+                    throw new AccessForbiddenException("You're not authorized to use Guild placeholder");
 
                 IDiscordGuildInfo guild = await this._provider.GetGuildInfoAsync(placeholder.GuildID, cancellationToken).ConfigureAwait(false);
                 if (guild == null)
