@@ -2,6 +2,7 @@
 using Markdig;
 using Markdig.Parsers;
 using Markdig.Parsers.Inlines;
+using TehGM.EinherjiBot.UI.Utilities.Rendering.MarkdownExtensions;
 
 namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
 {
@@ -40,10 +41,10 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
         private static string TrimHtml(string text)
         {
             string result = text.TrimEnd('\n');
-            if (result.EndsWith("</p>"))
-                result = result.Remove(result.Length - "</p>".Length);
-            if (result.StartsWith("<p>"))
-                result = result.Substring("<p>".Length);
+            //if (result.EndsWith("</p>"))
+            //    result = result.Remove(result.Length - "</p>".Length);
+            //if (result.StartsWith("<p>"))
+            //    result = result.Substring("<p>".Length);
             return result;
         }
 
@@ -78,7 +79,6 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.BlockParsers.Add(new QuoteBlockParser());
             builder.BlockParsers.Add(new FencedCodeBlockParser() { OpeningCharacters = new[] { '`' } });
             builder.BlockParsers.Add(new IndentedCodeBlockParser());
-            // TODO: write a parser that handles this as <br/> tags instead
             builder.BlockParsers.Add(new ParagraphBlockParser());
             builder.InlineParsers.Add(new EscapeInlineParser());
             builder.InlineParsers.Add(new EmphasisInlineParser());
@@ -88,6 +88,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.UseEmphasisExtras(Markdig.Extensions.EmphasisExtras.EmphasisExtraOptions.Strikethrough);
             builder.UseReferralLinks("nofollow");
             builder.EnableTrackTrivia();
+            builder.Extensions.AddIfNotAlready<NormalLineBreaksExtension>();
 
             // TODO: add parsers for other discord tags
 
