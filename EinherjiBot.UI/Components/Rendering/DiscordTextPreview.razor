@@ -4,6 +4,7 @@
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 @inject IPlaceholdersService Placeholders
 @inject IMarkdownRenderer MarkdownRenderer
+@inject IJSRuntime JS
 
 @if (this._output != null)
 {
@@ -59,6 +60,13 @@
         bool render = this._dirty;
         this._dirty = false;
         return render;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (this.RenderLocation.IsClient)
+            await JS.InvokeVoidAsync("registerDiscordSpoilers");
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     public async Task UpdateAsync()

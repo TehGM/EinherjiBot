@@ -1,0 +1,30 @@
+﻿@using MudBlazor.Utilities
+
+<span class="@this.Class" @onclick="this.OnClickAsync">
+    <span class="discord-spoiler-text">
+        @this.ChildContent
+    </span>
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string CssClass { get; set; }
+
+    [Parameter]
+    public bool Hidden { get; set; } = true;
+    [Parameter]
+    public EventCallback<bool> HiddenChanged { get; set; }
+
+    private string Class => new CssBuilder("discord-spoiler")
+        .AddClass("hidden", this.Hidden)
+        .AddClass(this.CssClass)
+        .Build();
+
+    private Task OnClickAsync()
+    {
+        this.Hidden = false;
+        return this.HiddenChanged.InvokeAsync(this.Hidden);
+    }
+}

@@ -38,6 +38,8 @@
 	<Target Name="CompileStaticFiles" BeforeTargets="Build">
 		<Message Text="Compiling Static Files: /wwwroot/css" Importance="high" />
 		<Exec Command="webcompiler -r wwwroot/css -c webcompiler.json" StandardOutputImportance="high" />
+		<Message Text="Compiling Static Files: /wwwroot/js" Importance="high" />
+		<Exec Command="webcompiler -r wwwroot/js -c webcompiler.json" StandardOutputImportance="high" />
 		<Message Text="Compiling Static Files: /Layouts" Importance="high" />
 		<Exec Command="webcompiler -r Layouts -c webcompiler.json" StandardOutputImportance="high" />
 		<Message Text="Compiling Static Files: /Components" Importance="high" />

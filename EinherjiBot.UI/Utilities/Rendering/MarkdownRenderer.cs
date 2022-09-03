@@ -34,8 +34,8 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
 
         private string ConvertToHtml(string text, MarkdownPipeline pipeline)
         {
-            string result = Markdig.Markdown.ToHtml(text, pipeline);
-            return this._sanitizer.Sanitize(result);
+            string result = this._sanitizer.Sanitize(text);
+            return Markdig.Markdown.ToHtml(text, pipeline);
         }
 
         private static string TrimHtml(string text)
@@ -89,6 +89,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.UseReferralLinks("nofollow");
             builder.EnableTrackTrivia();
             builder.Extensions.AddIfNotAlready<NormalLineBreaksExtension>();
+            builder.Extensions.AddIfNotAlready<SpoilerExtension>();
 
             // TODO: add parsers for other discord tags
 

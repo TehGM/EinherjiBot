@@ -77,3 +77,25 @@
         color: white;
     }
 }
+
+.discord-spoiler {
+    transition: all .1s ease;
+    -webkit-transition: all .1s ease;
+    background-color: rgba(255, 255, 255, .1);
+
+    &.hidden {
+        border-radius: 3px;
+        cursor: pointer;
+        background-color: rgb(10, 10, 10);
+
+        &:hover {
+            background-color: rgba(255,255,255,0.03);
+        }
+
+        .discord-spoiler-text {
+            pointer-events: none;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
+}
