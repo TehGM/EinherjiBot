@@ -34,8 +34,9 @@ namespace TehGM.EinherjiBot.UI.Utilities.Rendering.MarkdownExtensions
                 renderer.Write("||").Write(obj.Content).Write("||");
                 return;
             }
-
-            renderer.Write("<span class=\"discord-spoiler hidden\"><span class=\"discord-spoiler-text\">").Write(obj.Content).Write("</span></span>");
+            ReadOnlySpan<char> chars = obj.Content.AsSpan();
+            string content = new string(chars.ToArray()).Replace(" ", "&nbsp;");
+            renderer.Write("<span class=\"discord-spoiler hidden\"><span class=\"discord-spoiler-text\">").Write(content).Write("</span></span>");
         }
     }
 
