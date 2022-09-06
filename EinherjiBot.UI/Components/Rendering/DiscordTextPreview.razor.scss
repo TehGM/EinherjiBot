@@ -16,18 +16,4 @@
         display: block;
         padding: .5em;
     }
-
-    ::deep blockquote {
-        padding: 0 8px 0 12px;
-
-        &::before {
-            width: 4px;
-            border-radius: 4px;
-            background-color: rgb(80, 80, 80);
-            position: absolute;
-            left: 12px;
-            height: 20px;
-            content: ' ';
-        }
-    }
 }

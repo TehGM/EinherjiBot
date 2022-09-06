@@ -99,3 +99,20 @@
         }
     }
 }
+
+.discord-quote {
+    display: flex;
+
+    .discord-quote-line {
+        width: 4px;
+        border-radius: 4px;
+        outline: 0;
+        background-color: rgb(80, 80, 80);
+    }
+
+    blockquote {
+        padding: 0 8px 0 12px;
+        box-sizing: border-box;
+        text-indent: 0;
+    }
+}

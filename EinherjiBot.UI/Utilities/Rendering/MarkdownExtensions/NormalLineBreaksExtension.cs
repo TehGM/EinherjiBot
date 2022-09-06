@@ -23,7 +23,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Rendering.MarkdownExtensions
     {
         protected override void Write(HtmlRenderer renderer, ParagraphBlock obj)
         {
-            if (obj.Parent is not MarkdownDocument)
+            if (obj.Parent is not MarkdownDocument && obj.Parent is not QuoteBlock)
             {
                 base.Write(renderer, obj);
                 return;
@@ -35,10 +35,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Rendering.MarkdownExtensions
             renderer.WriteLeafInline(obj);
 
             if (!renderer.IsLastInContainer)
-            {
                 renderer.WriteLine("<br />");
-                renderer.WriteLine("<br />");
-            }
             else
                 renderer.EnsureLine();
         }

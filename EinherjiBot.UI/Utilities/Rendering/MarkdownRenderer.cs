@@ -90,6 +90,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.EnableTrackTrivia();
             builder.Extensions.AddIfNotAlready<NormalLineBreaksExtension>();
             builder.Extensions.AddIfNotAlready<SpoilerExtension>();
+            builder.Extensions.AddIfNotAlready<DiscordQuoteExtension>();
 
             // TODO: add parsers for other discord tags
 
