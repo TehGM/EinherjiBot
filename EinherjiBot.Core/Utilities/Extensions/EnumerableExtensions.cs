@@ -42,7 +42,7 @@
             if (second == null)
                 return false;
 
-            comparer = EqualityComparer<TSource>.Default;
+            comparer ??= EqualityComparer<TSource>.Default;
             return !first.Except(second, comparer).Any();
         }
 
