@@ -7,6 +7,9 @@
     public bool ShowDiscriminator { get; set; } = true;
 
     [Parameter]
+    public bool MentionUseGuildNickname { get; set; } = false;
+
+    [Parameter]
     public ushort PreviewAvatarSize { get; set; } = 32;
     [Parameter]
     public string PreviewCustomNameText { get; set; } = null;
@@ -33,8 +36,14 @@
             ? base.Entity.GetUsernameWithDiscriminator()
             : base.Entity.Username;
         if (base.ShowAsMention)
-            text = $"@{text}";
-        return text;
+        {
+            if (this.MentionUseGuildNickname && base.Entity is GuildUserInfoResponse guildUser && !string.IsNullOrWhiteSpace(guildUser.Nickname))
+                return $"@{guildUser.Nickname}";
+            return $"@{base.Entity.Username}";
+        }
+        else if (this.ShowDiscriminator)
+            return base.Entity.GetUsernameWithDiscriminator();
+        return base.Entity.Username;
     }
 
     protected override RenderFragment RenderTooltipPreview()
