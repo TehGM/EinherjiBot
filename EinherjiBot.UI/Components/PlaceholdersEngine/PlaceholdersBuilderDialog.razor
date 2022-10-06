@@ -53,7 +53,7 @@
             }
 
             <MudDivider Class="my-2" DividerType="DividerType.Middle" />
-            <PlaceholderPreview Context="this.Context" Error="!this.AllPropertiesValid" EntityID="this._previewEntityID" SerializedPlaceholder="@this._serializedPlaceholder" />
+            <PlaceholderPreview Context="this.Context" Error="!this.AllPropertiesValid" SerializedPlaceholder="@this._serializedPlaceholder" />
 
             @if (this._selectedPlaceholder?.Properties?.Any() == true)
             {
@@ -96,8 +96,6 @@
 
     private bool AllPropertiesValid => this._invalidProperties?.Any() != true;
     private Color CopyButtonColor => this.AllPropertiesValid ? Color.Primary : Color.Default;
-
-    private ulong? _previewEntityID;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -151,15 +149,6 @@
             this._invalidProperties.Remove(e.Property);
         else
             this._invalidProperties.Add(e.Property);
-
-
-        if (e.Value != null && e.Property.PropertyAttribute.IDType != IDType.None && typeof(ulong?).IsAssignableFrom(e.Value.GetType()))
-        {
-            if (e.IsValid)
-                this._previewEntityID = (ulong?)e.Value;
-            else
-                this._previewEntityID = null;
-        }
 
         e.Property.Property.SetValue(this._placeholderValue, e.Value, PlaceholderDescriptor.MemberBindingFlags, null, null, null);
         this.SerializePlaceholder();

@@ -6,15 +6,15 @@
 @inject IPlaceholdersService Placeholders
 
 <div class="placeholder-preview">
-    <MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" ReadOnly="true" Disabled="this.IsError" >
+    <MudField Class="mt-2 not-pickable" Label="Preview" Variant="Variant.Outlined" Disabled="this.IsError" >
         @(this._preview ?? this.NullPreview)
     </MudField>
 </div>
 
 @code {
-    private static Regex _userMentionRegex = new Regex(@"^<@!?\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-    private static Regex _channelMentionRegex = new Regex(@"^<#\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-    private static Regex _roleMentionRegex = new Regex(@"^<@&\d{17,20}>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static Regex _userMentionRegex = new Regex(@"^<@!?(\d{17,20})>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static Regex _channelMentionRegex = new Regex(@"^<#(\d{17,20})>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+    private static Regex _roleMentionRegex = new Regex(@"^<@&(\d{17,20})>$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     [Parameter]
     public string SerializedPlaceholder { get; set; }
@@ -24,13 +24,10 @@
     public bool Error { get; set; }
     [Parameter]
     public string ErrorText { get; set; } = "Preview disabled when properties have errors";
-    [Parameter]
-    public ulong? EntityID { get; set; }
 
     private RenderFragment _preview;
 
     private string _serializedPlaceholder;
-    private ulong? _entityID;
     private bool _error;
 
     private bool IsError => this.Error || string.IsNullOrEmpty(this.SerializedPlaceholder);
@@ -56,10 +53,9 @@
 
     private bool CheckNeedsUpdate()
     {
-        bool dirty = this.SerializedPlaceholder != this._serializedPlaceholder || this.EntityID != this._entityID || this.Error != this._error;
+        bool dirty = this.SerializedPlaceholder != this._serializedPlaceholder || this.Error != this._error;
         if (dirty)
         {
-            this._entityID = this.EntityID;
             this._serializedPlaceholder = this.SerializedPlaceholder;
             this._error = this.Error;
         }
@@ -71,24 +67,25 @@
         if (string.IsNullOrWhiteSpace(preview))
             return null;
 
-        if (this._entityID != null)
+        Match userMatch = _userMentionRegex.Match(preview);
+        if (userMatch.Success && ulong.TryParse(userMatch.Groups[1].Value, out ulong userID))
         {
-            if (_userMentionRegex.IsMatch(preview))
-            {
-                IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(this._entityID.Value);
-                return @<PreviewableUserSpan Entity="user" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
-            }
-            if (_channelMentionRegex.IsMatch(preview))
-            {
-                ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(this._entityID.Value);
-                return @<PreviewableChannelSpan Entity="channel" EnablePopover="false" EnableTooltip="false" ShowTypeIcon="true" ShowAsMention="true" TypeIconMatchDiscord="true" />;
-            }
-            if (_roleMentionRegex.IsMatch(preview))
-            {
-                RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(this._entityID.Value);
-                return @<PreviewableRoleSpan Entity="role" UseRoleColor="true" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
-            }
+            IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(userID);
+            return @<PreviewableUserSpan Entity="user" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
         }
+        Match channelMatch = _channelMentionRegex.Match(preview);
+        if (channelMatch.Success && ulong.TryParse(channelMatch.Groups[1].Value, out ulong channelID))
+        {
+            ChannelInfoResponse channel = await this.EntityInfoProvider.GetChannelInfoAsync(channelID);
+            return @<PreviewableChannelSpan Entity="channel" EnablePopover="false" EnableTooltip="false" ShowTypeIcon="true" ShowAsMention="true" TypeIconMatchDiscord="true" />;
+        }
+        Match roleMatch = _roleMentionRegex.Match(preview);
+        if (roleMatch.Success && ulong.TryParse(roleMatch.Groups[1].Value, out ulong roleID))
+        {
+            RoleInfoResponse role = await this.EntityInfoProvider.GetRoleInfoAsync(roleID);
+            return @<PreviewableRoleSpan Entity="role" UseRoleColor="true" EnablePopover="false" EnableTooltip="false" ShowAsMention="true" />;
+        }
+
         return @<text>@preview</text>;
     }
 
