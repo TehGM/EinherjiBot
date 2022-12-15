@@ -76,7 +76,6 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             // not all of markdown features are supported by discord messages, so only add those that are Discord-y enough
             builder.BlockParsers.Clear();
             builder.InlineParsers.Clear();
-            builder.BlockParsers.Add(new QuoteBlockParser());
             builder.BlockParsers.Add(new FencedCodeBlockParser() { OpeningCharacters = new[] { '`' } });
             builder.BlockParsers.Add(new IndentedCodeBlockParser());
             builder.BlockParsers.Add(new ParagraphBlockParser());
@@ -91,6 +90,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.Extensions.AddIfNotAlready<NormalLineBreaksExtension>();
             builder.Extensions.AddIfNotAlready<SpoilerExtension>();
             builder.Extensions.AddIfNotAlready<DiscordQuoteExtension>();
+            builder.Extensions.AddIfNotAlready<DiscordCodeBlockExtension>();
 
             // TODO: add parsers for other discord tags
 
