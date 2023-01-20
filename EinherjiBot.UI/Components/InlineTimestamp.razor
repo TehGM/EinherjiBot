@@ -46,6 +46,9 @@
 
     protected override void OnParametersSet()
     {
+        if (this.RenderLocation.IsServer)
+            this.EnableTooltip = false;
+
         this._computedCssClass = $"inline-timestamp {(this.DisableHighlight ? "no-highlight" : null)} {this.CssClass}";
         this.StartUpdateLoop();
         base.OnParametersSet();
