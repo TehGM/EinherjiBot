@@ -1,4 +1,4 @@
-﻿using Ganss.XSS;
+﻿using Ganss.Xss;
 using Markdig;
 using Markdig.Parsers;
 using Markdig.Parsers.Inlines;
@@ -82,7 +82,7 @@ namespace TehGM.EinherjiBot.UI.Utilities.Markdown.Services
             builder.InlineParsers.Add(new EscapeInlineParser());
             builder.InlineParsers.Add(new EmphasisInlineParser());
             builder.InlineParsers.Add(new CodeInlineParser());
-            builder.InlineParsers.Add(new AutolinkInlineParser() { EnableHtmlParsing = false });
+            builder.InlineParsers.Add(new AutolinkInlineParser(new AutolinkOptions() { EnableHtmlParsing = false }));
             builder.InlineParsers.Add(new LineBreakInlineParser() { EnableSoftAsHard = true });
             builder.UseEmphasisExtras(Markdig.Extensions.EmphasisExtras.EmphasisExtraOptions.Strikethrough);
             builder.UseReferralLinks("nofollow");
