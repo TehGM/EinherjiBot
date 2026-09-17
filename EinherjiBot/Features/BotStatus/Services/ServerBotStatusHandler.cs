@@ -24,7 +24,7 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException("You have no privileges to control bot's status.");
 
-            BotStatus result = new BotStatus(request.Text, request.Link, request.ActivityType);
+            BotStatus result = new BotStatus(request.Text);
             result.IsEnabled = request.IsEnabled;
 
             await this._provider.AddOrUpdateAsync(result, cancellationToken).ConfigureAwait(false);
@@ -75,8 +75,6 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             if (status.HasChanges(request))
             {
                 status.Text = request.Text;
-                status.Link = request.Link;
-                status.ActivityType = request.ActivityType;
                 status.IsEnabled = request.IsEnabled;
                 status.LastError = null;
                 await this._provider.AddOrUpdateAsync(status, cancellationToken).ConfigureAwait(false);
@@ -92,13 +90,13 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException("You have no privileges to control bot's status.");
 
-            BotStatus status = new BotStatus(request.Text, request.Link, request.ActivityType);
+            BotStatus status = new BotStatus(request.Text);
             await this._service.SetStatusAsync(status, cancellationToken);
         }
 
         private static BotStatusResponse CreateResponse(BotStatus status)
         {
-            return new BotStatusResponse(status.ID, status.Text, status.Link, status.ActivityType, status.IsEnabled)
+            return new BotStatusResponse(status.ID, status.Text, status.IsEnabled)
             {
                 LastError = (ErrorInfoResponse)status.LastError
             };

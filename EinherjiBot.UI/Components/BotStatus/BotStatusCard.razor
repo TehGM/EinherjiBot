@@ -1,5 +1,4 @@
-﻿@using Discord
-@using TehGM.EinherjiBot.BotStatus
+﻿@using TehGM.EinherjiBot.BotStatus
 @using TehGM.EinherjiBot.PlaceholdersEngine
 @using TehGM.EinherjiBot.PlaceholdersEngine.API
 @using TehGM.EinherjiBot.UI.PlaceholdersEngine
@@ -13,7 +12,7 @@
         <MudCardHeader>
             <MudGrid Class="flex-wrap">
                 <MudItem xs="7" sm="6" md="8">
-                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing || !this.IsLinkValid" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
+                    <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Disabled="this._processing" OnClick="this.OnSetClickedAsync">Use Now</MudButton>
                     <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Secondary" Disabled="this._processing || string.IsNullOrWhiteSpace(this._request.Text)" OnClick="this.OnPreviewClickedAsync">
                         Preview
                         <MudPopover Open="this._previewText != null" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
@@ -30,7 +29,7 @@
                     }
                     <MudSwitch @bind-Checked="this._request.IsEnabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
                     <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
-                        Disabled="this._processing || !this.HasPendingChanges() || !this.IsLinkValid" 
+                        Disabled="this._processing || !this.HasPendingChanges()"
                         OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
                     <MudIconButton Icon="@this.DeleteIcon" Color="MudBlazor.Color.Error" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
                 </MudItem>
@@ -38,26 +37,9 @@
         </MudCardHeader>
         <MudCardContent>
             <MudGrid>
-                <MudItem xs="12" md="3" lg="2">
-                    <MudSelect T="ActivityType" @bind-Value="this._request.ActivityType" Label="Activity" Disabled="this._processing">
-                        <MudSelectItem Value="ActivityType.Playing"><MudIcon Icon="@Icons.Filled.VideogameAsset"/> Playing</MudSelectItem>
-                        <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
-                        <MudSelectItem Value="ActivityType.Listening"><MudIcon Icon="@Icons.Filled.Headphones"/> Listening to</MudSelectItem>
-                        <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
-                        <MudSelectItem Value="ActivityType.Competing"><MudIcon Icon="@Icons.Filled.EmojiEvents"/> Competing in</MudSelectItem>
-                        <MudSelectItem Value="ActivityType.CustomStatus"><MudIcon Icon="@Icons.Filled.ChatBubble"/> Custom</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" md="9" lg="10">
+                <MudItem xs="12">
                     <MudTextField @bind-Value="this._request.Text" Label="Status (Empty to clear)" Disabled="this._processing" DebounceInterval="350" />
                 </MudItem>
-                @if (this.IsStreamingActivity)
-                {
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="this._request.Link" Label="Twitch or YouTube URL (Optional)" Disabled="this._processing" 
-                            Error="!this.IsLinkValid" Validation="@ActivityLinkValidator.ValidationDelegate" DebounceInterval="350" />
-                    </MudItem>
-                }
                 @if (!string.IsNullOrWhiteSpace(this._error?.Message))
                 {
                     <MudItem xs="12">
@@ -94,8 +76,6 @@
     private ErrorInfoResponse _error;
 
     private bool IsNew => this._id == null;
-    private bool IsStreamingActivity => this._request.ActivityType == ActivityType.Streaming;
-    private bool IsLinkValid => !this.IsStreamingActivity || ActivityLinkValidator.IsLinkValid(this._request.Link);
 
     private string SaveIcon => this.IsNew ? Icons.Filled.AddCircle : Icons.Material.Filled.Save;
     private string SaveText => this.IsNew ? "Add" : "Save";
@@ -110,9 +90,7 @@
 
     private bool HasPendingChanges()
         => this._id == null
-        || this.ExistingStatus.ActivityType != this._request.ActivityType
         || this.ExistingStatus.Text != this._request.Text
-        || this.ExistingStatus.Link != this._request.Link
         || this.ExistingStatus.IsEnabled != this._request.IsEnabled;
 
     private void LoadStatus(IBotStatus status)
@@ -137,7 +115,7 @@
         {
             string message = string.IsNullOrWhiteSpace(this._request.Text)
                 ? "Are you sure you want to permanently delete empty status?"
-                : $"Are you sure you want to permanently delete status \"{BuildStatusText(this._request.Text)}\"?";
+                : $"Are you sure you want to permanently delete status \"{this._request.Text}\"?";
             bool? result = await this.Dialogs.ShowMessageBox("Deleting Status", message,
                 yesText: "Delete", cancelText: "Cancel");
             if (result != true)
@@ -193,7 +171,7 @@
         try
         {
             PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._request.Text, PlaceholderUsage.Status));
-            this._previewText = BuildStatusText(response.Result);
+            this._previewText = response.Result;
         }
         catch (PlaceholderException ex)
         {
@@ -203,12 +181,6 @@
         {
             this._processing = false;
         }
-    }
-
-    private string BuildStatusText(string text)
-    {
-        string activity = this._request.ActivityType.ToDisplayString();
-        return string.IsNullOrEmpty(activity) ? text : $"{activity} {text}";
     }
 
     public record StatusEventArgs(Guid? ID, IBotStatus Status);

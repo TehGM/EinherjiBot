@@ -9,9 +9,7 @@
         public static bool HasChanges(this IBotStatus status, BotStatusRequest request)
         {
             return status.IsEnabled != request.IsEnabled
-                || status.ActivityType != request.ActivityType
-                || status.Text != request.Text
-                || status.Link != request.Link;
+                || status.Text != request.Text;
         }
     }
 }

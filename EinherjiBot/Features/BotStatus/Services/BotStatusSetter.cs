@@ -64,18 +64,20 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             if (!authorization.Succeeded)
                 throw new AccessForbiddenException("You are not authorized to change bot's status");
 
-            string text = status.Text;
+            string text = null;
             if (!string.IsNullOrWhiteSpace(status.Text))
-            {
                 text = await this._placeholders.ConvertPlaceholdersAsync(status.Text, new PlaceholderConvertContext(PlaceholderUsage.Status), cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
                 this._log.LogDebug("Changing status to `{Status}`", text);
+                await this._client.SetCustomStatusAsync(text).ConfigureAwait(false);
             }
             else
+            {
                 this._log.LogDebug("Clearing status");
-            if (status.ActivityType == ActivityType.CustomStatus && !string.IsNullOrWhiteSpace(text))
-                await this._client.SetCustomStatusAsync(text).ConfigureAwait(false);
-            else
-                await this._client.SetGameAsync(text, status.Link, status.ActivityType).ConfigureAwait(false);
+                await this._client.SetGameAsync(null).ConfigureAwait(false);
+            }
         }
     }
 }

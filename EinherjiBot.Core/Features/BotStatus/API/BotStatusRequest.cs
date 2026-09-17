@@ -1,36 +1,22 @@
-﻿using Discord;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using TehGM.EinherjiBot.API;
-using TehGM.EinherjiBot.Utilities;
 
 namespace TehGM.EinherjiBot.BotStatus
 {
     public class BotStatusRequest : ICreateValidatable, IUpdateValidatable<IBotStatus>, IValidatableObject
     {
-        public static IReadOnlyCollection<ActivityType> SupportedActivityTypes { get; } = new HashSet<ActivityType>()
-        {
-            ActivityType.Playing, ActivityType.Streaming, ActivityType.Listening,
-            ActivityType.Watching, ActivityType.Competing, ActivityType.CustomStatus
-        };
-
         [JsonProperty("text")]
         public string Text { get; set; }
-        [JsonProperty("link")]
-        public string Link { get; set; }
-        [JsonProperty("activity")]
-        public ActivityType ActivityType { get; set; }
         [JsonProperty("enabled")]
         public bool IsEnabled { get; set; }
 
         [JsonConstructor]
         public BotStatusRequest() { }
 
-        public BotStatusRequest(string text, string link, ActivityType activityType, bool isEnabled)
+        public BotStatusRequest(string text, bool isEnabled)
         {
             this.Text = text;
-            this.Link = link;
-            this.ActivityType = activityType;
             this.IsEnabled = isEnabled;
         }
 
@@ -44,20 +30,9 @@ namespace TehGM.EinherjiBot.BotStatus
             => this.ValidateShared().Select(e => new ValidationResult(e));
 
         private IEnumerable<string> ValidateShared()
-        {
-            if (!SupportedActivityTypes.Contains(this.ActivityType))
-                yield return $"Activity type {this.ActivityType} is not supported for bots.";
-
-            if (this.ActivityType == ActivityType.Streaming)
-            {
-                foreach (string error in ActivityLinkValidator.ValidationDelegate(this.Link))
-                    yield return error;
-            }
-            else if (!string.IsNullOrEmpty(this.Link))
-                yield return $"Link is only valid for {ActivityType.Streaming} activity type.";
-        }
+            => Enumerable.Empty<string>();
 
         public static BotStatusRequest FromStatus(IBotStatus status)
-            => new BotStatusRequest(status.Text, status.Link, status.ActivityType, status.IsEnabled);
+            => new BotStatusRequest(status.Text, status.IsEnabled);
     }
 }
