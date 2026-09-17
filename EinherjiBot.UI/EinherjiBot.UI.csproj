@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 	<Nullable>disable</Nullable>
 	<ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>TehGM.EinherjiBot.UI</RootNamespace>
     <AssemblyName>EinherjiBot.UI</AssemblyName>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,10 +22,9 @@
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="HtmlSanitizer" Version="7.1.542" />
     <PackageReference Include="Markdig" Version="0.30.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.7" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <PackageReference Include="MudBlazor" Version="6.0.14" />
 	<PackageReference Include="Serilog.Sinks.BrowserConsole" Version="1.0.0" />
   </ItemGroup>
@@ -37,9 +38,8 @@
   </ItemGroup>
 
 	<!-- SASS BUILD -->
-	<!-- note: on first run, the file might not be up to date, cause MSBuild works myseterious ways -->
-	<!-- to work this around, use something like fsriev -->
-	<Target Name="CompileStaticFiles" BeforeTargets="Build">
+	<!-- note: must run before static web assets are discovered, otherwise MapStaticAssets serves stale files -->
+	<Target Name="CompileStaticFiles" BeforeTargets="BeforeBuild">
 		<Message Text="Compiling Static Files: /wwwroot/css" Importance="high" />
 		<Exec Command="webcompiler -r wwwroot/css -c webcompiler.json" StandardOutputImportance="high" />
 		<Message Text="Compiling Static Files: /wwwroot/js" Importance="high" />

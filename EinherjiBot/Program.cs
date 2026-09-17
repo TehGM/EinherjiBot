@@ -80,6 +80,8 @@ namespace TehGM.EinherjiBot
             services.AddRouting(options => options.ConstraintMap.Add("ulong", typeof(API.Constraints.UlongRouteConstraint)));
             services.AddControllersWithViews().AddNewtonsoftJson(options => JsonConfiguration.ApplyDefaultSettings(options.SerializerSettings));
             services.AddRazorPages().AddNewtonsoftJson(options => JsonConfiguration.ApplyDefaultSettings(options.SerializerSettings));
+            services.AddRazorComponents()
+                .AddInteractiveWebAssemblyComponents();
 
             services.AddDiscordClient();
             services.AddEntityCaching();
@@ -117,21 +119,24 @@ namespace TehGM.EinherjiBot
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"),
                 builder => builder.UseMiddleware<VersionCheckMiddleware>());
-
-            app.UseBlazorFrameworkFiles();
-            app.UseStaticFiles();
+            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"),
+                builder => builder.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true));
 
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseMiddleware<AuthContextMiddleware>();
-            app.UseMiddleware<BotAuthorizationMiddleware>();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-                endpoints.MapControllers();
-                endpoints.MapFallbackToPage("/_Host");
-            });
+            // UI pages and framework assets are always served - UI auth is resolved client-side
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api"),
+                builder => builder.UseMiddleware<BotAuthorizationMiddleware>());
+            app.UseAntiforgery();
+
+            app.MapStaticAssets();
+            app.MapRazorPages();
+            app.MapControllers();
+            app.MapRazorComponents<Components.App>()
+                .AddInteractiveWebAssemblyRenderMode()
+                .AddAdditionalAssemblies(typeof(UI.Routes).Assembly);
         }
 
         private static void ConfigureSerilog(HostBuilderContext context, LoggerConfiguration logConfig)

@@ -107,7 +107,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
 
                 // claims mapping
-                options.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>();
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters.NameClaimType = ClaimNames.UserID;
                 options.TokenValidationParameters.RoleClaimType = ClaimNames.Roles;
 

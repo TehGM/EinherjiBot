@@ -1,8 +1,8 @@
-﻿@using TehGM.EinherjiBot.UI.Layouts
+@using TehGM.EinherjiBot.UI.Layouts
 @using Microsoft.AspNetCore.Components.Authorization
 
 <CascadingAuthenticationState>
-        <Router AppAssembly="@typeof(App).Assembly">
+        <Router AppAssembly="@typeof(Routes).Assembly" NotFoundPage="typeof(Pages.NotFound)">
             <Found Context="routeData">
                 <PolicyAuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                     <NotAuthorized>
@@ -18,11 +18,5 @@
                     </Authorizing>
                 </PolicyAuthorizeRouteView>
             </Found>
-            <NotFound>
-                <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p role="alert">Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
         </Router>
 </CascadingAuthenticationState>
