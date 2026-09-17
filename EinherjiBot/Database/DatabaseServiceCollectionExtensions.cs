@@ -18,9 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!_guidRegistered)
             {
-                #pragma warning disable CS0618 // Type or member is obsolete
-                BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-                #pragma warning restore CS0618 // Type or member is obsolete
                 BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
                 BsonSerializer.RegisterSerializer(new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
                 _guidRegistered = true;
