@@ -9,14 +9,14 @@
 @inject IPlaceholdersService Placeholders
 
 <CascadingPickers>
-<MudDialog Class="placeholder-builder-dialog" DisableSidePadding="true">
+<MudDialog Class="placeholder-builder-dialog" Gutters="false">
     <DialogContent>
 
         <MudContainer Style="overflow-y: scroll;">
             <MudText Typo="Typo.h4" Class="mx-3 mb-2 d-flex flex-row align-center gap-2 cursor-help" @onclick="this.OnHelpClicked" >
-                <MudIcon Icon="@Icons.Filled.Code" Color="Color.Secondary" Size="Size.Large" />
+                <MudIcon Icon="@Icons.Material.Filled.Code" Color="Color.Secondary" Size="Size.Large" />
                 Placeholder Builder
-                <MudIcon Class="cursor-pointer" Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" />
+                <MudIcon Class="cursor-pointer" Color="Color.Default" Icon="@Icons.Material.Outlined.Info" Size="Size.Small" />
             </MudText>
             
             <MudCollapse Expanded="this._showHelp">
@@ -37,14 +37,14 @@
 
             @if (!string.IsNullOrWhiteSpace(this._selectedPlaceholder?.Description))
             {
-                <MudAlert Dense="true" Severity="Severity.Normal" Icon="@Icons.Filled.HelpCenter" Variant="Variant.Text">
+                <MudAlert Dense="true" Severity="Severity.Normal" Icon="@Icons.Material.Filled.HelpCenter" Variant="Variant.Text">
                     @(new MarkupString(this._selectedPlaceholder.Description))
                 </MudAlert>
             }
 
             <MudDivider Class="my-2" DividerType="DividerType.Middle" />
             <MudTextField Value="@this._serializedPlaceholder" Label="Result" Variant="Variant.Outlined" ReadOnly="true" Class="mt-2"
-                Adornment="Adornment.Start" AdornmentColor="this.CopyButtonColor" AdornmentIcon="@Icons.Filled.CopyAll" OnAdornmentClick="this.OnCopyClickedAsync"/>
+                Adornment="Adornment.Start" AdornmentColor="this.CopyButtonColor" AdornmentIcon="@Icons.Material.Filled.CopyAll" OnAdornmentClick="this.OnCopyClickedAsync"/>
             @if (this._showConfirmationAlert)
             {
                 <MudAlert Severity="Severity.Success" Variant="Variant.Text">
@@ -90,7 +90,7 @@
     private bool _showHelp;
 
     [CascadingParameter]
-    private MudDialogInstance Dialog { get; set; }
+    private IMudDialogInstance Dialog { get; set; }
     [Parameter]
     public PlaceholderConvertContext Context { get; set; }
 

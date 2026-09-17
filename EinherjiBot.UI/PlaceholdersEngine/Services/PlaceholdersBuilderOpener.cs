@@ -34,7 +34,7 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
             DialogOptions options = new DialogOptions()
             {
                 CloseOnEscapeKey = true,
-                DisableBackdropClick = false,
+                BackdropClick = true,
                 //FullScreen = true,
                 FullWidth = true,
                 NoHeader = true,
@@ -43,9 +43,9 @@ namespace TehGM.EinherjiBot.UI.PlaceholdersEngine.Services
                 Position = DialogPosition.CenterRight
             };
 
-            IDialogReference dialog = this._dialogService.Show<PlaceholdersBuilderDialog>(PlaceholdersBuilderDialog.DefaultTitle, parameters, options);
+            IDialogReference dialog = await this._dialogService.ShowAsync<PlaceholdersBuilderDialog>(PlaceholdersBuilderDialog.DefaultTitle, parameters, options);
             DialogResult result = await dialog.Result;
-            if (result.Cancelled)
+            if (result.Canceled)
                 return PlaceholderBuilderResult.Cancelled;
             return (PlaceholderBuilderResult)result.Data;
         }

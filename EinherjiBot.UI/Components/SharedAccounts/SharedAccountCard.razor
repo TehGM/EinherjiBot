@@ -29,11 +29,11 @@
                     <MudItem xs="4" Class="d-flex justify-end">
                         @if (this._canEdit)
                         {
-                            <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="this.OnEditClicked"><MudIcon Icon="@Icons.Filled.Edit" /> Edit</MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="this.OnEditClicked"><MudIcon Icon="@Icons.Material.Filled.Edit" /> Edit</MudButton>
                         }
                         @if (this._canDelete)
                         {
-                            <MudIconButton Icon="@Icons.Filled.DeleteForever" Color="Color.Error" OnClick="this.OnDeleteClickedAsync" />
+                            <MudIconButton Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="this.OnDeleteClickedAsync" />
                         }
                     </MudItem>
                 </MudItem>
@@ -89,7 +89,7 @@
         if (!this._canDelete)
             return;
             
-        bool? result = await this.Dialogs.ShowMessageBox("Deleting Account", 
+        bool? result = await this.Dialogs.ShowMessageBoxAsync("Deleting Account", 
             $"Are you sure you want to permanently delete {this.Account.AccountType} account {this.Account.Login}?",
             yesText: "Delete", cancelText: "Cancel");
         if (result != true)

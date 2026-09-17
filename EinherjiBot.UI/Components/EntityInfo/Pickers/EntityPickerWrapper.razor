@@ -59,7 +59,7 @@
 
     private bool _alertSuppressed;
 
-    private string FilterFieldIcon => string.IsNullOrWhiteSpace(this.DefaultFilterValue) ? Icons.Filled.FilterAltOff : Icons.Filled.FilterAlt;
+    private string FilterFieldIcon => string.IsNullOrWhiteSpace(this.DefaultFilterValue) ? Icons.Material.Filled.FilterAltOff : Icons.Material.Filled.FilterAlt;
     private bool ShowPrivacyAlert => this.EnablePrivacyAlert && !this._alertSuppressed && this.AuthProvider.User?.IsAdmin() != true;
     private string ItemsMargin => this.ShowPrivacyAlert && !this._alertSuppressed ? "70px" : "0";
 

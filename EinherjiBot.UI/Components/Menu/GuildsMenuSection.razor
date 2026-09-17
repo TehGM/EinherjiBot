@@ -11,22 +11,22 @@
     <div class="menu-guild-filters">
         <div class="d-flex flex-row justify-center cursor-pointer mr-3 no-select" @onclick="_ => this._filtersOpen = !this._filtersOpen">
             <MudText Color="@(this._filtersOpen ? Color.Tertiary : Color.Default)" Typo="Typo.body2">Guilds</MudText>
-            <MudIcon Size="Size.Small" Icon="@(this._filtersOpen ? Icons.Filled.FilterAlt : Icons.TwoTone.FilterAlt)" Color="@(this._filtersOpen ? Color.Secondary : Color.Default)" />
+            <MudIcon Size="Size.Small" Icon="@(this._filtersOpen ? Icons.Material.Filled.FilterAlt : Icons.Material.TwoTone.FilterAlt)" Color="@(this._filtersOpen ? Color.Secondary : Color.Default)" />
         </div>
         <MudCollapse Class="mx-3" Expanded="this._filtersOpen">
-            <MudCheckBox T="bool" Checked="this._showAll" Dense="true" Class="no-select" CheckedChanged="this.OnShowAllFilterChanged"
-                UnCheckedColor="Color.Default" Color="Color.Tertiary">
+            <MudCheckBox T="bool" Value="this._showAll" Dense="true" Class="no-select" ValueChanged="this.OnShowAllFilterChanged"
+                UncheckedColor="Color.Default" Color="Color.Tertiary">
                     @($"Guilds without {EinherjiInfo.Name}")
             </MudCheckBox>
             @if (this._isAdmin)
             {
-                <MudCheckBox T="bool" Checked="this._adminView" Dense="true" Class="no-select" CheckedChanged="this.OnAdminViewFilterChanged"
-                    UnCheckedColor="Color.Default" Color="Color.Tertiary">
+                <MudCheckBox T="bool" Value="this._adminView" Dense="true" Class="no-select" ValueChanged="this.OnAdminViewFilterChanged"
+                    UncheckedColor="Color.Default" Color="Color.Tertiary">
                     Admin View
                 </MudCheckBox>
             }
             <MudTextField T="string" Value="this._nameFilter" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Search" Class="mx-2" ValueChanged="this.OnNameFilterChanged"
-                Clearable="true" DebounceInterval="200" MaxLength="128" Adornment="Adornment.End" AdornmentIcon="@Icons.Outlined.Search" />
+                Clearable="true" DebounceInterval="200" MaxLength="128" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Search" />
             <MudDivider Class="mt-2 mb-1" DividerType="DividerType.Middle" />
         </MudCollapse>
     </div>

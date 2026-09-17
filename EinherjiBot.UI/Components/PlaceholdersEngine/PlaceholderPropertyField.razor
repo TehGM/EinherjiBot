@@ -45,7 +45,7 @@
 
 @if (this.HasDescription || this.HasValueDescription)
 {
-    <MudItem xs="12" md="4" Class="mt-0">
+    <MudItem xs="12" md="4" Class="input-row-aside">
         <MudText Color="Color.Tertiary" Typo="Typo.body2" Class="mx-2">
             @(new MarkupString(this._valueDescription ?? this.Descriptor.Description))
         </MudText>

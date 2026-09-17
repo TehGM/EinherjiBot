@@ -10,10 +10,10 @@ namespace TehGM.EinherjiBot.UI
             DialogOptions options = new DialogOptions()
             {
                 CloseButton = false,
-                DisableBackdropClick = true
+                BackdropClick = false
             };
 
-            await dialogs.ShowMessageBox(title, text, "Reload", options: options);
+            await dialogs.ShowMessageBoxAsync(title, text, "Reload", options: options);
             navigation.NavigateTo(navigation.Uri, forceLoad: true, replace: true);
         }
     }

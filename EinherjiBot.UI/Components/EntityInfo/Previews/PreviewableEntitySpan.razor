@@ -47,7 +47,7 @@
         {
             <MudPopover Open="this.IsPopoverOpen" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
                 @this.RenderPopoverPreview()
-                <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Filled.Close" Size="Size.Small" OnClick="_ => this.IsPopoverOpen = false" />
+                <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="_ => this.IsPopoverOpen = false" />
             </MudPopover>
             <MudOverlay DarkBackground="true" Visible="this.IsPopoverOpen" OnClick="_ => this.IsPopoverOpen = false" />
         };

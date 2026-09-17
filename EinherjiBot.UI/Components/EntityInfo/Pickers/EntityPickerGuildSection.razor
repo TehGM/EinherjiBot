@@ -1,7 +1,7 @@
 ﻿<div class="guild-section @this.CssClass">
     <MudItem xs="12" Class="d-flex flex-row flex-grow-1 guild-section-header" @onclick="this.OnHeaderClickedAsync">
         <MudIcon Icon="@this.ArrowIcon" Size="Size.Medium" Class="section-header-arrow" />
-        <MudAvatar Image="@this.Guild.GetIconURL(32)" Size="Size.Small" Alt="@this.Guild.Name" Class="section-header-image" />
+        <MudAvatar Size="Size.Small" Class="section-header-image"><MudImage ObjectFit="ObjectFit.Cover" Src="@this.Guild.GetIconURL(32)" Alt="@this.Guild.Name" /></MudAvatar>
         <MudText Class="flex-shrink-1 section-header-text text-cutoff">@this.Guild.Name</MudText>
     </MudItem>
 
@@ -25,9 +25,9 @@
     public bool InitiallyExpanded { get; set; } = false;
 
     [Parameter]
-    public string CollapsedIcon { get; set; } = Icons.Filled.ArrowRight;
+    public string CollapsedIcon { get; set; } = Icons.Material.Filled.ArrowRight;
     [Parameter]
-    public string ExpandedIcon { get; set; } = Icons.Filled.ArrowDropDown;
+    public string ExpandedIcon { get; set; } = Icons.Material.Filled.ArrowDropDown;
 
     [Parameter, EditorRequired]
     public RenderFragment ChildContent { get; set; }

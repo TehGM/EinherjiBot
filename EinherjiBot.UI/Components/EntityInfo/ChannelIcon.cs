@@ -9,13 +9,13 @@ namespace TehGM.EinherjiBot.UI.Components.EntityInfo
         public static string GetForType(ChannelType type)
         {
             if (type == ChannelType.Text)
-                return Icons.Filled.Numbers;
+                return Icons.Material.Filled.Numbers;
             if (type.IsThread())
-                return Icons.Filled.SubdirectoryArrowRight;
+                return Icons.Material.Filled.SubdirectoryArrowRight;
             if (type == ChannelType.Category)
-                return Icons.Filled.AutoAwesomeMotion;
+                return Icons.Material.Filled.AutoAwesomeMotion;
             if (type == ChannelType.Voice)
-                return Icons.Filled.VolumeUp;
+                return Icons.Material.Filled.VolumeUp;
             return null;
         }
 

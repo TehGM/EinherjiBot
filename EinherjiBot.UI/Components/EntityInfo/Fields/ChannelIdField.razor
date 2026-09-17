@@ -26,7 +26,7 @@
     }
     @if (!base.ReadOnly)
     {
-        <MudIconButton Class="align-self-first-baseline" Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" 
+        <MudIconButton Class="align-self-first-baseline" Icon="@Icons.Material.Outlined.PersonSearch" Color="Color.Secondary" 
             Disabled="this.Picker == null || base.ReadOnly" Size="Size.Medium" OnClick="this.OnPickerClicked" />
     }
 </MudItem>
@@ -73,7 +73,7 @@
             <text>(</text>
             @foreach (ChannelInfoResponse parent in this._parents)
             {
-                <MudIcon Icon="@Icons.Filled.ArrowRightAlt" Size="iconSize" /> @RenderIcon(parent, iconSize) @parent.Name
+                <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" Size="iconSize" /> @RenderIcon(parent, iconSize) @parent.Name
             }
             <text>)</text>
         };

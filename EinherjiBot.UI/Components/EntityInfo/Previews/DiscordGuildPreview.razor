@@ -1,7 +1,7 @@
 ﻿<div class="d-flex flex-row gap-2 align-center discord-guild-preview @this.CssClass" @onclick="e => this.Clicked.InvokeAsync(e)">
     @if (this.ShowIcon)
     {
-        <MudAvatar Image="@this.Guild.GetIconURL(this.IconSize)" Class="discord-avatar inline"/>
+        <MudAvatar Class="discord-avatar inline"><MudImage ObjectFit="ObjectFit.Cover" Src="@this.Guild.GetIconURL(this.IconSize)" /></MudAvatar>
     }
     <MudText Class="text-cutoff">@this.NameText</MudText>
 </div>

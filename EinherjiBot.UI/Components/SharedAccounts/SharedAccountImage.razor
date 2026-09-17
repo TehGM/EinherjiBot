@@ -4,7 +4,9 @@
 @if (!string.IsNullOrWhiteSpace(this._imageUrl))
 {
     <div class="shared-account-image-container">
-        <MudAvatar Square="true" Image="@this._imageUrl" Alt="@this.AccountType.ToString()" Class="mr-3 rounded-1 shared-account-image" />
+        <MudAvatar Square="true" Class="mr-3 rounded-1 shared-account-image">
+            <MudImage ObjectFit="ObjectFit.Cover" Src="@this._imageUrl" Alt="@this.AccountType.ToString()" />
+        </MudAvatar>
     </div>
 }
 

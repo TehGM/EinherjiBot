@@ -94,3 +94,16 @@ $fab-margin: 24px;
 .mud-dialog-container.mud-dialog-centerright {
     padding-right: 0;
 }
+
+/*** INPUTS ***/
+// content placed next to an input (descriptions, buttons) would get centered against the input's full height,
+// which includes the helper/error text below it - that makes it sit too low whenever an error shows.
+// this centers such content against the input box itself instead
+.input-row-aside {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    // mud input box height, and the top margin mud puts on inputs with a label
+    min-height: 48px;
+    margin-top: 4px;
+}

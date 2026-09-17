@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="this._theme" />
+<MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -23,36 +24,15 @@
     {
         this._theme = new MudTheme()
         {
-            Palette = BuildDefaultPalette(),
-            PaletteDark = BuildDefaultPalette(),
-            Typography = new Typography()
-            {
-                Body1 = new Body1()
-                {
-                    FontSize = "15.4px"
-                },
-                Body2 = new Body2()
-                {
-                    FontSize = "13.4px"
-                },
-                H1 = new H1()
-                {
-                    FontSize = "2.35rem"
-                },
-                H2 = new H2()
-                {
-                    FontSize = "2.15rem"
-                },
-                H3 = new H3()
-                {
-                    FontSize = "1.85rem"
-                },
-                H4 = new H4()
-                {
-                    FontSize = "1.60rem"
-                }
-            }
+            PaletteLight = BuildDefaultPalette(),
+            PaletteDark = BuildDefaultPalette()
         };
+        this._theme.Typography.Body1.FontSize = "15.4px";
+        this._theme.Typography.Body2.FontSize = "13.4px";
+        this._theme.Typography.H1.FontSize = "2.35rem";
+        this._theme.Typography.H2.FontSize = "2.15rem";
+        this._theme.Typography.H3.FontSize = "1.85rem";
+        this._theme.Typography.H4.FontSize = "1.60rem";
 
         Palette BuildDefaultPalette()
         {
@@ -65,9 +45,9 @@
             palette.Secondary = Colors.DeepPurple.Default;
             palette.SecondaryLighten = Colors.DeepPurple.Lighten1;
             palette.SecondaryDarken = Colors.DeepPurple.Darken4;
-            palette.Tertiary = Colors.BlueGrey.Darken1;
-            palette.TertiaryLighten = Colors.BlueGrey.Lighten1;
-            palette.TertiaryDarken = Colors.BlueGrey.Darken3;
+            palette.Tertiary = Colors.BlueGray.Darken1;
+            palette.TertiaryLighten = Colors.BlueGray.Lighten1;
+            palette.TertiaryDarken = Colors.BlueGray.Darken3;
             palette.Dark = "#141414";
             palette.DarkContrastText = palette.TextPrimary;
             return palette;

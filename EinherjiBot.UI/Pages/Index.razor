@@ -4,7 +4,12 @@
 <PageTitle>Index</PageTitle>
 
 <PageHeader Text="Einherji Discord Bot">
-    <MudAvatar Image="@this._botAvatarUrl" Style="height: 64px; width: 64px;" />
+    <MudAvatar Style="height: 64px; width: 64px;">
+        @if (this._botAvatarUrl != null)
+        {
+            <MudImage ObjectFit="ObjectFit.Cover" Src="@this._botAvatarUrl" />
+        }
+    </MudAvatar>
 </PageHeader>
 
 

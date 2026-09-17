@@ -17,7 +17,7 @@
                         Preview
                         <MudPopover Open="this._previewText != null" Elevation="7" AnchorOrigin="Origin.CenterCenter" TransformOrigin="Origin.CenterLeft" Class="pa-4 d-flex flex-row gap-2">
                             <DiscordUserPreview User="this.BotInfo" CustomStatusText="@this._previewText" ShowAdminIcon="false" />
-                            <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Filled.Close" Size="Size.Small" OnClick="_ => this._previewText = null" />
+                            <MudIconButton Class="align-self-center" Color="MudBlazor.Color.Secondary" Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="_ => this._previewText = null" />
                         </MudPopover>
                         <MudOverlay DarkBackground="true" Visible="this._previewText != null" OnClick="_ => this._previewText = null" />
                     </MudButton>
@@ -27,7 +27,7 @@
                     {
                         <MudProgressCircular Class="ms-n1" Color="MudBlazor.Color.Primary" Size="Size.Small" Indeterminate="true"/>
                     }
-                    <MudSwitch @bind-Checked="this._request.IsEnabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1"/>
+                    <MudSwitch @bind-Value="this._request.IsEnabled" Color="MudBlazor.Color.Primary" Disabled="this._processing" Class="ml-0 mr-1 align-self-center"/>
                     <MudButton StartIcon="@this.SaveIcon" Variant="Variant.Filled" Color="MudBlazor.Color.Success" 
                         Disabled="this._processing || !this.HasPendingChanges()"
                         OnClick="this.OnSaveClickedAsync">@this.SaveText</MudButton>
@@ -77,9 +77,9 @@
 
     private bool IsNew => this._id == null;
 
-    private string SaveIcon => this.IsNew ? Icons.Filled.AddCircle : Icons.Material.Filled.Save;
+    private string SaveIcon => this.IsNew ? Icons.Material.Filled.AddCircle : Icons.Material.Filled.Save;
     private string SaveText => this.IsNew ? "Add" : "Save";
-    private string DeleteIcon => this.IsNew ? Icons.Filled.Clear : Icons.Filled.DeleteForever;
+    private string DeleteIcon => this.IsNew ? Icons.Material.Filled.Clear : Icons.Material.Filled.DeleteForever;
 
     protected override void OnParametersSet()
     {
@@ -116,7 +116,7 @@
             string message = string.IsNullOrWhiteSpace(this._request.Text)
                 ? "Are you sure you want to permanently delete empty status?"
                 : $"Are you sure you want to permanently delete status \"{this._request.Text}\"?";
-            bool? result = await this.Dialogs.ShowMessageBox("Deleting Status", message,
+            bool? result = await this.Dialogs.ShowMessageBoxAsync("Deleting Status", message,
                 yesText: "Delete", cancelText: "Cancel");
             if (result != true)
                 return;

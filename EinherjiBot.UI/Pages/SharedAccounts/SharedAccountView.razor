@@ -40,7 +40,7 @@
                                     <MudTooltip Delay="0" Class="d-md-none" Placement="Placement.Top">
                                         <TooltipContent>@_alreadySavedText</TooltipContent>
                                         <ChildContent>
-                                            <MudAlert Severity="Severity.Normal" Icon="@Icons.Outlined.Info" Variant="Variant.Text" Dense=true>
+                                            <MudAlert Severity="Severity.Normal" Icon="@Icons.Material.Outlined.Info" Variant="Variant.Text" Dense=true>
                                                 <span class="d-none d-md-block">@_alreadySavedText</span>
                                             </MudAlert>
                                         </ChildContent>
@@ -91,7 +91,7 @@ else
                             Authorized Users
                             <MudTooltip Delay="0" Placement="Placement.Top">
                                 <TooltipContent>These users will be able to get Login and Password.</TooltipContent>
-                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Material.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
                         <UserIdList @ref="this._authorizedUsersComponent" @bind-Values="this._request.AuthorizedUserIDs" AllowNewValues="true" />
@@ -101,7 +101,7 @@ else
                             Authorized Roles
                             <MudTooltip Delay="0" Placement="Placement.Top">
                                 <TooltipContent>These roles will be able to get Login and Password.<br/>Note that the bot must be present in the guild to check the role.</TooltipContent>
-                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Material.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
                         <RoleIdList @ref="this._authorizedRolesComponent" @bind-Values="this._request.AuthorizedRoleIDs" AllowNone="true" AllowNewValues="true" />
@@ -117,7 +117,7 @@ else
                             Mods
                             <MudTooltip Delay="0" Placement="Placement.Top">
                                 <TooltipContent>Mods can edit and even delete this account.</TooltipContent>
-                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Outlined.Info" Size="Size.Small" /></ChildContent>
+                                <ChildContent><MudIcon Color="Color.Default" Icon="@Icons.Material.Outlined.Info" Size="Size.Small" /></ChildContent>
                             </MudTooltip>
                         </MudText>
                         <UserIdList @ref="this._modUsersComponent" @bind-Values="this._request.ModUserIDs" AllowNewValues="true" />
@@ -153,9 +153,9 @@ else
     }
     @if (!this.IsNew && this._canDelete)
     {
-        <MudFab Color="Color.Error" Size="Size.Medium" StartIcon="@Icons.Filled.DeleteForever" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
+        <MudFab Color="Color.Error" Size="Size.Medium" StartIcon="@Icons.Material.Filled.DeleteForever" Disabled="this._processing" OnClick="this.OnDeleteClickedAsync" />
     }
-    <MudFab Color="Color.Default" Size="Size.Medium" StartIcon="@Icons.Filled.ArrowBack" Disabled="this._processing" OnClick="this.OnReturnClickedAsync" />
+    <MudFab Color="Color.Default" Size="Size.Medium" StartIcon="@Icons.Material.Filled.ArrowBack" Disabled="this._processing" OnClick="this.OnReturnClickedAsync" />
 </FabContainer>
 
 @code {
@@ -242,7 +242,7 @@ else
         {
             if (this.IsNew)
             {
-                await this._loginField.Validate();
+                await this._loginField.ValidateAsync();
                 await this._loginField.FocusAsync();
             }
         }
@@ -301,7 +301,7 @@ else
     {
         if (!this.IsNew)
         {
-            bool? promptResult = await this.Dialogs.ShowMessageBox("Deleting Account",
+            bool? promptResult = await this.Dialogs.ShowMessageBoxAsync("Deleting Account",
                 $"Are you sure you want to permanently delete {this._request.AccountType} account {this._request.Login}?",
                 yesText: "Delete", cancelText: "Cancel");
             if (promptResult != true)
@@ -321,7 +321,7 @@ else
     {
         if (this.HasPendingChanges())
         {
-            bool? result = await this.Dialogs.ShowMessageBox("Unsaved Changes",
+            bool? result = await this.Dialogs.ShowMessageBoxAsync("Unsaved Changes",
                 $"You have made some changes that are not saved. Are you sure you want to leave?",
                 yesText: "Leave", cancelText: "Cancel");
             if (result != true)

@@ -16,14 +16,14 @@
             </TooltipContent>
             <ChildContent>
                 <MudItem xs="1" Class="d-flex flex-row flex-grow-1 ml-2 user-preview">
-                    <MudAvatar Size="Size.Medium" Image="@base.FoundEntity.GetAvatarURL(64)" Class="mr-1" />
+                    <MudAvatar Size="Size.Medium" Class="mr-1"><MudImage ObjectFit="ObjectFit.Cover" Src="@base.FoundEntity.GetAvatarURL(64)" /></MudAvatar>
                 </MudItem>
             </ChildContent>
         </MudTooltip>
     }
     @if (!base.ReadOnly)
     {
-        <MudIconButton Class="align-self-first-baseline" Icon="@Icons.Outlined.PersonSearch" Color="Color.Secondary" 
+        <MudIconButton Class="align-self-first-baseline" Icon="@Icons.Material.Outlined.PersonSearch" Color="Color.Secondary" 
             Disabled="this.Picker == null || base.ReadOnly" Size="Size.Medium" OnClick="this.OnPickerClicked" />
     }
 </MudItem>
