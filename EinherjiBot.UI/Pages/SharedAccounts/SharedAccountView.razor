@@ -205,7 +205,7 @@ else
         {
             try
             {
-                Base64Guid id = new Base64Guid(this.ID);
+                Base64Guid id = Base64Guid.Parse(this.ID);
                 ISharedAccount account = await this.Handler.GetAsync(id);
                 await this.LoadAccountAsync(account);
             }

@@ -1,6 +1,5 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
-using System.Web;
 using TehGM.EinherjiBot.Security.API;
 
 namespace TehGM.EinherjiBot.UI.Security.Services
@@ -35,7 +34,7 @@ namespace TehGM.EinherjiBot.UI.Security.Services
             if (this._options.Scopes?.Any() == true)
                 query.Add("scope", string.Join(' ', this._options.Scopes));
 
-            string queryString = string.Join('&', query.Select(pair => $"{pair.Key}={HttpUtility.UrlEncodeUnicode(pair.Value)}"));
+            string queryString = string.Join('&', query.Select(pair => $"{pair.Key}={Uri.EscapeDataString(pair.Value)}"));
             string url = $"https://discord.com/api/oauth2/authorize?" + queryString;
 
             this._navigation.NavigateTo(url, false, false);

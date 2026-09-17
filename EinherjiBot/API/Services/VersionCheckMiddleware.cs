@@ -19,7 +19,7 @@ namespace TehGM.EinherjiBot.API.Services
                 values == StringValues.Empty || values.ToString() != EinherjiInfo.WebVersion)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                context.Response.Headers.Add(CustomHeaders.ExpectedClientVersion, EinherjiInfo.WebVersion);
+                context.Response.Headers[CustomHeaders.ExpectedClientVersion] = EinherjiInfo.WebVersion;
                 return context.Response.WriteAsync("Wrong client version", context.RequestAborted);
             }
 

@@ -30,11 +30,11 @@ namespace TehGM.EinherjiBot.Security.API.Services
                 context.Response.Headers.ETag = default;
 
                 if (ex is PlaceholderConvertException)
-                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderConvertException));
+                    context.Response.Headers[CustomHeaders.ExceptionType] = nameof(PlaceholderConvertException);
                 else if (ex is PlaceholderContextException)
-                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderContextException));
+                    context.Response.Headers[CustomHeaders.ExceptionType] = nameof(PlaceholderContextException);
                 else if (ex is PlaceholderFormatException)
-                    context.Response.Headers.Add(CustomHeaders.ExceptionType, nameof(PlaceholderFormatException));
+                    context.Response.Headers[CustomHeaders.ExceptionType] = nameof(PlaceholderFormatException);
 
                 await context.Response.WriteAsync(ex.Message).ConfigureAwait(false);
             }

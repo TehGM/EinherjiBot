@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Settings.Configuration;
 using Microsoft.Extensions.Configuration;
 using TehGM.EinherjiBot.Utilities;
 using Blazored.LocalStorage;
@@ -112,7 +113,7 @@ namespace TehGM.EinherjiBot.UI
             Serilog.Debugging.SelfLog.Enable(m => Console.Error.WriteLine(m));
 
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Configuration, "Serilog")
+                .ReadFrom.Configuration(builder.Configuration, new ConfigurationReaderOptions() { SectionName = "Serilog" })
                 .CreateLogger();
 
             builder.Logging.ClearProviders();

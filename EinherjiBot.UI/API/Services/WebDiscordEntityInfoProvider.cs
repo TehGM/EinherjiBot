@@ -1,5 +1,4 @@
-﻿using System.Web;
-using TehGM.EinherjiBot.API;
+﻿using TehGM.EinherjiBot.API;
 using TehGM.EinherjiBot.Caching.Services;
 
 namespace TehGM.EinherjiBot.UI.API.Services
@@ -164,7 +163,7 @@ namespace TehGM.EinherjiBot.UI.API.Services
             if (queryValues?.Any() != true)
                 return url;
 
-            string query = string.Join('&', queryValues.Select(v => $"{queryKey}={HttpUtility.UrlEncodeUnicode(v.ToString())}"));
+            string query = string.Join('&', queryValues.Select(v => $"{queryKey}={Uri.EscapeDataString(v.ToString())}"));
             return $"{url}?{query}";
         }
     }

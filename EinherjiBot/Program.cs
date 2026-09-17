@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Settings.Configuration;
 using TehGM.EinherjiBot.Logging;
 using TehGM.EinherjiBot.Utilities;
 using TehGM.EinherjiBot.Security.API.Services;
@@ -141,7 +142,7 @@ namespace TehGM.EinherjiBot
 
         private static void ConfigureSerilog(HostBuilderContext context, LoggerConfiguration logConfig)
         {
-            logConfig.ReadFrom.Configuration(context.Configuration, "Serilog");
+            logConfig.ReadFrom.Configuration(context.Configuration, new ConfigurationReaderOptions() { SectionName = "Serilog" });
 
             DatadogOptions ddOptions = context.Configuration.GetSection("Serilog").GetSection("DataDog").Get<DatadogOptions>();
             if (!string.IsNullOrWhiteSpace(ddOptions?.ApiKey))
