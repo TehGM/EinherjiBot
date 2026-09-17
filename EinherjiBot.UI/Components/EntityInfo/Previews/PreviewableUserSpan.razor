@@ -4,9 +4,6 @@
 
 @code {
     [Parameter]
-    public bool ShowDiscriminator { get; set; } = true;
-
-    [Parameter]
     public bool MentionUseGuildNickname { get; set; } = false;
 
     [Parameter]
@@ -32,18 +29,13 @@
 
     protected override string GetText()
     {
-        string text = this.ShowDiscriminator && !base.ShowAsMention
-            ? base.Entity.GetUsernameWithDiscriminator()
-            : base.Entity.Username;
         if (base.ShowAsMention)
         {
-            if (this.MentionUseGuildNickname && base.Entity is GuildUserInfoResponse guildUser && !string.IsNullOrWhiteSpace(guildUser.Nickname))
-                return $"@{guildUser.Nickname}";
-            return $"@{base.Entity.Username}";
+            if (this.MentionUseGuildNickname && base.Entity is GuildUserInfoResponse guildUser)
+                return $"@{guildUser.GetGuildDisplayName()}";
+            return $"@{base.Entity.GetDisplayName()}";
         }
-        else if (this.ShowDiscriminator)
-            return base.Entity.GetUsernameWithDiscriminator();
-        return base.Entity.Username;
+        return base.Entity.GetDisplayName();
     }
 
     protected override RenderFragment RenderTooltipPreview()

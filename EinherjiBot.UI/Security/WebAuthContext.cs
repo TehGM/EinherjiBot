@@ -12,6 +12,7 @@ namespace TehGM.EinherjiBot.UI.Security
 
         public ulong ID { get; }
         public string Username { get; }
+        public string GlobalName { get; }
         public string Discriminator { get; }
         public string AvatarHash { get; }
         public IEnumerable<string> BotRoles { get; }
@@ -25,11 +26,12 @@ namespace TehGM.EinherjiBot.UI.Security
         public IEnumerable<ulong> RecognizedDiscordRoleIDs { get; }
 
 
-        public WebAuthContext(ulong id, string username, string discriminator, string avatarHash, 
+        public WebAuthContext(ulong id, string username, string globalName, string discriminator, string avatarHash,
             IEnumerable<string> roles, IEnumerable<string> botFeatures, IEnumerable<ulong> recognizedGuilds, IEnumerable<ulong> recognizedRoles)
         {
             this.ID = id;
             this.Username = username;
+            this.GlobalName = globalName;
             this.Discriminator = discriminator;
             this.AvatarHash = avatarHash;
             this.BotRoles = new HashSet<string>(roles ?? Enumerable.Empty<string>());
@@ -41,10 +43,10 @@ namespace TehGM.EinherjiBot.UI.Security
         private WebAuthContext() { }
 
         public static WebAuthContext FromLoginResponse(LoginResponse response)
-            => new WebAuthContext(response.User.ID, response.User.Username, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features, response.RecognizedDiscordGuildIDs, response.RecognizedDiscordRoleIDs);
+            => new WebAuthContext(response.User.ID, response.User.Username, response.User.GlobalName, response.User.Discriminator, response.User.AvatarHash, response.Roles, response.Features, response.RecognizedDiscordGuildIDs, response.RecognizedDiscordRoleIDs);
 
         public override string ToString()
-            => this.GetUsernameWithDiscriminator();
+            => this.Username;
 
         public override bool Equals(object obj)
             => this.Equals(obj as IAuthContext);

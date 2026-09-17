@@ -9,7 +9,7 @@ namespace TehGM.EinherjiBot.Administration.Commands
     // I must be missing something...
 
     [Group("voice", "Allows managing users in voice channels")]
-    [EnabledInDm(false)]
+    [CommandContextType(InteractionContextType.Guild)]
     public class VoiceAdministrationSlashCommands : EinherjiInteractionModule
     {
         private readonly IAuditStore<CommandAuditEntry> _audit;

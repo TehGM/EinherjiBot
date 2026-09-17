@@ -9,8 +9,11 @@
                     <div class="user-info">
                         <img src="@this.AuthProvider.User?.GetAvatarURL(256)" />
                         <div class="username-bar">
-                            <span class="username">@this.AuthProvider.User.Username</span>
-                            <span class="discriminator">#@this.AuthProvider.User.Discriminator</span>
+                            <span class="username">@this.AuthProvider.User.GetDisplayName()</span>
+                            @if (!string.Equals(this.AuthProvider.User.GetDisplayName(), this.AuthProvider.User.Username, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="handle">@this.AuthProvider.User.Username</span>
+                            }
                         </div>
                     </div>
                 </div>

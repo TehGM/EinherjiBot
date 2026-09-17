@@ -85,7 +85,8 @@
         if (!string.IsNullOrWhiteSpace(this._filter))
         {
             this._filteredGuilds = this._filteredGuilds.ToDictionary(g => g.Key, g => g.Value.Where(u => 
-                    u.GetUsernameWithDiscriminator().Contains(this._filter, StringComparison.OrdinalIgnoreCase) ||
+                    u.Username.Contains(this._filter, StringComparison.OrdinalIgnoreCase) ||
+                    u.GlobalName?.Contains(this._filter, StringComparison.OrdinalIgnoreCase) == true ||
                     u.Nickname?.Contains(this._filter, StringComparison.OrdinalIgnoreCase) == true));
         }
         if (!string.IsNullOrWhiteSpace(this._roleFilter))
@@ -103,14 +104,14 @@
 
         this._filteredGuilds = this._filteredGuilds
             .Where(g => g.Value.Any())
-            .ToDictionary(g => g.Key, g => g.Value.OrderBy(r => r.Nickname ?? r.Username).AsEnumerable());
+            .ToDictionary(g => g.Key, g => g.Value.OrderBy(r => r.GetGuildDisplayName()).AsEnumerable());
     }
 
     private string GetUserText(GuildUserInfoResponse user)
-        => user.Nickname ?? user.Username;
+        => user.GetGuildDisplayName();
 
     private string GetUserStyle(GuildUserInfoResponse user)
-        => $"color: {user.GetTopRoleWithColor().GetHtmlColorOrDefault()}";
+        => user.GetTopRoleWithColor().GetHtmlTextStyleOrDefault();
         
     private void OnFilterTextChanged(string value)
     {

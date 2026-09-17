@@ -86,7 +86,7 @@ namespace TehGM.EinherjiBot.SharedAccounts.Commands
                     IUser user = await base.Context.Client.GetUserAsync(account.ModifiedByID.Value, base.CancellationToken).ConfigureAwait(false);
                     embed
                         .WithTimestamp(account.ModifiedTimestamp.Value)
-                        .WithFooter($"Last modified by {user.GetUsernameWithDiscriminator()}", user.GetSafeAvatarUrl());
+                        .WithFooter($"Last modified by {user.GetDisplayName()}", user.GetSafeAvatarUrl());
                 }
                 return embed;
             }

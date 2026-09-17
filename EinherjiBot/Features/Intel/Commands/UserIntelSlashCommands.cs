@@ -6,7 +6,7 @@ using TehGM.EinherjiBot.Auditing.Intel;
 namespace TehGM.EinherjiBot.Intel.Commands
 {
     [Group("intel", "Get Discord intel reports")]
-    [EnabledInDm(true)]
+    [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm)]
     public class UserIntelSlashCommands : EinherjiInteractionModule
     {
         [Group("on", "Get Discord intel reports")]
@@ -39,7 +39,7 @@ namespace TehGM.EinherjiBot.Intel.Commands
             }
 
             [SlashCommand("guild", "Gets intel on current guild")]
-            [EnabledInDm(false)]
+            [CommandContextType(InteractionContextType.Guild)]
             public async Task CmdIntelGuildAsync()
             {
                 IGuild guild = base.Context.Guild;

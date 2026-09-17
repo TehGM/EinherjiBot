@@ -21,15 +21,17 @@ namespace TehGM.EinherjiBot.Intel.Services
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            this._log.LogDebug("Building intel on user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
+            this._log.LogDebug("Building intel on user {Username} ({UserID})", user.Username, user.Id);
             UserIntelContext intel = await this._provider.GetAsync(user.Id, guild?.Id, cancellationToken).ConfigureAwait(false);
 
             // global user info
             EmbedBuilder embed = new EmbedBuilder()
-                .WithAuthor($"Intel on {intel.User.Username}", this._client.CurrentUser.GetSafeAvatarUrl())
+                .WithAuthor($"Intel on {intel.User.GetDisplayName()}", this._client.CurrentUser.GetSafeAvatarUrl())
                 .WithThumbnailUrl(intel.User.GetMaxAvatarUrl())
-                .AddField("Username and Discriminator", $"{intel.User.Username}#{intel.User.Discriminator}")
-                .AddField("Account created", TimestampTag.FromDateTimeOffset(intel.User.CreatedAt, TimestampTagStyles.Relative))
+                .AddField("Username", intel.User.Username, true);
+            if (!string.IsNullOrWhiteSpace(intel.User.GlobalName))
+                embed.AddField("Display name", intel.User.GlobalName, true);
+            embed.AddField("Account created", TimestampTag.FromDateTimeOffset(intel.User.CreatedAt, TimestampTagStyles.Relative))
                 .AddField("Status", (intel.User is SocketUser) ? intel.User.Status.ToString() : "???", true);
 
             if (intel.LatestStatus != null)
@@ -60,7 +62,7 @@ namespace TehGM.EinherjiBot.Intel.Services
                     embed.AddField("Roles", string.Join(", ", roles.Select(r => MentionUtils.MentionRole(r.Id))), true);
                 else
                     embed.AddField("Roles", "-");
-                embed.Color = intel.GuildUser.GetHighestRole()?.Color;
+                embed.Color = intel.GuildUser.GetUserColour();
 
                 // add joined time
                 if (intel.GuildUser.JoinedAt != null)
@@ -131,6 +133,8 @@ namespace TehGM.EinherjiBot.Intel.Services
                     return "Streaming";
                 case ActivityType.Watching:
                     return "Watching";
+                case ActivityType.Competing:
+                    return "Competing in";
                 case ActivityType.CustomStatus:
                     return string.Empty;
                 default:

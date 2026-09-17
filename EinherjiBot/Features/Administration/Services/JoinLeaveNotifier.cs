@@ -30,7 +30,7 @@ namespace TehGM.EinherjiBot.Administration.Services
         private async Task OnUserJoinedAsync(SocketGuildUser user)
         {
             IGuild guild = user.Guild;
-            this._log.LogDebug("User {User} ({UserID}) joined guild {Guild} ({GuildID})", user.GetUsernameWithDiscriminator(), user.Id, guild.Name, guild.Id);
+            this._log.LogDebug("User {User} ({UserID}) joined guild {Guild} ({GuildID})", user.Username, user.Id, guild.Name, guild.Id);
             await this._audit.AddAuditAsync(JoinLeaveAuditEntry.UserJoined(user.Id, guild.Id, user.JoinedAt.Value.UtcDateTime), base.CancellationToken).ConfigureAwait(false);
 
             GuildSettings settings = await this._provider.GetAsync(guild.Id, base.CancellationToken).ConfigureAwait(false);
@@ -40,7 +40,7 @@ namespace TehGM.EinherjiBot.Administration.Services
 
         protected async Task OnUserLeftAsync(SocketGuild guild, SocketUser user)
         {
-            this._log.LogDebug("User {User} ({UserID}) left guild {Guild} ({GuildID})", user.GetUsernameWithDiscriminator(), user.Id, guild.Name, guild.Id);
+            this._log.LogDebug("User {User} ({UserID}) left guild {Guild} ({GuildID})", user.Username, user.Id, guild.Name, guild.Id);
             await this._audit.AddAuditAsync(JoinLeaveAuditEntry.UserLeft(user.Id, guild.Id, DateTime.UtcNow), base.CancellationToken).ConfigureAwait(false);
 
             GuildSettings settings = await this._provider.GetAsync(guild.Id, base.CancellationToken).ConfigureAwait(false);

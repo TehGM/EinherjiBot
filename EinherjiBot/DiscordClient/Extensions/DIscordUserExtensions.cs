@@ -19,7 +19,7 @@ namespace TehGM.EinherjiBot
 
 
         public static Color GetUserColour(this IGuildUser user)
-            => GetHighestRole(user, role => role.Color != default)?.Color ?? Color.Default;
+            => GetHighestRole(user, role => role.Colors.PrimaryColor != default)?.Colors.PrimaryColor ?? Color.Default;
 
 
         public static Task ModifyAsync(this IGuildUser user, Action<GuildUserProperties> func, CancellationToken cancellationToken)
@@ -29,7 +29,8 @@ namespace TehGM.EinherjiBot
         public static string GetSafeAvatarUrl(this IUser user, ImageFormat format = ImageFormat.Auto, ushort size = 128)
             => user.GetAvatarUrl(format, size) ?? user.GetDefaultAvatarUrl();
 
-        public static string GetUsernameWithDiscriminator(this IUser user)
-            => $"{user.Username}#{user.Discriminator}";
+        /// <summary>Gets user's display name if set, or username otherwise.</summary>
+        public static string GetDisplayName(this IUser user)
+            => string.IsNullOrWhiteSpace(user.GlobalName) ? user.Username : user.GlobalName;
     }
 }

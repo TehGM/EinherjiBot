@@ -4,6 +4,7 @@
     {
         ulong ID { get; }
         string Username { get; }
+        string GlobalName { get; }
         string Discriminator { get; }
         string AvatarHash { get; }
         IEnumerable<string> BotRoles { get; }
@@ -14,20 +15,10 @@
         /// <summary>User's roles that bot can track.</summary>
         IEnumerable<ulong> RecognizedDiscordRoleIDs { get; }
 
-        string GetUsernameWithDiscriminator()
-            => $"{this.Username}#{this.Discriminator}";
+        string GetDisplayName()
+            => string.IsNullOrWhiteSpace(this.GlobalName) ? this.Username : this.GlobalName;
 
         string GetAvatarURL(ushort size = 1024)
-        {
-            const string baseUrl = "https://cdn.discordapp.com";
-            if (string.IsNullOrWhiteSpace(this.AvatarHash))
-            {
-                int value = int.Parse(this.Discriminator) % 5;
-                return $"{baseUrl}/embed/avatars/{value}.png";
-            }
-
-            string ext = this.AvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"{baseUrl}/avatars/{this.ID}/{this.AvatarHash}.{ext}?size={size}";
-        }
+            => EinherjiBot.API.DiscordUserInfoExtensions.GetAvatarURL(this.ID, this.AvatarHash, this.Discriminator, size);
     }
 }

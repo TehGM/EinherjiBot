@@ -7,7 +7,7 @@ using TehGM.EinherjiBot.Auditing.GameServer;
 namespace TehGM.EinherjiBot.GameServers.Commands
 {
     [Group("game-server", "Retrieves info for our game servers that you have access to")]
-    [EnabledInDm(true)]
+    [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm)]
     public class GameServerSlashCommands : EinherjiInteractionModule
     {
         private readonly IGameServerProvider _provider;
@@ -20,7 +20,7 @@ namespace TehGM.EinherjiBot.GameServers.Commands
         }
 
         [SlashCommand("info", "Retrieves info for our game servers that you have access to")]
-        [EnabledInDm(true)]
+        [CommandContextType(InteractionContextType.Guild, InteractionContextType.BotDm)]
         public async Task CmdInfoAsync(
             [Summary("Server", "Name of the server to pick"), Autocomplete(typeof(GameServerAutocompleteHandler))] Guid id)
         {

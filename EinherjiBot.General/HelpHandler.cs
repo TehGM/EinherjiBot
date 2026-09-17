@@ -162,7 +162,7 @@ namespace TehGM.EinherjiBot
             }
             SocketUser user = context.Client.GetUser(EinherjiInfo.AuthorID);
             if (user != null)
-                return $"{user.Username}#{user.Discriminator}";
+                return user.GetDisplayName();
             return "TehGM";
         }
 

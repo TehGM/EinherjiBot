@@ -54,10 +54,10 @@ $height-info-expanded: 70px;
                 color: var(--user-panel-username-color);
             }
 
-            .discriminator {
+            .handle {
                 font-weight: normal;
                 font-size: 15px;
-                color: var(--user-panel-discriminator-color);
+                color: var(--user-panel-handle-color);
             }
         }
     }
@@ -124,7 +124,7 @@ $height-info-expanded: 70px;
                 vertical-align: top;
             }
 
-            .discriminator {
+            .handle {
                 vertical-align: middle;
             }
         }
@@ -140,7 +140,7 @@ $height-info-expanded: 70px;
                 vertical-align: middle;
             }
 
-            .discriminator {
+            .handle {
                 vertical-align: text-bottom;
             }
         }

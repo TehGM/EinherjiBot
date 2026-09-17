@@ -57,7 +57,7 @@
     private string GetStyle()
     {
         if (!this.ShowAsMention)
-            return $"color: {base.Entity.GetHtmlColorOrDefault()};";
+            return base.Entity.GetHtmlTextStyleOrDefault();
         else
         {
             double transparency = this._isHovered ? 0.3 : 0.1;

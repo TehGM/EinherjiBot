@@ -16,6 +16,8 @@ namespace TehGM.EinherjiBot
                     return "Watching";
                 case ActivityType.Listening:
                     return "Listening to";
+                case ActivityType.Competing:
+                    return "Competing in";
                 case ActivityType.CustomStatus:
                     return string.Empty;
                 default:

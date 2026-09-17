@@ -24,8 +24,8 @@ namespace TehGM.EinherjiBot.API
 
         private RoleInfoResponse _topRoleWithColor;
 
-        public GuildUserInfoResponse(ulong id, string username, string discriminator, string avatarHash, ulong guildID, IEnumerable<RoleInfoResponse> roles)
-            : base(id, username, discriminator, avatarHash)
+        public GuildUserInfoResponse(ulong id, string username, string globalName, string discriminator, string avatarHash, ulong guildID, IEnumerable<RoleInfoResponse> roles)
+            : base(id, username, globalName, discriminator, avatarHash)
         {
             this.GuildID = guildID;
             this.Roles = roles;
@@ -36,9 +36,13 @@ namespace TehGM.EinherjiBot.API
             if (string.IsNullOrWhiteSpace(this.GuildAvatarHash))
                 return this.GetAvatarURL(size);
 
-            string ext = this.AvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
-            return $"https://cdn.discordapp.com/guilds/{this.GuildID}/users/{this.ID}/avatars/{this.AvatarHash}.{ext}?size={size}";
+            string ext = this.GuildAvatarHash.StartsWith("a_", StringComparison.Ordinal) ? "gif" : "png";
+            return $"https://cdn.discordapp.com/guilds/{this.GuildID}/users/{this.ID}/avatars/{this.GuildAvatarHash}.{ext}?size={size}";
         }
+
+        /// <summary>Gets name as displayed in the guild - nickname, display name or username.</summary>
+        public string GetGuildDisplayName()
+            => string.IsNullOrWhiteSpace(this.Nickname) ? this.GetDisplayName() : this.Nickname;
 
         public RoleInfoResponse GetTopRoleWithColor()
         {

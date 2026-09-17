@@ -47,27 +47,23 @@
     [Parameter]
     public bool UseGuildAvatar { get; set; } = false;
 
-    private string StatusText => this.CustomStatusText ?? this.User.GetUsernameWithDiscriminator();
+    private string StatusText => this.CustomStatusText ?? this.User.Username;
 
     private string GetUserText()
     {
         if (this.CustomNameText != null)
             return this.CustomNameText;
 
-        string result = null;
         if (this.UseGuildNickname && this.User is GuildUserInfoResponse guildUser)
-            result = guildUser.Nickname;
-        if (string.IsNullOrEmpty(result))
-            result = this.User.Username;
-        return result;
+            return guildUser.GetGuildDisplayName();
+        return this.User.GetDisplayName();
     }
 
     private string GetUserStyle()
     {
-        string color = "var(--mud-palette-text-primary)";
         if (this.UseGuildRoleColor && this.User is GuildUserInfoResponse guildUser)
-            color = guildUser.GetTopRoleWithColor().GetHtmlColorOrDefault(defaultValue: color) ?? color;
-        return $"color: {color};";
+            return guildUser.GetTopRoleWithColor().GetHtmlTextStyleOrDefault();
+        return "color: var(--mud-palette-text-primary);";
     }
 
     private string GetUserAvatarURL(ushort size)

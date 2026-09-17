@@ -158,12 +158,16 @@ namespace TehGM.EinherjiBot.API.Services
         }
 
         private static UserInfoResponse CreateUserInfo(IUser user)
-            => new UserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId)
+            => new UserInfoResponse(user.Id, user.Username, user.GlobalName, user.Discriminator, user.AvatarId)
             {
                 IsBot = user.IsBot || user.IsWebhook
             };
         private static RoleInfoResponse CreateRoleInfo(IRole role)
-            => new RoleInfoResponse(role.Id, role.Name, role.Guild.Id, role.Guild.Name, role.Color, role.Position);
+            => new RoleInfoResponse(role.Id, role.Name, role.Guild.Id, role.Guild.Name, role.Colors.PrimaryColor, role.Position)
+            {
+                SecondaryColor = role.Colors.SecondaryColor?.RawValue,
+                TertiaryColor = role.Colors.TertiaryColor?.RawValue
+            };
         private static ChannelInfoResponse CreateChannelInfo(IChannel channel)
         {
             return new ChannelInfoResponse(channel.Id, channel.Name, channel.GetChannelType().Value, (channel as IGuildChannel)?.GuildId)
@@ -175,7 +179,7 @@ namespace TehGM.EinherjiBot.API.Services
             };
         }
         private static GuildUserInfoResponse CreateGuildUserInfo(IGuildUser user, IEnumerable<RoleInfoResponse> roles)
-            => new GuildUserInfoResponse(user.Id, user.Username, user.Discriminator, user.AvatarId, user.GuildId, roles)
+            => new GuildUserInfoResponse(user.Id, user.Username, user.GlobalName, user.Discriminator, user.AvatarId, user.GuildId, roles)
             {
                 GuildAvatarHash = user.GuildAvatarId,
                 Nickname = user.Nickname,

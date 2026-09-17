@@ -62,7 +62,7 @@ namespace TehGM.EinherjiBot.Settings.Services
 
             // create default
             string userMention = this.BuildDefaultUserPlaceholder(UserDisplayMode.Mention);
-            string userName = this.BuildDefaultUserPlaceholder(UserDisplayMode.UsernameWithDiscriminator);
+            string userName = this.BuildDefaultUserPlaceholder(UserDisplayMode.Username);
             Color color = (Color)System.Drawing.Color.Cyan;
 
             GuildSettings result = new GuildSettings(guild.Id);

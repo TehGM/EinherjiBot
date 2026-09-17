@@ -53,6 +53,10 @@ namespace TehGM.EinherjiBot.BotStatus
                     return $"Watching {this.Text}";
                 case ActivityType.Listening:
                     return $"Listening to {this.Text}";
+                case ActivityType.Competing:
+                    return $"Competing in {this.Text}";
+                case ActivityType.CustomStatus:
+                    return this.Text;
                 default:
                     throw new NotSupportedException($"Activity of type {this.ActivityType} is not supported");
             }

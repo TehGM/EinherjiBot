@@ -44,6 +44,8 @@
                         <MudSelectItem Value="ActivityType.Watching"><MudIcon Icon="@Icons.Filled.OndemandVideo"/> Watching</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Listening"><MudIcon Icon="@Icons.Filled.Headphones"/> Listening to</MudSelectItem>
                         <MudSelectItem Value="ActivityType.Streaming"><MudIcon Icon="@Icons.Filled.CellTower"/> Streaming</MudSelectItem>
+                        <MudSelectItem Value="ActivityType.Competing"><MudIcon Icon="@Icons.Filled.EmojiEvents"/> Competing in</MudSelectItem>
+                        <MudSelectItem Value="ActivityType.CustomStatus"><MudIcon Icon="@Icons.Filled.ChatBubble"/> Custom</MudSelectItem>
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="9" lg="10">
@@ -133,10 +135,9 @@
     {
         if (this._id != null)
         {
-            string activity = this._request.ActivityType == ActivityType.Listening ? "Listening to" : this._request.ActivityType.ToString();
-            string message = !string.IsNullOrWhiteSpace(this._request.Text)
+            string message = string.IsNullOrWhiteSpace(this._request.Text)
                 ? "Are you sure you want to permanently delete empty status?"
-                : $"Are you sure you want to permanently delete status \"{activity} {this._request.Text}\"?";
+                : $"Are you sure you want to permanently delete status \"{BuildStatusText(this._request.Text)}\"?";
             bool? result = await this.Dialogs.ShowMessageBox("Deleting Status", message,
                 yesText: "Delete", cancelText: "Cancel");
             if (result != true)
@@ -192,8 +193,7 @@
         try
         {
             PlaceholdersConvertResponse response = await this.Placeholders.ConvertAsync(new PlaceholdersConvertRequest(this._request.Text, PlaceholderUsage.Status));
-            string activity = this._request.ActivityType == ActivityType.Listening ? "Listening to" : this._request.ActivityType.ToString();
-            this._previewText = $"{activity} {response.Result}";
+            this._previewText = BuildStatusText(response.Result);
         }
         catch (PlaceholderException ex)
         {
@@ -203,6 +203,12 @@
         {
             this._processing = false;
         }
+    }
+
+    private string BuildStatusText(string text)
+    {
+        string activity = this._request.ActivityType.ToDisplayString();
+        return string.IsNullOrEmpty(activity) ? text : $"{activity} {text}";
     }
 
     public record StatusEventArgs(Guid? ID, IBotStatus Status);

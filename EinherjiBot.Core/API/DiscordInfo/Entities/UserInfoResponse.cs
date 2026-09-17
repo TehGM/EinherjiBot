@@ -10,6 +10,8 @@ namespace TehGM.EinherjiBot.API
         public ulong ID { get; init; }
         [JsonProperty("username")]
         public string Username { get; init; }
+        [JsonProperty("global_name")]
+        public string GlobalName { get; init; }
         [JsonProperty("discriminator")]
         public string Discriminator { get; init; }
         [JsonProperty("avatar", NullValueHandling = NullValueHandling.Include)]
@@ -23,16 +25,17 @@ namespace TehGM.EinherjiBot.API
         [JsonConstructor]
         protected UserInfoResponse() { }
 
-        public UserInfoResponse(ulong id, string username, string discriminator, string avatarHash)
+        public UserInfoResponse(ulong id, string username, string globalName, string discriminator, string avatarHash)
         {
             this.ID = id;
             this.Username = username;
+            this.GlobalName = globalName;
             this.Discriminator = discriminator;
             this.AvatarHash = avatarHash;
         }
 
         public override string ToString()
-            => this.GetUsernameWithDiscriminator();
+            => this.Username;
 
         public override int GetHashCode()
             => HashCode.Combine(this.ID);

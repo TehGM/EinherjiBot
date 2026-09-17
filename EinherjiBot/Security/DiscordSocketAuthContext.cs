@@ -20,9 +20,11 @@ namespace TehGM.EinherjiBot.Security
         public bool IsBanned => this._data?.IsBanned ?? false;
 
         string IAuthContext.Username => this.DiscordUser?.Username;
+        string IAuthContext.GlobalName => this.DiscordUser?.GlobalName;
         string IAuthContext.Discriminator => this.DiscordUser?.Discriminator;
         string IAuthContext.AvatarHash => this.DiscordUser?.AvatarId;
         string IDiscordUserInfo.Username => this.DiscordUser?.Username;
+        string IDiscordUserInfo.GlobalName => this.DiscordUser?.GlobalName;
         string IDiscordUserInfo.Discriminator => this.DiscordUser?.Discriminator;
         string IDiscordUserInfo.AvatarHash => this.DiscordUser?.AvatarId;
         bool IDiscordUserInfo.IsBot => this.DiscordUser?.IsBot ?? false;
@@ -43,7 +45,7 @@ namespace TehGM.EinherjiBot.Security
         private DiscordSocketAuthContext() { }
 
         public override string ToString()
-            => this.DiscordUser?.GetUsernameWithDiscriminator();
+            => this.DiscordUser?.Username;
 
         public override bool Equals(object obj)
             => this.Equals(obj as IAuthContext);

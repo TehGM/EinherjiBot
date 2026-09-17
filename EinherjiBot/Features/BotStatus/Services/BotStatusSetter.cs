@@ -72,7 +72,10 @@ namespace TehGM.EinherjiBot.BotStatus.Services
             }
             else
                 this._log.LogDebug("Clearing status");
-            await this._client.SetGameAsync(text, status.Link, status.ActivityType).ConfigureAwait(false);
+            if (status.ActivityType == ActivityType.CustomStatus && !string.IsNullOrWhiteSpace(text))
+                await this._client.SetCustomStatusAsync(text).ConfigureAwait(false);
+            else
+                await this._client.SetGameAsync(text, status.Link, status.ActivityType).ConfigureAwait(false);
         }
     }
 }

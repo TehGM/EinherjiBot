@@ -8,6 +8,12 @@ namespace TehGM.EinherjiBot.BotStatus
 {
     public class BotStatusRequest : ICreateValidatable, IUpdateValidatable<IBotStatus>, IValidatableObject
     {
+        public static IReadOnlyCollection<ActivityType> SupportedActivityTypes { get; } = new HashSet<ActivityType>()
+        {
+            ActivityType.Playing, ActivityType.Streaming, ActivityType.Listening,
+            ActivityType.Watching, ActivityType.Competing, ActivityType.CustomStatus
+        };
+
         [JsonProperty("text")]
         public string Text { get; set; }
         [JsonProperty("link")]
@@ -39,6 +45,9 @@ namespace TehGM.EinherjiBot.BotStatus
 
         private IEnumerable<string> ValidateShared()
         {
+            if (!SupportedActivityTypes.Contains(this.ActivityType))
+                yield return $"Activity type {this.ActivityType} is not supported for bots.";
+
             if (this.ActivityType == ActivityType.Streaming)
             {
                 foreach (string error in ActivityLinkValidator.ValidationDelegate(this.Link))

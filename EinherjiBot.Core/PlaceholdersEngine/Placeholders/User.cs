@@ -37,8 +37,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
                         return MentionUtils.MentionUser(placeholder.UserID);
                     case UserDisplayMode.Username:
                         return user.Username;
-                    case UserDisplayMode.UsernameWithDiscriminator:
-                        return user.GetUsernameWithDiscriminator();
+                    case UserDisplayMode.DisplayName:
+                        return user.GetDisplayName();
                     default:
                         throw new ArgumentException($"Unsupported display mode {placeholder.DisplayMode}", nameof(placeholder.DisplayMode));
                 }

@@ -4,10 +4,10 @@
     {
         [Description("Will mention the user (<i>@User</i>),")]
         Mention = 0,
-        [Description("Will use user's name as normal text (<i>User</i>).")]
+        [Description("Will use user's unique username as normal text (<i>user</i>).")]
         Username = 1,
-        [DisplayName("Username with Discriminator")]
-        [Description("Will use user's name and discriminator as normal text (<i>User#1234</i>).")]
-        UsernameWithDiscriminator = 2
+        [DisplayName("Display Name")]
+        [Description("Will use user's display name as normal text (<i>User</i>). Username will be used if user has no display name set.")]
+        DisplayName = 3
     }
 }

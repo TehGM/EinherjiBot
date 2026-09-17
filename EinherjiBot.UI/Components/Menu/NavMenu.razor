@@ -80,7 +80,7 @@
             
             <AuthorizeView>
                 <Authorized>
-                    <NavLinkCategory Identifier="this.AuthProvider.User.ID" Text="@this.AuthProvider.User.GetUsernameWithDiscriminator()" ImageURL="@this.AuthProvider.User?.GetAvatarURL(_avatarSize)" 
+                    <NavLinkCategory Identifier="this.AuthProvider.User.ID" Text="@this.AuthProvider.User.GetDisplayName()" ImageURL="@this.AuthProvider.User?.GetAvatarURL(_avatarSize)" 
                         OnClick=@this.OnCategoryClick IsOpen="@(this._currentCategoryIdentifier == this.AuthProvider.User.ID)">
                         <div class="nav-item">
                             <NavLink class="nav-link" @onclick=this.LogoutAsync>

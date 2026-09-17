@@ -16,13 +16,22 @@ namespace TehGM.EinherjiBot.API
         public ulong GuildID { get; init; }
         [JsonProperty("guildName")]
         public string GuildName { get; init; }
+        /// <summary>Primary role color. 0 if role has no color.</summary>
         [JsonProperty("color")]
         public uint Color { get; init; }
+        /// <summary>Secondary role color. Only set if role uses gradient colors.</summary>
+        [JsonProperty("secondaryColor")]
+        public uint? SecondaryColor { get; init; }
+        /// <summary>Tertiary role color. Only set if role uses holographic colors.</summary>
+        [JsonProperty("tertiaryColor")]
+        public uint? TertiaryColor { get; init; }
         [JsonProperty("position")]
         public int Position { get; init; }
 
         [JsonIgnore]
         public bool IsEveryone => this.Position == 0;
+        [JsonIgnore]
+        public bool IsGradient => this.Color != 0 && this.SecondaryColor != null;
 
         [JsonConstructor]
         private RoleInfoResponse() { }

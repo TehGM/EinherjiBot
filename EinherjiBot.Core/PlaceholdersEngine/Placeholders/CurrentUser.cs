@@ -51,8 +51,8 @@ namespace TehGM.EinherjiBot.PlaceholdersEngine.Placeholders
                     return MentionUtils.MentionUser(user.ID);
                 if (mode == GuildUserDisplayMode.Username)
                     return user.Username;
-                if (mode == GuildUserDisplayMode.UsernameWithDiscriminator)
-                    return user.GetUsernameWithDiscriminator();
+                if (mode == GuildUserDisplayMode.DisplayName)
+                    return user.GetDisplayName();
                 throw new ArgumentException($"Unsupported display mode {mode}", nameof(placeholder.DisplayMode));
             }
         }

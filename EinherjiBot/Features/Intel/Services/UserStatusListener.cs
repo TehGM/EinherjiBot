@@ -38,7 +38,7 @@ namespace TehGM.EinherjiBot.Intel.Services
                 hasSpotifyStatusChanged = intel.Intel.ChangeListeningStatus(GetSpotifyStatus(newPresence));
             if (HasAnythingChanged())
             {
-                this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.GetUsernameWithDiscriminator(), user.Id);
+                this._log.LogDebug("Updating intel status for user {Username} ({UserID})", user.Username, user.Id);
                 await provider.UpdateIntelAsync(intel.Intel, base.CancellationToken).ConfigureAwait(false);
             }
 

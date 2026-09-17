@@ -125,7 +125,7 @@
             else if (slice.SliceType == RenderSliceType.User)
             {
                 IDiscordUserInfo user = await this.EntityInfoProvider.GetUserInfoAsync(slice.EntityID.Value);
-                builder.AppendFormat(@"<span class=""discord-mention"">@{0}</span>", sanitizer.Sanitize(user.Username));
+                builder.AppendFormat(@"<span class=""discord-mention"">@{0}</span>", sanitizer.Sanitize(user.GetDisplayName()));
             }
             else if (slice.SliceType == RenderSliceType.Channel)
             {
